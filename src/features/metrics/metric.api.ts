@@ -262,16 +262,15 @@ export async function deleteMetric(
 export async function createMetricDummy(
   payload: GenerateDummyMetricsRequestDTO,
   opts: RequestOpts = {}
-): Promise<{ metrics: MetricResponseDTO[] }> {
+): Promise<MetricResponseDTO[]> {
   try {
-    const { data } = await api.post<
-      ApiResponse<{ metrics: MetricResponseDTO[] }>
-    >("/metrics/dummy", payload, { signal: opts.signal });
+    const res = await api.post<ApiResponse<MetricResponseDTO[]>>(
+      "/metrics/dummy",
+      payload,
+      { signal: opts.signal }
+    );
 
-    if (data.status !== "success" || !data.data) {
-      return { metrics: [] };
-    }
-    return data.data;
+    return unwrap(res);
   } catch (error) {
     handleApiError(error);
     throw error;
