@@ -7,12 +7,12 @@ import {
 } from "@/src/types/dtos/metric-category.dto";
 import ApiResponse, { unwrap } from "@/src/types/generics/ApiResponse";
 import api from "../../services/api/api";
-import { AxiosError } from "axios";
 import {
   MetricCategoryCursorPage,
   MetricCategoryFilter,
   MetricCategorySort,
 } from "./sort";
+import { handleApiError } from "@/src/services/api/handleApiError";
 
 // Developer Note: Should this replaced with generics?
 export type ListCategoryParams = {
@@ -22,6 +22,11 @@ export type ListCategoryParams = {
   filter?: MetricCategoryFilter;
   after?: string;
   includeTotal?: boolean;
+};
+
+// TODO: Shared
+type RequestOpts = {
+  signal?: AbortSignal;
 };
 
 // * ========== Queries ==========
@@ -88,6 +93,7 @@ export const getMetricCategoryLibraries = async ({
     return unwrap(res);
   } catch (error: unknown) {
     console.error("Error fetching metric library list:", error);
+    handleApiError(error);
     throw error;
   }
 };
@@ -97,16 +103,19 @@ export const getMetricCategoryLibraries = async ({
  * @description Fetches a single metric category by its ID.
  */
 export const getMetricCategoryById = async (
-  id: string
+  id: string,
+  opts: RequestOpts = {}
 ): Promise<MetricCategoryResponseDTO> => {
   try {
     const res = await api.get<ApiResponse<MetricCategoryResponseDTO>>(
-      `/metric-categories/${id}`
+      `/metric-categories/${id}`,
+      { signal: opts.signal }
     );
 
     return unwrap(res);
   } catch (error: unknown) {
     console.error(`Error fetching metric category with ID ${id}:`, error);
+    handleApiError(error);
     throw error;
   }
 };
@@ -118,25 +127,22 @@ export const getMetricCategoryById = async (
  * @description Fetches the list of metric categories from the API.
  */
 export const createMetricCategory = async (
-  category: CreateMetricCategoryRequestDTO
+  category: CreateMetricCategoryRequestDTO,
+  opts: RequestOpts & { idempotencyKey?: string } = {}
 ): Promise<MetricCategoryResponseDTO> => {
-  console.log("createMetric called with category:", category);
+  const headers: Record<string, string> = {};
+  if (opts.idempotencyKey) headers["Idempotency-Key"] = opts.idempotencyKey;
   try {
     const res = await api.post<ApiResponse<MetricCategoryResponseDTO>>(
       "/metric-categories",
-      category
+      category,
+      { signal: opts.signal, headers }
     );
 
     return unwrap(res);
   } catch (error: unknown) {
     console.error("Error in createMetric:", error);
-    if (error instanceof Error) {
-      const axiosError = error as AxiosError;
-      if (axiosError.response) {
-        console.error("Response error data:", axiosError.response.data);
-        console.error("Response status:", axiosError.response.status);
-      }
-    }
+    handleApiError(error);
     throw error;
   }
 };
@@ -145,25 +151,24 @@ export const createMetricCategory = async (
  * * UPDATE
  * @description Updates an existing metric category by its ID.
  */
-export const updateMetricCategory = async ({
-  categoryId,
-  category,
-}: {
-  categoryId: string;
-  category: UpdateMetricCategoryRequestDTO;
-}): Promise<MetricCategoryResponseDTO> => {
+export const updateMetricCategory = async (
+  args: { categoryId: string; category: UpdateMetricCategoryRequestDTO },
+  opts: RequestOpts = {}
+): Promise<MetricCategoryResponseDTO> => {
   try {
-    const res = await api.patch<ApiResponse<MetricCategoryResponseDTO>>(
-      `/metric-categories/${categoryId}`,
-      category
+    const res = await api.put<ApiResponse<MetricCategoryResponseDTO>>(
+      `/metric-categories/${args.categoryId}`,
+      args.category,
+      { signal: opts.signal }
     );
 
     return unwrap(res);
   } catch (error: unknown) {
     console.error(
-      `Error updating metric category with ID ${categoryId}:`,
+      `Error updating metric category with ID ${args.categoryId}:`,
       error
     );
+    handleApiError(error);
     throw error;
   }
 };
@@ -172,11 +177,18 @@ export const updateMetricCategory = async ({
  * * DELETE
  * @description a metric category by its ID.
  */
-export const deleteMetricCategory = async (id: string): Promise<void> => {
+export const deleteMetricCategory = async (
+  id: string,
+  opts: RequestOpts = {}
+): Promise<MetricCategoryResponseDTO> => {
   try {
-    await api.delete(`/metric-categories/${id}`);
+    const res = await api.delete(`/metric-categories/${id}`, {
+      signal: opts.signal,
+    });
+    return unwrap(res);
   } catch (error: unknown) {
     console.error(`Error deleting metric category with ID ${id}:`, error);
+    handleApiError(error);
     throw error;
   }
 };
@@ -197,6 +209,7 @@ export const createMetricCategoryDummy = async (
     return unwrap(res) ?? { categories: [] };
   } catch (error: unknown) {
     console.error("Error in generating Metric Dummy:", error);
+    handleApiError(error);
     throw error;
   }
 };

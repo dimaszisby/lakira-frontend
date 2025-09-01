@@ -1,8 +1,10 @@
 import {
   InfiniteData,
+  QueryKey,
   useInfiniteQuery,
   useMutation,
   useQuery,
+  useQueryClient,
 } from "@tanstack/react-query";
 import {
   createMetricCategory,
@@ -12,32 +14,26 @@ import {
   listMetricCategories,
   updateMetricCategory,
 } from "@/src/features/metricCategories/api";
-import { MetricCategoryResponseDTO } from "@/src/types/dtos/metric-category.dto";
+import {
+  MetricCategoryResponseDTO,
+  UpdateMetricCategoryRequestDTO,
+} from "@/src/types/dtos/metric-category.dto";
 import { CursorPage } from "@/src/types/generics/CursorPage";
 import { useEffect, useMemo, useState } from "react";
 import { MetricsListParams } from "../metrics/types";
 import { useMetricsLibrary } from "../metrics/hooks";
 import { MetricCategoryFilter, MetricCategorySort } from "./sort";
+import { metricCategoriesKeys } from "./keys";
+import {
+  invalidateMetricCategoryDetail,
+  invalidateMetricCategoryLists,
+  patchCategoryOptimistic,
+  removeMetricCategoryDetail,
+} from "./cache";
+import { MetricCategoryVM } from "./view-models";
+import { toVM } from "./mappers";
 
 // TODO: Overhaul,use Metric's hook(s) as an example
-
-// TODO: Overhaul, uses key and cache helper like Metrics
-export const mcKeys = {
-  infinite: (p: {
-    limit: number;
-    sort: MetricCategorySort;
-    q?: string;
-    filter?: MetricCategoryFilter;
-  }) => ["metricCategories", { ...p }] as const,
-  pages: (p: {
-    limit: number;
-    sort: MetricCategorySort;
-    q?: string;
-    filter?: MetricCategoryFilter;
-    includeTotal?: boolean;
-    page?: number;
-  }) => ["metricCategories", "pages", { ...p }] as const,
-};
 
 // Types
 type UseMetricCategoriesArgs = {
@@ -51,7 +47,7 @@ type CursorResult = CursorPage<MetricCategoryResponseDTO>;
 
 // * =========== Query Hooks ===========
 
-export function useCursorPagination(params: {
+export function useMetricCategoryCursorPagination(params: {
   limit: number;
   sort: MetricCategorySort;
   q?: string;
@@ -70,7 +66,11 @@ export function useCursorPagination(params: {
   }, [params.limit, params.sort, params.q, params.filter?.name]);
 
   const query = useQuery({
-    queryKey: mcKeys.pages({ ...params, page, includeTotal: true }),
+    queryKey: metricCategoriesKeys.cursor.pages({
+      ...params,
+      page,
+      includeTotal: true,
+    }),
     queryFn: async () => {
       const after = cursorByPage[page] ?? undefined;
       const res = await listMetricCategories({
@@ -111,7 +111,7 @@ export function useCursorPagination(params: {
 }
 
 // Infinite Mobile
-const useMetricCategories = (
+const useMetricCategoriesCursorInfinite = (
   opts: UseMetricCategoriesArgs & { enabled: boolean }
 ) => {
   const { limit = 20, sort = "-createdAt", q, filter, enabled = true } = opts;
@@ -120,10 +120,10 @@ const useMetricCategories = (
     CursorResult, // TQueryFnData
     Error, // TError
     InfiniteData<CursorResult, string | undefined>, // TData (no select -> keep InfiniteData)
-    ReturnType<typeof mcKeys.infinite>, // TQueryKey
+    ReturnType<typeof metricCategoriesKeys.cursor.infinite>, // TQueryKey
     string | undefined // TPageParam
   >({
-    queryKey: mcKeys.infinite({ limit, sort, q, filter }),
+    queryKey: metricCategoriesKeys.cursor.infinite({ limit, sort, q, filter }),
     queryFn: ({ pageParam }) =>
       listMetricCategories({
         limit,
@@ -149,9 +149,9 @@ const useMetricCategories = (
 
 // MetricCategoryDetailPage
 const useMetricCategoryById = (categoryId: string) => {
-  return useQuery<MetricCategoryResponseDTO, Error>({
-    queryKey: ["metricCategoryDetail", categoryId],
-    queryFn: () => getMetricCategoryById(categoryId),
+  return useQuery<MetricCategoryVM, Error>({
+    queryKey: metricCategoriesKeys.detail(categoryId),
+    queryFn: async() => toVM(await getMetricCategoryById(categoryId)),
     enabled: !!categoryId,
   });
 };
@@ -178,12 +178,17 @@ export const useCategoryMetrics = (
 // * =========== Mutation Hooks ===========
 
 const useCreateMetricCategory = (
-  onSuccess?: () => void,
+  onSuccess?: (created: MetricCategoryResponseDTO) => void,
   onError?: (error: Error) => void
 ) => {
+  const qc = useQueryClient();
+
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation({
     mutationFn: createMetricCategory,
-    onSuccess,
+    onSuccess: (created) => {
+      invalidateMetricCategoryLists(qc);
+      onSuccess?.(created);
+    },
     onError,
   });
 
@@ -198,20 +203,57 @@ const useCreateMetricCategory = (
   };
 };
 
+type UpdateCategoryVars = {
+  categoryId: string;
+  category: UpdateMetricCategoryRequestDTO;
+};
+type UpdateCtx = { key: QueryKey; prev?: MetricCategoryVM };
+
 const useUpdateMetricCategory = (
-  onSuccess?: () => void,
-  onError?: (error: Error) => void
+  onSuccess?: (updated: MetricCategoryResponseDTO) => void,
+  onErrorCb?: (error: Error) => void
 ) => {
-  const { mutateAsync, isError, isSuccess, error, isPending } = useMutation({
+  const qc = useQueryClient();
+  const { mutateAsync, isError, isSuccess, error, isPending } = useMutation<
+    MetricCategoryResponseDTO,
+    Error,
+    UpdateCategoryVars,
+    UpdateCtx
+  >({
     mutationFn: updateMetricCategory,
-    onSuccess,
-    onError,
+    onMutate: async ({ categoryId, category }) => {
+      await qc.cancelQueries({
+        queryKey: metricCategoriesKeys.detailByIdRoot(categoryId),
+      });
+
+      const patch: Partial<Pick<MetricCategoryVM, "name" | "icon" | "color">> =
+        {
+          name: category.name,
+          icon: category.icon,
+          color: category.color,
+        };
+
+      return patchCategoryOptimistic(qc, categoryId, patch);
+    },
+    onError: (err, _vars, ctx) => {
+      if (ctx?.prev) {
+        qc.setQueryData<MetricCategoryVM>(ctx.key, ctx.prev);
+      }
+      onErrorCb?.(err);
+    },
+    onSettled: (_data, _err, vars) => {
+      invalidateMetricCategoryDetail(qc, vars.categoryId);
+      invalidateMetricCategoryLists(qc);
+    },
+    // (Optional) Setup for a success callback for UI toasts
+    onSuccess: (updated) => {
+      onSuccess?.(updated);
+    },
   });
 
   return {
     updateMetricCategory: mutateAsync,
     onSuccess,
-    onError,
     isError,
     isSuccess,
     error,
@@ -219,20 +261,56 @@ const useUpdateMetricCategory = (
   };
 };
 
+type DeleteCtx = {
+  details: Array<{ key: QueryKey; prev: unknown }>;
+};
+
 const useDeleteMetricCategory = (
-  onSuccess?: () => void,
-  onError?: (error: Error) => void
+  onSuccess?: (deletedId: string) => void,
+  onErrorCb?: (error: Error) => void
 ) => {
-  const { mutateAsync, isError, isSuccess, error, isPending } = useMutation({
+  const qc = useQueryClient();
+  const { mutateAsync, isError, isSuccess, error, isPending } = useMutation<
+    MetricCategoryResponseDTO,
+    Error,
+    string,
+    DeleteCtx
+  >({
     mutationFn: deleteMetricCategory,
-    onSuccess,
-    onError,
+    onMutate: async (categoryId) => {
+      await qc.cancelQueries({
+        queryKey: metricCategoriesKeys.detailByIdRoot(categoryId),
+      });
+
+      const details = qc
+        .getQueriesData({
+          queryKey: metricCategoriesKeys.detailByIdRoot(categoryId),
+        })
+        .map(([key, prev]) => {
+          qc.setQueryData(key, undefined);
+          return { key, prev };
+        });
+
+      return { details };
+    },
+    onError: (err, _categoryId, ctx) => {
+      ctx?.details.forEach(({ key, prev }) => {
+        qc.setQueryData(key, prev);
+      });
+      onErrorCb?.(err);
+    },
+    onSuccess: (_void, categoryId) => {
+      removeMetricCategoryDetail(qc, categoryId);
+      onSuccess?.(categoryId);
+    },
+    onSettled: () => {
+      invalidateMetricCategoryLists(qc);
+    },
   });
 
   return {
     deleteMetricCategory: mutateAsync,
     onSuccess,
-    onError,
     isError,
     isSuccess,
     error,
@@ -262,7 +340,7 @@ const useCreateMetricCategoryDummy = (
 };
 
 export {
-  useMetricCategories,
+  useMetricCategoriesCursorInfinite as useMetricCategories,
   useMetricCategoryById,
   useCreateMetricCategory,
   useUpdateMetricCategory,
