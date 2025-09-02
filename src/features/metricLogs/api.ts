@@ -4,42 +4,37 @@ import {
   UpdateMetricLogRequestDTO,
   PaginatedMetricLogListResponseDTO,
   GenerateDummyMetricLogsRequestDTO,
-} from "@/types/dtos/metric-log.dto";
+} from "@/src/types/dtos/metric-log.dto";
 import api from "../../services/api/api";
 import ApiResponse, { unwrap } from "@/types/generics/ApiResponse";
 import { handleApiError } from "@/src/services/api/handleApiError";
+import {
+  MetricLogCursorPageResponse,
+  MetricLogFilterViaCursor,
+  MetricLogSortViaCursor,
+} from "./sort";
 
-/**
- * Log a new metric entry
- * @param {CreateMetricLogRequestDTO} metricLog - The metric log data to create.
- * @returns {Promise<MetricLogResponseDTO>} - A promise that resolves to the created metric log entry.
- * @throws {Error} - If the API request fails.
- */
-export const createMetricLog = async (
-  metricLog: CreateMetricLogRequestDTO
-): Promise<MetricLogResponseDTO> => {
-  console.log("logMetric called with metricLog:", metricLog);
-  try {
-    const response = await api.post<ApiResponse<MetricLogResponseDTO>>(
-      "/metric-logs",
-      metricLog
-    );
-
-    return unwrap(response);
-  } catch (error: unknown) {
-    console.error("Error in logMetric:", error);
-    handleApiError(error);
-    throw error;
-  }
+// TODO: Generic Function
+type ListLogsRequestParams = {
+  limit?: number; // default 20
+  sort?: MetricLogSortViaCursor;
+  q?: string;
+  filter?: MetricLogFilterViaCursor;
+  after?: string; // cursor
+  includeTotal?: boolean;
 };
 
+// TODO: Shared
+type RequestOpts = {
+  signal?: AbortSignal;
+};
+
+// * ========== Query Endpoints ==========
+
 /**
+ * * GET ALL via Offset
  * Fetches a list of metric log entries, optionally filtered by metricId.
- * @param {string} [metricId] - Optional ID of the metric to retrieve logs for.
- * @param {number} [page=1] - The page number for pagination.
- * @param {number} [limit=20] - The number of items per page for pagination.
- * @returns {Promise<MetricLogListResponseDTO>} - A promise that resolves to the list of metric log entries.
- * @throws {Error} - If the API request fails.
+ * @deprecated Use cursor-based pagination instead (getMetricLogsViaCursor)
  */
 export const getMetricLogs = async ({
   metricId,
@@ -79,11 +74,63 @@ export const getMetricLogs = async ({
 };
 
 /**
+ * * GET ALL via Cursor
+ * Fetches a list of metric log entries, optionally filtered by metricId.
+ */
+export async function getMetricLogsListViaCursor({
+  limit = 20,
+  sort = "-createdAt",
+  q,
+  filter,
+  after,
+  includeTotal = false,
+}: ListLogsRequestParams): Promise<MetricLogCursorPageResponse> {
+  const search = new URLSearchParams();
+
+  search.set("limit", String(limit));
+  search.set("sort", sort);
+
+  if (q?.trim()) search.set("q", q.trim());
+  if (filter?.name?.trim()) search.set("filter[name]", filter.name.trim());
+  if (filter?.metricId?.trim())
+    search.set("filter[metricId]", filter.metricId.trim());
+  if (after) search.set("after", after);
+  if (includeTotal) search.set("includeTotal", "true");
+
+  const response = await api.get<ApiResponse<MetricLogCursorPageResponse>>(
+    `/metric-logs?${search.toString()}`
+  );
+
+  return unwrap(response);
+}
+
+// * ========== Command Endpoints ==========
+
+/**
+ * * CREATE
+ * Log a new metric entry
+ */
+export const createMetricLog = async (
+  metricLog: CreateMetricLogRequestDTO
+): Promise<MetricLogResponseDTO> => {
+  console.log("logMetric called with metricLog:", metricLog);
+  try {
+    const response = await api.post<ApiResponse<MetricLogResponseDTO>>(
+      "/metric-logs",
+      metricLog
+    );
+
+    return unwrap(response);
+  } catch (error: unknown) {
+    console.error("Error in logMetric:", error);
+    handleApiError(error);
+    throw error;
+  }
+};
+
+/**
+ * * UPDATE
  * Update an existing metric log entry
- * @param {string} metricLogId - The ID of the metric log entry to update.
- * @param {UpdateMetricLogRequestDTO} metricLog - The metric log data to update.
- * @returns {Promise<MetricLogResponseDTO>} - A promise that resolves to the updated metric log entry.
- * @throws {Error} - If the API request fails.
  */
 export const updateMetricLog = async ({
   metricLogId,
@@ -107,10 +154,8 @@ export const updateMetricLog = async ({
 };
 
 /**
+ * * DELETE
  * Delete a metric log entry
- * @param {string} metricLogId - The ID of the metric log entry to delete.
- * @returns {Promise<MetricLogResponseDTO>} - A promise that resolves to the deleted metric log entry.
- * @throws {Error} - If the API request fails.
  */
 export const deleteMetricLog = async (
   metricLogId: string
