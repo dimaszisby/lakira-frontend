@@ -1,27 +1,23 @@
-// components/features/metrics/MetricLogAddModal.tsx
-
 "use client";
 
 import React, { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useQueryClient } from "@tanstack/react-query";
-
-// Components
 import Modal from "@/src/components/ui/Modal";
 import PrimaryButton from "@/src/components/ui/PrimaryButton";
 import ReusableFormField from "../../ui/ReusableFormField";
-
-// Services
 import {
   useCreateMetricLog,
   useDeleteMetricLog,
   useUpdateMetricLog,
 } from "@/src/features/metricLogs/hooks";
-
-// Types
 import { LogFormInputs, logFormSchema } from "@/features/metricLogs/types";
-import { MetricLogResponseDTO } from "@/src/types/dtos/metric-log.dto";
+import {
+  CreateMetricLogRequestDTO,
+  MetricLogResponseDTO,
+  UpdateMetricLogRequestDTO,
+} from "@/src/types/dtos/metric-log.dto";
+import { toIsoFromLocalInput } from "@/src/utils/date-io";
 
 interface MetricLogModalProps {
   open: boolean;
@@ -37,9 +33,7 @@ export const MetricLogFormModal: React.FC<MetricLogModalProps> = ({
   initialLog,
 }) => {
   const isEditMode = !!initialLog;
-  const queryClient = useQueryClient();
 
-  // Form Setup
   const {
     register,
     handleSubmit,
@@ -47,7 +41,6 @@ export const MetricLogFormModal: React.FC<MetricLogModalProps> = ({
     formState: { errors, isSubmitting, isValid },
     setValue,
   } = useForm<LogFormInputs>({
-    // Problem Here: Create and Update have different schemas
     resolver: zodResolver(logFormSchema),
     mode: "onChange",
     defaultValues: isEditMode
@@ -56,7 +49,7 @@ export const MetricLogFormModal: React.FC<MetricLogModalProps> = ({
           logValue: initialLog?.logValue,
           loggedAt: initialLog?.loggedAt
             ? new Date(initialLog.loggedAt)
-            : undefined,
+            : new Date(), // form state use Date type
           type: initialLog?.type || "manual",
         }
       : {
@@ -88,57 +81,49 @@ export const MetricLogFormModal: React.FC<MetricLogModalProps> = ({
   }, [open, isEditMode, initialLog, metricId, setValue, reset]);
 
   // * Mutation Hooks
-  // Mutation setup with onSuccess to refetch logs and close modal
   const {
     createMetricLog,
     isPending: isCreating,
     error: createError,
-  } = useCreateMetricLog(async () => {
-    // Invalidate the logs query to refetch with fresh data
-    queryClient.invalidateQueries({
-      queryKey: ["metricLogs", metricId],
-      exact: false,
-    });
-  });
+  } = useCreateMetricLog();
 
   const {
     updateMetricLog,
     isPending: isUpdating,
     error: updateError,
-  } = useUpdateMetricLog(async () => {
-    // Invalidate the logs query to refetch with fresh data
-    await queryClient.invalidateQueries({
-      queryKey: ["metricLogs", metricId],
-      exact: false,
-    });
-  });
+  } = useUpdateMetricLog();
 
-  // Mutation setup for delete MetricLog
   const {
     deleteMetricLog,
     isPending: isDeleting,
     error: deleteError,
-  } = useDeleteMetricLog(async () => {
-    await queryClient.invalidateQueries({
-      queryKey: ["metricLogs", metricId],
-      exact: false,
-    });
-  });
+  } = useDeleteMetricLog();
 
   // * Submit Handlers
   // Handles form submission for both create and edit modes
-  // Problem Here: Create and Update have different schemas
   const onSubmit = async (data: LogFormInputs) => {
     try {
-      if (isEditMode && initialLog) {
-        const { logValue, loggedAt, type } = data;
+      const payloadCreate = {
+        metricId: data.metricId,
+        logValue: data.logValue,
+        type: data.type,
+        loggedAt: toIsoFromLocalInput(data.loggedAt),
+      } satisfies CreateMetricLogRequestDTO;
 
+      const payloadUpdate = {
+        metricId: data.metricId,
+        logValue: data.logValue,
+        type: data.type,
+        loggedAt: toIsoFromLocalInput(data.loggedAt),
+      } satisfies UpdateMetricLogRequestDTO;
+
+      if (isEditMode && initialLog) {
         await updateMetricLog({
-          metricLogId: initialLog.id,
-          metricLog: { logValue, loggedAt, type },
+          logId: initialLog.id,
+          log: payloadUpdate,
         });
       } else {
-        await createMetricLog(data);
+        await createMetricLog(payloadCreate);
       }
       reset();
       onClose();
@@ -158,7 +143,6 @@ export const MetricLogFormModal: React.FC<MetricLogModalProps> = ({
     }
   };
 
-  // Reset form on modal close
   React.useEffect(() => {
     if (!open) reset();
   }, [open, reset]);
@@ -211,7 +195,7 @@ export const MetricLogFormModal: React.FC<MetricLogModalProps> = ({
             <input
               type="datetime-local"
               className="w-full px-3 py-2 border rounded"
-              {...register("loggedAt")}
+              {...register("loggedAt", { valueAsDate: true })} // RHF will handle Date conversion
             />
           </label>
           {errors.loggedAt && (
@@ -249,8 +233,6 @@ export const MetricLogFormModal: React.FC<MetricLogModalProps> = ({
                 : "Add"}
             </PrimaryButton>
           </div>
-
-          <hr style={{ borderTop: "1px solid lightgrey" }}></hr>
 
           {/* Delete button (edit mode only) */}
           {isEditMode && (

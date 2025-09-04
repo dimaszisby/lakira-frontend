@@ -1,31 +1,49 @@
-// components/MetricTable.tsx
+import React from "react";
+import { MetricCategoryResponseDTO } from "@/src/types/dtos/metric-category.dto";
+import LogDesktopTable from "./LogDesktopTable";
+import LogMobileTable from "./LogMobileTable";
+import { LogTableProps } from "./types";
 
-import { MetricLogResponseDTO } from "@/src/types/dtos/metric-log.dto";
-import LogTableRow from "./LogTableRow";
+const LogTable = React.memo(
+  ({
+    logs,
+    sortBy,
+    sortOrder,
+    onSort,
+    onEdit,
+    onDelete,
+    onRowClick,
+  }: LogTableProps) => {
+    return (
+      <>
+        {/* Desktop view */}
+        <LogDesktopTable
+          logs={logs}
+          sortBy={sortBy as keyof MetricCategoryResponseDTO}
+          sortOrder={sortOrder}
+          onSort={onSort}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onRowClick={onRowClick}
+          className="space-y-4"
+        />
 
-interface LogTableProps {
-  logs: MetricLogResponseDTO[];
-  onRowClick?: (log: MetricLogResponseDTO) => void;
-}
+        {/* Mobile view */}
+        <LogMobileTable
+          logs={logs}
+          rowKey={(log) => log.id}
+          sortBy={sortBy as keyof MetricCategoryResponseDTO}
+          sortOrder={sortOrder}
+          onSort={onSort}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          className="block sm:hidden"
+        />
+      </>
+    );
+  }
+);
 
-const LogTable: React.FC<LogTableProps> = ({ logs, onRowClick }) => {
-  return (
-    <div className="overflow-x-auto rounded-xl shadow-sm bg-red-100">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead>
-          <tr className="bg-gray-50 text-gray-700 text-left">
-            <th className="px-4 py-3">Log Date</th>
-            <th className="px-4 py-3">Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          {logs.map((log) => (
-            <LogTableRow key={log.id} log={log} onClick={onRowClick} />
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-};
+LogTable.displayName = "LogTable";
 
 export default LogTable;
