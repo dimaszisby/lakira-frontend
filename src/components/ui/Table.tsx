@@ -11,7 +11,7 @@ export interface TableColumn<T> {
     sorted: boolean,
     order: "ASC" | "DESC" | null
   ) => React.ReactNode;
-  renderCell?: (item: T) => React.ReactNode;
+  renderCell?: (row: T, value: T[keyof T]) => React.ReactNode;
 }
 
 interface TableProps<T> {
@@ -180,6 +180,8 @@ export const Table = <T,>({
                       col.width,
                       col.responsiveWidth
                     );
+                    const value = item[col.key as keyof T];
+
                     return (
                       <td
                         key={String(col.key)}
@@ -199,8 +201,10 @@ export const Table = <T,>({
                         }}
                       >
                         {col.renderCell
-                          ? col.renderCell(item)
-                          : String(item[col.key] ?? "")}
+                          ? col.renderCell(item, value)
+                          : value == null
+                          ? ""
+                          : String(value)}
                       </td>
                     );
                   })}
