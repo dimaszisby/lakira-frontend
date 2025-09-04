@@ -2,7 +2,7 @@ import { memo } from "react";
 import SwipeableCard from "@/components/ui/SwipeableCard";
 import MetricLibraryMobileCard from "./MetricLibraryMobileCard";
 import { MetricPreviewResponseDTO } from "@/src/features/metrics/metric.dto";
-import { MetricTableProps } from "./type";
+import { MetricTableProps } from "./table-config";
 
 const MetricMobileTable = memo(
   ({

@@ -1,76 +1,7 @@
 import { memo } from "react";
-import { Table, TableColumn } from "@/components/ui/Table";
+import { Table } from "@/components/ui/Table";
 import { MetricPreviewResponseDTO } from "@/src/features/metrics/metric.dto";
-import { MetricTableProps } from "./type";
-import { SERVER_SORTABLE_COLUMNS } from "@/src/features/metrics/sort";
-
-const canSort = new Set<string>(SERVER_SORTABLE_COLUMNS);
-const columns: TableColumn<MetricPreviewResponseDTO>[] = [
-  {
-    key: "category",
-    label: "CATEGORY",
-    align: "center",
-    width: "w-[50px]",
-    responsiveWidth: { md: "w-[60px]" }, // Slightly wider on medium+
-    sortable: true,
-    renderCell: (met) => {
-      return (
-        <div
-          className={`flex px-2 py-1 rounded-lg gap-2 ${
-            met.category ? "text-black" : "text-white"
-          }`}
-          style={{
-            backgroundColor: met.category ? met.category.color : "#808080",
-          }}
-          aria-label="Category Chip"
-        >
-          <span>{met.category ? met.category.icon : "🗂️"}</span>
-          <span> {met.category ? met.category.name : "uncategorized"}</span>
-        </div>
-      );
-    },
-  },
-  {
-    key: "name",
-    label: "NAME",
-    align: "center",
-    width: "w-[60px]",
-    responsiveWidth: { md: "w-[80px]" },
-    sortable: canSort.has("name"),
-  },
-  {
-    key: "description",
-    label: "DESCRIPTION",
-    align: "left",
-    sortable: false,
-    width: "w-[140px]",
-    responsiveWidth: { md: "w-1/3" },
-  },
-  {
-    key: "defaultUnit",
-    label: "UNIT",
-    align: "center",
-    width: "w-[70px]",
-    responsiveWidth: { md: "w-[100px]" },
-    sortable: canSort.has("defaultUnit"),
-  },
-  {
-    key: "isPublic",
-    label: "VISIBILITY",
-    align: "center",
-    width: "w-[70px]",
-    responsiveWidth: { md: "w-[100px]" },
-    sortable: canSort.has("isPublic"),
-  },
-  {
-    key: "logCount",
-    label: "Logs",
-    align: "center",
-    width: "w-[70px]",
-    responsiveWidth: { md: "w-[100px]" },
-    sortable: canSort.has("logCount"),
-  },
-];
+import { desktopColumns, MetricTableProps } from "./table-config";
 
 const MetricDesktopTable = memo(
   ({
@@ -85,7 +16,7 @@ const MetricDesktopTable = memo(
     return (
       <Table
         data={metrics}
-        columns={columns}
+        columns={desktopColumns}
         sortBy={sortBy as keyof MetricPreviewResponseDTO}
         sortOrder={sortOrder}
         onSort={onSort} // Dev Note: recently changed
