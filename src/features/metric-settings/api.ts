@@ -7,6 +7,23 @@ import {
 import api from "../../services/api/api";
 import ApiResponse, { unwrap } from "@/src/types/generics/ApiResponse";
 import { handleApiError } from "@/src/services/api/handleApiError";
+import {
+  MetricSettingsCursorPageResponse,
+  MetricSettingsFilterViaCursor,
+  MetricSettingsSortViaCursor,
+} from "./sort";
+
+type ListSettingsRequestParams = {
+  limit?: number; // default 20
+  sort?: MetricSettingsSortViaCursor;
+  filter?: MetricSettingsFilterViaCursor;
+  after?: string; // cursor
+  includeTotal?: boolean;
+};
+
+type RequestOpts = {
+  signal?: AbortSignal;
+};
 
 /**
  * * CREATE
@@ -52,6 +69,34 @@ export const getAllMetricSettings = async (
     throw error;
   }
 };
+
+/**
+ * * GET ALL via Cursor
+ * Fetches a list of metric settings entries.
+ */
+export async function getMetricSettingsListViaCursor({
+  limit = 20,
+  sort = "-createdAt",
+  filter,
+  after,
+  includeTotal = false,
+}: ListSettingsRequestParams): Promise<MetricSettingsCursorPageResponse> {
+  const search = new URLSearchParams();
+
+  search.set("limit", String(limit));
+  search.set("sort", sort);
+
+  if (filter?.metricId?.trim())
+    search.set("filter[metricId]", filter.metricId.trim());
+  if (after) search.set("after", after);
+  if (includeTotal) search.set("includeTotal", "true");
+
+  const response = await api.get<ApiResponse<MetricSettingsCursorPageResponse>>(
+    `/metric-settings?${search.toString()}`
+  );
+
+  return unwrap(response);
+}
 
 /**
  * * GET By Id
@@ -152,7 +197,8 @@ export const updateGoalAchievement = async (
 export const updateDisplayOptions = async (
   id: string,
   metricId: string,
-  displayOptions: DisplayOptionsDTO
+  displayOptions: DisplayOptionsDTO,
+  opts: RequestOpts = {}
 ): Promise<MetricSettingsResponseDTO> => {
   console.log(
     "updateDisplayOptions called with:",
@@ -163,7 +209,8 @@ export const updateDisplayOptions = async (
   try {
     const res = await api.patch<ApiResponse<MetricSettingsResponseDTO>>(
       `/metric-settings/${id}/display?metricId=${metricId}`,
-      { displayOptions }
+      { displayOptions },
+      { signal: opts.signal }
     );
 
     return unwrap(res);
