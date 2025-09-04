@@ -1,26 +1,21 @@
-// src/types/api/zod-metric-log.schema.ts
-
-// Developer Note: This code is part of a Zod schema definition for metric logs in a TypeScript application.
-// It defines the structure and validation rules for creating, updating, retrieving, and deleting metric logs.
-// The schemas are used to ensure that the data sent to and received from the API adheres to the expected format.
-// It also includes a schema for generating dummy metric logs for testing purposes.
-
-// Developer Note: This schema reflects current API endpoints and their expected request/response structures.
-
 import {
   zDateOptional,
+  zDateRequired,
   zLogType,
   zPositiveFloat,
   zUUID,
 } from "@/src/constants/zod-rules";
 import { z } from "zod";
 
+// TODO: Currently schema is not used in the frontend, only for backend validation.
+// However, we can use this for form validation in the future if needed.
+
 export const createMetricLogSchema = z.object({
   body: z.object({
     metricId: zUUID,
     type: zLogType.optional().default("manual"),
     logValue: zPositiveFloat,
-    loggedAt: zDateOptional,
+    loggedAt: zDateRequired,
   }),
 });
 
@@ -31,7 +26,7 @@ export const updateMetricLogSchema = z.object({
   body: z.object({
     type: zLogType.optional(),
     logValue: zPositiveFloat.optional(),
-    loggedAt: zDateOptional,
+    loggedAt: zDateRequired,
   }),
 });
 

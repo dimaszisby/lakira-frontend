@@ -106,18 +106,24 @@ export async function getMetricLogsListViaCursor({
 
 // * ========== Command Endpoints ==========
 
-/**
- * * CREATE
- * Log a new metric entry
- */
+// CREATE Log a new metric entry
 export const createMetricLog = async (
-  metricLog: CreateMetricLogRequestDTO
+  metricLog: CreateMetricLogRequestDTO,
+  opts: RequestOpts & { idempotencyKey?: string } = {}
 ): Promise<MetricLogResponseDTO> => {
   console.log("logMetric called with metricLog:", metricLog);
   try {
+    // Avoid dupplicates on retry
+    const headers: Record<string, string> = {};
+    if (opts.idempotencyKey) headers["Idempotency-Key"] = opts.idempotencyKey;
+
     const response = await api.post<ApiResponse<MetricLogResponseDTO>>(
       "/metric-logs",
-      metricLog
+      metricLog,
+      {
+        signal: opts.signal,
+        headers,
+      }
     );
 
     return unwrap(response);
@@ -128,21 +134,18 @@ export const createMetricLog = async (
   }
 };
 
-/**
- * * UPDATE
- * Update an existing metric log entry
- */
-export const updateMetricLog = async ({
-  metricLogId,
-  metricLog,
-}: {
-  metricLogId: string;
-  metricLog: UpdateMetricLogRequestDTO;
-}): Promise<MetricLogResponseDTO> => {
+// UPDATE an existing metric log entry
+export const updateMetricLog = async (
+  args: { metricLogId: string; metricLog: UpdateMetricLogRequestDTO },
+  opts: RequestOpts = {}
+): Promise<MetricLogResponseDTO> => {
   try {
+    const { metricLogId, metricLog } = args;
+
     const response = await api.put<ApiResponse<MetricLogResponseDTO>>(
       `/metric-logs/${metricLogId}`,
-      metricLog
+      metricLog,
+      { signal: opts.signal }
     );
 
     return unwrap(response);
@@ -153,16 +156,15 @@ export const updateMetricLog = async ({
   }
 };
 
-/**
- * * DELETE
- * Delete a metric log entry
- */
+// DELETE a metric log entry
 export const deleteMetricLog = async (
-  metricLogId: string
+  metricLogId: string,
+  opts: RequestOpts = {}
 ): Promise<MetricLogResponseDTO> => {
   try {
     const response = await api.delete<ApiResponse<MetricLogResponseDTO>>(
-      `/metric-logs/${metricLogId}`
+      `/metric-logs/${metricLogId}`,
+      { signal: opts.signal }
     );
 
     return unwrap(response);

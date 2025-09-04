@@ -16,6 +16,7 @@ import {
   createMetricLog,
   createMetricLogDummy,
   deleteMetricLog,
+  updateMetricLog,
   getMetricLogsListViaCursor,
 } from "@/src/features/metricLogs/api";
 import { MetricLogFilterViaCursor, MetricLogSortViaCursor } from "./sort";
@@ -179,6 +180,7 @@ export function useMetricLogInfiniteViaCursor(
 
 // * =========== Mutation Hooks ===========
 
+// CREATE hook
 const useCreateMetricLog = (
   onSuccess?: (created: MetricLogResponseDTO) => void,
   onError?: (error: Error) => void
@@ -204,6 +206,7 @@ const useCreateMetricLog = (
   };
 };
 
+// UPDATE hook with optimistic update
 type UpdateLogVars = {
   logId: string;
   log: UpdateMetricLogRequestDTO;
@@ -222,6 +225,8 @@ const useUpdateMetricLog = (
     UpdateLogVars,
     UpdateCtx
   >({
+    mutationFn: ({ logId, log }) =>
+      updateMetricLog({ metricLogId: logId, metricLog: log }),
     onMutate: async ({ logId, log }) => {
       await qc.cancelQueries({
         queryKey: metricLogsKeys.detail(logId),
@@ -250,7 +255,7 @@ const useUpdateMetricLog = (
   });
 
   return {
-    deleteMetricLog: mutateAsync,
+    updateMetricLog: mutateAsync,
     onSuccess,
     isError,
     isSuccess,
@@ -259,6 +264,7 @@ const useUpdateMetricLog = (
   };
 };
 
+// DELETE hook with optimistic update
 type DeleteCtx = {
   // Temp snapshot all detail variants for restoration
   details: Array<{ key: QueryKey; prev: unknown }>;
@@ -315,19 +321,18 @@ const useDeleteMetricLog = (
   };
 };
 
-/** * Custom hook to create dummy metric logs.
- * @param {Function} onSuccess - Callback function to be called on successful creation.
- * @param {Function} onError - Callback function to be called on error.
- * @returns {Object} - An object containing the createMetricLogDummy function and isError state.
- * @throws {Error} - If the API request fails.
- */
+// Custom hook to create dummy metric logs.
 const useCreateMetricLogDummy = (
-  onSuccess?: () => void,
+  onSuccess?: (created: MetricLogResponseDTO[]) => void,
   onError?: (error: Error) => void
 ) => {
+  const qc = useQueryClient();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation({
     mutationFn: createMetricLogDummy,
-    onSuccess,
+    onSuccess: (created) => {
+      invalidateLogLists(qc);
+      onSuccess?.(created.logs);
+    },
     onError,
   });
 

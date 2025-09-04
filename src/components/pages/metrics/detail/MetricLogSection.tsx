@@ -1,31 +1,84 @@
 "use client";
 
-import React, { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
-
-// components
+import React, { useCallback, useMemo, useState } from "react";
 import PrimaryButton from "@/src/components/ui/PrimaryButton";
 import SectionCard from "@/src/components/ui/SectionCard";
 import SkeletonLoader from "@/src/components/ui/SekeletonLoader";
 import { Pagination } from "@/src/components/ui/Pagination";
 import LogTable from "../../logs/LogTable";
 import MetricLogFormModal from "../../logs/LogFormModal";
-import { useCreateMetricLogDummy, useMetricLogs } from "@/src/features/metricLogs/hooks";
+import {
+  useCreateMetricLogDummy,
+  useDeleteMetricLog,
+  useMetricLogsListPaginationViaCursor,
+} from "@/src/features/metricLogs/hooks";
 import { MetricLogResponseDTO } from "@/src/types/dtos/metric-log.dto";
 import EmptyDataIndicator from "@/src/components/ui/EmptyDataIndicator";
+import {
+  MetricLogFilterViaCursor,
+  MetricLogSortParamViaCursor,
+  nextSortForColumn,
+  parseSort,
+} from "@/src/features/metricLogs/sort";
+import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
+import SearchInput from "@/src/components/ui/SearchInput";
 
-const PAGE_SIZE = 20;
-
-/**
- * Logs section with search and pagination (dummy).
- */
 interface MetricLogSectionProps {
   metricId: string;
 }
 
 const MetricLogsSection: React.FC<MetricLogSectionProps> = ({ metricId }) => {
-  const queryClient = useQueryClient();
-  const [page, setPage] = useState(1);
+  // * Contants
+  const PAGE_SIZE = 50;
+  const [sort, setSort] = useState<MetricLogSortParamViaCursor>("-createdAt");
+  const { field: sortField, dir: sortDir } = useMemo(
+    () => parseSort(sort),
+    [sort]
+  );
+
+  // * Search
+  const [search, setSearch] = useState("");
+  const debouncedQ = useDebouncedValue(search, 350);
+  const [filterName] = useState<string>("");
+  const [filterMetric] = useState<string>(metricId);
+
+  const params = useMemo(() => {
+    const p: {
+      limit: number;
+      sort: MetricLogSortParamViaCursor;
+      q?: string;
+      filter?: MetricLogFilterViaCursor;
+    } = { limit: PAGE_SIZE, sort };
+
+    if (debouncedQ) p.q = debouncedQ;
+
+    const f: MetricLogFilterViaCursor = {};
+    if (filterName) f.name = filterName;
+    if (filterMetric) f.metricId = filterMetric;
+    if (Object.keys(f).length) p.filter = f;
+
+    console.log(`----- [View]: Filter`, p.filter);
+    console.log(`----- [View]: Limit`, p.limit);
+
+    return p;
+  }, [PAGE_SIZE, sort, debouncedQ, filterName, filterMetric]);
+
+  // Hook consumtion based on mode
+  const pages = useMetricLogsListPaginationViaCursor({
+    ...params,
+    enabled: true,
+  });
+
+  const onColumnSort = useCallback((column: string) => {
+    if (
+      column === "createdAt" ||
+      column === "updatedAt" ||
+      column === "logValue" ||
+      column === "loggedAt"
+    ) {
+      setSort((cur) => nextSortForColumn(cur, column));
+    }
+  }, []);
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -34,19 +87,23 @@ const MetricLogsSection: React.FC<MetricLogSectionProps> = ({ metricId }) => {
   );
 
   // Use the new useMetricLogs with pagination
-  const { logs, isLoading, isError, total } = useMetricLogs(
-    metricId,
-    page,
-    PAGE_SIZE
-  );
+  const { deleteMetricLog } = useDeleteMetricLog();
 
-  // Calculate total pages
-  const totalPages = total ? Math.ceil(total / PAGE_SIZE) : 1;
+  // * Handlers
+  const handleEditLog = useCallback((log: MetricLogResponseDTO) => {
+    setSelectedLog(log);
+    setModalOpen(true);
+  }, []);
 
-  /**
-   * * Dummy Metrics
-   * UseMutation for API request for Creating Dummy Metrics
-   */
+  const handleDelete = async (log: MetricLogResponseDTO) => {
+    try {
+      await deleteMetricLog(log.id);
+    } catch (error) {
+      console.error("Error deleting log:", error);
+    }
+  };
+
+  // * Dummy Metrics
   const { createMetricLogDummy } = useCreateMetricLogDummy();
   const onDummyDataSubmit = async () => {
     try {
@@ -54,37 +111,25 @@ const MetricLogsSection: React.FC<MetricLogSectionProps> = ({ metricId }) => {
         count: 5,
         metricId: metricId,
       });
-      // queryClient.invalidateQueries({
-      //   queryKey: ["metricLogs", metricId],
-      //   exact: false,
-      // });
-      await queryClient.refetchQueries({
-        queryKey: ["metricLogs", metricId, 1, PAGE_SIZE],
-      });
     } catch (error) {
       console.error("Form submission error:", error);
     }
   };
 
   // * Handlers
-  // Handlers for table row click
   const handleRowClick = (log: MetricLogResponseDTO) => {
     setSelectedLog(log);
     setModalOpen(true);
   };
 
-  // Handler for add log button (create mode)
   const handleAddLogClick = () => {
     setSelectedLog(null); // No log = create mode
     setModalOpen(true);
   };
 
-  if (isLoading) {
-    <div>Loading Logs</div>;
-  }
-  if (isError) {
-    <div> Error Loading Logs</div>;
-  }
+  // Derived
+  const loading = pages.isFetching && pages.items.length === 0;
+  const empty = pages.items.length === 0;
 
   return (
     <>
@@ -101,12 +146,21 @@ const MetricLogsSection: React.FC<MetricLogSectionProps> = ({ metricId }) => {
         className="mb-8"
         headerComponent={
           <div className="flex bg-items-center justify-between space-x-4 mb-4">
+            <SearchInput
+              value={search}
+              onChange={setSearch}
+              onClear={() => setSearch("")}
+              isLoading={pages.isFetching && !!pages.items.length}
+              placeholder="Search by log value…"
+              className="flex-1"
+            />
+
             <PrimaryButton
               onClick={onDummyDataSubmit}
               ariaLabel="Generate Logs"
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
-              Generate Metric
+              Generate Dummy
             </PrimaryButton>
 
             <PrimaryButton onClick={handleAddLogClick}>Add Logs</PrimaryButton>
@@ -115,9 +169,9 @@ const MetricLogsSection: React.FC<MetricLogSectionProps> = ({ metricId }) => {
       >
         <>
           {/* Pagination Placeholder (unchanged) */}
-          {isLoading ? (
+          {loading ? (
             <SkeletonLoader count={10} className="h-10" />
-          ) : logs.length === 0 ? (
+          ) : empty ? (
             <EmptyDataIndicator
               title="No Data Available"
               description="You haven't created any data yet."
@@ -125,19 +179,25 @@ const MetricLogsSection: React.FC<MetricLogSectionProps> = ({ metricId }) => {
             />
           ) : (
             <>
-              <LogTable logs={logs || []} onRowClick={handleRowClick} />
+              <LogTable
+                logs={pages.items}
+                sortBy={sortField}
+                sortOrder={sortDir}
+                onSort={(col) => onColumnSort(String(col))}
+                onEdit={handleEditLog}
+                onDelete={handleDelete}
+                onRowClick={handleRowClick}
+              />
 
               {/**Pagination Segment */}
-              {totalPages > 1 && (
-                <div className="flex justify-center mt-8">
-                  <Pagination
-                    page={page}
-                    total={total}
-                    pageSize={PAGE_SIZE}
-                    onChange={setPage}
-                  />
-                </div>
-              )}
+              <Pagination
+                page={pages.page}
+                pageSize={PAGE_SIZE}
+                total={pages.totalCount}
+                onChange={pages.setPage}
+                canPrev={pages.canPrev}
+                canNext={pages.canNext}
+              />
             </>
           )}
         </>
