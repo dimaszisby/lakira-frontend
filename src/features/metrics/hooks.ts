@@ -29,6 +29,7 @@ import { CursorPage } from "@/src/types/generics/CursorPage";
 import { MetricFilterViaCursor, MetricSortViaCursor } from "./sort";
 import { toMetricHeaderVM, toMetricSettingsVM } from "./mappers";
 import { MetricDetailCompositeVM, MetricHeaderVM } from "./view-models";
+import { MetricSettingsExtendedVM } from "../metric-settings/view-models";
 import {
   invalidateMetricDetail,
   invalidateMetricLists,
@@ -98,7 +99,7 @@ function useMetricDetailComposite(metricId: string) {
       getUserMetricDetails(metricId, { includes: ["category", "settings"] }),
     select: (dto) => ({
       header: toMetricHeaderVM(dto),
-      settings: toMetricSettingsVM(dto),
+      settings: toMetricSettingsVM(dto) as MetricSettingsExtendedVM,
     }),
     enabled: !!metricId,
     staleTime: 30_000,

@@ -6,20 +6,12 @@ import {
   updateMetricSchema,
   generateDummyMetricsSchema,
 } from "@/types/api/zod-metric.schema";
-
-// Internal DTOs for associations
 import { MetricCategoryResponseDTO } from "../../types/dtos/metric-category.dto";
 import { MetricSettingsResponseDTO } from "../../types/dtos/metric-settings.dto";
 import { MetricLogResponseDTO } from "../../types/dtos/metric-log.dto";
+import { ISODateString } from "@/src/types/aliases";
 
-/**
- * @file src/types/dtos/metric.dto.ts
- * @description Defines the Data Transfer Objects (DTOs) for Metric-related API contracts.
- * These interfaces and types are used for incoming and outgoing API requests and responses,
- * defining the structure of data exchanged between the client and server.
- */
-
-// * Respose DTOs
+// * ===== Response DTOs ===== 
 
 /**
  * @interface MetricResponseDTO
@@ -30,19 +22,21 @@ export interface MetricResponseDTO {
   readonly userId: string;
   readonly categoryId: string | null;
   readonly originalMetricId: string | null;
+
   readonly name: string;
   readonly description: string | null;
   readonly defaultUnit: string;
   readonly isPublic: boolean;
-  readonly createdAt: string; // ISO Date string
-  readonly updatedAt: string; // ISO Date string
+
+  readonly createdAt: ISODateString; // ISO Date string
+  readonly updatedAt: ISODateString; // ISO Date string
 }
 
 /**
  * @interface MetricPreviewCategoryDTO
  * @description Represents summarized category information for a metric preview.
  */
-interface MetricPreviewCategoryDTO {
+export interface MetricPreviewCategoryDTO {
   readonly id: string;
   readonly name: string;
   readonly icon: string;
@@ -82,12 +76,14 @@ export interface UserMetricDetailResponseDTO {
   readonly userId: string;
   readonly categoryId: string | null;
   readonly originalMetricId: string | null;
+
   readonly name: string;
   readonly description: string | null;
   readonly defaultUnit: string;
   readonly isPublic: boolean;
-  readonly createdAt: string; // ISO Date string
-  readonly updatedAt: string; // ISO Date string
+
+  readonly createdAt: ISODateString; // ISO Date string
+  readonly updatedAt: ISODateString; // ISO Date string
 
   // if included
   readonly category?: MetricCategoryResponseDTO | null;
@@ -95,7 +91,7 @@ export interface UserMetricDetailResponseDTO {
   readonly logs?: MetricLogResponseDTO[] | null;
 }
 
-// * ========== Request DTOs
+// * ===== Request DTOs =====
 
 /**
  * @typedef CreateMetricRequestDTO

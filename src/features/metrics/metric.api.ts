@@ -49,41 +49,7 @@ function buildQuery(params: Record<string, unknown>): string {
   return s ? `?${s}` : "";
 }
 
-// * ========== APIs Interactors ==========
-
-/**
- * Create a new metric
- * @param {CreateMetricRequestDTO} metric - The metric data to create.
- * @returns {Promise<MetricResponseDTO>} - A promise that resolves to the created metric.
- * @throws {Error} - If the API request fails.
- */
-export const createMetric = async (
-  metric: CreateMetricRequestDTO,
-  opts: RequestOpts & { idempotencyKey?: string } = {}
-): Promise<MetricResponseDTO> => {
-  // Avoid dupplicates on retry
-  const headers: Record<string, string> = {};
-  if (opts.idempotencyKey) headers["Idempotency-Key"] = opts.idempotencyKey;
-
-  const response = await api.post<ApiResponse<MetricResponseDTO>>(
-    "/metrics",
-    metric,
-    { signal: opts.signal, headers }
-  );
-
-  return unwrap(response);
-};
-
-// * TODO: Currently have no use for this function, but it can be useful in the future
-export const getAllMetricNames = async (): Promise<string[]> => {
-  try {
-    const response = await api.get("/metrics/names");
-    return response.data.data;
-  } catch (error: unknown) {
-    handleApiError(error);
-    throw error;
-  }
-};
+// * ========== Query Endpoints ==========
 
 /**
  * Fetches the list of metrics from the API.
@@ -125,6 +91,7 @@ export async function getMetricLibraryList(
   return unwrap(response);
 }
 
+// GET ALL via Cursor
 export async function getMetricLibraryViaCursor({
   limit = 20,
   sort = "-createdAt",
@@ -153,10 +120,8 @@ export async function getMetricLibraryViaCursor({
 }
 
 /**
- * * TODO: Currently not being part of the API MVP, but can be useful in the future
- * Get Metric Details that contains core metric information, will be mainly used for public metrics.
- * @param {string} metricId - The ID of the metric to retrieve.
- * @returns {Promise<MetricResponseDTO>} - A promise that resolves to the metric details.
+ * TODO: Currently not being part of the API MVP, but can be useful in the future
+ * @description Get Metric Details that contains core metric information, will be mainly used for public metrics.
  */
 export const getMetricDetails = async (
   metricId: string
@@ -175,9 +140,8 @@ export const getMetricDetails = async (
 };
 
 /**
- * Get User Metric Details that contains extended metric information, will be mainly used for metric detail page.
- * @param {string} metricId - The ID of the metric to retrieve.
- * @returns {Promise<UserMetricDetailResponseDTO>} - A promise that resolves to the metric details (extended).
+ * * GET Details with extended info
+ * @description Get User Metric Details that contains extended metric information, will be mainly used for metric detail page.
  */
 export const getUserMetricDetails = async (
   metricId: string,
@@ -207,12 +171,39 @@ export const getUserMetricDetails = async (
   }
 };
 
-/**
- * Update a metric
- * @param {UpdateMetricRequestDTO} metric - The metric data to update.
- * @returns {Promise<MetricResponseDTO>} - A promise that resolves to the updated metric.
- * @throws {Error} - If the API request fails.
- */
+// GET ALL metric names
+// Currently have no use for this function, but it can be useful in the future
+export const getAllMetricNames = async (): Promise<string[]> => {
+  try {
+    const response = await api.get("/metrics/names");
+    return response.data.data;
+  } catch (error: unknown) {
+    handleApiError(error);
+    throw error;
+  }
+};
+
+// * ========== Commands Endpoints ==========
+
+//  CREATE a new metric
+export const createMetric = async (
+  metric: CreateMetricRequestDTO,
+  opts: RequestOpts & { idempotencyKey?: string } = {}
+): Promise<MetricResponseDTO> => {
+  // Avoid dupplicates on retry
+  const headers: Record<string, string> = {};
+  if (opts.idempotencyKey) headers["Idempotency-Key"] = opts.idempotencyKey;
+
+  const response = await api.post<ApiResponse<MetricResponseDTO>>(
+    "/metrics",
+    metric,
+    { signal: opts.signal, headers }
+  );
+
+  return unwrap(response);
+};
+
+// UPDATE a metric
 export async function updateMetric(
   args: { metricId: string; metric: UpdateMetricRequestDTO },
   opts: RequestOpts = {}
@@ -232,12 +223,7 @@ export async function updateMetric(
   }
 }
 
-/**
- * Delete a metric
- * @param {string} metricId - The ID of the metric to delete.
- * @returns {Promise<MetricResponseDTO>} - A promise that resolves to the deleted metric.
- * @throws {Error} - If the API request fails.
- */
+// Delete a metric
 export async function deleteMetric(
   metricId: string,
   opts: RequestOpts = {}

@@ -1,5 +1,10 @@
 import { UserMetricDetailResponseDTO } from "@/features/metrics/metric.dto";
-import { isChartType, MetricHeaderVM, MetricSettingsVM } from "./view-models";
+import { MetricHeaderVM } from "./view-models";
+import {
+  isChartType,
+  MetricSettingsExtendedVM,
+  DEFAULT_DISPLAY,
+} from "../metric-settings/view-models";
 
 // MetricHeader section of MetricDetailsPage
 export function toMetricHeaderVM(
@@ -19,46 +24,66 @@ export function toMetricHeaderVM(
       : null,
   };
 }
+
 // MetricSetting section of MetricDetailsPage
+// TODO: Shared/centralized because of dupplications
 export function toMetricSettingsVM(
   d: UserMetricDetailResponseDTO
-): MetricSettingsVM {
+): MetricSettingsExtendedVM {
   const s = d.settings;
   if (!s) {
     return {
-      id: null,
-      isActive: null,
+      metricId: d.id,
+      goalEnabled: false,
       goalType: null,
       goalValue: null,
+      timeFrameEnabled: false,
       startDate: null,
       deadlineDate: null,
-      alertEnabled: null,
-      alertThresholds: null,
-      display: null,
+      alertEnabled: false,
+      alertThresholds: 0,
+      isAchieved: false,
+      isActive: false,
+      displayOptions: {
+        showOnDashboard: DEFAULT_DISPLAY.showOnDashboard,
+        priority: DEFAULT_DISPLAY.priority,
+        chartType: DEFAULT_DISPLAY.chartType,
+        color: DEFAULT_DISPLAY.color,
+      },
     };
   }
 
-  const disp = s.displayOptions
-    ? {
-        showOnDashboard: s.displayOptions.showOnDashboard ?? null,
-        priority: s.displayOptions.priority ?? null,
-        chartType: isChartType(s.displayOptions.chartType)
-          ? s.displayOptions.chartType
-          : null,
-        color: s.displayOptions.color ?? null,
-      }
-    : null;
+  const displayOptions = {
+    showOnDashboard:
+      s.displayOptions?.showOnDashboard ?? DEFAULT_DISPLAY.showOnDashboard,
+    priority: s.displayOptions?.priority ?? DEFAULT_DISPLAY.priority,
+    chartType: isChartType(s.displayOptions?.chartType)
+      ? s.displayOptions!.chartType
+      : DEFAULT_DISPLAY.chartType,
+    color: s.displayOptions?.color ?? DEFAULT_DISPLAY.color,
+  };
 
   return {
-    id: s.id ?? null,
-    isActive: s.isActive ?? null,
+    id: s.id,
+    metricId: d.id,
+    goalEnabled: s.goalEnabled ?? false,
     goalType: s.goalType ?? null,
     goalValue: s.goalValue ?? null,
-    startDate: s.startDate ?? null,
-    deadlineDate: s.deadlineDate ?? null,
-    alertEnabled: s.alertEnabled ?? null,
-    alertThresholds: s.alertThresholds ?? null,
-    display: disp,
+    timeFrameEnabled: s.timeFrameEnabled ?? false,
+    startDate: s.startDate ? s.startDate : null,
+    deadlineDate: s.deadlineDate ? s.deadlineDate : null,
+    alertEnabled: s.alertEnabled ?? false,
+    alertThresholds: s.alertThresholds ?? 0,
+    isAchieved: s.isAchieved ?? false,
+    isActive: s.isActive ?? false,
+    displayOptions: {
+      showOnDashboard: displayOptions.showOnDashboard ?? false,
+      priority: displayOptions.priority,
+      chartType: displayOptions.chartType,
+      color: displayOptions.color,
+    },
+    createdAt: s.createdAt ? s.createdAt : undefined,
+    updatedAt: s.updatedAt ? s.updatedAt : undefined,
   };
 }
 
