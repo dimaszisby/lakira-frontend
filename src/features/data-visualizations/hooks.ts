@@ -1,5 +1,4 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-
 import type { VizQuery, VizResponse } from "./types";
 import { getDashboardVisualizations, getMetricVisualization } from "./api";
 import { vizKeys } from "./keys";

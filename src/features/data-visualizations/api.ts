@@ -6,6 +6,7 @@ import { withApiErrorHandling } from "@/src/services/api/withApiErrorHandling";
 
 const BASE = "/analytics";
 
+// helper
 function normalizeParams(query: VizQuery & { limit?: number }) {
   if ("last" in query) {
     return {
@@ -31,11 +32,11 @@ export async function getMetricVisualization(
   query: VizQuery,
   opts: { signal?: AbortSignal } = {}
 ): Promise<VizResponse> {
-  const params = normalizeParams(query);
-  const url = `${BASE}/metrics/${metricId}`;
-  const key = etagCache.keyFrom(url, params);
-
   return withApiErrorHandling(async () => {
+    const params = normalizeParams(query);
+    const url = `${BASE}/metrics/${metricId}`;
+    const key = etagCache.keyFrom(url, params);
+
     const headers: Record<string, string> = {};
     const prevEtag = etagCache.getEtag(key);
     if (prevEtag) headers["If-None-Match"] = prevEtag;
@@ -64,11 +65,11 @@ export async function getMetricVisualization(
 export async function getDashboardVisualizations(
   q: VizQuery & { limit?: number }
 ) {
-  const params = normalizeParams(q);
-  const url = `${BASE}/dashboard`;
-  const key = etagCache.keyFrom(url, params);
-
   return withApiErrorHandling(async () => {
+    const params = normalizeParams(q);
+    const url = `${BASE}/dashboard`;
+    const key = etagCache.keyFrom(url, params);
+
     const headers: Record<string, string> = {};
     const prevEtag = etagCache.getEtag(key);
     if (prevEtag) headers["If-None-Match"] = prevEtag;
