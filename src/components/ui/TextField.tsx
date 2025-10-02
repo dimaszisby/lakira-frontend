@@ -1,8 +1,9 @@
 import * as React from "react";
-import { UseFormRegisterReturn } from "react-hook-form";
-import { FieldShell } from "./FieldShell";
+import type { UseFormRegisterReturn } from "react-hook-form";
 
-type TextFieldProps = {
+import FieldShell from "./FieldShell";
+
+type Props = {
   id: string; // stable id for a11y
   label: string;
   registration: UseFormRegisterReturn;
@@ -17,7 +18,7 @@ type TextFieldProps = {
   onChange?: React.ChangeEventHandler<HTMLInputElement>;
 };
 
-export function TextField({
+const TextField = ({
   id,
   label,
   registration,
@@ -30,7 +31,7 @@ export function TextField({
   className,
   inputClassName,
   onChange,
-}: TextFieldProps) {
+}: Props) => {
   return (
     <FieldShell
       id={id}
@@ -44,16 +45,16 @@ export function TextField({
         type={type}
         placeholder={placeholder}
         disabled={disabled}
-        className={["input-textfield", inputClassName]
-          .filter(Boolean)
-          .join(" ")}
+        className={["input-textfield", inputClassName].filter(Boolean).join(" ")}
         {...registration}
         onChange={(e) => {
           // keep RHF in the loop, then your side-effect
-          registration.onChange(e);
+          void registration.onChange(e);
           onChange?.(e);
         }}
       />
     </FieldShell>
   );
-}
+};
+
+export default TextField;

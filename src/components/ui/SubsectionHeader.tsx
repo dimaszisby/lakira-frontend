@@ -8,7 +8,7 @@ const SubsectionHeader: React.FC<{ title: string; className?: string }> = ({
   className,
 }) => (
   <div
-    className={`px-4 py-2 bg-[#F7F9FC] text-lg font-medium text-[#578C9C] rounded-xl border border-[#578C9C] mb-4 ${className}`}
+    className={`mb-4 rounded-xl border border-[#578C9C] bg-[#F7F9FC] px-4 py-2 text-lg font-medium text-[#578C9C] ${className}`}
   >
     {title}
   </div>

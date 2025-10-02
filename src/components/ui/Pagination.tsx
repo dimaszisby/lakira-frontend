@@ -7,18 +7,18 @@ type PaginationProps = {
   canNext?: boolean;
 };
 
-export function Pagination({
+export const Pagination = ({
   page,
   total,
   pageSize,
   onChange,
   canPrev,
   canNext,
-}: PaginationProps) {
+}: PaginationProps) => {
   const totalPages =
-    typeof total === "number"
-      ? Math.max(1, Math.ceil(total / pageSize))
-      : undefined;
+    typeof total === "number" ? Math.max(1, Math.ceil(total / pageSize)) : undefined;
+  const disabledStyle = "cursor-not-allowed opacity-50";
+  const enabledStyle = "text-gray-700 hover:bg-gray-200";
 
   // IF total page unknown => show simple Prev/Next controls
   if (!totalPages) {
@@ -27,13 +27,9 @@ export function Pagination({
     const nextDisabled = typeof canNext === "boolean" ? !canNext : false;
 
     return (
-      <nav className="flex items-center justify-center mt-8 space-x-1">
+      <nav className="mt-8 flex items-center justify-center space-x-1">
         <button
-          className={`px-3 py-1 rounded-lg ${
-            prevDisabled
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-gray-200 text-gray-700"
-          }`}
+          className={`rounded-lg px-3 py-1 ${prevDisabled ? disabledStyle : enabledStyle}`}
           onClick={() => onChange(page - 1)}
           disabled={prevDisabled}
           aria-label="Previous page"
@@ -44,11 +40,7 @@ export function Pagination({
           Page {page}
         </span>
         <button
-          className={`px-3 py-1 rounded-lg ${
-            nextDisabled
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-gray-200 text-gray-700"
-          }`}
+          className={`rounded-lg px-3 py-1 ${prevDisabled ? disabledStyle : enabledStyle}`}
           onClick={() => onChange(page + 1)}
           disabled={nextDisabled}
           aria-label="Next page"
@@ -64,10 +56,7 @@ export function Pagination({
   for (let i = 1; i <= totalPages; i++) {
     if (i === 1 || i === totalPages || Math.abs(page - i) <= 2) {
       pageNumbers.push(i);
-    } else if (
-      (i === 2 && page > 4) ||
-      (i === totalPages - 1 && page < totalPages - 3)
-    ) {
+    } else if ((i === 2 && page > 4) || (i === totalPages - 1 && page < totalPages - 3)) {
       // avoid duplicate "..." entries
       if (pageNumbers[pageNumbers.length - 1] !== "...") {
         pageNumbers.push("...");
@@ -76,13 +65,9 @@ export function Pagination({
   }
 
   return (
-    <nav className="flex items-center justify-center mt-8 space-x-1">
+    <nav className="mt-8 flex items-center justify-center space-x-1">
       <button
-        className={`px-3 py-1 rounded-lg ${
-          page === 1
-            ? "opacity-50 cursor-not-allowed"
-            : "hover:bg-gray-200 text-gray-700"
-        }`}
+        className={`rounded-lg px-3 py-1 ${page === 1 ? disabledStyle : enabledStyle}`}
         onClick={() => onChange(page - 1)}
         disabled={page === 1}
         aria-label="Previous page"
@@ -98,10 +83,10 @@ export function Pagination({
         ) : (
           <button
             key={`page-${num}`}
-            className={`px-3 py-1 rounded-lg ${
+            className={`rounded-lg px-3 py-1 ${
               page === num
-                ? "bg-purple-200 text-purple-800 font-bold"
-                : "hover:bg-gray-200 text-gray-700"
+                ? "bg-purple-200 font-bold text-purple-800"
+                : "text-gray-700 hover:bg-gray-200"
             }`}
             onClick={() => onChange(num)}
             disabled={page === num}
@@ -109,15 +94,11 @@ export function Pagination({
           >
             {num}
           </button>
-        )
+        ),
       )}
 
       <button
-        className={`px-3 py-1 rounded-lg ${
-          page === totalPages
-            ? "opacity-50 cursor-not-allowed"
-            : "hover:bg-gray-200 text-gray-700"
-        }`}
+        className={`rounded-lg px-3 py-1 ${page === totalPages ? disabledStyle : enabledStyle}`}
         onClick={() => onChange(page + 1)}
         disabled={page === totalPages}
         aria-label="Next page"
@@ -126,4 +107,4 @@ export function Pagination({
       </button>
     </nav>
   );
-}
+};

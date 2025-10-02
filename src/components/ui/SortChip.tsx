@@ -1,5 +1,3 @@
-// File: src/components/ui/SortChip.tsx
-
 /**
  * SortChip.tsx
  * - Stateless Component
@@ -32,19 +30,17 @@ const SortChip: React.FC<{
       type="button"
       onClick={onClick}
       className={`mr-2 px-3 py-2 ${getSortOrderClass(
-        sortOrder
-      )} rounded-2xl focus:outline-none hover:underline`}
+        sortOrder,
+      )} rounded-2xl hover:underline focus:outline-none`}
     >
       {customChildren ? (
         customChildren
       ) : (
         <>
           {label}
-          {sortOrder && (
-            <span className="ml-1 text-xs">
-              {sortOrder === "ASC" ? "▲" : "▼"}
-            </span>
-          )}
+          {sortOrder ? (
+            <span className="ml-1 text-xs">{sortOrder === "ASC" ? "▲" : "▼"}</span>
+          ) : null}
         </>
       )}
     </button>

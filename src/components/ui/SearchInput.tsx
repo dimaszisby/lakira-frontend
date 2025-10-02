@@ -1,11 +1,7 @@
-import {
-  forwardRef,
-  memo,
-  useCallback,
-  useId,
-  KeyboardEvent,
-  type ChangeEvent,
-} from "react";
+import type { ChangeEvent } from "react";
+import type { KeyboardEvent } from "react";
+import { forwardRef, memo, useCallback, useId } from "react";
+
 import { cn } from "../../../src/lib/cn";
 
 type Props = {
@@ -25,114 +21,114 @@ type Props = {
   "data-testid"?: string;
 };
 
-const SearchInput = memo(
-  forwardRef<HTMLInputElement, Props>(function SearchInput(
-    {
-      value,
-      onChange,
-      placeholder = "Search…",
-      isLoading = false,
-      className = "",
-      ariaLabel = "Search",
-      onClear,
-      disabled = false,
-      ariaControlsId,
-      ariaDescribedById,
-      "data-testid": dataTestId,
+export const SearchInputBase = forwardRef<HTMLInputElement, Props>(function SearchInput(
+  {
+    value,
+    onChange,
+    placeholder = "Search…",
+    isLoading = false,
+    className = "",
+    ariaLabel = "Search",
+    onClear,
+    disabled = false,
+    ariaControlsId,
+    ariaDescribedById,
+    "data-testid": dataTestId,
+  },
+  ref,
+) {
+  const id = useId();
+
+  const handleInput = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value),
+    [onChange],
+  );
+
+  const clear = useCallback(() => {
+    (onClear ?? onChange)("");
+  }, [onClear, onChange]);
+
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === "Escape" && value) {
+        e.preventDefault();
+        clear();
+      }
     },
-    ref
-  ) {
-    const id = useId();
+    [value, clear],
+  );
 
-    const handleInput = useCallback(
-      (e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value),
-      [onChange]
-    );
+  // If spinner is visible, give a bit more right padding so text doesn't collide with icons.
+  const inputPaddingRight = isLoading || value ? "pr-12" : "pr-4";
 
-    const clear = useCallback(() => {
-      (onClear ?? onChange)("");
-    }, [onClear, onChange]);
+  return (
+    <div className={cn("relative w-full sm:max-w-md", className)}>
+      <label htmlFor={id} className="sr-only">
+        {ariaLabel}
+      </label>
 
-    const handleKeyDown = useCallback(
-      (e: KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Escape" && value) {
-          e.preventDefault();
-          clear();
-        }
-      },
-      [value, clear]
-    );
+      <input
+        id={id}
+        ref={ref}
+        type="search"
+        inputMode="search"
+        autoComplete="off"
+        spellCheck={false}
+        disabled={disabled}
+        value={value}
+        onChange={handleInput}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder}
+        aria-label={ariaLabel}
+        aria-busy={isLoading || undefined}
+        aria-controls={ariaControlsId}
+        aria-describedby={ariaDescribedById}
+        data-testid={dataTestId}
+        className={cn(
+          "w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-2",
+          inputPaddingRight,
+          "outline-none ring-0 focus:border-gray-400",
+          "placeholder:text-gray-400",
+          "disabled:opacity-60 disabled:cursor-not-allowed",
+        )}
+      />
 
-    // If spinner is visible, give a bit more right padding so text doesn't collide with icons.
-    const inputPaddingRight = isLoading || value ? "pr-12" : "pr-4";
+      {/* Loading spinner */}
+      {isLoading ? (
+        <div
+          className="absolute right-10 top-1/2 -translate-y-1/2"
+          role="status"
+          aria-live="polite"
+          aria-label="Loading"
+        >
+          <span className="inline-block h-4 w-4 animate-spin rounded-full border-[2px] border-gray-300 border-t-gray-500" />
+          <span className="sr-only">Loading</span>
+        </div>
+      ) : null}
 
-    return (
-      <div className={cn("relative w-full sm:max-w-md", className)}>
-        <label htmlFor={id} className="sr-only">
-          {ariaLabel}
-        </label>
-
-        <input
-          id={id}
-          ref={ref}
-          type="search"
-          inputMode="search"
-          autoComplete="off"
-          spellCheck={false}
+      {/* Clear button */}
+      {value ? (
+        <button
+          type="button"
+          aria-label="Clear search"
+          title="Clear"
+          onClick={clear}
           disabled={disabled}
-          value={value}
-          onChange={handleInput}
-          onKeyDown={handleKeyDown}
-          placeholder={placeholder}
-          aria-label={ariaLabel}
-          aria-busy={isLoading || undefined}
-          aria-controls={ariaControlsId}
-          aria-describedby={ariaDescribedById}
-          data-testid={dataTestId}
           className={cn(
-            "w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-2",
-            inputPaddingRight,
-            "outline-none ring-0 focus:border-gray-400",
-            "placeholder:text-gray-400",
-            "disabled:opacity-60 disabled:cursor-not-allowed"
+            "absolute right-2 top-1/2 -translate-y-1/2",
+            "rounded h-8 w-8 flex items-center justify-center",
+            "hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300",
+            "disabled:opacity-60",
           )}
-        />
+        >
+          <span aria-hidden>✕</span>
+        </button>
+      ) : null}
+    </div>
+  );
+});
+SearchInputBase.displayName = "SearchInput";
 
-        {/* Loading spinner */}
-        {isLoading && (
-          <div
-            className="absolute right-10 top-1/2 -translate-y-1/2"
-            role="status"
-            aria-live="polite"
-            aria-label="Loading"
-          >
-            <span className="animate-spin inline-block h-4 w-4 border-[2px] border-gray-300 border-t-gray-500 rounded-full" />
-            <span className="sr-only">Loading</span>
-          </div>
-        )}
-
-        {/* Clear button */}
-        {value && (
-          <button
-            type="button"
-            aria-label="Clear search"
-            title="Clear"
-            onClick={clear}
-            disabled={disabled}
-            className={cn(
-              "absolute right-2 top-1/2 -translate-y-1/2",
-              "rounded h-8 w-8 flex items-center justify-center",
-              "hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300",
-              "disabled:opacity-60"
-            )}
-          >
-            <span aria-hidden>✕</span>
-          </button>
-        )}
-      </div>
-    );
-  })
-);
-
+const SearchInput = memo(SearchInputBase);
 SearchInput.displayName = "SearchInput";
 export default SearchInput;

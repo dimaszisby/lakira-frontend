@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 import SubsectionHeader from "./SubsectionHeader";
 
 /**
@@ -6,15 +8,18 @@ import SubsectionHeader from "./SubsectionHeader";
  * @param children - Content of the subsection
  * @param className - Additional CSS classes for customization
  */
-const SubsectionCard: React.FC<{
+export const SubsectionCardBase: React.FC<{
   title: string;
   children: React.ReactNode;
   className?: string;
 }> = ({ title, children, className = "" }) => (
-  <div className={`bg-[#F4F5FB] rounded-xl p-4 ${className}`}>
+  <div className={`rounded-xl bg-[#F4F5FB] p-4 ${className}`}>
     <SubsectionHeader title={title} />
     {children}
   </div>
 );
+SubsectionCardBase.displayName = "SubsectionCard";
 
+const SubsectionCard = memo(SubsectionCardBase);
+SubsectionCard.displayName = "SubsectionCard";
 export default SubsectionCard;

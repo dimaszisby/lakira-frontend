@@ -1,8 +1,9 @@
 import * as React from "react";
-import { UseFormRegisterReturn } from "react-hook-form";
-import { FieldShell } from "./FieldShell";
+import type { UseFormRegisterReturn } from "react-hook-form";
 
-type TextAreaFieldProps = {
+import FieldShell from "./FieldShell";
+
+type Props = {
   id: string;
   label: string;
   registration: UseFormRegisterReturn;
@@ -17,7 +18,7 @@ type TextAreaFieldProps = {
   onChange?: React.ChangeEventHandler<HTMLTextAreaElement>;
 };
 
-export function TextAreaField({
+const TextAreaField = ({
   id,
   label,
   registration,
@@ -30,7 +31,7 @@ export function TextAreaField({
   className,
   textareaClassName,
   onChange,
-}: TextAreaFieldProps) {
+}: Props) => {
   return (
     <FieldShell
       id={id}
@@ -44,15 +45,15 @@ export function TextAreaField({
         rows={rows}
         placeholder={placeholder}
         disabled={disabled}
-        className={["input-textfield", textareaClassName]
-          .filter(Boolean)
-          .join(" ")}
+        className={["input-textfield", textareaClassName].filter(Boolean).join(" ")}
         {...registration}
         onChange={(e) => {
-          registration.onChange(e);
+          void registration.onChange(e);
           onChange?.(e);
         }}
       />
     </FieldShell>
   );
-}
+};
+
+export default TextAreaField;

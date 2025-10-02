@@ -1,4 +1,5 @@
 import * as React from "react";
+
 import { cn } from "../../../src/lib/cn";
 
 type ControlProps =
@@ -16,21 +17,13 @@ type FieldShellProps = {
   children: React.ReactElement<ControlProps>;
 };
 
-export function FieldShell({
-  id,
-  label,
-  required,
-  error,
-  hint,
-  className,
-  children,
-}: FieldShellProps) {
+const FieldShell = ({ id, label, required, error, hint, className, children }: FieldShellProps) => {
   const describedBy = error ? `${id}-msg` : hint ? `${id}-msg` : undefined;
 
   return (
     <div className={cn("w-full", className)}>
-      <label htmlFor={id} className="block text-input-label text-gray-700 mb-1">
-        {label} {required && <span className="text-red-500">*</span>}
+      <label htmlFor={id} className="text-input-label mb-1 block text-gray-700">
+        {label} {required ? <span className="text-red-500">*</span> : null}
       </label>
 
       {React.cloneElement(children, {
@@ -44,13 +37,12 @@ export function FieldShell({
         id={`${id}-msg`}
         role={error ? "alert" : undefined}
         aria-live={error ? "polite" : undefined}
-        className={cn(
-          "mt-1 text-sm min-h-[1.25rem]",
-          error ? "text-red-500" : "text-gray-500"
-        )}
+        className={cn("mt-1 text-sm min-h-[1.25rem]", error ? "text-red-500" : "text-gray-500")}
       >
         {error ?? hint ?? "\u00A0"}
       </p>
     </div>
   );
-}
+};
+
+export default FieldShell;

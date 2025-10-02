@@ -1,7 +1,8 @@
 import { memo } from "react";
+
 import OverlineLabel from "./OverlineLabel";
 
-interface DataLabelProps {
+interface Props {
   title: string;
   value: string | number | null;
   valueStyle?: "xl" | "md" | "sm";
@@ -22,31 +23,23 @@ function getValueStyling(valueStyle: "xl" | "md" | "sm" | null) {
   }
 }
 
-const DataLabel = memo(
-  ({
-    title,
-    value,
-    className = "",
-    valueStyle,
-    renderValue,
-  }: DataLabelProps) => {
-    const normalizedValue = value ? value : "-";
-    const normalizedValueStyle = valueStyle ? valueStyle : null;
+export const DataLabelBase = ({ title, value, className = "", valueStyle, renderValue }: Props) => {
+  const normalizedValue = value ? value : "-";
+  const normalizedValueStyle = valueStyle ? valueStyle : null;
 
-    return (
-      <div className={`block flex-col gap-2 ${className}`}>
-        <OverlineLabel text={title} />
-        {renderValue ? (
-          renderValue
-        ) : (
-          <span className={`w-full ${getValueStyling(normalizedValueStyle)}`}>
-            {normalizedValue}
-          </span>
-        )}
-      </div>
-    );
-  }
-);
+  return (
+    <div className={`block flex-col gap-2 ${className}`}>
+      <OverlineLabel text={title} />
+      {renderValue ? (
+        renderValue
+      ) : (
+        <span className={`w-full ${getValueStyling(normalizedValueStyle)}`}>{normalizedValue}</span>
+      )}
+    </div>
+  );
+};
+DataLabelBase.displayName = "DataLabel";
 
+const DataLabel = memo(DataLabelBase);
 DataLabel.displayName = "DataLabel";
 export default DataLabel;

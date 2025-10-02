@@ -12,11 +12,13 @@ const SectionCard: React.FC<{
   headerComponent?: React.ReactNode | undefined;
   children: React.ReactNode;
   className?: string;
-}> = ({ title, headerComponent, children, className = "" }) => (
-  <div className={`bg-white rounded-2xl shadow p-6 ${className}`}>
-    <SectionHeader title={title}>{headerComponent}</SectionHeader>
-    {children}
-  </div>
-);
+}> = ({ title, headerComponent, children, className = "" }) => {
+  return (
+    <div className={`rounded-2xl bg-white p-6 shadow ${className}`}>
+      <SectionHeader title={title}>{headerComponent}</SectionHeader>
+      {children}
+    </div>
+  );
+};
 
 export default SectionCard;

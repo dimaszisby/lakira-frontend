@@ -1,5 +1,6 @@
-import { memo, ReactNode, ComponentType } from "react";
 import classNames from "classnames";
+import type { ComponentType, ReactNode } from "react";
+import { memo } from "react";
 
 export type IconProps = {
   size?: number | string;
@@ -27,33 +28,26 @@ const toneToText = {
 const sizeToGap = { sm: "text-xs", md: "text-sm" } as const;
 const sizeToIcon = { sm: 14, md: 16 } as const;
 
-const IconLabel = memo(
-  ({
-    icon: Icon,
-    label,
-    size = "md",
-    tone = "muted",
-    className,
-    iconClassName,
-  }: IconLabelProps) => (
-    <div
-      className={classNames(
-        "flex items-center",
-        sizeToGap[size],
-        toneToText[tone],
-        className
-      )}
-    >
-      <Icon
-        size={sizeToIcon[size]}
-        weight="regular"
-        className={classNames("mr-1", iconClassName)}
-        aria-hidden
-      />
-      <span>{label}</span>
-    </div>
-  )
+export const IconLabelBase = ({
+  icon: Icon,
+  label,
+  size = "md",
+  tone = "muted",
+  className,
+  iconClassName,
+}: IconLabelProps) => (
+  <div className={classNames("flex items-center", sizeToGap[size], toneToText[tone], className)}>
+    <Icon
+      size={sizeToIcon[size]}
+      weight="regular"
+      className={classNames("mr-1", iconClassName)}
+      aria-hidden
+    />
+    <span>{label}</span>
+  </div>
 );
-IconLabel.displayName = "IconLabel";
+IconLabelBase.displayName = "IconLabel";
 
+const IconLabel = memo(IconLabelBase);
+IconLabel.displayName = "IconLabel";
 export default IconLabel;

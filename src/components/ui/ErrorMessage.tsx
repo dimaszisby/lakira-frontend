@@ -1,4 +1,4 @@
-interface ErrorMessageProps {
+interface Props {
   message: string | null | undefined;
   className?: string;
 }
@@ -11,16 +11,14 @@ function getBackgroundColor(message: string | null) {
   }
 }
 
-const ErrorMessage = ({ message, className }: ErrorMessageProps) => {
+const ErrorMessage = ({ message, className }: Props) => {
   return (
     <div
-      className={`w-full inline-block ${getBackgroundColor(
-        message ?? null
-      )} text-red-500 px-3 py-2 rounded ${className}`}
+      className={`inline-block w-full ${getBackgroundColor(
+        message ?? null,
+      )} rounded px-3 py-2 text-red-500 ${className}`}
     >
-      {(message !== null || message !== "") && (
-        <p className="text-red-500 text-sm">{message}</p>
-      )}
+      {(message !== null || message !== "") && <p className="text-sm text-red-500">{message}</p>}
     </div>
   );
 };

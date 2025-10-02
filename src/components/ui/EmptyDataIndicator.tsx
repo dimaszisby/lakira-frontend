@@ -1,49 +1,45 @@
-import React from "react";
 import { Files } from "phosphor-react";
+import React from "react";
 
-interface EmptyDataIndicatorProps {
+interface Props {
   title: string;
   description: string;
   tooltip?: string;
 }
 
-const EmptyDataIndicator = ({
-  title,
-  description,
-  tooltip,
-}: EmptyDataIndicatorProps) => {
+const EmptyDataIndicator = ({ title, description, tooltip }: Props) => {
   return (
-    <div className="text-center text-gray-600 mt-8">
+    <div className="mt-8 text-center text-gray-600">
       <div
-        className="flex flex-col items-center justify-center max-w-md mx-auto space-y-6"
+        className="mx-auto flex max-w-md flex-col items-center justify-center space-y-6"
         aria-label="Empty State Container"
         role="region"
       >
         {/* Card */}
         <div
-          className="flex flex-col items-center justify-center bg-white rounded-2xl shadow-lg p-8 w-full max-w-xs min-h-[320px] space-y-4"
+          className="flex min-h-[320px] w-full max-w-xs flex-col items-center justify-center space-y-4 rounded-2xl bg-white p-8 shadow-lg"
           aria-label="Empty State Card"
           role="banner"
         >
           <Files size={48} />
-          <h2 className="text-gray-800 font-semibold text-xl text-center">
+          <h2 className="text-center text-xl font-semibold text-gray-800">
             {title || "No Data Available"}
           </h2>
-          <p className="text-gray-500 text-base text-center">
+          <p className="text-center text-base text-gray-500">
             {description || "You haven't created any data yet."}
           </p>
         </div>
 
         {/* Tooltip */}
-        {tooltip && (
+        {tooltip ? (
           <div
-            className="flex items-center bg-status-info text-white px-4 py-2 rounded-xl text-sm text-center wraps"
+            className="wraps flex items-center rounded-xl bg-status-info px-4 py-2 text-center text-sm text-white"
             aria-label="Tooltip"
             role="tooltip"
           >
             <span>{tooltip || "Create your first data"}</span>
           </div>
-        )}
+        ) : null}
       </div>
     </div>
   );

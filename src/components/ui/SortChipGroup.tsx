@@ -1,14 +1,12 @@
 import React from "react";
+
 import SortChip from "./SortChip";
 
 export interface SortChipsColumns<T> {
   key: keyof T;
   label: string;
   sortable: boolean;
-  renderHeader?: (
-    isSorted: boolean,
-    sortOrder: "ASC" | "DESC" | null
-  ) => React.ReactNode;
+  renderHeader?: (isSorted: boolean, sortOrder: "ASC" | "DESC" | null) => React.ReactNode;
 }
 
 interface SortChipGroupProps<T> {

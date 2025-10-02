@@ -1,5 +1,5 @@
 import React from "react";
-import { UseFormRegisterReturn } from "react-hook-form";
+import type { UseFormRegisterReturn } from "react-hook-form";
 
 /**
  * Reusable Form Field Component
@@ -29,22 +29,19 @@ const ReusableFormField: React.FC<ReusableFormFieldProps> = ({
 }) => {
   return (
     <div>
-      <label className="block text-input-label text-gray-700 mb-1">
-        {label}
-      </label>
+      <label className="text-input-label mb-1 block text-gray-700">{label}</label>
       <input
         type={type}
         className={`input-textfield ${className}`}
         placeholder={placeholder}
         {...register}
         onChange={(e) => {
-          console.log(`Input ${label} changed:`, e.target.value);
-          register.onChange(e); // Trigger react-hook-form's onChange
+          void register.onChange(e); // Trigger react-hook-form's onChange
         }}
         disabled={isSubmitting}
       />
       {/** TODO: Create an error message that persist its size (height), so the form layout not get pushed around when it transitioning from to hidden and showing */}
-      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+      {error ? <p className="mt-1 text-sm text-red-500">{error}</p> : null}
     </div>
   );
 };
