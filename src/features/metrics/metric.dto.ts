@@ -1,17 +1,19 @@
-import { z } from "zod";
-import {
+import type { z } from "zod";
+
+import type { ISODateString } from "@/src/types/aliases";
+import type {
   createMetricSchema,
   deleteMetricSchema,
+  generateDummyMetricsSchema,
   getMetricSchema,
   updateMetricSchema,
-  generateDummyMetricsSchema,
 } from "@/types/api/zod-metric.schema";
-import { MetricCategoryResponseDTO } from "../../types/dtos/metric-category.dto";
-import { MetricSettingsResponseDTO } from "../../types/dtos/metric-settings.dto";
-import { MetricLogResponseDTO } from "../../types/dtos/metric-log.dto";
-import { ISODateString } from "@/src/types/aliases";
 
-// * ===== Response DTOs ===== 
+import type { MetricCategoryResponseDTO } from "../../types/dtos/metric-category.dto";
+import type { MetricLogResponseDTO } from "../../types/dtos/metric-log.dto";
+import type { MetricSettingsResponseDTO } from "../../types/dtos/metric-settings.dto";
+
+// * ===== Response DTOs =====
 
 /**
  * @interface MetricResponseDTO
@@ -98,18 +100,14 @@ export interface UserMetricDetailResponseDTO {
  * @description Represents the expected structure of the request body when creating a new metric.
  * Inferred from the Zod schema for validation.
  */
-export type CreateMetricRequestDTO = z.infer<
-  typeof createMetricSchema.shape.body
->;
+export type CreateMetricRequestDTO = z.infer<typeof createMetricSchema.shape.body>;
 
 /**
  * @typedef UpdateMetricRequestDTO
  * @description Represents the expected structure of the request body when updating an existing metric.
  * Inferred from the Zod schema for validation.
  */
-export type UpdateMetricRequestDTO = z.infer<
-  typeof updateMetricSchema.shape.body
->;
+export type UpdateMetricRequestDTO = z.infer<typeof updateMetricSchema.shape.body>;
 
 /**
  * @typedef GetMetricRequestDTO
@@ -134,6 +132,4 @@ export type DeleteMetricInput = z.infer<typeof deleteMetricSchema>["params"];
  * @description Represents the expected structure of the request body when generating dummy metric entries.
  * Inferred from the Zod schema for validation.
  */
-export type GenerateDummyMetricsRequestDTO = z.infer<
-  typeof generateDummyMetricsSchema.shape.body
->;
+export type GenerateDummyMetricsRequestDTO = z.infer<typeof generateDummyMetricsSchema.shape.body>;

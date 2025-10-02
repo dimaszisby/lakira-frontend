@@ -1,6 +1,8 @@
+import type { z } from "zod";
+
 import { createMetricSchema } from "@/src/types/api/zod-metric.schema";
-import { z } from "zod";
-import { ServerSortBy, SortOrder } from "./sort";
+
+import type { ServerSortBy, SortOrder } from "./sort";
 
 // ===== Form =====
 export const metricFormSchema = createMetricSchema.shape.body;

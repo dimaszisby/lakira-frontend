@@ -1,18 +1,7 @@
-import {
-  InfiniteData,
-  QueryKey,
-  useInfiniteQuery,
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-import {
-  MetricPreviewResponseDTO,
-  MetricResponseDTO,
-  PaginatedMetricListResponseDTO,
-  UpdateMetricRequestDTO,
-  UserMetricDetailResponseDTO,
-} from "@/src/features/metrics/metric.dto";
+import type { InfiniteData, QueryKey } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+
 import {
   createMetric,
   createMetricDummy,
@@ -22,20 +11,27 @@ import {
   getUserMetricDetails,
   updateMetric,
 } from "@/src/features/metrics/metric.api";
-import { metricsKeys } from "./keys";
-import { IncludeKey, ListOptions, MetricsListParams } from "./types";
-import { useEffect, useState } from "react";
-import { CursorPage } from "@/src/types/generics/CursorPage";
-import { MetricFilterViaCursor, MetricSortViaCursor } from "./sort";
-import { toMetricHeaderVM, toMetricSettingsVM } from "./mappers";
-import { MetricDetailCompositeVM, MetricHeaderVM } from "./view-models";
-import { MetricSettingsExtendedVM } from "../metric-settings/view-models";
+import type {
+  MetricPreviewResponseDTO,
+  MetricResponseDTO,
+  PaginatedMetricListResponseDTO,
+  UpdateMetricRequestDTO,
+  UserMetricDetailResponseDTO,
+} from "@/src/features/metrics/metric.dto";
+import type { CursorPage } from "@/src/types/generics/CursorPage";
+
+import type { MetricSettingsExtendedVM } from "../metric-settings/view-models";
 import {
   invalidateMetricDetail,
   invalidateMetricLists,
   patchMetricHeaderOptimistic,
   removeMetricDetail,
 } from "./cache";
+import { metricsKeys } from "./keys";
+import { toMetricHeaderVM, toMetricSettingsVM } from "./mappers";
+import type { MetricFilterViaCursor, MetricSortViaCursor } from "./sort";
+import type { IncludeKey, ListOptions, MetricsListParams } from "./types";
+import type { MetricDetailCompositeVM, MetricHeaderVM } from "./view-models";
 
 // Types
 type UseMetricArgs = {
@@ -49,19 +45,11 @@ type CursorResult = CursorPage<MetricPreviewResponseDTO>;
 
 // * =========== Query Hooks ===========
 
-const useMetricsLibrary = (
-  params: MetricsListParams,
-  opts: ListOptions = {}
-) => {
-  const { data, isLoading, isError } = useQuery<
-    PaginatedMetricListResponseDTO | undefined,
-    Error
-  >({
+const useMetricsLibrary = (params: MetricsListParams, opts: ListOptions = {}) => {
+  const { data, isLoading, isError } = useQuery<PaginatedMetricListResponseDTO | undefined, Error>({
     queryKey: metricsKeys.list(params),
     queryFn: () => getMetricLibraryList(params),
-    placeholderData: (
-      previousData: PaginatedMetricListResponseDTO | undefined
-    ) => previousData, // for smooth pagination UX
+    placeholderData: (previousData: PaginatedMetricListResponseDTO | undefined) => previousData, // for smooth pagination UX
     enabled: opts.enabled ?? true,
     staleTime: opts.staleTime ?? 15_000,
   });
@@ -80,11 +68,7 @@ const useMetricsLibrary = (
 /**
  * @deprecated
  */
-function useMetricDetails(
-  metricId: string,
-  includes: IncludeKey[] = [],
-  logsLimit?: number
-) {
+function useMetricDetails(metricId: string, includes: IncludeKey[] = [], logsLimit?: number) {
   return useQuery<UserMetricDetailResponseDTO, Error>({
     queryKey: metricsKeys.detail(metricId, includes, logsLimit),
     queryFn: () => getUserMetricDetails(metricId, { includes, logsLimit }),
@@ -95,8 +79,7 @@ function useMetricDetails(
 function useMetricDetailComposite(metricId: string) {
   return useQuery({
     queryKey: metricsKeys.detail(metricId, ["category", "settings"]),
-    queryFn: () =>
-      getUserMetricDetails(metricId, { includes: ["category", "settings"] }),
+    queryFn: () => getUserMetricDetails(metricId, { includes: ["category", "settings"] }),
     select: (dto) => ({
       header: toMetricHeaderVM(dto),
       settings: toMetricSettingsVM(dto) as MetricSettingsExtendedVM,
@@ -123,15 +106,7 @@ export function useMetricsListPaginationViaCursor(params: {
   useEffect(() => {
     setPage(1);
     setCursorByPage({ 1: null });
-  }, [
-    params.limit,
-    params.sort,
-    params.q,
-    params.filter?.name,
-    params.filter?.categoryId,
-  ]);
-
-  console.log(`----- [Hook]: Filter`, params.filter);
+  }, [params.limit, params.sort, params.q, params.filter?.name, params.filter?.categoryId]);
 
   const query = useQuery({
     queryKey: metricsKeys.cursor.pages({ ...params, page, includeTotal: true }),
@@ -154,9 +129,7 @@ export function useMetricsListPaginationViaCursor(params: {
 
   const items = query.data?.items ?? [];
   const totalCount = query.data?.totalCount;
-  const totalPages = totalCount
-    ? Math.max(1, Math.ceil(totalCount / params.limit))
-    : undefined;
+  const totalPages = totalCount ? Math.max(1, Math.ceil(totalCount / params.limit)) : undefined;
 
   // navigation helpers (works even if total unknown)
   const canPrev = page > 1;
@@ -174,9 +147,7 @@ export function useMetricsListPaginationViaCursor(params: {
   };
 }
 
-export function useMetricInfiniteViaCursor(
-  opts: UseMetricArgs & { enabled: boolean }
-) {
+export function useMetricInfiniteViaCursor(opts: UseMetricArgs & { enabled: boolean }) {
   const { limit = 20, sort = "-createdAt", q, filter, enabled = true } = opts;
 
   const query = useInfiniteQuery<
@@ -214,13 +185,13 @@ export function useMetricInfiniteViaCursor(
 
 const useCreateMetric = (
   onSuccess?: (created: MetricResponseDTO) => void,
-  onError?: (error: Error) => void
+  onError?: (error: Error) => void,
 ) => {
   const qc = useQueryClient();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation({
     mutationFn: createMetric,
-    onSuccess: (created) => {
-      invalidateMetricLists(qc);
+    onSuccess: async (created) => {
+      await invalidateMetricLists(qc);
 
       // Optional: optimistic stitch into the *current* first page if you want:
       // qc.setQueryData(metricsKeys.list({ page: 1, limit: 20, sortBy: "createdAt", sortOrder: "DESC" }), (old: any) => ...);
@@ -242,7 +213,7 @@ type UpdateCtx = { key: QueryKey; prev?: MetricDetailCompositeVM };
 
 const useUpdateMetric = (
   onSuccess?: (updated: MetricResponseDTO) => void,
-  onErrorCb?: (error: Error) => void
+  onErrorCb?: (error: Error) => void,
 ) => {
   const qc = useQueryClient();
 
@@ -260,10 +231,7 @@ const useUpdateMetric = (
       });
 
       const patch: Partial<
-        Pick<
-          MetricHeaderVM,
-          "name" | "defaultUnit" | "isPublic" | "description"
-        >
+        Pick<MetricHeaderVM, "name" | "defaultUnit" | "isPublic" | "description">
       > = {
         name: metric.name,
         defaultUnit: metric.defaultUnit,
@@ -279,9 +247,9 @@ const useUpdateMetric = (
       }
       onErrorCb?.(err);
     },
-    onSettled: (_data, _err, vars) => {
-      invalidateMetricDetail(qc, vars.metricId);
-      invalidateMetricLists(qc);
+    onSettled: async (_data, _err, vars) => {
+      await invalidateMetricDetail(qc, vars.metricId);
+      await invalidateMetricLists(qc);
     },
     // (Optional) Setup for a success callback for UI toasts
     onSuccess: (updated) => {
@@ -299,7 +267,7 @@ type DeleteCtx = {
 
 const useDeleteMetric = (
   onSuccess?: (deletedId: string) => void,
-  onErrorCb?: (error: Error) => void
+  onErrorCb?: (error: Error) => void,
 ) => {
   const qc = useQueryClient();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation<
@@ -334,23 +302,20 @@ const useDeleteMetric = (
       removeMetricDetail(qc, metricId);
       onSuccess?.(metricId);
     },
-    onSettled: () => {
-      invalidateMetricLists(qc);
+    onSettled: async () => {
+      await invalidateMetricLists(qc);
     },
   });
 
   return { deleteMetric: mutateAsync, isError, isSuccess, error, isPending };
 };
 
-const useCreateMetricDummy = (
-  onSuccess?: () => void,
-  onError?: (error: Error) => void
-) => {
+const useCreateMetricDummy = (onSuccess?: () => void, onError?: (error: Error) => void) => {
   const qc = useQueryClient();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation({
     mutationFn: createMetricDummy,
-    onSuccess: () => {
-      invalidateMetricLists(qc);
+    onSuccess: async () => {
+      await invalidateMetricLists(qc);
       onSuccess?.();
     },
     onError,
@@ -366,11 +331,11 @@ const useCreateMetricDummy = (
 };
 
 export {
-  useMetricsLibrary,
-  useMetricDetails,
-  useMetricDetailComposite,
   useCreateMetric,
-  useUpdateMetric,
-  useDeleteMetric,
   useCreateMetricDummy,
+  useDeleteMetric,
+  useMetricDetailComposite,
+  useMetricDetails,
+  useMetricsLibrary,
+  useUpdateMetric,
 };

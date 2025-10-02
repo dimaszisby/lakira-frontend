@@ -1,5 +1,5 @@
-import { MetricPreviewResponseDTO } from "@/src/features/metrics/metric.dto";
-import { CursorPage, SortParam } from "@/src/types/generics/CursorPage";
+import type { MetricPreviewResponseDTO } from "@/src/features/metrics/metric.dto";
+import type { CursorPage, SortParam } from "@/src/types/generics/CursorPage";
 
 // * =================== OFFSET - Deprecated (Currently Migrating) ===================
 
@@ -26,16 +26,13 @@ export const METRICS_PAGE_SIZE = 20 as const;
  * Safe guard: accepts unknown and narrows to ServerSortBy
  */
 export function isServerSortableKey(key: unknown): key is ServerSortBy {
-  return (
-    typeof key === "string" &&
-    (SERVER_SORTABLE_COLUMNS as readonly string[]).includes(key)
-  );
+  return typeof key === "string" && (SERVER_SORTABLE_COLUMNS as readonly string[]).includes(key);
 }
 
 export function nextSort<K extends string>(
   current: SortState<K>,
   column: K,
-  reset: SortState<K>
+  reset: SortState<K>,
 ): SortState<K> {
   if (current.sortBy !== column) return { sortBy: column, sortOrder: "ASC" };
   if (current.sortOrder === "ASC") return { sortBy: column, sortOrder: "DESC" };
@@ -47,13 +44,12 @@ export function nextSort<K extends string>(
  * */
 export function sortFromSearchParams(
   sp: URLSearchParams,
-  fallback: SortState<ServerSortBy> = DEFAULT_METRIC_SORT
+  fallback: SortState<ServerSortBy> = DEFAULT_METRIC_SORT,
 ): SortState<ServerSortBy> {
   const sb = sp.get("sortBy");
   const so = sp.get("sortOrder");
   const sortBy = isServerSortableKey(sb) ? sb : fallback.sortBy;
-  const sortOrder: SortOrder =
-    so === "ASC" || so === "DESC" ? so : fallback.sortOrder;
+  const sortOrder: SortOrder = so === "ASC" || so === "DESC" ? so : fallback.sortOrder;
   return { sortBy, sortOrder };
 }
 
@@ -70,11 +66,7 @@ export type MetricSortParamViaCursor =
   | "-logCount";
 
 /** Only the keys MetricCategory can sort by */
-export type MetricSortableKeyViaCursor =
-  | "createdAt"
-  | "updatedAt"
-  | "name"
-  | "logCount";
+export type MetricSortableKeyViaCursor = "createdAt" | "updatedAt" | "name" | "logCount";
 
 /** Optional: strong typing for your filter block */
 export type MetricFilterViaCursor = {
@@ -98,7 +90,7 @@ export const parseSort = (s: MetricSortParamViaCursor) => {
 // TODO: Refactor
 export const nextSortForColumn = (
   current: MetricSortParamViaCursor,
-  column: MetricSortableKeyViaCursor
+  column: MetricSortableKeyViaCursor,
 ): MetricSortParamViaCursor => {
   const { field, dir } = parseSort(current);
   if (field === column) {

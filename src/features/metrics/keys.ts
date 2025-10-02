@@ -1,14 +1,10 @@
-import { MetricFilterViaCursor, MetricSortViaCursor } from "./sort";
-import { IncludeKey, MetricsListParams } from "./types";
+import type { MetricFilterViaCursor, MetricSortViaCursor } from "./sort";
+import type { IncludeKey, MetricsListParams } from "./types";
 
 /** Canonical include normalizer (sorted CSV to match server cache keys) */
-export function normalizeIncludes(
-  includes: IncludeKey[] = []
-): string | undefined {
+export function normalizeIncludes(includes: IncludeKey[] = []): string | undefined {
   const allowed: IncludeKey[] = ["settings", "category", "logs"];
-  const normalized = includes
-    .filter((s): s is IncludeKey => allowed.includes(s))
-    .sort();
+  const normalized = includes.filter((s): s is IncludeKey => allowed.includes(s)).sort();
   if (normalized.length === 0) return undefined; // "flat" on server
   return normalized.join(","); // e.g., "category,logs,settings"
 }
@@ -52,8 +48,7 @@ export const metricsKeys = {
 
   // ----- Offset lists (legacy) -----
   lists: () => [...metricsKeys.all, "list"] as const,
-  list: (params: MetricsListParams) =>
-    [...metricsKeys.lists(), normalizeList(params)] as const,
+  list: (params: MetricsListParams) => [...metricsKeys.lists(), normalizeList(params)] as const,
 
   // ----- Cursor lists (current) -----
   cursor: {
@@ -72,8 +67,7 @@ export const metricsKeys = {
       q?: string;
       filter?: MetricFilterViaCursor;
       after?: string;
-    }) =>
-      [...metricsKeys.cursor.root(), "infinite", normalizeCursor(p)] as const,
+    }) => [...metricsKeys.cursor.root(), "infinite", normalizeCursor(p)] as const,
   },
 
   // ----- Details -----
@@ -86,6 +80,5 @@ export const metricsKeys = {
       { includes: normalizeIncludes(includes), logsLimit: logsLimit ?? 20 },
     ] as const,
   /** prefix for invalidating all variants of one metricId */
-  detailByIdRoot: (metricId: string) =>
-    [...metricsKeys.details(), metricId] as const,
+  detailByIdRoot: (metricId: string) => [...metricsKeys.details(), metricId] as const,
 };

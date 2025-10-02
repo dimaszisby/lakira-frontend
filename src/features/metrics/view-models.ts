@@ -1,4 +1,4 @@
-import { MetricSettingsExtendedVM } from "../metric-settings/view-models";
+import type { MetricSettingsExtendedVM } from "../metric-settings/view-models";
 
 export type MetricDetailCompositeVM = {
   header: MetricHeaderVM;

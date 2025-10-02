@@ -1,15 +1,11 @@
-import { UserMetricDetailResponseDTO } from "@/features/metrics/metric.dto";
-import { MetricHeaderVM } from "./view-models";
-import {
-  isChartType,
-  MetricSettingsExtendedVM,
-  DEFAULT_DISPLAY,
-} from "../metric-settings/view-models";
+import type { UserMetricDetailResponseDTO } from "@/features/metrics/metric.dto";
+
+import type { MetricSettingsExtendedVM } from "../metric-settings/view-models";
+import { DEFAULT_DISPLAY, isChartType } from "../metric-settings/view-models";
+import type { MetricHeaderVM } from "./view-models";
 
 // MetricHeader section of MetricDetailsPage
-export function toMetricHeaderVM(
-  dto: UserMetricDetailResponseDTO
-): MetricHeaderVM {
+export function toMetricHeaderVM(dto: UserMetricDetailResponseDTO): MetricHeaderVM {
   const cat = dto.category;
   return {
     id: dto.id,
@@ -19,17 +15,13 @@ export function toMetricHeaderVM(
     description: dto.description ?? null,
     createdAt: dto.createdAt,
     updatedAt: dto.updatedAt,
-    category: cat
-      ? { id: cat.id, name: cat.name, color: cat.color, icon: cat.icon }
-      : null,
+    category: cat ? { id: cat.id, name: cat.name, color: cat.color, icon: cat.icon } : null,
   };
 }
 
 // MetricSetting section of MetricDetailsPage
 // TODO: Shared/centralized because of dupplications
-export function toMetricSettingsVM(
-  d: UserMetricDetailResponseDTO
-): MetricSettingsExtendedVM {
+export function toMetricSettingsVM(d: UserMetricDetailResponseDTO): MetricSettingsExtendedVM {
   const s = d.settings;
   if (!s) {
     return {
@@ -54,8 +46,7 @@ export function toMetricSettingsVM(
   }
 
   const displayOptions = {
-    showOnDashboard:
-      s.displayOptions?.showOnDashboard ?? DEFAULT_DISPLAY.showOnDashboard,
+    showOnDashboard: s.displayOptions?.showOnDashboard ?? DEFAULT_DISPLAY.showOnDashboard,
     priority: s.displayOptions?.priority ?? DEFAULT_DISPLAY.priority,
     chartType: isChartType(s.displayOptions?.chartType)
       ? s.displayOptions!.chartType
