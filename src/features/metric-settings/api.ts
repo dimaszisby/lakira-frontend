@@ -1,13 +1,15 @@
-import {
-  MetricSettingsResponseDTO,
-  CreateMetricSettingsRequestDTO,
-  UpdateMetricSettingsRequestDTO,
-  DisplayOptionsDTO,
-} from "@/src/types/dtos/metric-settings.dto";
-import api from "../../services/api/api";
-import ApiResponse, { unwrap } from "@/src/types/generics/ApiResponse";
 import { handleApiError } from "@/src/services/api/handleApiError";
-import {
+import type {
+  CreateMetricSettingsRequestDTO,
+  DisplayOptionsDTO,
+  MetricSettingsResponseDTO,
+  UpdateMetricSettingsRequestDTO,
+} from "@/src/types/dtos/metric-settings.dto";
+import type ApiResponse from "@/src/types/generics/ApiResponse";
+import { unwrap } from "@/src/types/generics/ApiResponse";
+
+import api from "../../services/api/api";
+import type {
   MetricSettingsCursorPageResponse,
   MetricSettingsFilterViaCursor,
   MetricSettingsSortViaCursor,
@@ -30,13 +32,12 @@ type RequestOpts = {
  * @description Create new metric settings.
  */
 export const createMetricSettings = async (
-  metricSettings: CreateMetricSettingsRequestDTO
+  metricSettings: CreateMetricSettingsRequestDTO,
 ): Promise<MetricSettingsResponseDTO> => {
-  console.log("createMetricSettings called with:", metricSettings);
   try {
     const res = await api.post<ApiResponse<MetricSettingsResponseDTO>>(
       "/metric-settings",
-      metricSettings
+      metricSettings,
     );
 
     return unwrap(res);
@@ -51,16 +52,14 @@ export const createMetricSettings = async (
  * @description Get all metric settings, optionally filtered by metricId.
  */
 export const getAllMetricSettings = async (
-  metricId?: string
+  metricId?: string,
 ): Promise<MetricSettingsResponseDTO[]> => {
   try {
     let url = "/metric-settings";
     if (metricId) {
       url += `?metricId=${metricId}`;
     }
-    const res = await api.get<
-      ApiResponse<{ settings: MetricSettingsResponseDTO[] }>
-    >(url);
+    const res = await api.get<ApiResponse<{ settings: MetricSettingsResponseDTO[] }>>(url);
 
     return unwrap(res).settings;
   } catch (error: unknown) {
@@ -86,13 +85,12 @@ export async function getMetricSettingsListViaCursor({
   search.set("limit", String(limit));
   search.set("sort", sort);
 
-  if (filter?.metricId?.trim())
-    search.set("filter[metricId]", filter.metricId.trim());
+  if (filter?.metricId?.trim()) search.set("filter[metricId]", filter.metricId.trim());
   if (after) search.set("after", after);
   if (includeTotal) search.set("includeTotal", "true");
 
   const response = await api.get<ApiResponse<MetricSettingsCursorPageResponse>>(
-    `/metric-settings?${search.toString()}`
+    `/metric-settings?${search.toString()}`,
   );
 
   return unwrap(response);
@@ -104,12 +102,12 @@ export async function getMetricSettingsListViaCursor({
  */
 export const getMetricSettingsById = async (
   id: string,
-  metricId: string
+  metricId: string,
 ): Promise<MetricSettingsResponseDTO> => {
   try {
-    const res = await api.get<
-      ApiResponse<{ settings: MetricSettingsResponseDTO }>
-    >(`/metric-settings/${id}?metricId=${metricId}`);
+    const res = await api.get<ApiResponse<{ settings: MetricSettingsResponseDTO }>>(
+      `/metric-settings/${id}?metricId=${metricId}`,
+    );
 
     return unwrap(res).settings;
   } catch (error: unknown) {
@@ -126,18 +124,12 @@ export const getMetricSettingsById = async (
 export const updateMetricSettings = async (
   id: string,
   metricId: string,
-  metricSettings: UpdateMetricSettingsRequestDTO
+  metricSettings: UpdateMetricSettingsRequestDTO,
 ): Promise<MetricSettingsResponseDTO> => {
-  console.log(
-    "updateMetricSettings called with:",
-    id,
-    metricId,
-    metricSettings
-  );
   try {
     const res = await api.put<ApiResponse<MetricSettingsResponseDTO>>(
       `/metric-settings/${id}?metricId=${metricId}`,
-      metricSettings
+      metricSettings,
     );
 
     return unwrap(res);
@@ -154,11 +146,11 @@ export const updateMetricSettings = async (
  */
 export const deleteMetricSettings = async (
   id: string,
-  metricId: string
+  metricId: string,
 ): Promise<MetricSettingsResponseDTO> => {
   try {
     const res = await api.delete<ApiResponse<MetricSettingsResponseDTO>>(
-      `/metric-settings/${id}?metricId=${metricId}`
+      `/metric-settings/${id}?metricId=${metricId}`,
     );
 
     return unwrap(res);
@@ -175,11 +167,11 @@ export const deleteMetricSettings = async (
  */
 export const updateGoalAchievement = async (
   id: string,
-  metricId: string
+  metricId: string,
 ): Promise<MetricSettingsResponseDTO> => {
   try {
     const res = await api.patch<ApiResponse<MetricSettingsResponseDTO>>(
-      `/metric-settings/${id}/achieve?metricId=${metricId}`
+      `/metric-settings/${id}/achieve?metricId=${metricId}`,
     );
 
     return unwrap(res);
@@ -198,19 +190,13 @@ export const updateDisplayOptions = async (
   id: string,
   metricId: string,
   displayOptions: DisplayOptionsDTO,
-  opts: RequestOpts = {}
+  opts: RequestOpts = {},
 ): Promise<MetricSettingsResponseDTO> => {
-  console.log(
-    "updateDisplayOptions called with:",
-    id,
-    metricId,
-    displayOptions
-  );
   try {
     const res = await api.patch<ApiResponse<MetricSettingsResponseDTO>>(
       `/metric-settings/${id}/display?metricId=${metricId}`,
       { displayOptions },
-      { signal: opts.signal }
+      { signal: opts.signal },
     );
 
     return unwrap(res);

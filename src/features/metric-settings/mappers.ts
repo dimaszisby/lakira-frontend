@@ -1,29 +1,46 @@
-import { MetricSettingsResponseDTO } from "@/src/types/dtos/metric-settings.dto";
-import { MetricSettingsExtendedVM } from "./view-models";
+import type { MetricSettingsResponseDTO } from "@/src/types/dtos/metric-settings.dto";
+
+import type { MetricSettingsExtendedVM } from "./view-models";
+import { DEFAULT_DISPLAY } from "./view-models";
 
 export function toMetricSettingsExtendedVM(
-  dto: MetricSettingsResponseDTO
+  dto: MetricSettingsResponseDTO,
 ): MetricSettingsExtendedVM {
   return {
     id: dto.id,
     metricId: dto.metricId,
-    goalEnabled: dto.goalEnabled ?? false,
+    isActive: dto.isActive,
+
+    goalEnabled: dto.goalEnabled,
     goalType: dto.goalType,
     goalValue: dto.goalValue,
-    timeFrameEnabled: dto.timeFrameEnabled ?? false,
-    startDate: dto.startDate ? new Date(dto.startDate) : null,
-    deadlineDate: dto.deadlineDate ? new Date(dto.deadlineDate) : null,
-    alertEnabled: dto.alertEnabled ?? false,
+
+    timeFrameEnabled: dto.timeFrameEnabled,
+    startDate: dto.startDate,
+    deadlineDate: dto.deadlineDate,
+
+    alertEnabled: dto.alertEnabled,
     alertThresholds: dto.alertThresholds,
-    isAchieved: dto.isAchieved ?? false,
-    isActive: dto.isActive ?? false,
+
+    isAchieved: dto.isAchieved,
+
     displayOptions: {
-      showOnDashboard: dto.displayOptions?.showOnDashboard ?? false,
-      priority: dto.displayOptions?.priority ?? null,
-      chartType: dto.displayOptions?.chartType ?? null,
-      color: dto.displayOptions?.color ?? null,
+      showOnDashboard: dto.displayOptions?.showOnDashboard ?? DEFAULT_DISPLAY.showOnDashboard,
+      priority:
+        typeof dto.displayOptions?.priority === "number"
+          ? dto.displayOptions!.priority
+          : DEFAULT_DISPLAY.priority,
+      chartType:
+        typeof dto.displayOptions?.chartType === "string"
+          ? dto.displayOptions!.chartType
+          : DEFAULT_DISPLAY.chartType,
+      color:
+        typeof dto.displayOptions?.color === "string"
+          ? dto.displayOptions!.color
+          : DEFAULT_DISPLAY.color,
     },
-    createdAt: dto.createdAt ? new Date(dto.createdAt) : undefined,
-    updatedAt: dto.updatedAt ? new Date(dto.updatedAt) : undefined,
+
+    createdAt: dto.createdAt,
+    updatedAt: dto.updatedAt,
   };
 }

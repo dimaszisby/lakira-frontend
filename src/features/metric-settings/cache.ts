@@ -1,32 +1,27 @@
-import { QueryClient } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
+
 import { metricSettingsKeys } from "./keys";
-import { MetricSettingsExtendedVM } from "./view-models";
+import type { MetricSettingsExtendedVM } from "./view-models";
 
 /** Rooted + surgical invalidations (no heavy global predicate) */
-export const invalidateMetricSettingsLists = (qc: QueryClient) => {
+export const invalidateMetricSettingsLists = async (qc: QueryClient) => {
   // Offset-based
-  qc.invalidateQueries({ queryKey: metricSettingsKeys.lists(), exact: false });
+  await qc.invalidateQueries({ queryKey: metricSettingsKeys.lists(), exact: false });
   // Cursor-based (pages + infinite share the same root)
-  qc.invalidateQueries({
+  await qc.invalidateQueries({
     queryKey: metricSettingsKeys.cursor.root(),
     exact: false,
   });
 };
 
-export const invalidateMetricSettingsDetail = (
-  qc: QueryClient,
-  metricId: string
-) => {
-  qc.invalidateQueries({
+export const invalidateMetricSettingsDetail = async (qc: QueryClient, metricId: string) => {
+  await qc.invalidateQueries({
     queryKey: metricSettingsKeys.detailByIdRoot(metricId),
     exact: false,
   });
 };
 
-export const removeMetricSettingsDetail = (
-  qc: QueryClient,
-  metricId: string
-) => {
+export const removeMetricSettingsDetail = (qc: QueryClient, metricId: string) => {
   qc.removeQueries({
     queryKey: metricSettingsKeys.detailByIdRoot(metricId),
     exact: false,
@@ -34,18 +29,15 @@ export const removeMetricSettingsDetail = (
 };
 
 /** Typed accessors for the common detail variant used by the composite hook */
-export const detailKey = (metricId: string) =>
-  metricSettingsKeys.detail(metricId);
+export const detailKey = (metricId: string) => metricSettingsKeys.detail(metricId);
 
-export const getMetricSettingsDetailVM = (
-  qc: QueryClient,
-  metricId: string
-) => qc.getQueryData<MetricSettingsExtendedVM>(detailKey(metricId));
+export const getMetricSettingsDetailVM = (qc: QueryClient, metricId: string) =>
+  qc.getQueryData<MetricSettingsExtendedVM>(detailKey(metricId));
 
 export const setMetricSettingsVM = (
   qc: QueryClient,
   metricId: string,
-  next: MetricSettingsExtendedVM
+  next: MetricSettingsExtendedVM,
 ) => qc.setQueryData<MetricSettingsExtendedVM>(detailKey(metricId), next);
 
 /** Safe optimistic header patcher (keeps settings untouched) */
@@ -67,7 +59,7 @@ export const patchMetricSettingsOptimistic = (
       | "isActive"
       | "displayOptions"
     >
-  >
+  >,
 ) => {
   const key = detailKey(metricId);
   const prev = qc.getQueryData<MetricSettingsExtendedVM>(key);

@@ -1,5 +1,6 @@
-import { CursorPage, SortParam } from "@/src/types/generics/CursorPage";
-import { MetricSettingsExtendedVM } from "./view-models";
+import type { CursorPage, SortParam } from "@/src/types/generics/CursorPage";
+
+import type { MetricSettingsExtendedVM } from "./view-models";
 
 // MetricExtended Opts
 export type ListOptions = { enabled?: boolean; staleTime?: number };
@@ -15,8 +16,7 @@ export type MetricSettingsSortParamViaCursor =
 /** Only the keys MetricSettings can sort by */
 export type MetricSettingsSortableKeyViaCursor = "createdAt" | "updatedAt";
 
-export type MetricSettingsSortViaCursor =
-  SortParam<MetricSettingsSortParamViaCursor>;
+export type MetricSettingsSortViaCursor = SortParam<MetricSettingsSortParamViaCursor>;
 export type MetricSettingsFilterViaCursor = {
   metricId?: string;
 };
@@ -36,13 +36,11 @@ export const parseSort = (s: MetricSettingsSortViaCursor) => {
 // TODO: Refactor
 export const nextSortForColumn = (
   current: MetricSettingsSortViaCursor,
-  column: MetricSettingsSortableKeyViaCursor
+  column: MetricSettingsSortableKeyViaCursor,
 ): MetricSettingsSortViaCursor => {
   const { field, dir } = parseSort(current);
   if (field === column) {
-    return (
-      dir === "ASC" ? `-${column}` : column
-    ) as MetricSettingsSortViaCursor; // toggle direction
+    return (dir === "ASC" ? `-${column}` : column) as MetricSettingsSortViaCursor; // toggle direction
   }
   // Default direction for dates is DESC
   return `-${column}` as MetricSettingsSortViaCursor;

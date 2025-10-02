@@ -1,23 +1,4 @@
-// Define sortable fields for metric settings
-// export type MetricSettingsSortField = "createdAt" | "updatedAt";
-
-import {
-  MetricSettingsFilterViaCursor,
-  MetricSettingsSortViaCursor,
-  SortOrder,
-} from "./sort";
-
-// export type SortOrder = "ASC" | "DESC";
-
-// // Define filter options for cursor-based pagination
-// export type MetricSettingsFilterViaCursor = {
-//   metricId?: string;
-// };
-
-// // Define sort options for cursor-based pagination
-// export type MetricSettingsSortViaCursor =
-//   | MetricSettingsSortField
-//   | `-${MetricSettingsSortField}`;
+import type { MetricSettingsFilterViaCursor, MetricSettingsSortViaCursor, SortOrder } from "./sort";
 
 // Define parameters for offset-based list queries
 export type MetricSettingsListParams = {
@@ -73,31 +54,19 @@ export const metricSettingsKeys = {
       filter?: MetricSettingsFilterViaCursor;
       includeTotal?: boolean;
       page: number;
-    }) =>
-      [
-        ...metricSettingsKeys.cursor.root(),
-        "pages",
-        normalizeCursor(p),
-      ] as const,
+    }) => [...metricSettingsKeys.cursor.root(), "pages", normalizeCursor(p)] as const,
     infinite: (p: {
       limit: number;
       sort: MetricSettingsSortViaCursor;
       filter?: MetricSettingsFilterViaCursor;
       after?: string;
-    }) =>
-      [
-        ...metricSettingsKeys.cursor.root(),
-        "infinite",
-        normalizeCursor(p),
-      ] as const,
+    }) => [...metricSettingsKeys.cursor.root(), "infinite", normalizeCursor(p)] as const,
   },
 
   // ----- Details -----
   details: () => [...metricSettingsKeys.all, "detail"] as const,
   /** fully-qualified detail key (variant-specific) */
-  detail: (metricId: string) =>
-    [...metricSettingsKeys.details(), metricId] as const,
+  detail: (metricId: string) => [...metricSettingsKeys.details(), metricId] as const,
   /** prefix for invalidating all variants of one metricId */
-  detailByIdRoot: (metricId: string) =>
-    [...metricSettingsKeys.details(), metricId] as const,
+  detailByIdRoot: (metricId: string) => [...metricSettingsKeys.details(), metricId] as const,
 };

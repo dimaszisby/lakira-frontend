@@ -1,38 +1,32 @@
-import {
-  useQuery,
-  useMutation,
-  useInfiniteQuery,
-  InfiniteData,
-  useQueryClient,
-  QueryKey,
-} from "@tanstack/react-query";
-import {
-  MetricSettingsResponseDTO,
-  UpdateMetricSettingsRequestDTO,
-  DisplayOptionsDTO,
-} from "@/src/types/dtos/metric-settings.dto";
+import type { InfiniteData, QueryKey } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+
 import {
   createMetricSettings,
-  updateMetricSettings,
   deleteMetricSettings,
-  updateGoalAchievement,
-  updateDisplayOptions,
   getMetricSettingsListViaCursor,
+  updateDisplayOptions,
+  updateGoalAchievement,
+  updateMetricSettings,
 } from "@/src/features/metric-settings/api";
-import { CursorPage } from "@/src/types/generics/CursorPage";
-import { useEffect, useState } from "react";
-import { metricSettingsKeys } from "./keys";
-import { MetricSettingsExtendedVM } from "./view-models";
+import type {
+  DisplayOptionsDTO,
+  MetricSettingsResponseDTO,
+  UpdateMetricSettingsRequestDTO,
+} from "@/src/types/dtos/metric-settings.dto";
+import type { CursorPage } from "@/src/types/generics/CursorPage";
+import { toIsoFromLocalInput } from "@/src/utils/date-io";
+
 import {
   invalidateMetricSettingsDetail,
   invalidateMetricSettingsLists,
   patchMetricSettingsOptimistic,
   removeMetricSettingsDetail,
 } from "./cache";
-import {
-  MetricSettingsFilterViaCursor,
-  MetricSettingsSortViaCursor,
-} from "./sort";
+import { metricSettingsKeys } from "./keys";
+import type { MetricSettingsFilterViaCursor, MetricSettingsSortViaCursor } from "./sort";
+import type { MetricSettingsExtendedVM } from "./view-models";
 
 // Types
 type UseMetricSettingsArgs = {
@@ -87,9 +81,7 @@ function useMetricSettingsListPaginationViaCursor(params: {
 
   const items = query.data?.items ?? [];
   const totalCount = query.data?.totalCount;
-  const totalPages = totalCount
-    ? Math.max(1, Math.ceil(totalCount / params.limit))
-    : undefined;
+  const totalPages = totalCount ? Math.max(1, Math.ceil(totalCount / params.limit)) : undefined;
 
   // navigation helpers (works even if total unknown)
   const canPrev = page > 1;
@@ -100,6 +92,7 @@ function useMetricSettingsListPaginationViaCursor(params: {
     page,
     setPage,
     isFetching: query.isFetching,
+    isError: query.isError, // Add isError to the returned object
     totalCount,
     totalPages,
     canPrev,
@@ -107,9 +100,7 @@ function useMetricSettingsListPaginationViaCursor(params: {
   };
 }
 
-function useMetricSettingsInfiniteViaCursor(
-  opts: UseMetricSettingsArgs & { enabled: boolean }
-) {
+function useMetricSettingsInfiniteViaCursor(opts: UseMetricSettingsArgs & { enabled: boolean }) {
   const { limit = 20, sort = "-createdAt", filter, enabled = true } = opts;
 
   const query = useInfiniteQuery<
@@ -147,14 +138,14 @@ function useMetricSettingsInfiniteViaCursor(
 // CREATE hook
 const useCreateMetricSettings = (
   onSuccess?: (created: MetricSettingsResponseDTO) => void,
-  onError?: (error: Error) => void
+  onError?: (error: Error) => void,
 ) => {
   const qc = useQueryClient();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation({
     mutationFn: createMetricSettings,
-    onSuccess: (created) => {
-      invalidateMetricSettingsLists(qc);
-      onSuccess?.(created);
+    onSuccess: async (created) => {
+      await invalidateMetricSettingsLists(qc);
+      await onSuccess?.(created);
     },
     onError,
   });
@@ -181,7 +172,7 @@ type UpdateCtx = { key: QueryKey; prev?: MetricSettingsExtendedVM };
 
 const useUpdateMetricSettings = (
   onSuccess?: (updated: MetricSettingsResponseDTO) => void,
-  onErrorCb?: (error: Error) => void
+  onErrorCb?: (error: Error) => void,
 ) => {
   const qc = useQueryClient();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation<
@@ -217,10 +208,8 @@ const useUpdateMetricSettings = (
         goalType: settings.goalType,
         goalValue: settings.goalValue,
         timeFrameEnabled: settings.timeFrameEnabled,
-        startDate: settings.startDate ? new Date(settings.startDate) : null,
-        deadlineDate: settings.deadlineDate
-          ? new Date(settings.deadlineDate)
-          : null,
+        startDate: settings.startDate ? toIsoFromLocalInput(settings.startDate) : null,
+        deadlineDate: settings.deadlineDate ? toIsoFromLocalInput(settings.deadlineDate) : null,
         alertEnabled: settings.alertEnabled,
         alertThresholds: settings.alertThresholds,
         displayOptions: {
@@ -238,9 +227,9 @@ const useUpdateMetricSettings = (
       }
       onErrorCb?.(err);
     },
-    onSettled: (_data, _err, vars) => {
-      invalidateMetricSettingsDetail(qc, vars.settingsId);
-      invalidateMetricSettingsLists(qc);
+    onSettled: async (_data, _err, vars) => {
+      await invalidateMetricSettingsDetail(qc, vars.settingsId);
+      await invalidateMetricSettingsLists(qc);
     },
 
     onSuccess: (updated) => {
@@ -266,7 +255,7 @@ type DeleteCtx = {
 
 const useDeleteMetricSettings = (
   onSuccess?: (deletedId: string) => void,
-  onErrorCb?: (error: Error) => void
+  onErrorCb?: (error: Error) => void,
 ) => {
   const qc = useQueryClient();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation<
@@ -300,8 +289,8 @@ const useDeleteMetricSettings = (
       removeMetricSettingsDetail(qc, vars.id);
       onSuccess?.(vars.id);
     },
-    onSettled: () => {
-      invalidateMetricSettingsLists(qc);
+    onSettled: async () => {
+      await invalidateMetricSettingsLists(qc);
     },
   });
 
@@ -318,15 +307,15 @@ const useDeleteMetricSettings = (
 // PATCH goal achievements hook
 const useUpdateGoalAchievement = (
   onSuccess?: (updated: MetricSettingsResponseDTO) => void,
-  onError?: (error: Error) => void
+  onError?: (error: Error) => void,
 ) => {
   const qc = useQueryClient();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation({
     mutationFn: ({ id, metricId }: { id: string; metricId: string }) =>
       updateGoalAchievement(id, metricId),
-    onSuccess: (updated) => {
-      invalidateMetricSettingsDetail(qc, updated.id);
-      invalidateMetricSettingsLists(qc);
+    onSuccess: async (updated) => {
+      await invalidateMetricSettingsDetail(qc, updated.id);
+      await invalidateMetricSettingsLists(qc);
       onSuccess?.(updated);
     },
     onError,
@@ -346,7 +335,7 @@ const useUpdateGoalAchievement = (
 // PATCH display options hook
 const useUpdateDisplayOptions = (
   onSuccess?: (updated: MetricSettingsResponseDTO) => void,
-  onError?: (error: Error) => void
+  onError?: (error: Error) => void,
 ) => {
   const qc = useQueryClient();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation({
@@ -359,9 +348,9 @@ const useUpdateDisplayOptions = (
       metricId: string;
       displayOptions: DisplayOptionsDTO;
     }) => updateDisplayOptions(id, metricId, displayOptions),
-    onSuccess: (updated) => {
-      invalidateMetricSettingsDetail(qc, updated.id);
-      invalidateMetricSettingsLists(qc);
+    onSuccess: async (updated) => {
+      await invalidateMetricSettingsDetail(qc, updated.id);
+      await invalidateMetricSettingsLists(qc);
       onSuccess?.(updated);
     },
     onError,
@@ -379,11 +368,11 @@ const useUpdateDisplayOptions = (
 };
 
 export {
-  useMetricSettingsListPaginationViaCursor,
-  useMetricSettingsInfiniteViaCursor,
   useCreateMetricSettings,
-  useUpdateMetricSettings,
   useDeleteMetricSettings,
-  useUpdateGoalAchievement,
+  useMetricSettingsInfiniteViaCursor,
+  useMetricSettingsListPaginationViaCursor,
   useUpdateDisplayOptions,
+  useUpdateGoalAchievement,
+  useUpdateMetricSettings,
 };
