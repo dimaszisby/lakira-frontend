@@ -1,52 +1,49 @@
-import { QueryClient } from "@tanstack/react-query";
+import type { QueryClient } from "@tanstack/react-query";
+
 import { metricLogsKeys } from "./keys";
-import { MetricLogVM } from "./view-models";
+import type { MetricLogVM } from "./view-models";
 
 /** Rooted + surgical invalidations (no heavy global predicate) */
-export const invalidateLogLists = (qc: QueryClient) => {
+export const invalidateLogLists = async (qc: QueryClient) => {
   // Offset-based
-  qc.invalidateQueries({ queryKey: metricLogsKeys.lists(), exact: false });
+  await qc.invalidateQueries({ queryKey: metricLogsKeys.lists(), exact: false });
   // Cursor-based (pages + infinite share the same root)
-  qc.invalidateQueries({
+  await qc.invalidateQueries({
     queryKey: metricLogsKeys.cursor.root(),
     exact: false,
   });
 };
 
-export const invalidateLogDetail = (qc: QueryClient, categoryId: string) => {
-  qc.invalidateQueries({
-    queryKey: metricLogsKeys.detailByIdRoot(categoryId),
+export const invalidateLogDetail = async (qc: QueryClient, logId: string) => {
+  await qc.invalidateQueries({
+    queryKey: metricLogsKeys.detailByIdRoot(logId),
     exact: false,
   });
 };
 
-export const removeLogDetail = (qc: QueryClient, categoryId: string) => {
+export const removeLogDetail = (qc: QueryClient, logId: string) => {
   qc.removeQueries({
-    queryKey: metricLogsKeys.detailByIdRoot(categoryId),
+    queryKey: metricLogsKeys.detailByIdRoot(logId),
     exact: false,
   });
 };
 
 /** Typed accessors for the common detail variant used by the composite hook */
-export const detailKey = (categoryId: string) =>
-  metricLogsKeys.detail(categoryId);
+export const detailKey = (logId: string) => metricLogsKeys.detail(logId);
 
-export const getMetricLogDetailVM = (qc: QueryClient, categoryId: string) =>
-  qc.getQueryData<MetricLogVM>(detailKey(categoryId));
+export const getMetricLogDetailVM = (qc: QueryClient, logId: string) =>
+  qc.getQueryData<MetricLogVM>(detailKey(logId));
 
-export const setMetricLogVM = (
-  qc: QueryClient,
-  categoryId: string,
-  next: MetricLogVM
-) => qc.setQueryData<MetricLogVM>(detailKey(categoryId), next);
+export const setMetricLogVM = (qc: QueryClient, logId: string, next: MetricLogVM) =>
+  qc.setQueryData<MetricLogVM>(detailKey(logId), next);
 
 /** Safe optimistic header patcher (keeps settings untouched) */
 export const patchLogHeaderOptimistic = (
   qc: QueryClient,
-  categoryId: string,
-  patch: Partial<Pick<MetricLogVM, "logValue" | "loggedAt">>
+  logId: string,
+  patch: Partial<Pick<MetricLogVM, "logValue" | "loggedAt">>,
 ) => {
-  const key = detailKey(categoryId);
+  const key = detailKey(logId);
   const prev = qc.getQueryData<MetricLogVM>(key);
   if (!prev) return { key, prev };
 

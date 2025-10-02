@@ -1,4 +1,4 @@
-import {
+import type {
   MetricLogFilterViaCursor,
   MetricLogSortViaCursor,
   MetricsLogsListParams,
@@ -55,28 +55,20 @@ export const metricLogsKeys = {
       filter?: MetricLogFilterViaCursor;
       includeTotal?: boolean;
       page: number;
-    }) =>
-      [...metricLogsKeys.cursor.root(), "pages", normalizeCursor(p)] as const,
+    }) => [...metricLogsKeys.cursor.root(), "pages", normalizeCursor(p)] as const,
     infinite: (p: {
       limit: number;
       sort: MetricLogSortViaCursor;
       q?: string;
       filter?: MetricLogFilterViaCursor;
       after?: string;
-    }) =>
-      [
-        ...metricLogsKeys.cursor.root(),
-        "infinite",
-        normalizeCursor(p),
-      ] as const,
+    }) => [...metricLogsKeys.cursor.root(), "infinite", normalizeCursor(p)] as const,
   },
 
   // ----- Details -----
   details: () => [...metricLogsKeys.all, "detail"] as const,
   /** fully-qualified detail key (variant-specific) */
-  detail: (metricId: string) =>
-    [...metricLogsKeys.details(), metricId] as const,
+  detail: (logId: string) => [...metricLogsKeys.details(), logId] as const,
   /** prefix for invalidating all variants of one metricId */
-  detailByIdRoot: (metricId: string) =>
-    [...metricLogsKeys.details(), metricId] as const,
+  detailByIdRoot: (logId: string) => [...metricLogsKeys.details(), logId] as const,
 };

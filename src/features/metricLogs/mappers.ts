@@ -1,5 +1,6 @@
-import { MetricLogResponseDTO } from "@/src/types/dtos/metric-log.dto";
-import { MetricLogVM } from "./view-models";
+import type { MetricLogResponseDTO } from "@/src/types/dtos/metric-log.dto";
+
+import type { MetricLogVM } from "./view-models";
 
 export function toMetricLogVM(dto: MetricLogResponseDTO): MetricLogVM {
   return {
@@ -10,6 +11,5 @@ export function toMetricLogVM(dto: MetricLogResponseDTO): MetricLogVM {
     type: dto.type,
     createdAt: dto.createdAt,
     updatedAt: dto.updatedAt,
-    deletedAt: dto.deletedAt
   };
 }

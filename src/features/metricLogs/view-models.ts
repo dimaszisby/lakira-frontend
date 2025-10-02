@@ -1,4 +1,4 @@
-import { ISODateTimeString } from "@/src/types/aliases";
+import type { ISODateTimeString } from "@/src/types/aliases";
 
 export type MetricLogVM = {
   id: string;

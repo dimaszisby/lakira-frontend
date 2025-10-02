@@ -1,14 +1,17 @@
-import {
-  MetricLogResponseDTO,
+import { withApiErrorHandling } from "@/src/services/api/withApiErrorHandling";
+import type {
   CreateMetricLogRequestDTO,
-  UpdateMetricLogRequestDTO,
-  PaginatedMetricLogListResponseDTO,
   GenerateDummyMetricLogsRequestDTO,
+  MetricLogResponseDTO,
+  PaginatedMetricLogListResponseDTO,
+  UpdateMetricLogRequestDTO,
 } from "@/src/types/dtos/metric-log.dto";
+import type { RequestOpts } from "@/src/types/generics/RequestOpts";
+import type ApiResponse from "@/types/generics/ApiResponse";
+import { unwrap } from "@/types/generics/ApiResponse";
+
 import api from "../../services/api/api";
-import ApiResponse, { unwrap } from "@/types/generics/ApiResponse";
-import { handleApiError } from "@/src/services/api/handleApiError";
-import {
+import type {
   MetricLogCursorPageResponse,
   MetricLogFilterViaCursor,
   MetricLogSortViaCursor,
@@ -22,11 +25,6 @@ type ListLogsRequestParams = {
   filter?: MetricLogFilterViaCursor;
   after?: string; // cursor
   includeTotal?: boolean;
-};
-
-// TODO: Shared
-type RequestOpts = {
-  signal?: AbortSignal;
 };
 
 // * ========== Query Endpoints ==========
@@ -48,8 +46,8 @@ export const getMetricLogs = async ({
   limit?: number;
   startDate?: string;
   endDate?: string;
-}): Promise<PaginatedMetricLogListResponseDTO> => {
-  try {
+}): Promise<PaginatedMetricLogListResponseDTO> =>
+  withApiErrorHandling(async () => {
     let url = `/metric-logs?page=${page}&limit=${limit}`;
     if (metricId) {
       url += `&metricId=${metricId}`;
@@ -61,17 +59,10 @@ export const getMetricLogs = async ({
       url += `&endDate=${endDate}`;
     }
 
-    const response = await api.get<
-      ApiResponse<PaginatedMetricLogListResponseDTO>
-    >(url);
+    const response = await api.get<ApiResponse<PaginatedMetricLogListResponseDTO>>(url);
 
     return unwrap(response);
-  } catch (error: unknown) {
-    console.error("Error fetching metric logs:", error);
-    handleApiError(error);
-    throw error;
-  }
-};
+  }, "getMetricLogs");
 
 /**
  * * GET ALL via Cursor
@@ -85,23 +76,24 @@ export async function getMetricLogsListViaCursor({
   after,
   includeTotal = false,
 }: ListLogsRequestParams): Promise<MetricLogCursorPageResponse> {
-  const search = new URLSearchParams();
+  return withApiErrorHandling(async () => {
+    const search = new URLSearchParams();
 
-  search.set("limit", String(limit));
-  search.set("sort", sort);
+    search.set("limit", String(limit));
+    search.set("sort", sort);
 
-  if (q?.trim()) search.set("q", q.trim());
-  if (filter?.name?.trim()) search.set("filter[name]", filter.name.trim());
-  if (filter?.metricId?.trim())
-    search.set("filter[metricId]", filter.metricId.trim());
-  if (after) search.set("after", after);
-  if (includeTotal) search.set("includeTotal", "true");
+    if (q?.trim()) search.set("q", q.trim());
+    if (filter?.name?.trim()) search.set("filter[name]", filter.name.trim());
+    if (filter?.metricId?.trim()) search.set("filter[metricId]", filter.metricId.trim());
+    if (after) search.set("after", after);
+    if (includeTotal) search.set("includeTotal", "true");
 
-  const response = await api.get<ApiResponse<MetricLogCursorPageResponse>>(
-    `/metric-logs?${search.toString()}`
-  );
+    const response = await api.get<ApiResponse<MetricLogCursorPageResponse>>(
+      `/metric-logs?${search.toString()}`,
+    );
 
-  return unwrap(response);
+    return unwrap(response);
+  }, "getMetricLogsListViaCursor");
 }
 
 // * ========== Command Endpoints ==========
@@ -109,70 +101,53 @@ export async function getMetricLogsListViaCursor({
 // CREATE Log a new metric entry
 export const createMetricLog = async (
   metricLog: CreateMetricLogRequestDTO,
-  opts: RequestOpts & { idempotencyKey?: string } = {}
+  opts: RequestOpts & { idempotencyKey?: string } = {},
 ): Promise<MetricLogResponseDTO> => {
-  console.log("logMetric called with metricLog:", metricLog);
-  try {
+  return withApiErrorHandling(async () => {
     // Avoid dupplicates on retry
     const headers: Record<string, string> = {};
     if (opts.idempotencyKey) headers["Idempotency-Key"] = opts.idempotencyKey;
 
-    const response = await api.post<ApiResponse<MetricLogResponseDTO>>(
-      "/metric-logs",
-      metricLog,
-      {
-        signal: opts.signal,
-        headers,
-      }
-    );
+    const response = await api.post<ApiResponse<MetricLogResponseDTO>>("/metric-logs", metricLog, {
+      signal: opts.signal,
+      headers,
+    });
 
     return unwrap(response);
-  } catch (error: unknown) {
-    console.error("Error in logMetric:", error);
-    handleApiError(error);
-    throw error;
-  }
+  }, "createMetricLog");
 };
 
 // UPDATE an existing metric log entry
 export const updateMetricLog = async (
   args: { metricLogId: string; metricLog: UpdateMetricLogRequestDTO },
-  opts: RequestOpts = {}
+  opts: RequestOpts = {},
 ): Promise<MetricLogResponseDTO> => {
-  try {
+  return withApiErrorHandling(async () => {
     const { metricLogId, metricLog } = args;
 
     const response = await api.put<ApiResponse<MetricLogResponseDTO>>(
       `/metric-logs/${metricLogId}`,
       metricLog,
-      { signal: opts.signal }
+      { signal: opts.signal },
     );
 
     return unwrap(response);
-  } catch (error: unknown) {
-    console.error("Error in updateMetricLog:", error);
-    handleApiError(error);
-    throw error;
-  }
+  }, "updateMetricLog");
 };
 
 // DELETE a metric log entry
 export const deleteMetricLog = async (
   metricLogId: string,
-  opts: RequestOpts = {}
+  opts: RequestOpts = {},
 ): Promise<MetricLogResponseDTO> => {
-  try {
+  return withApiErrorHandling(async () => {
     const response = await api.delete<ApiResponse<MetricLogResponseDTO>>(
       `/metric-logs/${metricLogId}`,
-      { signal: opts.signal }
+      { signal: opts.signal },
     );
 
     return unwrap(response);
-  } catch (error: unknown) {
-    console.error("Error in deleteMetricLog:", error);
-    handleApiError(error);
-    throw error;
-  }
+  }, "deleteMetricLog");
 };
 
 /**
@@ -180,19 +155,14 @@ export const deleteMetricLog = async (
  */
 
 export const createMetricLogDummy = async (
-  metric: GenerateDummyMetricLogsRequestDTO
+  metric: GenerateDummyMetricLogsRequestDTO,
 ): Promise<{ logs: MetricLogResponseDTO[] }> => {
-  console.log("createMetricLogDummy called with metric:", metric);
-  try {
-    const response = await api.post<
-      ApiResponse<{ logs: MetricLogResponseDTO[] }>
-    >(`/metric-logs/${metric.metricId}/dummy`, metric);
-    console.log("createMetricLogDummy response:", response.data);
+  return withApiErrorHandling(async () => {
+    const response = await api.post<ApiResponse<{ logs: MetricLogResponseDTO[] }>>(
+      `/metric-logs/${metric.metricId}/dummy`,
+      metric,
+    );
 
     return unwrap(response);
-  } catch (error: unknown) {
-    console.error("Error in generating Metric Dummy:", error);
-    handleApiError(error);
-    throw error;
-  }
+  }, "createMetricLogDummy");
 };

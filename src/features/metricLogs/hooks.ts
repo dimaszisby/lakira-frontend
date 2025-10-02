@@ -1,35 +1,31 @@
+import type { InfiniteData, QueryKey } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+
 import {
-  useQuery,
-  useMutation,
-  useInfiniteQuery,
-  InfiniteData,
-  useQueryClient,
-  QueryKey,
-} from "@tanstack/react-query";
-import {
+  createMetricLog,
+  createMetricLogDummy,
+  deleteMetricLog,
+  getMetricLogs,
+  getMetricLogsListViaCursor,
+  updateMetricLog,
+} from "@/src/features/metricLogs/api";
+import type {
   MetricLogResponseDTO,
   PaginatedMetricLogListResponseDTO,
   UpdateMetricLogRequestDTO,
 } from "@/src/types/dtos/metric-log.dto";
-import {
-  getMetricLogs,
-  createMetricLog,
-  createMetricLogDummy,
-  deleteMetricLog,
-  updateMetricLog,
-  getMetricLogsListViaCursor,
-} from "@/src/features/metricLogs/api";
-import { MetricLogFilterViaCursor, MetricLogSortViaCursor } from "./sort";
-import { CursorPage } from "@/src/types/generics/CursorPage";
-import { useEffect, useState } from "react";
-import { metricLogsKeys } from "./keys";
-import { MetricLogVM } from "./view-models";
+import type { CursorPage } from "@/src/types/generics/CursorPage";
+
 import {
   invalidateLogDetail,
   invalidateLogLists,
   patchLogHeaderOptimistic,
   removeLogDetail,
 } from "./cache";
+import { metricLogsKeys } from "./keys";
+import type { MetricLogFilterViaCursor, MetricLogSortViaCursor } from "./sort";
+import type { MetricLogVM } from "./view-models";
 
 // Types
 type UseMetricLogArgs = {
@@ -55,9 +51,7 @@ const useMetricLogs = (metricId: string, page: number, limit: number = 20) => {
     queryKey: ["metricLogs", metricId, page, limit],
     // queryKey: ["metricLogs", metricId],
     queryFn: () => getMetricLogs({ metricId, page, limit }),
-    placeholderData: (
-      previousData: PaginatedMetricLogListResponseDTO | undefined
-    ) => previousData, // for smooth pagination UX
+    placeholderData: (previousData: PaginatedMetricLogListResponseDTO | undefined) => previousData, // for smooth pagination UX
   });
 
   const logs = data?.logs ?? [];
@@ -87,15 +81,7 @@ export function useMetricLogsListPaginationViaCursor(params: {
   useEffect(() => {
     setPage(1);
     setCursorByPage({ 1: null });
-  }, [
-    params.limit,
-    params.sort,
-    params.q,
-    params.filter?.name,
-    params.filter?.metricId,
-  ]);
-
-  console.log(`----- [Hook]: Filter`, params.filter);
+  }, [params.limit, params.sort, params.q, params.filter?.name, params.filter?.metricId]);
 
   const query = useQuery({
     queryKey: metricLogsKeys.cursor.pages({
@@ -122,9 +108,7 @@ export function useMetricLogsListPaginationViaCursor(params: {
 
   const items = query.data?.items ?? [];
   const totalCount = query.data?.totalCount;
-  const totalPages = totalCount
-    ? Math.max(1, Math.ceil(totalCount / params.limit))
-    : undefined;
+  const totalPages = totalCount ? Math.max(1, Math.ceil(totalCount / params.limit)) : undefined;
 
   // navigation helpers (works even if total unknown)
   const canPrev = page > 1;
@@ -142,9 +126,7 @@ export function useMetricLogsListPaginationViaCursor(params: {
   };
 }
 
-export function useMetricLogInfiniteViaCursor(
-  opts: UseMetricLogArgs & { enabled: boolean }
-) {
+export function useMetricLogInfiniteViaCursor(opts: UseMetricLogArgs & { enabled: boolean }) {
   const { limit = 20, sort = "-createdAt", q, filter, enabled = true } = opts;
 
   const query = useInfiniteQuery<
@@ -183,13 +165,13 @@ export function useMetricLogInfiniteViaCursor(
 // CREATE hook
 const useCreateMetricLog = (
   onSuccess?: (created: MetricLogResponseDTO) => void,
-  onError?: (error: Error) => void
+  onError?: (error: Error) => void,
 ) => {
   const qc = useQueryClient();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation({
     mutationFn: createMetricLog,
-    onSuccess: (created) => {
-      invalidateLogLists(qc);
+    onSuccess: async (created) => {
+      await invalidateLogLists(qc);
       onSuccess?.(created);
     },
     onError,
@@ -197,8 +179,6 @@ const useCreateMetricLog = (
 
   return {
     createMetricLog: mutateAsync,
-    onSuccess,
-    onError,
     isError,
     isSuccess,
     error,
@@ -216,7 +196,7 @@ type UpdateCtx = { key: QueryKey; prev?: MetricLogVM };
 
 const useUpdateMetricLog = (
   onSuccess?: (updated: MetricLogResponseDTO) => void,
-  onErrorCb?: (error: Error) => void
+  onErrorCb?: (error: Error) => void,
 ) => {
   const qc = useQueryClient();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation<
@@ -225,8 +205,7 @@ const useUpdateMetricLog = (
     UpdateLogVars,
     UpdateCtx
   >({
-    mutationFn: ({ logId, log }) =>
-      updateMetricLog({ metricLogId: logId, metricLog: log }),
+    mutationFn: ({ logId, log }) => updateMetricLog({ metricLogId: logId, metricLog: log }),
     onMutate: async ({ logId, log }) => {
       await qc.cancelQueries({
         queryKey: metricLogsKeys.detail(logId),
@@ -244,9 +223,9 @@ const useUpdateMetricLog = (
       }
       onErrorCb?.(err);
     },
-    onSettled: (_data, _err, vars) => {
-      invalidateLogDetail(qc, vars.logId);
-      invalidateLogLists(qc);
+    onSettled: async (_data, _err, vars) => {
+      await invalidateLogDetail(qc, vars.logId);
+      await invalidateLogLists(qc);
     },
 
     onSuccess: (updated) => {
@@ -256,7 +235,6 @@ const useUpdateMetricLog = (
 
   return {
     updateMetricLog: mutateAsync,
-    onSuccess,
     isError,
     isSuccess,
     error,
@@ -272,7 +250,7 @@ type DeleteCtx = {
 
 const useDeleteMetricLog = (
   onSuccess?: (deletedId: string) => void,
-  onErrorCb?: (error: Error) => void
+  onErrorCb?: (error: Error) => void,
 ) => {
   const qc = useQueryClient();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation<
@@ -306,14 +284,13 @@ const useDeleteMetricLog = (
       removeLogDetail(qc, logId);
       onSuccess?.(logId);
     },
-    onSettled: () => {
-      invalidateLogLists(qc);
+    onSettled: async () => {
+      await invalidateLogLists(qc);
     },
   });
 
   return {
     deleteMetricLog: mutateAsync,
-    onSuccess,
     isError,
     isSuccess,
     error,
@@ -324,13 +301,13 @@ const useDeleteMetricLog = (
 // Custom hook to create dummy metric logs.
 const useCreateMetricLogDummy = (
   onSuccess?: (created: MetricLogResponseDTO[]) => void,
-  onError?: (error: Error) => void
+  onError?: (error: Error) => void,
 ) => {
   const qc = useQueryClient();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation({
     mutationFn: createMetricLogDummy,
-    onSuccess: (created) => {
-      invalidateLogLists(qc);
+    onSuccess: async (created) => {
+      await invalidateLogLists(qc);
       onSuccess?.(created.logs);
     },
     onError,
@@ -338,8 +315,6 @@ const useCreateMetricLogDummy = (
 
   return {
     createMetricLogDummy: mutateAsync,
-    onSuccess,
-    onError,
     isError,
     isSuccess,
     error,
@@ -348,9 +323,9 @@ const useCreateMetricLogDummy = (
 };
 
 export {
-  useMetricLogs,
   useCreateMetricLog,
-  useUpdateMetricLog,
-  useDeleteMetricLog,
   useCreateMetricLogDummy,
+  useDeleteMetricLog,
+  useMetricLogs,
+  useUpdateMetricLog,
 };
