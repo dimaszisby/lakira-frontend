@@ -1,4 +1,6 @@
-import axios, { AxiosError } from "axios";
+import type { AxiosError } from "axios";
+import axios from "axios";
+
 import { isAbortError } from "./isAbortError";
 
 export type NormalizedApiError = {
@@ -15,17 +17,11 @@ export type NormalizedApiError = {
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null;
 }
-function getString(
-  obj: Record<string, unknown>,
-  key: string
-): string | undefined {
+function getString(obj: Record<string, unknown>, key: string): string | undefined {
   const v = obj[key];
   return typeof v === "string" ? v : undefined;
 }
-function getArray(
-  obj: Record<string, unknown>,
-  key: string
-): unknown[] | undefined {
+function getArray(obj: Record<string, unknown>, key: string): unknown[] | undefined {
   const v = obj[key];
   return Array.isArray(v) ? v : undefined;
 }
@@ -110,8 +106,7 @@ export function normalizeApiError(err: unknown): NormalizedApiError {
     const code = e.code;
     const data = e.response?.data;
 
-    const messages =
-      extractMessages(data) ?? (e.message ? [e.message] : ["Request failed"]);
+    const messages = extractMessages(data) ?? (e.message ? [e.message] : ["Request failed"]);
 
     return {
       isAbort: false,

@@ -26,10 +26,7 @@ export function isAbortError(err: unknown): boolean {
       if ((err as { code: string }).code === "ERR_CANCELED") return true;
     }
     // message
-    if (
-      "message" in err &&
-      typeof (err as { message: unknown }).message === "string"
-    ) {
+    if ("message" in err && typeof (err as { message: unknown }).message === "string") {
       if ((err as { message: string }).message === "canceled") return true;
     }
   }

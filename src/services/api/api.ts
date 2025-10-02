@@ -8,8 +8,7 @@ import axiosRetry, { isNetworkOrIdempotentRequestError } from "axios-retry";
  */
 
 const api = axios.create({
-  baseURL:
-    process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8001/api/v1",
+  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8001/api/v1",
   headers: {
     "Content-Type": "application/json",
   },
@@ -18,20 +17,19 @@ const api = axios.create({
 // Auth header (browser-only)
 api.interceptors.request.use(
   (config) => {
-    const token =
-      typeof window !== "undefined" ? localStorage.getItem("token") : null;
+    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 // 401 handling (logout flow stays in callers / router)
 api.interceptors.response.use(
   (res) => res,
-  (err) => Promise.reject(err)
+  (err) => Promise.reject(err),
 );
 
 // Add a response interceptor to handle 401 Unauthorized errors
@@ -47,7 +45,7 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 // Retry policy
@@ -61,8 +59,7 @@ axiosRetry(api, {
 
     // Network issues or 429/5xx
     const retriableServer =
-      (error.response?.status ?? 0) === 429 ||
-      (error.response?.status ?? 0) >= 500;
+      (error.response?.status ?? 0) === 429 || (error.response?.status ?? 0) >= 500;
 
     if (isSafeMethod) {
       return isNetworkOrIdempotentRequestError(error) || retriableServer;

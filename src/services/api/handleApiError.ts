@@ -1,7 +1,5 @@
-import {
-  normalizeApiError,
-  type NormalizedApiError,
-} from "./normalizeApiError";
+import type { NormalizedApiError } from "./normalizeApiError";
+import { normalizeApiError } from "./normalizeApiError";
 
 type HandleOptions = {
   toast?: (msg: string) => void; // Dev Note: optional UI hook, currently not being used yet
@@ -9,18 +7,14 @@ type HandleOptions = {
   quietStatuses?: number[]; // e.g., [404]
 };
 
-export const handleApiError = (
-  error: unknown,
-  opts: HandleOptions = {}
-): string[] => {
+export const handleApiError = (error: unknown, opts: HandleOptions = {}): string[] => {
   const n = normalizeApiError(error);
 
   // Ignore cancellations completely
   if (n.isAbort) return [];
 
   // IF: skip noisy statuses from UI (but still log to dev console)
-  const shouldQuiet =
-    n.status && opts.quietStatuses?.includes(n.status as number);
+  const shouldQuiet = n.status && opts.quietStatuses?.includes(n.status as number);
 
   // Dev console
   if (process.env.NODE_ENV !== "production") {
