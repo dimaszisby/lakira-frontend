@@ -14,16 +14,14 @@ export function buildVizQuery(
   range: TimeRangeValue,
   bucket: BucketAlias,
   tz: string = DEFAULT_TZ,
-  fill: FillMode = DEFAULT_FILL
+  fill: FillMode = DEFAULT_FILL,
 ): VizQuery {
   return range.mode === "relative"
     ? { last: range.last as RelativeLast, bucket, tz, fill }
     : { start: range.start, end: range.end, bucket, tz, fill };
 }
 
-export function toTimeUnit(
-  bucket: BucketAlias
-): "hour" | "day" | "week" | "month" | "year" {
+export function toTimeUnit(bucket: BucketAlias): "hour" | "day" | "week" | "month" | "year" {
   switch (bucket) {
     case "1h":
       return "hour";
@@ -54,10 +52,7 @@ export function isAllMissing(xs: XY[]) {
 }
 
 // Some backends may send count as string (e.g., pg bitstring mishap). Normalize.
-export function toNumberOr<T extends number | string | null | undefined>(
-  v: T,
-  fallback = 0
-) {
+export function toNumberOr<T extends number | string | null | undefined>(v: T, fallback = 0) {
   const n = typeof v === "string" ? Number(v) : v;
   return typeof n === "number" && Number.isFinite(n) ? n : fallback;
 }

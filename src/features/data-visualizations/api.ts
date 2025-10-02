@@ -1,8 +1,10 @@
 import api from "@/src/services/api/api";
-import ApiResponse, { unwrap } from "@/types/generics/ApiResponse";
+import { withApiErrorHandling } from "@/src/services/api/withApiErrorHandling";
+import type ApiResponse from "@/types/generics/ApiResponse";
+import { unwrap } from "@/types/generics/ApiResponse";
+
 import type { DashboardVizResponse, VizQuery, VizResponse } from "./types";
 import { etagCache } from "./utils/etag-cache";
-import { withApiErrorHandling } from "@/src/services/api/withApiErrorHandling";
 
 const BASE = "/analytics";
 
@@ -30,7 +32,7 @@ function normalizeParams(query: VizQuery & { limit?: number }) {
 export async function getMetricVisualization(
   metricId: string,
   query: VizQuery,
-  opts: { signal?: AbortSignal } = {}
+  opts: { signal?: AbortSignal } = {},
 ): Promise<VizResponse> {
   return withApiErrorHandling(async () => {
     const params = normalizeParams(query);
@@ -62,9 +64,7 @@ export async function getMetricVisualization(
   }, "fetchedSingularMetricAnalytics");
 }
 
-export async function getDashboardVisualizations(
-  q: VizQuery & { limit?: number }
-) {
+export async function getDashboardVisualizations(q: VizQuery & { limit?: number }) {
   return withApiErrorHandling(async () => {
     const params = normalizeParams(q);
     const url = `${BASE}/dashboard`;

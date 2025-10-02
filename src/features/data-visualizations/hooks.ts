@@ -1,23 +1,20 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import type { VizQuery, VizResponse } from "./types";
+
+import { isAbortError } from "@/src/services/api/isAbortError";
+
 import { getDashboardVisualizations, getMetricVisualization } from "./api";
 import { vizKeys } from "./keys";
-import { isAbortError } from "@/src/services/api/isAbortError";
+import type { VizQuery, VizResponse } from "./types";
 
 export function useMetricVisualization(
   metricId: string,
   query: VizQuery,
-  opts?: { enabled?: boolean; staleTime?: number; gcTime?: number }
+  opts?: { enabled?: boolean; staleTime?: number; gcTime?: number },
 ) {
-  const {
-    enabled = true,
-    staleTime = 60_000,
-    gcTime = 5 * 60_000,
-  } = opts ?? {};
+  const { enabled = true, staleTime = 60_000, gcTime = 5 * 60_000 } = opts ?? {};
   return useQuery<VizResponse, Error, VizResponse>({
     queryKey: vizKeys.byMetric(metricId, query),
-    queryFn: ({ signal }) =>
-      getMetricVisualization(metricId, query, { signal }),
+    queryFn: ({ signal }) => getMetricVisualization(metricId, query, { signal }),
     enabled,
     staleTime,
     gcTime,
@@ -28,22 +25,14 @@ export function useMetricVisualization(
 
 export function useDashboardVisualizations(
   q: VizQuery & { limit?: number },
-  opts?: { enabled?: boolean; staleTime?: number; gcTime?: number }
+  opts?: { enabled?: boolean; staleTime?: number; gcTime?: number },
 ) {
-  const {
-    enabled = true,
-    staleTime = 60_000,
-    gcTime = 5 * 60_000,
-  } = opts ?? {};
+  const { enabled = true, staleTime = 60_000, gcTime = 5 * 60_000 } = opts ?? {};
 
   return useQuery<
-    ReturnType<typeof getDashboardVisualizations> extends Promise<infer R>
-      ? R
-      : never,
+    ReturnType<typeof getDashboardVisualizations> extends Promise<infer R> ? R : never,
     Error,
-    ReturnType<typeof getDashboardVisualizations> extends Promise<infer R>
-      ? R
-      : never
+    ReturnType<typeof getDashboardVisualizations> extends Promise<infer R> ? R : never
   >({
     queryKey: vizKeys.dashboard(q),
     queryFn: () => getDashboardVisualizations(q),
