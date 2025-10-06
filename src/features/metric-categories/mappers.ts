@@ -1,4 +1,4 @@
-import type { MetricCategoryResponseDTO } from "@/src/types/dtos/metric-category.dto";
+import type { MetricCategoryResponseDTO } from "@/types/dtos/metric-category.dto";
 
 import type { MetricCategoryVM } from "./view-models";
 
