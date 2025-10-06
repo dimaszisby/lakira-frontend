@@ -1,8 +1,9 @@
-import { SortChipsColumns } from "@/components/ui/SortChipGroup";
-import { MetricPreviewResponseDTO } from "@/src/features/metrics/metric.dto";
-import TableCategoryChip from "./TableCategoryChip";
-import { TableColumn } from "../../ui/Table";
-import { SERVER_SORTABLE_COLUMNS } from "@/src/features/metrics/sort";
+import { toCategoryUI } from "@/features/metric-categories/presenters/toCategoryUI";
+import type { MetricPreviewResponseDTO } from "@/features/metrics/metric.dto";
+import { SERVER_SORTABLE_COLUMNS } from "@/features/metrics/sort";
+import CategoryChip from "@/src/features/metric-categories/components/CategoryChip";
+import type { SortChipsColumns } from "@/ui/SortChipGroup";
+import type { TableColumn } from "@/ui/Table";
 
 // Shared types for both desktop and mobile tables
 // TODO: Create a generic for shared between Metric, MetricCategory, and Logs
@@ -60,9 +61,10 @@ export const desktopColumns: TableColumn<MetricPreviewResponseDTO>[] = [
     width: "w-[50px]",
     responsiveWidth: { md: "w-[60px]" }, // Slightly wider on medium+
     sortable: true,
-    renderCell: (row /* , value */) => (
-      <TableCategoryChip category={row.category} />
-    ),
+    renderCell: (row /* , value */) => {
+      const category = toCategoryUI(row.category);
+      return <CategoryChip category={category} />;
+    },
   },
   {
     key: "name",

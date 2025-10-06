@@ -1,28 +1,25 @@
 "use client";
 
-// WIP Metric Form
-
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useDebounce } from "react-use";
+
+import type { MetricFormInitial } from "@/features/metrics/form.initial";
 import {
   useCreateMetric,
   useDeleteMetric,
   useMetricsLibrary,
   useUpdateMetric,
-} from "@/src/features/metrics/hooks";
-import {
-  MetricFormInputs,
-  metricFormSchema,
-} from "@/src/features/metrics/types";
-import PrimaryButton from "../../ui/PrimaryButton";
-import Modal from "../../ui/Modal";
-import ErrorMessage from "../../ui/ErrorMessage";
-import CategorySelect from "../../ui/CategorySelect";
-import { MetricFormInitial } from "@/src/features/metrics/form.initial";
-import { TextField } from "../../ui/TextField";
-import { TextAreaField } from "../../ui/TextArea";
+} from "@/features/metrics/hooks";
+import type { MetricFormInputs } from "@/features/metrics/types";
+import { metricFormSchema } from "@/features/metrics/types";
+import CategorySelect from "@/ui/CategorySelect";
+import ErrorMessage from "@/ui/ErrorMessage";
+import Modal from "@/ui/Modal";
+import PrimaryButton from "@/ui/PrimaryButton";
+import TextAreaField from "@/ui/TextArea";
+import TextField from "@/ui/TextField";
 
 interface MetricModalProps {
   open: boolean;
@@ -31,12 +28,7 @@ interface MetricModalProps {
   initialMetric?: MetricFormInitial | null;
 }
 
-export const MetricForm = ({
-  open,
-  onClose,
-  metricId,
-  initialMetric,
-}: MetricModalProps) => {
+export const MetricForm = ({ open, onClose, metricId, initialMetric }: MetricModalProps) => {
   // Default Form handling
   const makeDefaults = (m?: MetricFormInitial | null): MetricFormInputs => ({
     categoryId: m?.categoryId ?? undefined,
@@ -65,7 +57,7 @@ export const MetricForm = ({
   });
 
   // Rehydrate -> open/change with a stable key
-  const formKey = open ? initialMetric?.id ?? "create" : "closed";
+  const formKey = open ? (initialMetric?.id ?? "create") : "closed";
   const prevKeyRef = useRef<string | null>(null);
   useEffect(() => {
     if (!open) return;
@@ -92,18 +84,15 @@ export const MetricForm = ({
       limit: 1,
       name: debouncedName || undefined,
     }),
-    [debouncedName]
+    [debouncedName],
   );
 
   // Only fetch when modal is open and user typed 2+ chars
   const shouldCheckDup = open && debouncedName.length >= 2;
-  const { metrics: dupCandidates = [] } = useMetricsLibrary(
-    duplicateCheckParams,
-    {
-      enabled: shouldCheckDup,
-      staleTime: 5_000,
-    }
-  );
+  const { metrics: dupCandidates = [] } = useMetricsLibrary(duplicateCheckParams, {
+    enabled: shouldCheckDup,
+    staleTime: 5_000,
+  });
 
   // derive current “has conflict” + current error state
   const hasValidateError = !!errors.name && errors.name.type === "validate";
@@ -116,7 +105,7 @@ export const MetricForm = ({
     const conflict = dupCandidates.some(
       (m) =>
         m.name.trim().toLowerCase() === debouncedName.toLowerCase() &&
-        (!isEditMode || m.id !== initialMetric?.id)
+        (!isEditMode || m.id !== initialMetric?.id),
     );
     if (conflict && !hasValidateError) {
       setError("name", {
@@ -138,30 +127,18 @@ export const MetricForm = ({
   ]);
 
   // * ========== Mutations ==========
-  const {
-    createMetric,
-    isPending: isCreating,
-    error: createError,
-  } = useCreateMetric();
+  const { createMetric, isPending: isCreating, error: createError } = useCreateMetric();
 
-  const {
-    updateMetric,
-    isPending: isUpdating,
-    error: updateError,
-  } = useUpdateMetric();
+  const { updateMetric, isPending: isUpdating, error: updateError } = useUpdateMetric();
 
-  const {
-    deleteMetric,
-    isPending: isDeleting,
-    error: deleteError,
-  } = useDeleteMetric();
+  const { deleteMetric, isPending: isDeleting, error: deleteError } = useDeleteMetric();
 
   const isBusyInputs = isSubmitting || isCreating || isUpdating;
 
   // * Submit Handlers
   const onSubmit = async (data: MetricFormInputs) => {
     if (!isValid) {
-      console.log("Form is not valid, preventing submission.");
+      console.warn("Form is not valid, preventing submission.");
       return;
     }
 
@@ -189,22 +166,23 @@ export const MetricForm = ({
     }
   };
 
-  const errorMsg =
-    createError?.message || updateError?.message || deleteError?.message || "";
+  const errorMsg = createError?.message || updateError?.message || deleteError?.message || "";
 
   return (
     <Modal isOpen={open} onClose={onClose}>
       <form
-        className="flex flex-col bg-white p-2 sm:p-2 lg:p-6 max-w-lg min-w-96 mx-auto"
-        onSubmit={handleSubmit((data) => {
-          if (Object.keys(errors).length > 0) {
-            console.log("Form has errors, preventing submission.");
-            return;
-          }
-          onSubmit(data);
-        })}
+        className="mx-auto flex min-w-96 max-w-lg flex-col bg-white p-2 sm:p-2 lg:p-6"
+        onSubmit={
+          void handleSubmit((data) => {
+            if (Object.keys(errors).length > 0) {
+              console.warn("Form has errors, preventing submission.");
+              return;
+            }
+            void onSubmit(data);
+          })
+        }
       >
-        <h2 className="text-xl font-semibold mb-2">Manage Metric</h2>
+        <h2 className="mb-2 text-xl font-semibold">Manage Metric</h2>
 
         <ErrorMessage message={errorMsg} className="mb-2"></ErrorMessage>
 
@@ -255,46 +233,35 @@ export const MetricForm = ({
 
         {/* Buttons */}
         <div className="flex-row space-y-4">
-          <div className="flex gap-2 mt-6 justify-center items">
+          <div className="items mt-6 flex justify-center gap-2">
             <button
               type="button"
-              className="px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 w-full"
+              className="w-full rounded-xl bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200"
               onClick={onClose}
               disabled={isSubmitting}
             >
               Cancel
             </button>
 
-            <PrimaryButton
-              type="submit"
-              disabled={isSubmitting || !isValid}
-              className="w-full"
-            >
-              {isSubmitting || isCreating || isUpdating
-                ? "Saving..."
-                : isEditMode
-                ? "Save"
-                : "Add"}
+            <PrimaryButton type="submit" disabled={isSubmitting || !isValid} className="w-full">
+              {isSubmitting || isCreating || isUpdating ? "Saving..." : isEditMode ? "Save" : "Add"}
             </PrimaryButton>
           </div>
 
           {/* Delete button (edit mode only) */}
-          {isEditMode && (
+          {isEditMode ? (
             <>
-              <hr
-                style={{ borderTop: "1px solid lightgrey" }}
-                className="my-4"
-              />
+              <hr style={{ borderTop: "1px solid lightgrey" }} className="my-4" />
               <button
                 type="button"
-                className="px-4 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-500 w-full"
-                onClick={onDeleteSubmit}
+                className="w-full rounded-xl bg-red-50 px-4 py-2 text-red-500 hover:bg-red-100"
+                onClick={void onDeleteSubmit}
                 disabled={isSubmitting || isDeleting}
               >
                 {isDeleting ? "Deleting..." : "Delete Log"}
               </button>
             </>
-          )}
+          ) : null}
         </div>
       </form>
     </Modal>

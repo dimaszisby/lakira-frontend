@@ -1,40 +1,33 @@
 "use client";
 
-import React, { useCallback, useMemo, useState } from "react";
-import PrimaryButton from "@/src/components/ui/PrimaryButton";
-import SectionCard from "@/src/components/ui/SectionCard";
-import SkeletonLoader from "@/src/components/ui/SekeletonLoader";
-import { Pagination } from "@/src/components/ui/Pagination";
-import LogTable from "../../logs/LogTable";
-import MetricLogFormModal from "../../logs/LogFormModal";
+import React, { memo, useCallback, useMemo, useState } from "react";
+
+import MetricLogFormModal from "@/components/pages/logs/LogFormModal";
+import LogTable from "@/components/pages/logs/LogTable";
 import {
   useCreateMetricLogDummy,
   useDeleteMetricLog,
   useMetricLogsListPaginationViaCursor,
-} from "@/src/features/metricLogs/hooks";
-import { MetricLogResponseDTO } from "@/src/types/dtos/metric-log.dto";
-import EmptyDataIndicator from "@/src/components/ui/EmptyDataIndicator";
-import {
+} from "@/features/metricLogs/hooks";
+import type {
   MetricLogFilterViaCursor,
   MetricLogSortParamViaCursor,
-  nextSortForColumn,
-  parseSort,
-} from "@/src/features/metricLogs/sort";
-import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
-import SearchInput from "@/src/components/ui/SearchInput";
+} from "@/features/metricLogs/sort";
+import { nextSortForColumn, parseSort } from "@/features/metricLogs/sort";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import type { MetricLogResponseDTO } from "@/types/dtos/metric-log.dto";
+import EmptyDataIndicator from "@/ui/EmptyDataIndicator";
+import { Pagination } from "@/ui/Pagination";
+import PrimaryButton from "@/ui/PrimaryButton";
+import SearchInput from "@/ui/SearchInput";
+import SectionCard from "@/ui/SectionCard";
+import SkeletonLoader from "@/ui/SekeletonLoader";
 
-interface MetricLogSectionProps {
-  metricId: string;
-}
-
-const MetricLogsSection: React.FC<MetricLogSectionProps> = ({ metricId }) => {
+export const MetricLogsSectionBase = ({ metricId }: { metricId: string }) => {
   // * Contants
   const PAGE_SIZE = 50;
   const [sort, setSort] = useState<MetricLogSortParamViaCursor>("-createdAt");
-  const { field: sortField, dir: sortDir } = useMemo(
-    () => parseSort(sort),
-    [sort]
-  );
+  const { field: sortField, dir: sortDir } = useMemo(() => parseSort(sort), [sort]);
 
   // * Search
   const [search, setSearch] = useState("");
@@ -56,9 +49,6 @@ const MetricLogsSection: React.FC<MetricLogSectionProps> = ({ metricId }) => {
     if (filterName) f.name = filterName;
     if (filterMetric) f.metricId = filterMetric;
     if (Object.keys(f).length) p.filter = f;
-
-    console.log(`----- [View]: Filter`, p.filter);
-    console.log(`----- [View]: Limit`, p.limit);
 
     return p;
   }, [PAGE_SIZE, sort, debouncedQ, filterName, filterMetric]);
@@ -82,9 +72,7 @@ const MetricLogsSection: React.FC<MetricLogSectionProps> = ({ metricId }) => {
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedLog, setSelectedLog] = useState<MetricLogResponseDTO | null>(
-    null
-  );
+  const [selectedLog, setSelectedLog] = useState<MetricLogResponseDTO | null>(null);
 
   // Use the new useMetricLogs with pagination
   const { deleteMetricLog } = useDeleteMetricLog();
@@ -145,20 +133,20 @@ const MetricLogsSection: React.FC<MetricLogSectionProps> = ({ metricId }) => {
         title="Logs"
         className="mb-8"
         headerComponent={
-          <div className="flex bg-items-center justify-between space-x-4 mb-4">
+          <div className="bg-items-center mb-4 flex justify-between space-x-4">
             <SearchInput
               value={search}
               onChange={setSearch}
               onClear={() => setSearch("")}
-              isLoading={pages.isFetching && !!pages.items.length}
+              isLoading={pages.isFetching ? !!pages.items.length : undefined}
               placeholder="Search by log value…"
               className="flex-1"
             />
 
             <PrimaryButton
-              onClick={onDummyDataSubmit}
+              onClick={void onDummyDataSubmit}
               ariaLabel="Generate Logs"
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-blue-600 text-white hover:bg-blue-700"
             >
               Generate Dummy
             </PrimaryButton>
@@ -185,7 +173,7 @@ const MetricLogsSection: React.FC<MetricLogSectionProps> = ({ metricId }) => {
                 sortOrder={sortDir}
                 onSort={(col) => onColumnSort(String(col))}
                 onEdit={handleEditLog}
-                onDelete={handleDelete}
+                onDelete={void handleDelete}
                 onRowClick={handleRowClick}
               />
 
@@ -205,5 +193,8 @@ const MetricLogsSection: React.FC<MetricLogSectionProps> = ({ metricId }) => {
     </>
   );
 };
+MetricLogsSectionBase.displayName = "MetricLogsSection";
 
+const MetricLogsSection = memo(MetricLogsSectionBase);
+MetricLogsSection.displayName = "MetricLogsSection";
 export default MetricLogsSection;
