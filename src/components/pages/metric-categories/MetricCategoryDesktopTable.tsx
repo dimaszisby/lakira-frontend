@@ -1,7 +1,10 @@
-import React from "react";
-import { Table, TableColumn } from "@/components/ui/Table";
-import { MetricCategoryResponseDTO } from "@/src/types/dtos/metric-category.dto";
-import { CategoryTableProps } from "./type";
+import React, { memo } from "react";
+
+import type { TableColumn } from "@/components/ui/Table";
+import { TableBase } from "@/components/ui/Table";
+import type { MetricCategoryResponseDTO } from "@/src/types/dtos/metric-category.dto";
+
+import type { CategoryTableProps } from "./type";
 
 const columns: TableColumn<MetricCategoryResponseDTO>[] = [
   {
@@ -21,7 +24,7 @@ const columns: TableColumn<MetricCategoryResponseDTO>[] = [
     responsiveWidth: { md: "w-[80px]" },
     renderCell: (cat) => (
       <span
-        className="inline-block w-5 h-5 rounded-full"
+        className="inline-block h-5 w-5 rounded-full"
         style={{ backgroundColor: cat.color }}
         aria-label={cat.color}
       />
@@ -62,34 +65,33 @@ const columns: TableColumn<MetricCategoryResponseDTO>[] = [
   },
 ];
 
-const MetricCategoryDesktopTable = React.memo(
-  ({
-    categories,
-    sortBy,
-    sortOrder,
-    onSort,
-    onEdit,
-    onDelete,
-    onRowClick,
-  }: CategoryTableProps) => {
-    return (
-      <Table<MetricCategoryResponseDTO>
-        data={categories}
-        columns={columns}
-        sortBy={sortBy as keyof MetricCategoryResponseDTO}
-        sortOrder={sortOrder}
-        onSort={(col) => onSort(String(col))}
-        rowKey={(cat) => cat.id}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        onRowClick={onRowClick}
-        // Optionally: custom row component for editing/deleting per row
-        // renderRow={(category) => <MetricCategoryTableRow key={category.id} category={category} />}
-      />
-    );
-  }
-);
+export const MetricCategoryDesktopTableBase = ({
+  categories,
+  sortBy,
+  sortOrder,
+  onSort,
+  onEdit,
+  onDelete,
+  onRowClick,
+}: CategoryTableProps) => {
+  return (
+    <TableBase<MetricCategoryResponseDTO>
+      data={categories}
+      columns={columns}
+      sortBy={sortBy as keyof MetricCategoryResponseDTO}
+      sortOrder={sortOrder}
+      onSort={(col) => onSort(String(col))}
+      rowKey={(cat) => cat.id}
+      onEdit={onEdit}
+      onDelete={onDelete}
+      onRowClick={onRowClick}
+      // Optionally: custom row component for editing/deleting per row
+      // renderRow={(category) => <MetricCategoryTableRow key={category.id} category={category} />}
+    />
+  );
+};
+MetricCategoryDesktopTableBase.displayName = "MetricCategoryDesktopTable";
 
+const MetricCategoryDesktopTable = memo(MetricCategoryDesktopTableBase);
 MetricCategoryDesktopTable.displayName = "MetricCategoryDesktopTable";
-
 export default MetricCategoryDesktopTable;

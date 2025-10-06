@@ -1,44 +1,31 @@
-import { useCallback, useMemo, useState } from "react";
-import PrimaryButton from "@/src/components/ui/PrimaryButton";
-import SectionCard from "@/src/components/ui/SectionCard";
-import SkeletonLoader from "@/src/components/ui/SekeletonLoader";
-import { Pagination } from "@/src/components/ui/Pagination";
-import EmptyDataIndicator from "@/src/components/ui/EmptyDataIndicator";
-import { MetricPreviewResponseDTO } from "@/src/features/metrics/metric.dto";
-import MetricForm from "../../metrics/MetricForm";
-import MetricTable from "../../metrics/MetricTable";
 import { useRouter } from "next/navigation";
-import { useDebouncedValue } from "@/src/hooks/useDebouncedValue";
-import {
-  useDeleteMetric,
-  useMetricsListPaginationViaCursor,
-} from "@/src/features/metrics/hooks";
-import {
-  METRICS_PAGE_SIZE,
-  MetricSortParamViaCursor,
-  nextSortForColumn,
-  parseSort,
-} from "@/src/features/metrics/sort";
-import SearchInput from "@/src/components/ui/SearchInput";
+import { useCallback, useMemo, useState } from "react";
 
-// TODO: Migrate to Cursor based
+import MetricForm from "@/components/pages/metrics/MetricForm";
+import MetricTable from "@/components/pages/metrics/MetricTable";
+import { useDeleteMetric, useMetricsListPaginationViaCursor } from "@/features/metrics/hooks";
+import type { MetricPreviewResponseDTO } from "@/features/metrics/metric.dto";
+import type { MetricSortParamViaCursor } from "@/features/metrics/sort";
+import { METRICS_PAGE_SIZE, nextSortForColumn, parseSort } from "@/features/metrics/sort";
+import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import EmptyDataIndicator from "@/ui/EmptyDataIndicator";
+import { Pagination } from "@/ui/Pagination";
+import PrimaryButton from "@/ui/PrimaryButton";
+import SearchInput from "@/ui/SearchInput";
+import SectionCard from "@/ui/SectionCard";
+import SkeletonLoader from "@/ui/SekeletonLoader";
 
 interface MetricCategorySectionProps {
   categoryId: string;
 }
 
-const MetricListSection: React.FC<MetricCategorySectionProps> = ({
-  categoryId,
-}) => {
+const MetricListSection: React.FC<MetricCategorySectionProps> = ({ categoryId }) => {
   const router = useRouter();
 
   // constants
   const PAGE_SIZE = METRICS_PAGE_SIZE;
   const [sort, setSort] = useState<MetricSortParamViaCursor>("-createdAt");
-  const { field: sortField, dir: sortDir } = useMemo(
-    () => parseSort(sort),
-    [sort]
-  );
+  const { field: sortField, dir: sortDir } = useMemo(() => parseSort(sort), [sort]);
 
   // * Search
   const [search, setSearch] = useState("");
@@ -60,9 +47,6 @@ const MetricListSection: React.FC<MetricCategorySectionProps> = ({
     if (filterName) f.name = filterName;
     if (filterCategory) f.categoryId = filterCategory;
     if (Object.keys(f).length) p.filter = f;
-
-    console.log(`----- [View]: Filter`, p.filter);
-    console.log(`----- [View]: Limit`, p.limit);
 
     return p;
   }, [PAGE_SIZE, sort, debouncedQ, filterName, filterCategory]);
@@ -86,20 +70,15 @@ const MetricListSection: React.FC<MetricCategorySectionProps> = ({
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingMetric, setEditingMetric] =
-    useState<MetricPreviewResponseDTO | null>(null);
+  const [editingMetric, setEditingMetric] = useState<MetricPreviewResponseDTO | null>(null);
 
-  const {
-    deleteMetric,
-    isPending: isDeleting,
-    error: deleteError,
-  } = useDeleteMetric();
+  const { deleteMetric } = useDeleteMetric();
 
   // * Handlers
   // Handlers for table row click
   const handleRowClick = useCallback(
     (met: MetricPreviewResponseDTO) => router.push(`/metrics/${met.id}`),
-    [router]
+    [router],
   );
 
   // Handler for add log button (create mode)
@@ -130,7 +109,7 @@ const MetricListSection: React.FC<MetricCategorySectionProps> = ({
     <>
       {/* Log Form Modal (handles add/edit/delete) */}
       <MetricForm
-        key={modalOpen ? editingMetric?.id ?? "create" : "closed"}
+        key={modalOpen ? (editingMetric?.id ?? "create") : "closed"}
         metricId={null}
         initialMetric={null}
         open={modalOpen}
@@ -144,19 +123,17 @@ const MetricListSection: React.FC<MetricCategorySectionProps> = ({
         title="Metrics"
         className="mb-8"
         headerComponent={
-          <div className="flex bg-items-center justify-between space-x-4 mb-4">
+          <div className="bg-items-center mb-4 flex justify-between space-x-4">
             <SearchInput
               value={search}
               onChange={setSearch}
               onClear={() => setSearch("")}
-              isLoading={pages.isFetching && !!pages.items.length}
+              isLoading={pages.isFetching ? !!pages.items.length : undefined}
               placeholder="Search by name…"
               className="flex-1"
             />
 
-            <PrimaryButton onClick={handleAddMetricClick}>
-              Add Metrics
-            </PrimaryButton>
+            <PrimaryButton onClick={handleAddMetricClick}>Add Metrics</PrimaryButton>
           </div>
         }
       >
@@ -178,7 +155,7 @@ const MetricListSection: React.FC<MetricCategorySectionProps> = ({
                 sortOrder={sortDir}
                 onSort={(col) => onColumnSort(String(col))}
                 onEdit={handleEditMetric}
-                onDelete={handleDelete}
+                onDelete={void handleDelete}
                 onRowClick={handleRowClick}
               />
 

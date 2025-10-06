@@ -1,5 +1,5 @@
-import { SortChipsColumns } from "@/components/ui/SortChipGroup";
-import { MetricCategoryResponseDTO } from "@/src/types/dtos/metric-category.dto";
+import type {SortChipsColumns} from "@/components/ui/SortChipGroup";
+import type {MetricCategoryResponseDTO} from "@/src/types/dtos/metric-category.dto";
 
 // Shared types for both desktop and mobile tables
 export interface CategoryTableProps {
