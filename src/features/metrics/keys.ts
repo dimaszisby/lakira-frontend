@@ -1,7 +1,9 @@
 import type { MetricFilterViaCursor, MetricSortViaCursor } from "./sort";
 import type { IncludeKey, MetricsListParams } from "./types";
 
-/** Canonical include normalizer (sorted CSV to match server cache keys) */
+/**
+ * Canonical include normalizer (sorted CSV to match server cache keys)
+ */
 export function normalizeIncludes(includes: IncludeKey[] = []): string | undefined {
   const allowed: IncludeKey[] = ["settings", "category", "logs"];
   const normalized = includes.filter((s): s is IncludeKey => allowed.includes(s)).sort();
@@ -46,11 +48,11 @@ const normalizeCursor = (p: {
 export const metricsKeys = {
   all: ["metrics"] as const,
 
-  // ----- Offset lists (legacy) -----
+  // Offset lists (legacy)
   lists: () => [...metricsKeys.all, "list"] as const,
   list: (params: MetricsListParams) => [...metricsKeys.lists(), normalizeList(params)] as const,
 
-  // ----- Cursor lists (current) -----
+  // Cursor lists (current)
   cursor: {
     root: () => [...metricsKeys.all, "cursor"] as const,
     pages: (p: {
@@ -66,11 +68,15 @@ export const metricsKeys = {
       sort: MetricSortViaCursor;
       q?: string;
       filter?: MetricFilterViaCursor;
-      after?: string;
-    }) => [...metricsKeys.cursor.root(), "infinite", normalizeCursor(p)] as const,
+    }) =>
+      [
+        ...metricsKeys.cursor.root(),
+        "infinite",
+        normalizeCursor({ ...p, after: undefined }),
+      ] as const,
   },
 
-  // ----- Details -----
+  // Details
   details: () => [...metricsKeys.all, "detail"] as const,
   /** fully-qualified detail key (variant-specific) */
   detail: (metricId: string, includes: IncludeKey[] = [], logsLimit?: number) =>
