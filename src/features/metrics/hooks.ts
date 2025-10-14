@@ -1,5 +1,11 @@
 import type { InfiniteData, QueryKey } from "@tanstack/react-query";
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 import {
@@ -28,10 +34,15 @@ import {
   removeMetricDetail,
 } from "./cache";
 import { metricsKeys } from "./keys";
-import { toMetricHeaderVM, toMetricSettingsVM } from "./mappers";
-import type { MetricFilterViaCursor, MetricSortViaCursor } from "./sort";
+import { toMetricHeaderVM, toMetricPreviewVM, toMetricSettingsVM } from "./mappers";
+import type {
+  MetricCursorPage,
+  MetricFilterViaCursor,
+  MetricSortableKeyViaCursor,
+  MetricSortViaCursor,
+} from "./sort";
 import type { IncludeKey, ListOptions, MetricsListParams } from "./types";
-import type { MetricDetailCompositeVM, MetricHeaderVM } from "./view-models";
+import type { MetricDetailCompositeVM, MetricHeaderVM, MetricPreviewVM } from "./view-models";
 
 // Types
 type UseMetricArgs = {
@@ -41,7 +52,7 @@ type UseMetricArgs = {
   filter?: MetricFilterViaCursor;
 };
 
-type CursorResult = CursorPage<MetricPreviewResponseDTO>;
+// type CursorResult = CursorPage<MetricPreviewResponseDTO>;
 
 // * =========== Query Hooks ===========
 
@@ -90,6 +101,19 @@ function useMetricDetailComposite(metricId: string) {
   });
 }
 
+type MetricCursorPageDTO = MetricCursorPage; // server shape (items are DTOs)
+
+// TODO: refactor
+type CursorPageVM<TIn, TOut, S extends string, F> = Omit<CursorPage<TIn, S, F>, "items"> & {
+  items: TOut[];
+};
+type MetricCursorPageVM = CursorPageVM<
+  MetricPreviewResponseDTO,
+  MetricPreviewVM,
+  MetricSortableKeyViaCursor,
+  MetricFilterViaCursor
+>;
+
 export function useMetricsListPaginationViaCursor(params: {
   limit: number;
   sort: MetricSortViaCursor;
@@ -108,24 +132,31 @@ export function useMetricsListPaginationViaCursor(params: {
     setCursorByPage({ 1: null });
   }, [params.limit, params.sort, params.q, params.filter?.name, params.filter?.categoryId]);
 
-  const query = useQuery({
+  const after = cursorByPage[page] ?? undefined;
+
+  const query = useQuery<MetricCursorPageDTO, Error, MetricCursorPageVM>({
     queryKey: metricsKeys.cursor.pages({ ...params, page, includeTotal: true }),
-    queryFn: async () => {
-      const after = cursorByPage[page] ?? undefined;
-      const res = await getMetricLibraryViaCursor({
+    queryFn: async () =>
+      await getMetricLibraryViaCursor({
         ...params,
         after,
         includeTotal: true,
-      });
-      if (res.nextCursor && cursorByPage[page + 1] !== res.nextCursor) {
-        setCursorByPage((m) => ({ ...m, [page + 1]: res.nextCursor! }));
-      }
-      return res;
-    },
-    enabled: enabled,
-    placeholderData: (previousData) => previousData,
+      }),
+    select: (d) => ({
+      ...d,
+      items: d.items.map(toMetricPreviewVM),
+    }),
+    placeholderData: keepPreviousData,
     staleTime: 30_000,
+    enabled: enabled,
   });
+
+  // when we get new data, store the next cursor for the next page
+  useEffect(() => {
+    const next = query.data?.nextCursor;
+    if (!next) return;
+    setCursorByPage((prev) => (prev[page + 1] === next ? prev : { ...prev, [page + 1]: next }));
+  }, [page, query.data?.nextCursor]);
 
   const items = query.data?.items ?? [];
   const totalCount = query.data?.totalCount;
@@ -151,9 +182,9 @@ export function useMetricInfiniteViaCursor(opts: UseMetricArgs & { enabled: bool
   const { limit = 20, sort = "-createdAt", q, filter, enabled = true } = opts;
 
   const query = useInfiniteQuery<
-    CursorResult, // TQueryFnData
+    MetricCursorPage, // TQueryFnData
     Error, // TError
-    InfiniteData<CursorResult, string | undefined>, // TData (no select -> keep InfiniteData)
+    InfiniteData<MetricCursorPageVM, string | undefined>, // TData (no select -> keep InfiniteData)
     ReturnType<typeof metricsKeys.cursor.infinite>, // TQueryKey
     string | undefined // TPageParam
   >({
@@ -164,14 +195,27 @@ export function useMetricInfiniteViaCursor(opts: UseMetricArgs & { enabled: bool
         sort,
         q,
         filter,
-        after: pageParam, // pageParam is TParam here
+        after: pageParam,
       }),
-    enabled: enabled,
-    initialPageParam: undefined, // REQUIRED in v5
+
+    initialPageParam: undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+
+    select: (data) => ({
+      pageParams: data.pageParams,
+      pages: data.pages.map((p) => ({
+        ...p,
+        items: p.items.map(toMetricPreviewVM),
+      })),
+    }),
+
+    // Keep previous pages visible while fetching the next one
+    placeholderData: (prev) => prev,
+
     staleTime: 30_000,
     gcTime: 5 * 60_000,
     refetchOnWindowFocus: false,
+    enabled: enabled,
   });
 
   const items = query.data?.pages.flatMap((p) => p.items) ?? [];
