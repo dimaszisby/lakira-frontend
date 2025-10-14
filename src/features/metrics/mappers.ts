@@ -1,8 +1,11 @@
-import type { UserMetricDetailResponseDTO } from "@/features/metrics/metric.dto";
+import type {
+  MetricPreviewResponseDTO,
+  UserMetricDetailResponseDTO,
+} from "@/features/metrics/metric.dto";
 
 import type { MetricSettingsExtendedVM } from "../metric-settings/view-models";
 import { DEFAULT_DISPLAY, isChartType } from "../metric-settings/view-models";
-import type { MetricHeaderVM } from "./view-models";
+import type { MetricHeaderVM, MetricPreviewVM } from "./view-models";
 
 // MetricHeader section of MetricDetailsPage
 export function toMetricHeaderVM(dto: UserMetricDetailResponseDTO): MetricHeaderVM {
@@ -20,7 +23,7 @@ export function toMetricHeaderVM(dto: UserMetricDetailResponseDTO): MetricHeader
 }
 
 // MetricSetting section of MetricDetailsPage
-// TODO: Shared/centralized because of dupplications
+// TODO: refactor to ./src/features/metric-settings/mappers.ts
 export function toMetricSettingsVM(d: UserMetricDetailResponseDTO): MetricSettingsExtendedVM {
   const s = d.settings;
   if (!s) {
@@ -78,46 +81,24 @@ export function toMetricSettingsVM(d: UserMetricDetailResponseDTO): MetricSettin
   };
 }
 
-// export function toMetricSettingsVM(
-//   settings?: MetricSettingsResponseDTO | null
-// ): MetricSettingsVM {
-//   if (!settings) {
-//     // not included or not configured
-//     return {
-//       id: null,
-//       isActive: null,
-//       goalType: null,
-//       goalValue: null,
-//       startDate: null,
-//       deadlineDate: null,
-//       alertThresholds: null,
-//       display: null,
-//     };
-//   }
+export function toMetricPreviewVM(dto: MetricPreviewResponseDTO): MetricPreviewVM {
+  const cat = dto.category;
+  return {
+    // Base
+    id: dto.id,
+    name: dto.name,
+    defaultUnit: dto.defaultUnit,
+    description: dto.description ?? null,
+    isPublic: dto.isPublic,
 
-//   // normalize nested display
-//   const d = settings.displayOptions;
-//   const display: DisplayVM = {
-//     showOnDashboard: d?.showOnDashboard ?? DEFAULT_DISPLAY.showOnDashboard,
-//     priority: d?.priority ?? DEFAULT_DISPLAY.priority,
-//     chartType: isChartType(d?.chartType)
-//       ? d!.chartType
-//       : DEFAULT_DISPLAY.chartType,
-//     color: d?.color ?? DEFAULT_DISPLAY.color,
-//   };
+    // Relations
+    category: cat ? { id: cat.id, name: cat.name, color: cat.color, icon: cat.icon } : null,
+    originalMetricId: dto.originalMetricId ?? null,
+    goalType: dto.goalType ?? null,
+    logCount: dto.logCount,
 
-//   return {
-//     id: settings.id,
-//     isActive: settings.isActive,
-//     goalType: settings.goalEnabled ? settings.goalType ?? null : null,
-//     goalValue: settings.goalEnabled ? settings.goalValue ?? null : null,
-//     startDate: settings.timeFrameEnabled ? settings.startDate ?? null : null,
-//     deadlineDate: settings.timeFrameEnabled
-//       ? settings.deadlineDate ?? null
-//       : null,
-//     alertThresholds: settings.alertEnabled
-//       ? settings.alertThresholds ?? null
-//       : null,
-//     display,
-//   };
-// }
+    // Timestamps
+    createdAt: dto.createdAt,
+    updatedAt: dto.updatedAt,
+  };
+}
