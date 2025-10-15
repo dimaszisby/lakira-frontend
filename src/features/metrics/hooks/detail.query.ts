@@ -5,7 +5,7 @@ import { metricsKeys } from "../keys";
 import { toMetricHeaderVM, toMetricSettingsVM } from "../mappers";
 import { getUserMetricDetails } from "../metric.api";
 
-export default function useMetricDetailComposite(metricId: string) {
+export function useMetricDetailComposite(metricId: string) {
   return useQuery({
     queryKey: metricsKeys.detail(metricId, ["category", "settings"]),
     queryFn: () => getUserMetricDetails(metricId, { includes: ["category", "settings"] }),
@@ -18,3 +18,5 @@ export default function useMetricDetailComposite(metricId: string) {
     gcTime: 5 * 60_000,
   });
 }
+
+export default useMetricDetailComposite;

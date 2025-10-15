@@ -18,7 +18,7 @@ type Vars = {
 
 type Ctx = { key: QueryKey; prev?: MetricDetailCompositeVM };
 
-export default function useUpdateMetric(
+export function useUpdateMetric(
   onSuccess?: (updated: MetricResponseDTO) => void,
   onErrorCb?: (error: Error) => void,
 ) {

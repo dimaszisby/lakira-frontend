@@ -14,7 +14,7 @@ type UseMetricArgs = {
   filter?: MetricFilterViaCursor;
 };
 
-export default function useMetricInfiniteViaCursor(opts: UseMetricArgs & { enabled: boolean }) {
+export function useMetricListInfiniteViaCursor(opts: UseMetricArgs & { enabled: boolean }) {
   const { limit = 20, sort = "-createdAt", q, filter, enabled = true } = opts;
 
   const query = useInfiniteQuery<

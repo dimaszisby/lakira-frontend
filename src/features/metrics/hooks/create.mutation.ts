@@ -4,7 +4,7 @@ import { invalidateMetricLists } from "../cache";
 import { createMetric } from "../metric.api";
 import type { MetricResponseDTO } from "../metric.dto";
 
-export default function useCreateMetric(
+export function useCreateMetric(
   onSuccess?: (created: MetricResponseDTO) => void,
   onError?: (error: Error) => void,
 ) {

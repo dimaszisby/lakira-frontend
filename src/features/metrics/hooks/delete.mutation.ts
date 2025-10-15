@@ -11,7 +11,7 @@ type DeleteCtx = {
   details: Array<{ key: QueryKey; prev: unknown }>;
 };
 
-export default function useDeleteMetric(
+export function useDeleteMetric(
   onSuccess?: (deletedId: string) => void,
   onErrorCb?: (error: Error) => void,
 ) {

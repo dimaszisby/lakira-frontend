@@ -9,7 +9,7 @@ import type { MetricCursorPageVM } from "../view-models";
 
 type MetricCursorPageDTO = MetricCursorPage;
 
-export default function useMetricsListPaginationViaCursor(params: {
+export function useMetricsListPaginationViaCursor(params: {
   limit: number;
   sort: MetricSortViaCursor;
   q?: string;

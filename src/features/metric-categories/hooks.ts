@@ -9,14 +9,14 @@ import {
   getMetricCategoryById,
   listMetricCategories,
   updateMetricCategory,
-} from "@/src/features/metric-categories/api";
+} from "@/features/metric-categories/api";
 import type {
   MetricCategoryResponseDTO,
   UpdateMetricCategoryRequestDTO,
-} from "@/src/types/dtos/metric-category.dto";
-import type { CursorPage } from "@/src/types/generics/CursorPage";
+} from "@/types/dtos/metric-category.dto";
+import type { CursorPage } from "@/types/generics/CursorPage";
 
-import { useMetricsLibrary } from "../metrics/hooks";
+import { useMetricsListViaOffset } from "../metrics/hooks";
 import type { MetricsListParams } from "../metrics/types";
 import {
   invalidateMetricCategoryDetail,
@@ -151,6 +151,7 @@ const useMetricCategoryById = (categoryId: string) => {
 };
 
 // Adapter for MetricLibraryList
+// Dev Note: Currently not being used
 type CategoryMetricsParams = Omit<MetricsListParams, "categoryId">;
 
 export const useCategoryMetrics = (
@@ -160,7 +161,7 @@ export const useCategoryMetrics = (
 ) => {
   const merged = useMemo(() => ({ ...params, categoryId }), [params, categoryId]);
 
-  return useMetricsLibrary(merged, {
+  return useMetricsListViaOffset(merged, {
     enabled: (opts?.enabled ?? true) && !!categoryId,
     staleTime: opts?.staleTime,
   });
