@@ -22,6 +22,7 @@ export type MetricFormInitial = {
   };
 };
 
+// TODO: unify these conversion functions with the ones in /features/metrics/utils.ts
 export function fromPreview(m: MetricPreviewResponseDTO): MetricFormInitial {
   return {
     id: m.id,

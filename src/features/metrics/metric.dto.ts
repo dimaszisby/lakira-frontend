@@ -8,10 +8,11 @@ import type {
   getMetricSchema,
   updateMetricSchema,
 } from "@/types/api/zod-metric.schema";
+import type { MetricCategoryResponseDTO } from "@/types/dtos/metric-category.dto";
+import type { MetricLogResponseDTO } from "@/types/dtos/metric-log.dto";
+import type { MetricSettingsResponseDTO } from "@/types/dtos/metric-settings.dto";
 
-import type { MetricCategoryResponseDTO } from "../../types/dtos/metric-category.dto";
-import type { MetricLogResponseDTO } from "../../types/dtos/metric-log.dto";
-import type { MetricSettingsResponseDTO } from "../../types/dtos/metric-settings.dto";
+// TODO: Unify Redundants
 
 // * ===== Response DTOs =====
 
@@ -21,23 +22,28 @@ import type { MetricSettingsResponseDTO } from "../../types/dtos/metric-settings
  */
 export interface MetricResponseDTO {
   readonly id: string;
-  readonly userId: string;
-  readonly categoryId: string | null;
-  readonly originalMetricId: string | null;
 
+  // Base
   readonly name: string;
   readonly description: string | null;
   readonly defaultUnit: string;
   readonly isPublic: boolean;
 
-  readonly createdAt: ISODateString; // ISO Date string
-  readonly updatedAt: ISODateString; // ISO Date string
+  // Relations
+  readonly userId: string;
+  readonly categoryId: string | null;
+  readonly originalMetricId: string | null;
+
+  // Timestamps
+  readonly createdAt: ISODateString;
+  readonly updatedAt: ISODateString;
 }
 
 /**
  * @interface MetricPreviewCategoryDTO
  * @description Represents summarized category information for a metric preview.
  */
+// TODO: Unify with MetricCategoryResponseDTO
 export interface MetricPreviewCategoryDTO {
   readonly id: string;
   readonly name: string;
@@ -51,18 +57,27 @@ export interface MetricPreviewCategoryDTO {
  */
 export interface MetricPreviewResponseDTO {
   readonly id: string;
+
+  // Base
   readonly name: string;
   readonly defaultUnit: string;
   readonly description: string | null;
   readonly isPublic: boolean;
+
+  // Relations
+  readonly originalMetricId?: string | null;
   readonly category: MetricPreviewCategoryDTO | null;
-  readonly goalType: string | null;
   readonly logCount: number;
+  readonly goalType: string | null;
+
+  // Timestamps
+  readonly createdAt: ISODateString;
+  readonly updatedAt: ISODateString;
 }
 
 /**
  * @typedef PaginatedMetricListResponseDTO
- * @deprecated migrated to cursor method
+ * @description migrated to cursor method, but still used on Category Form and Metric Form
  */
 export interface PaginatedMetricListResponseDTO {
   metrics: MetricPreviewResponseDTO[];
@@ -75,6 +90,8 @@ export interface PaginatedMetricListResponseDTO {
  */
 export interface UserMetricDetailResponseDTO {
   readonly id: string;
+
+  // Relations IDs
   readonly userId: string;
   readonly categoryId: string | null;
   readonly originalMetricId: string | null;
@@ -87,7 +104,7 @@ export interface UserMetricDetailResponseDTO {
   readonly createdAt: ISODateString; // ISO Date string
   readonly updatedAt: ISODateString; // ISO Date string
 
-  // if included
+  // Relations (optional query includes)
   readonly category?: MetricCategoryResponseDTO | null;
   readonly settings?: MetricSettingsResponseDTO | null;
   readonly logs?: MetricLogResponseDTO[] | null;
