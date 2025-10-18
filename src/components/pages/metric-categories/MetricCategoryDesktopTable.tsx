@@ -2,11 +2,11 @@ import React, { memo } from "react";
 
 import type { TableColumn } from "@/components/ui/Table";
 import { TableBase } from "@/components/ui/Table";
-import type { MetricCategoryResponseDTO } from "@/src/types/dtos/metric-category.dto";
+import type { MetricCategoryVM } from "@/src/features/metric-categories/view-models";
 
 import type { CategoryTableProps } from "./type";
 
-const columns: TableColumn<MetricCategoryResponseDTO>[] = [
+const columns: TableColumn<MetricCategoryVM>[] = [
   {
     key: "icon",
     label: "ICON",
@@ -53,7 +53,10 @@ const columns: TableColumn<MetricCategoryResponseDTO>[] = [
     align: "left",
     sortable: true,
     width: "w-[160px]",
-    renderCell: (cat) => new Date(cat.updatedAt).toLocaleString(),
+    renderCell: (cat) => {
+      if (!cat.updatedAt) return "N/A";
+      return new Date(cat.updatedAt).toLocaleString();
+    },
   },
   {
     key: "createdAt",
@@ -61,7 +64,10 @@ const columns: TableColumn<MetricCategoryResponseDTO>[] = [
     align: "left",
     sortable: true,
     width: "w-[160px]",
-    renderCell: (cat) => new Date(cat.createdAt).toLocaleString(),
+    renderCell: (cat) => {
+      if (!cat.createdAt) return "N/A";
+      return new Date(cat.createdAt).toLocaleString();
+    },
   },
 ];
 
@@ -75,10 +81,10 @@ export const MetricCategoryDesktopTableBase = ({
   onRowClick,
 }: CategoryTableProps) => {
   return (
-    <TableBase<MetricCategoryResponseDTO>
+    <TableBase<MetricCategoryVM>
       data={categories}
       columns={columns}
-      sortBy={sortBy as keyof MetricCategoryResponseDTO}
+      sortBy={sortBy as keyof MetricCategoryVM}
       sortOrder={sortOrder}
       onSort={(col) => onSort(String(col))}
       rowKey={(cat) => cat.id}

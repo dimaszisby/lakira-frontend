@@ -1,12 +1,12 @@
 import { useRouter } from "next/navigation";
 import { memo, useCallback } from "react";
 
-import type { MetricCategoryResponseDTO } from "@/types/dtos/metric-category.dto";
+import type { MetricCategoryVM } from "@/src/features/metric-categories/view-models";
 import OverlineLabel from "@/ui/OverlineLabel";
 
 interface Props {
-  category: MetricCategoryResponseDTO;
-  onClick?: (metric: MetricCategoryResponseDTO) => void;
+  category: MetricCategoryVM;
+  onClick?: (metric: MetricCategoryVM) => void;
 }
 
 export const MetricCategoryMobileCardBase = ({ category, onClick }: Props) => {

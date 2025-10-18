@@ -1,20 +1,20 @@
-import type {SortChipsColumns} from "@/components/ui/SortChipGroup";
-import type {MetricCategoryResponseDTO} from "@/src/types/dtos/metric-category.dto";
+import type { SortChipsColumns } from "@/components/ui/SortChipGroup";
+import type { MetricCategoryVM } from "@/src/features/metric-categories/view-models";
 
 // Shared types for both desktop and mobile tables
 export interface CategoryTableProps {
-  categories: MetricCategoryResponseDTO[];
+  categories: MetricCategoryVM[];
   sortBy: string;
   sortOrder: "ASC" | "DESC" | null;
   onSort: (column: string) => void;
-  onEdit?: (category: MetricCategoryResponseDTO) => void;
-  onDelete?: (category: MetricCategoryResponseDTO) => void;
-  onRowClick?: (metric: MetricCategoryResponseDTO) => void;
-  rowKey?: (item: MetricCategoryResponseDTO) => string; // Mobile, Optional for SwipeableCard
+  onEdit?: (category: MetricCategoryVM) => void;
+  onDelete?: (category: MetricCategoryVM) => void;
+  onRowClick?: (metric: MetricCategoryVM) => void;
+  rowKey?: (item: MetricCategoryVM) => string; // Mobile, Optional for SwipeableCard
   className?: string;
 }
 
-export const mobileColumns: SortChipsColumns<MetricCategoryResponseDTO>[] = [
+export const mobileColumns: SortChipsColumns<MetricCategoryVM>[] = [
   {
     key: "icon",
     label: "Icon",

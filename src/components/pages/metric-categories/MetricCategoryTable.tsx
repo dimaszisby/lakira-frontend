@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 
-import type { MetricCategoryResponseDTO } from "@/types/dtos/metric-category.dto";
+import type { MetricCategoryVM } from "@/src/features/metric-categories/view-models";
 
 import MetricCategoryDesktopTable from "./MetricCategoryDesktopTable";
 import MetricCategoryMobileTable from "./MetricCategoryMobileTable";
@@ -20,7 +20,7 @@ export const MetricCategoryTableBase = ({
       {/* Desktop view */}
       <MetricCategoryDesktopTable
         categories={categories}
-        sortBy={sortBy as keyof MetricCategoryResponseDTO}
+        sortBy={sortBy as keyof MetricCategoryVM}
         sortOrder={sortOrder}
         onSort={onSort}
         onEdit={onEdit}
@@ -33,7 +33,7 @@ export const MetricCategoryTableBase = ({
       <MetricCategoryMobileTable
         categories={categories}
         rowKey={(cat) => cat.id}
-        sortBy={sortBy as keyof MetricCategoryResponseDTO}
+        sortBy={sortBy as keyof MetricCategoryVM}
         sortOrder={sortOrder}
         onSort={onSort}
         onEdit={onEdit}

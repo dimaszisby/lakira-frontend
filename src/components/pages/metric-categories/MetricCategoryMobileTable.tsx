@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 
-import type { MetricCategoryResponseDTO } from "@/types/dtos/metric-category.dto";
+import type { MetricCategoryVM } from "@/src/features/metric-categories/view-models";
 import SwipeableCard from "@/ui/SwipeableCard";
 
 import MetricCategoryMobileCard from "./MetricCategoryMobileCard";
@@ -8,7 +8,7 @@ import type { CategoryTableProps } from "./type";
 
 export const MetricCategoryMobileTableBase = ({
   categories,
-  rowKey = (item: MetricCategoryResponseDTO) => item.id,
+  rowKey = (item: MetricCategoryVM) => item.id,
   onEdit,
   onDelete,
   onRowClick,
