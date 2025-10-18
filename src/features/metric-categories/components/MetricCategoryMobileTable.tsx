@@ -4,7 +4,7 @@ import type { MetricCategoryVM } from "@/src/features/metric-categories/view-mod
 import SwipeableCard from "@/ui/SwipeableCard";
 
 import MetricCategoryMobileCard from "./MetricCategoryMobileCard";
-import type { CategoryTableProps } from "./type";
+import type { CategoryTableProps } from "./table-config";
 
 export const MetricCategoryMobileTableBase = ({
   categories,

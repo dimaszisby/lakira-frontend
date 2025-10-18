@@ -4,7 +4,7 @@ import type { TableColumn } from "@/components/ui/Table";
 import { TableBase } from "@/components/ui/Table";
 import type { MetricCategoryVM } from "@/src/features/metric-categories/view-models";
 
-import type { CategoryTableProps } from "./type";
+import type { CategoryTableProps } from "./table-config";
 
 const columns: TableColumn<MetricCategoryVM>[] = [
   {

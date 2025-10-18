@@ -4,7 +4,7 @@ import type { MetricCategoryVM } from "@/src/features/metric-categories/view-mod
 
 import MetricCategoryDesktopTable from "./MetricCategoryDesktopTable";
 import MetricCategoryMobileTable from "./MetricCategoryMobileTable";
-import type { CategoryTableProps } from "./type";
+import type { CategoryTableProps } from "./table-config";
 
 export const MetricCategoryTableBase = ({
   categories,
