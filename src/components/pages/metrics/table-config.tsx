@@ -1,25 +1,28 @@
+import { Eye, EyeSlash } from "phosphor-react";
+
+import CategoryChip from "@/features/metric-categories/components/CategoryChip";
 import { toCategoryUI } from "@/features/metric-categories/presenters/toCategoryUI";
-import type { MetricPreviewResponseDTO } from "@/features/metrics/metric.dto";
 import { SERVER_SORTABLE_COLUMNS } from "@/features/metrics/sort";
-import CategoryChip from "@/src/features/metric-categories/components/CategoryChip";
+import type { MetricPreviewVM } from "@/features/metrics/view-models";
+import IconLabel from "@/ui/IconLabel";
 import type { SortChipsColumns } from "@/ui/SortChipGroup";
 import type { TableColumn } from "@/ui/Table";
 
 // Shared types for both desktop and mobile tables
 // TODO: Create a generic for shared between Metric, MetricCategory, and Logs
 export interface MetricTableProps {
-  metrics: MetricPreviewResponseDTO[];
+  metrics: MetricPreviewVM[];
   sortBy: string;
   sortOrder: "ASC" | "DESC" | null;
   onSort: (column: string) => void;
-  onEdit?: (metric: MetricPreviewResponseDTO) => void;
-  onDelete?: (metric: MetricPreviewResponseDTO) => void;
-  onRowClick?: (metric: MetricPreviewResponseDTO) => void;
-  rowKey?: (item: MetricPreviewResponseDTO) => string; // Mobile, Optional for SwipeableCard
+  onEdit?: (metric: MetricPreviewVM) => void;
+  onDelete?: (metric: MetricPreviewVM) => void;
+  onRowClick?: (metric: MetricPreviewVM) => void;
+  rowKey?: (item: MetricPreviewVM) => string; // Mobile, Optional for SwipeableCard
   className?: string;
 }
 
-export const mobileColumns: SortChipsColumns<MetricPreviewResponseDTO>[] = [
+export const mobileColumns: SortChipsColumns<MetricPreviewVM>[] = [
   {
     key: "category",
     label: "Category",
@@ -53,7 +56,7 @@ export const mobileColumns: SortChipsColumns<MetricPreviewResponseDTO>[] = [
 ];
 
 const canSort = new Set<string>(SERVER_SORTABLE_COLUMNS);
-export const desktopColumns: TableColumn<MetricPreviewResponseDTO>[] = [
+export const desktopColumns: TableColumn<MetricPreviewVM>[] = [
   {
     key: "category",
     label: "CATEGORY",
@@ -81,6 +84,13 @@ export const desktopColumns: TableColumn<MetricPreviewResponseDTO>[] = [
     sortable: false,
     width: "w-[140px]",
     responsiveWidth: { md: "w-1/3" },
+    renderCell: (row /* , value */) => {
+      return row.description ? (
+        <label>{row.description}</label>
+      ) : (
+        <label className="font-light text-gray-400">No Description</label>
+      );
+    },
   },
   {
     key: "defaultUnit",
@@ -97,6 +107,17 @@ export const desktopColumns: TableColumn<MetricPreviewResponseDTO>[] = [
     width: "w-[70px]",
     responsiveWidth: { md: "w-[100px]" },
     sortable: canSort.has("isPublic"),
+    renderCell: (row /* , value */) => {
+      return (
+        <IconLabel
+          icon={row.isPublic ? Eye : EyeSlash}
+          label={row.isPublic ? "Public" : "Private"}
+          tone={row.isPublic ? "success" : "muted"}
+          size="sm"
+          iconClassName="mr-1"
+        />
+      );
+    },
   },
   {
     key: "logCount",

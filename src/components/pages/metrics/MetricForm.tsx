@@ -5,15 +5,14 @@ import { useCallback, useEffect, useId, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDebounce } from "react-use";
 
-import type { MetricFormInitial } from "@/features/metrics/form.initial";
+import type { MetricFormInitial, MetricFormInputs, MetricPreviewVM } from "@/features/metrics";
+import { metricFormSchema } from "@/features/metrics";
 import {
   useCreateMetric,
   useDeleteMetric,
-  useMetricsLibrary,
+  useMetricsListViaOffset,
   useUpdateMetric,
-} from "@/features/metrics/hooks";
-import type { MetricFormInputs } from "@/features/metrics/types";
-import { metricFormSchema } from "@/features/metrics/types";
+} from "@/features/metrics/hooks/index";
 import CategorySelect from "@/ui/CategorySelect";
 import ErrorMessage from "@/ui/ErrorMessage";
 import Modal from "@/ui/Modal";
@@ -80,7 +79,7 @@ export const MetricForm = ({ open, onClose, initialMetric }: Props) => {
 
   // Only fetch when modal is open and user typed 2+ chars
   const shouldCheckDup = open && debouncedName.length >= 2;
-  const { metrics: dupCandidates = [] } = useMetricsLibrary(duplicateCheckParams, {
+  const { metrics: dupCandidates = [] } = useMetricsListViaOffset(duplicateCheckParams, {
     enabled: shouldCheckDup,
     staleTime: 5_000,
   });
@@ -94,7 +93,7 @@ export const MetricForm = ({ open, onClose, initialMetric }: Props) => {
       return;
     }
     const conflict = dupCandidates.some(
-      (m) =>
+      (m: MetricPreviewVM) =>
         m.name.trim().toLowerCase() === debouncedName.toLowerCase() &&
         (!isEditMode || m.id !== initialMetric?.id),
     );

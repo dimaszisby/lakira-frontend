@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import type { MetricPreviewResponseDTO } from "@/features/metrics/metric.dto";
+import type { MetricPreviewVM } from "@/src/features/metrics";
 
 import MetricDesktopTable from "./MetricDesktopTable";
 import MetricMobileTable from "./MetricMobileTable";
@@ -17,10 +17,9 @@ export const MetricTableBase = ({
 }: MetricTableProps) => {
   return (
     <>
-      {/* Desktop view */}
       <MetricDesktopTable
         metrics={metrics}
-        sortBy={sortBy as keyof MetricPreviewResponseDTO}
+        sortBy={sortBy as keyof MetricPreviewVM}
         sortOrder={sortOrder}
         onSort={onSort}
         onEdit={onEdit}
@@ -29,11 +28,10 @@ export const MetricTableBase = ({
         className="space-y-4"
       />
 
-      {/* Mobile view */}
       <MetricMobileTable
         metrics={metrics}
         rowKey={(met) => met.id}
-        sortBy={sortBy as keyof MetricPreviewResponseDTO}
+        sortBy={sortBy as keyof MetricPreviewVM}
         sortOrder={sortOrder}
         onSort={onSort}
         onEdit={onEdit}

@@ -17,12 +17,7 @@ export const MetricHeaderSectionBase = ({ data }: { data: MetricHeaderVM }) => {
 
   return (
     <>
-      <MetricForm
-        metricId={data.id}
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        initialMetric={data}
-      />
+      <MetricForm open={modalOpen} onClose={() => setModalOpen(false)} initialMetric={data} />
 
       <section className="relative w-full rounded-2xl bg-white p-6 shadow">
         {/* Edit Button */}

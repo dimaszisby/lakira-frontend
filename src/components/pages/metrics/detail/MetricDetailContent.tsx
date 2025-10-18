@@ -8,7 +8,7 @@ import MetricHeaderSection from "@/components/pages/metrics/detail/MetricHeaderS
 import MetricLogsSection from "@/components/pages/metrics/detail/MetricLogSection";
 import MetricSettingsSection from "@/components/pages/metrics/detail/MetricSettingsSection";
 import VisualizationSection from "@/components/pages/metrics/detail/VisualizationSection";
-import { useMetricDetailComposite } from "@/features/metrics/hooks";
+import useMetricDetailComposite from "@/features/metrics/hooks/detail.query";
 import SkeletonLoader from "@/ui/SekeletonLoader";
 
 const MetricDetailContent = () => {

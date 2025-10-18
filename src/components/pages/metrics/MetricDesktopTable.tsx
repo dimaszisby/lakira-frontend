@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import type { MetricPreviewResponseDTO } from "@/features/metrics/metric.dto";
+import type { MetricPreviewVM } from "@/src/features/metrics/view-models";
 import { TableBase } from "@/ui/Table";
 
 import type { MetricTableProps } from "./table-config";
@@ -19,7 +19,7 @@ export const MetricDesktopTableBase = ({
     <TableBase
       data={metrics}
       columns={desktopColumns}
-      sortBy={sortBy as keyof MetricPreviewResponseDTO}
+      sortBy={sortBy as keyof MetricPreviewVM}
       sortOrder={sortOrder}
       onSort={onSort} // Dev Note: recently changed
       rowKey={(cat) => cat.id}

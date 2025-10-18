@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import type { MetricPreviewResponseDTO } from "@/features/metrics/metric.dto";
+import type { MetricPreviewVM } from "@/src/features/metrics/view-models";
 import SwipeableCard from "@/ui/SwipeableCard";
 
 import MetricLibraryMobileCard from "./MetricLibraryMobileCard";
@@ -8,7 +8,7 @@ import type { MetricTableProps } from "./table-config";
 
 export const MetricMobileTableBase = ({
   metrics,
-  rowKey = (item: MetricPreviewResponseDTO) => item.id,
+  rowKey = (item: MetricPreviewVM) => item.id,
   onEdit,
   onDelete,
   onRowClick,

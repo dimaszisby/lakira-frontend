@@ -2,23 +2,19 @@ import { useRouter } from "next/navigation";
 import { CalendarBlank, Eye, Tag } from "phosphor-react";
 import { memo, useCallback } from "react";
 
-import type { MetricPreviewResponseDTO } from "@/features/metrics/metric.dto";
-import CategoryChip from "@/ui/CategoryChip";
+import CategoryChip from "@/features/metric-categories/components/CategoryChip";
+import { toCategoryUI } from "@/src/features/metric-categories/presenters/toCategoryUI";
+import type { MetricPreviewVM } from "@/src/features/metrics/view-models";
 import IconLabel from "@/ui/IconLabel";
 
 export interface MetricLibraryCardProps {
-  metric: MetricPreviewResponseDTO;
-  onClick?: (metric: MetricPreviewResponseDTO) => void;
+  metric: MetricPreviewVM;
+  onClick?: (metric: MetricPreviewVM) => void;
 }
 
 export const MetricLibraryMobileCardBase = ({ metric, onClick }: MetricLibraryCardProps) => {
   const router = useRouter();
   const { id, name, defaultUnit, isPublic, category, logCount } = metric;
-
-  // * Normalization
-  // Normalize description: treat empty or whitespace-only as missing
-  // const displayDescription =
-  //   description && description.trim() !== "" ? description : "No Description";
 
   // * Sizing
   // Trim to avoid overflow
@@ -33,6 +29,8 @@ export const MetricLibraryMobileCardBase = ({ metric, onClick }: MetricLibraryCa
     if (onClick) return onClick(metric); // prefer parent handler
     router.push(`/metrics/${id}`); // fallback behaviour
   }, [onClick, router, id, metric]);
+
+  const categoryUI = toCategoryUI(category);
 
   return (
     <div
@@ -64,7 +62,7 @@ export const MetricLibraryMobileCardBase = ({ metric, onClick }: MetricLibraryCa
 
       <div className="mt-2 flex items-center justify-between">
         <span>
-          <CategoryChip category={category} />
+          <CategoryChip category={categoryUI} />
         </span>
 
         {/* Default Unit */}
