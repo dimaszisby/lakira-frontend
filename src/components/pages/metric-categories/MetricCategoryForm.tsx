@@ -7,7 +7,7 @@ import {
   useCreateMetricCategory,
   useDeleteMetricCategory,
   useUpdateMetricCategory,
-} from "@/features/metric-categories/hooks";
+} from "@/features/metric-categories/hooks/index";
 import type { MetricCategoryFormInput } from "@/features/metric-categories/types";
 import { metricCategoryFormSchema } from "@/features/metric-categories/types";
 import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
