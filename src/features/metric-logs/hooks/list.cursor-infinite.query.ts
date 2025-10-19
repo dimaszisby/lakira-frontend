@@ -1,0 +1,66 @@
+import type { InfiniteData } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
+
+import { getMetricLogsListViaCursor } from "../api";
+import { metricLogsKeys } from "../keys";
+import { toMetricLogVM } from "../mappers";
+import type {
+  MetricLogCursorPageResponse,
+  MetricLogFilterViaCursor,
+  MetricLogSortViaCursor,
+} from "../sort";
+import type { MetricLogCursorPageVM } from "../view-models";
+
+type UseMetricLogArgs = {
+  limit?: number;
+  sort?: MetricLogSortViaCursor;
+  q?: string;
+  filter?: MetricLogFilterViaCursor;
+};
+
+export function useMetricLogListCursorInfinite(opts: UseMetricLogArgs & { enabled: boolean }) {
+  const { limit = 20, sort = "-createdAt", q, filter, enabled = true } = opts;
+
+  const query = useInfiniteQuery<
+    MetricLogCursorPageResponse, // TQueryFnData
+    Error, // TError
+    InfiniteData<MetricLogCursorPageVM, string | undefined>, // TData (no select -> keep InfiniteData)
+    ReturnType<typeof metricLogsKeys.cursor.infinite>, // TQueryKey
+    string | undefined // TPageParam
+  >({
+    queryKey: metricLogsKeys.cursor.infinite({ limit, sort, q, filter }),
+    queryFn: ({ pageParam }) =>
+      getMetricLogsListViaCursor({
+        limit,
+        sort,
+        q,
+        filter,
+        after: pageParam, // pageParam is TParam here
+      }),
+
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+
+    select: (data) => ({
+      pageParams: data.pageParams,
+      pages: data.pages.map((p) => ({
+        ...p,
+        items: p.items.map(toMetricLogVM),
+      })),
+    }),
+
+    // Keep previous pages visible while fetching the next one
+    placeholderData: (prev) => prev,
+
+    enabled: enabled,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+    refetchOnWindowFocus: false,
+  });
+
+  const items = query.data?.pages.flatMap((p) => p.items) ?? [];
+  const hasNextPage = query.hasNextPage;
+  const loadMore = () => query.fetchNextPage();
+
+  return { ...query, items, hasNextPage, loadMore };
+}
