@@ -1,25 +1,19 @@
 import React from "react";
-import { MetricCategoryResponseDTO } from "@/src/types/dtos/metric-category.dto";
+
+import type { MetricLogVM } from "@/src/features/metric-logs/view-models";
+
 import LogDesktopTable from "./LogDesktopTable";
 import LogMobileTable from "./LogMobileTable";
-import { LogTableProps } from "./types";
+import type { LogTableProps } from "./table-config";
 
 const LogTable = React.memo(
-  ({
-    logs,
-    sortBy,
-    sortOrder,
-    onSort,
-    onEdit,
-    onDelete,
-    onRowClick,
-  }: LogTableProps) => {
+  ({ logs, sortBy, sortOrder, onSort, onEdit, onDelete, onRowClick }: LogTableProps) => {
     return (
       <>
         {/* Desktop view */}
         <LogDesktopTable
           logs={logs}
-          sortBy={sortBy as keyof MetricCategoryResponseDTO}
+          sortBy={sortBy as keyof MetricLogVM}
           sortOrder={sortOrder}
           onSort={onSort}
           onEdit={onEdit}
@@ -32,7 +26,7 @@ const LogTable = React.memo(
         <LogMobileTable
           logs={logs}
           rowKey={(log) => log.id}
-          sortBy={sortBy as keyof MetricCategoryResponseDTO}
+          sortBy={sortBy as keyof MetricLogVM}
           sortOrder={sortOrder}
           onSort={onSort}
           onEdit={onEdit}
@@ -41,7 +35,7 @@ const LogTable = React.memo(
         />
       </>
     );
-  }
+  },
 );
 
 LogTable.displayName = "LogTable";

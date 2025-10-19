@@ -1,13 +1,15 @@
 import React from "react";
+
 import SwipeableCard from "@/components/ui/SwipeableCard";
-import { MetricLogResponseDTO } from "@/src/types/dtos/metric-log.dto";
-import { LogTableProps } from "./types";
+import type { MetricLogVM } from "@/src/features/metric-logs/view-models";
+
 import LogMobileCard from "./LogMobileCard";
+import type { LogTableProps } from "./table-config";
 
 const LogMobileTable = React.memo(
   ({
     logs,
-    rowKey = (item: MetricLogResponseDTO) => item.id,
+    rowKey = (item: MetricLogVM) => item.id,
     onEdit,
     onDelete,
     onRowClick,
@@ -38,13 +40,11 @@ const LogMobileTable = React.memo(
             </SwipeableCard>
           ))
         ) : (
-          <p className="text-center text-gray-500 text-sm py-4">
-            No data available
-          </p>
+          <p className="py-4 text-center text-sm text-gray-500">No data available</p>
         )}
       </div>
     );
-  }
+  },
 );
 
 LogMobileTable.displayName = "LogMobileTable";

@@ -1,17 +1,17 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import React, { useCallback, useEffect, useId, useMemo } from "react";
+import React, { useCallback, useId, useMemo } from "react";
 import { useForm } from "react-hook-form";
 
 import {
   useCreateMetricLog,
   useDeleteMetricLog,
   useUpdateMetricLog,
-} from "@/features/metricLogs/hooks";
-import type { LogFormInputs } from "@/features/metricLogs/types";
-import { logFormSchema } from "@/features/metricLogs/types";
-import type { MetricLogVM } from "@/src/features/metricLogs/view-models";
+} from "@/features/metric-logs/hooks/index";
+import type { LogFormInputs } from "@/features/metric-logs/types";
+import { logFormSchema } from "@/features/metric-logs/types";
+import type { MetricLogVM } from "@/features/metric-logs/view-models";
 import type {
   CreateMetricLogRequestDTO,
   MetricLogResponseDTO,
@@ -19,9 +19,8 @@ import type {
 } from "@/types/dtos/metric-log.dto";
 import Modal from "@/ui/Modal";
 import PrimaryButton from "@/ui/PrimaryButton";
+import TextField from "@/ui/TextField";
 import { toIsoFromLocalInput } from "@/utils/date-io";
-
-import TextField from "../../ui/TextField";
 
 interface Props {
   open: boolean;
@@ -137,11 +136,6 @@ const MetricLogFormModal = ({ open, onClose, metricId, initialLog }: Props) => {
   const handleDeleteClick = useCallback(() => {
     void deleteLogAsync();
   }, [deleteLogAsync]);
-
-  // Question: Should I use useEffect for react
-  useEffect(() => {
-    if (!open) reset();
-  }, [open, reset]);
 
   // Computed values
   const errorMsg = createError?.message || updateError?.message || deleteError?.message || "";

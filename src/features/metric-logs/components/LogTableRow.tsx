@@ -1,6 +1,4 @@
-// components/MetricTableRow.tsx
-
-import { MetricLogResponseDTO } from "@/src/types/dtos/metric-log.dto";
+import type { MetricLogVM } from "@/src/features/metric-logs/view-models";
 import { formatDate } from "@/utils/helpers/dateHelper";
 
 /**
@@ -9,8 +7,8 @@ import { formatDate } from "@/utils/helpers/dateHelper";
  */
 
 interface LogTableRowProps {
-  log: MetricLogResponseDTO;
-  onClick?: (log: MetricLogResponseDTO) => void;
+  log: MetricLogVM;
+  onClick?: (log: MetricLogVM) => void;
 }
 
 const LogTableRow: React.FC<LogTableRowProps> = ({ log, onClick }) => {
@@ -18,7 +16,7 @@ const LogTableRow: React.FC<LogTableRowProps> = ({ log, onClick }) => {
     <tr
       tabIndex={0}
       role="button"
-      className="bg-white hover:bg-gray-50 cursor-pointer transition"
+      className="cursor-pointer bg-white transition hover:bg-gray-50"
       onClick={() => onClick?.(log)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -29,15 +27,11 @@ const LogTableRow: React.FC<LogTableRowProps> = ({ log, onClick }) => {
       data-testid={`metric-row-${log.id}`} // Optionally add data-testid for testing
     >
       {/* Log Date */}
-      <td className="px-4 py-2 font-semibold">
-        {formatDate(log.loggedAt, true)}
-      </td>
+      <td className="px-4 py-2 font-semibold">{formatDate(log.loggedAt, true)}</td>
 
       {/* Log Value */}
-      <td className="px-4 py-2 text-gray-500 truncate max-w-xs">
-        {log.logValue ?? (
-          <span className="italic text-gray-400">No Description</span>
-        )}
+      <td className="max-w-xs truncate px-4 py-2 text-gray-500">
+        {log.logValue ?? <span className="italic text-gray-400">No Description</span>}
       </td>
     </tr>
   );

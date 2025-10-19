@@ -1,9 +1,10 @@
 import { memo, useCallback } from "react";
-import { MetricLogResponseDTO } from "@/src/types/dtos/metric-log.dto";
+
+import type { MetricLogVM } from "@/src/features/metric-logs/view-models";
 
 interface LogMobileCardProps {
-  log: MetricLogResponseDTO;
-  onClick?: (log: MetricLogResponseDTO) => void;
+  log: MetricLogVM;
+  onClick?: (log: MetricLogVM) => void;
 }
 
 const LogMobileCard = memo(
@@ -29,15 +30,13 @@ const LogMobileCard = memo(
         className=""
         aria-label={`Open category ${name}`}
       >
-        <span className="text-gray-900 text-base font-semibold">
-          {loggedAt}
-        </span>
+        <span className="text-base font-semibold text-gray-900">{loggedAt}</span>
 
-        <span className="text-gray-500 text-sm font-regular">{logValue}</span>
+        <span className="text-sm font-regular text-gray-500">{logValue}</span>
       </div>
     );
   },
-  (prev, next) => prev.log.id === next.log.id && prev.onClick === next.onClick
+  (prev, next) => prev.log.id === next.log.id && prev.onClick === next.onClick,
 );
 
 LogMobileCard.displayName = "MetricCategoryMobileCard";
