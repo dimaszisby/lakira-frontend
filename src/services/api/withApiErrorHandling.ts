@@ -1,3 +1,4 @@
+// Used on API calls throughout the app to provide consistent error handling
 import { handleApiError } from "@/src/services/api/handleApiError";
 
 import { isAbortError, toAbortDomException } from "./isAbortError";
