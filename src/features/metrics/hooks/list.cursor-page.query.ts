@@ -1,5 +1,8 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo } from "react";
+
+import { httpStatusFrom } from "@/services/api/http-status";
+import { computeTotalPages, makePageItemsSelect, useCursorPager } from "@/utils/query-cursor";
 
 import { metricsKeys } from "../keys";
 import { toMetricPreviewVM } from "../mappers";
@@ -16,56 +19,54 @@ export function useMetricsListPaginationViaCursor(params: {
   filter?: MetricFilterViaCursor;
   enabled: boolean;
 }) {
-  type Map = Record<number, string | null>;
-  const [page, setPage] = useState(1);
-  const [cursorByPage, setCursorByPage] = useState<Map>({ 1: null });
-  const { enabled = true } = params;
+  const { limit, sort, q, filter, enabled = true } = params;
 
-  // reset cursors when query changes
-  useEffect(() => {
-    setPage(1);
-    setCursorByPage({ 1: null });
-  }, [params.limit, params.sort, params.q, params.filter?.name, params.filter?.categoryId]);
+  // Reset dependencies for pager when query params change
+  const resetDeps = useMemo(
+    () => [limit, sort, q ?? "", filter?.name ?? "", filter?.categoryId ?? ""],
+    [limit, sort, q, filter?.name, filter?.categoryId],
+  );
 
-  const after = cursorByPage[page] ?? undefined;
+  // Centralized page/cursor management
+  const pager = useCursorPager(resetDeps);
+  const { page, after, setPage, updateNextCursor, canPrev, canNextUsing } = pager;
 
-  const query = useQuery<MetricCursorPageDTO, Error, MetricCursorPageVM>({
-    queryKey: metricsKeys.cursor.pages({ ...params, page, includeTotal: true }),
-    queryFn: async () =>
-      await getMetricLibraryViaCursor({
-        ...params,
-        after,
-        includeTotal: true,
-      }),
-    select: (d) => ({
-      ...d,
-      items: d.items.map(toMetricPreviewVM),
-    }),
+  const query = useQuery<MetricCursorPageDTO, unknown, MetricCursorPageVM>({
+    queryKey: metricsKeys.cursor.pages({ limit, sort, q, filter, page, includeTotal: true }),
+    queryFn: () => getMetricLibraryViaCursor({ limit, sort, q, filter, after, includeTotal: true }),
+
+    select: makePageItemsSelect(toMetricPreviewVM),
     placeholderData: keepPreviousData,
     staleTime: 30_000,
+
+    retry: (count, err) => {
+      const status = httpStatusFrom(err);
+      if (status && status < 500 && status !== 429) return false;
+      return count < 2;
+    },
+
     enabled: enabled,
   });
 
-  // when we get new data, store the next cursor for the next page
   useEffect(() => {
-    const next = query.data?.nextCursor;
-    if (!next) return;
-    setCursorByPage((prev) => (prev[page + 1] === next ? prev : { ...prev, [page + 1]: next }));
-  }, [page, query.data?.nextCursor]);
+    updateNextCursor(query.data?.nextCursor ?? null);
+  }, [page, query.data?.nextCursor, updateNextCursor]);
 
-  const items = query.data?.items ?? [];
+  const items = useMemo(() => query.data?.items ?? [], [query.data?.items]);
   const totalCount = query.data?.totalCount;
-  const totalPages = totalCount ? Math.max(1, Math.ceil(totalCount / params.limit)) : undefined;
+  const totalPages = computeTotalPages(totalCount, limit);
 
   // navigation helpers (works even if total unknown)
-  const canPrev = page > 1;
-  const canNext = Boolean(cursorByPage[page + 1] ?? query.data?.nextCursor);
+  const canNext = canNextUsing(query.data?.nextCursor);
 
   return {
     items,
     page,
     setPage,
     isFetching: query.isFetching,
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
     totalCount,
     totalPages,
     canPrev,

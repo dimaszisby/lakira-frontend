@@ -1,5 +1,5 @@
-import type { ISODateString } from "@/src/types/aliases";
-import type { CursorPage } from "@/src/types/generics/CursorPage";
+import type { ISODateTimeString } from "@/src/types/aliases";
+import type { CursorPage } from "@/src/types/generics/cursor/CursorPage";
 
 import type { MetricCategoryVM } from "../metric-categories/view-models";
 import type { MetricSettingsExtendedVM } from "../metric-settings/view-models";
@@ -41,8 +41,8 @@ export type MetricPreviewVM = {
   logCount: number;
 
   // Timestamps
-  createdAt?: ISODateString; // currently not displayed in the preview, but keep it for future use
-  updatedAt?: ISODateString; // currently not displayed in the preview, but keep it for future use
+  createdAt?: ISODateTimeString; // currently not displayed in the preview, but keep it for future use
+  updatedAt?: ISODateTimeString; // currently not displayed in the preview, but keep it for future use
 };
 
 // Preview Cursor Page

@@ -1,6 +1,6 @@
 import type { z } from "zod";
 
-import type { ISODateString } from "@/src/types/aliases";
+import type { ISODateString, ISODateTimeString } from "@/src/types/aliases";
 import type {
   createMetricSchema,
   deleteMetricSchema,
@@ -71,8 +71,8 @@ export interface MetricPreviewResponseDTO {
   readonly goalType: string | null;
 
   // Timestamps
-  readonly createdAt: ISODateString;
-  readonly updatedAt: ISODateString;
+  readonly createdAt: ISODateTimeString;
+  readonly updatedAt: ISODateTimeString;
 }
 
 /**

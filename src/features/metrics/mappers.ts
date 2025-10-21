@@ -3,8 +3,6 @@ import type {
   UserMetricDetailResponseDTO,
 } from "@/features/metrics/metric.dto";
 
-import type { MetricSettingsExtendedVM } from "../metric-settings/view-models";
-import { DEFAULT_DISPLAY, isChartType } from "../metric-settings/view-models";
 import type { MetricHeaderVM, MetricPreviewVM } from "./view-models";
 
 // MetricHeader section of MetricDetailsPage
@@ -19,65 +17,6 @@ export function toMetricHeaderVM(dto: UserMetricDetailResponseDTO): MetricHeader
     createdAt: dto.createdAt,
     updatedAt: dto.updatedAt,
     category: cat ? { id: cat.id, name: cat.name, color: cat.color, icon: cat.icon } : null,
-  };
-}
-
-// MetricSetting section of MetricDetailsPage
-// TODO: refactor to ./src/features/metric-settings/mappers.ts
-export function toMetricSettingsVM(d: UserMetricDetailResponseDTO): MetricSettingsExtendedVM {
-  const s = d.settings;
-  if (!s) {
-    return {
-      metricId: d.id,
-      goalEnabled: false,
-      goalType: null,
-      goalValue: null,
-      timeFrameEnabled: false,
-      startDate: null,
-      deadlineDate: null,
-      alertEnabled: false,
-      alertThresholds: 0,
-      isAchieved: false,
-      isActive: false,
-      displayOptions: {
-        showOnDashboard: DEFAULT_DISPLAY.showOnDashboard,
-        priority: DEFAULT_DISPLAY.priority,
-        chartType: DEFAULT_DISPLAY.chartType,
-        color: DEFAULT_DISPLAY.color,
-      },
-    };
-  }
-
-  const displayOptions = {
-    showOnDashboard: s.displayOptions?.showOnDashboard ?? DEFAULT_DISPLAY.showOnDashboard,
-    priority: s.displayOptions?.priority ?? DEFAULT_DISPLAY.priority,
-    chartType: isChartType(s.displayOptions?.chartType)
-      ? s.displayOptions!.chartType
-      : DEFAULT_DISPLAY.chartType,
-    color: s.displayOptions?.color ?? DEFAULT_DISPLAY.color,
-  };
-
-  return {
-    id: s.id,
-    metricId: d.id,
-    goalEnabled: s.goalEnabled ?? false,
-    goalType: s.goalType ?? null,
-    goalValue: s.goalValue ?? null,
-    timeFrameEnabled: s.timeFrameEnabled ?? false,
-    startDate: s.startDate ? s.startDate : null,
-    deadlineDate: s.deadlineDate ? s.deadlineDate : null,
-    alertEnabled: s.alertEnabled ?? false,
-    alertThresholds: s.alertThresholds ?? 0,
-    isAchieved: s.isAchieved ?? false,
-    isActive: s.isActive ?? false,
-    displayOptions: {
-      showOnDashboard: displayOptions.showOnDashboard ?? false,
-      priority: displayOptions.priority,
-      chartType: displayOptions.chartType,
-      color: displayOptions.color,
-    },
-    createdAt: s.createdAt ? s.createdAt : undefined,
-    updatedAt: s.updatedAt ? s.updatedAt : undefined,
   };
 }
 
