@@ -1,24 +1,39 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { Tag, TrendUp } from "phosphor-react";
+import { useCallback, useEffect, useMemo } from "react";
+import { Controller, useForm } from "react-hook-form";
 
+import { CATEGORY_DEFAULTS } from "@/features/metric-categories/constants";
 import type { MetricSettingsFormInputs } from "@/features/metric-settings/form";
 import { metricSettingsFormSchema } from "@/features/metric-settings/form";
-import { useCreateMetricSettings, useUpdateMetricSettings } from "@/features/metric-settings/hook";
+import {
+  useCreateMetricSettings,
+  useUpdateMetricSettings,
+} from "@/features/metric-settings/hooks/index";
 import type { MetricSettingsExtendedVM } from "@/features/metric-settings/view-models";
+import { cn } from "@/src/lib/cn";
+import ColorField from "@/ui/ColorField";
+import DateTimePicker from "@/ui/DateTimePicker";
 import ErrorMessage from "@/ui/ErrorMessage";
+import { FormField } from "@/ui/FormField";
 import Modal from "@/ui/Modal";
 import PrimaryButton from "@/ui/PrimaryButton";
-import ReusableFormField from "@/ui/ReusableFormField";
-import { toInputDate, toIsoFromLocalInput } from "@/utils/date-io";
+import type { SegmentOption } from "@/ui/SegmentedControl";
+import SegmentedControl from "@/ui/SegmentedControl";
+import type { SelectOption } from "@/ui/Select";
+import Select from "@/ui/Select";
+import Slider from "@/ui/Slider";
+import TextField from "@/ui/TextField";
+import Toggle from "@/ui/Toggle";
+import { parseDate, toISODateOnly } from "@/utils/date-io";
 
 interface MetricSettingsModalProps {
   open: boolean;
   onClose: () => void;
-  metricId: string | null;
-  initialSettings?: MetricSettingsExtendedVM | null;
+  metricId: string;
+  initialSettings: MetricSettingsExtendedVM | null;
 }
 
 export const MetricSettingsForm = ({
@@ -28,7 +43,6 @@ export const MetricSettingsForm = ({
   initialSettings: initialSettings,
 }: MetricSettingsModalProps) => {
   // TODO: Refactor
-  // Default Form handling
   const makeDefaults = (
     set?: MetricSettingsExtendedVM | null,
     metricIdProp?: string | null,
@@ -64,8 +78,7 @@ export const MetricSettingsForm = ({
     reset,
     formState: { errors, isSubmitting, isValid },
     watch,
-    setValue,
-    trigger,
+    control,
   } = useForm<MetricSettingsFormInputs>({
     resolver: zodResolver(metricSettingsFormSchema),
     mode: "onChange",
@@ -73,17 +86,9 @@ export const MetricSettingsForm = ({
     shouldUnregister: true,
   });
 
-  // Rehydrate + immediately validate on open/change
   useEffect(() => {
-    if (!open) return;
-    reset(defaults);
-    // Ensure metricId is present & valid for the resolver
-    if (metricId) {
-      setValue("metricId", metricId, { shouldValidate: true });
-    }
-    // Compute isValid right away (no user interaction required)
-    void trigger();
-  }, [open, defaults, reset, trigger, setValue, metricId]);
+    if (open) reset(defaults);
+  }, [open, defaults, reset]);
 
   // * ========== Mutations ==========
   const {
@@ -98,33 +103,37 @@ export const MetricSettingsForm = ({
     error: updateError,
   } = useUpdateMetricSettings();
 
-  // const {
-  //   deleteMetricSettings,
-  //   isPending: isDeleting,
-  //   error: deleteError,
-  // } = useDeleteMetricSettings();
-
-  // * Submit Handlers
   const isBusyInputs = isSubmitting || isCreating || isUpdating;
 
-  // * Submit Handlers
-  const onSubmit = async (data: MetricSettingsFormInputs) => {
-    if (!isValid) {
-      console.warn("Form is not valid, preventing submission.");
-      return;
-    }
+  // * Handlers
+  const onValid = useCallback(
+    async (data: MetricSettingsFormInputs) => {
+      if (!metricId) {
+        console.error("Metric ID is required for settings.");
+        return;
+      }
 
-    if (!metricId) {
-      console.error("Metric ID is required for settings.");
-      return;
-    }
-
-    try {
-      if (isEditMode && initialSettings) {
-        await updateMetricSettings({
-          settingsId: initialSettings.id!,
-          metricId: metricId,
-          settings: {
+      try {
+        if (isEditMode && initialSettings) {
+          await updateMetricSettings({
+            settingsId: initialSettings.id!,
+            metricId: metricId,
+            settings: {
+              goalEnabled: data.goalEnabled,
+              goalType: data.goalType,
+              goalValue: data.goalValue,
+              timeFrameEnabled: data.timeFrameEnabled,
+              startDate: data.startDate,
+              deadlineDate: data.deadlineDate,
+              alertEnabled: data.alertEnabled,
+              alertThresholds: data.alertThresholds,
+              displayOptions: data.displayOptions,
+              // isActive and isAchieved currently managed by BE
+            },
+          });
+        } else {
+          await createMetricSettings({
+            metricId: metricId,
             goalEnabled: data.goalEnabled,
             goalType: data.goalType,
             goalValue: data.goalValue,
@@ -134,309 +143,441 @@ export const MetricSettingsForm = ({
             alertEnabled: data.alertEnabled,
             alertThresholds: data.alertThresholds,
             displayOptions: data.displayOptions,
-            // isActive and isAchieved currently managed by BE
-          },
-        });
-      } else {
-        await createMetricSettings({
-          metricId: metricId,
-          goalEnabled: data.goalEnabled,
-          goalType: data.goalType,
-          goalValue: data.goalValue,
-          timeFrameEnabled: data.timeFrameEnabled,
-          startDate: data.startDate,
-          deadlineDate: data.deadlineDate,
-          alertEnabled: data.alertEnabled,
-          alertThresholds: data.alertThresholds,
-          displayOptions: data.displayOptions,
-        });
+          });
+        }
+        reset();
+        onClose();
+      } catch (error) {
+        console.error("Error saving metric settings:", error);
       }
-      reset();
-      onClose();
-    } catch (error) {
-      console.error("Error saving metric settings:", error);
-    }
-  };
+    },
+    [
+      isEditMode,
+      initialSettings,
+      metricId,
+      updateMetricSettings,
+      createMetricSettings,
+      reset,
+      onClose,
+    ],
+  );
 
-  // const onDeleteSubmit = async () => {
-  //   if (!initialSettings?.id || !metricId) return;
-  //   try {
-  //     await deleteMetricSettings({
-  //       id: initialSettings.id,
-  //       metricId: metricId,
-  //     });
-  //     reset();
-  //     onClose();
-  //   } catch (error) {
-  //     console.error("Error deleting metric settings:", error);
-  //   }
-  // };
+  const onInvalid = useCallback((formErrors: typeof errors) => {
+    console.warn("Form has errors, preventing submission.", formErrors);
+  }, []);
+
+  const onSubmitForm = useMemo(
+    () => handleSubmit(onValid, onInvalid),
+    [handleSubmit, onValid, onInvalid],
+  );
+
+  const handleFormSubmit: React.FormEventHandler<HTMLFormElement> = useCallback(
+    (e) => {
+      void onSubmitForm(e);
+    },
+    [onSubmitForm],
+  );
 
   const errorMsg = createError?.message || updateError?.message || "";
 
-  return (
-    <Modal isOpen={open} onClose={onClose}>
-      <form
-        className="mx-auto flex max-h-[80vh] min-w-96 max-w-lg flex-col overflow-y-auto bg-white p-2 sm:p-2 lg:p-6"
-        onSubmit={
-          void handleSubmit((data) => {
-            if (Object.keys(errors).length > 0) return;
-            void onSubmit(data);
-          })
-        }
-      >
-        <h2 className="mb-2 text-xl font-semibold">Manage Metric</h2>{" "}
-        {/* keep schema happy: register metricId */}
-        <input type="hidden" {...register("metricId")} />
-        <ErrorMessage message={errorMsg} className="mb-2"></ErrorMessage>
-        <div className="flex flex-col gap-8">
-          {/* Goal Settings */}
-          <h3 className="mb-2 mt-4 text-lg font-semibold">Goal Settings</h3>
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="goalEnabled"
-              {...register("goalEnabled")}
-              disabled={isBusyInputs}
-            />
-            <label htmlFor="goalEnabled" className="text-sm">
-              Enable Goal
-            </label>
-          </div>
+  // TODO: refactor to ./src/features/metric-settings/constants
+  const chartOptions: SelectOption<string>[] = [
+    { value: "line", label: "Line Chart" },
+    { value: "bar", label: "Bar Chart" },
+    { value: "area", label: "Area Chart" },
+    { value: "pie", label: "Pie Chart" },
+  ];
 
-          {watch("goalEnabled") && (
-            <>
-              <div className="mb-4">
-                <label htmlFor="goalType" className="mb-1 block text-sm font-semibold">
-                  Goal Type
-                </label>
-                <select
-                  id="goalType"
-                  {...register("goalType", {
-                    setValueAs: (v) => (v === "" ? undefined : v),
-                  })}
-                  className="w-full rounded border px-3 py-2"
-                  disabled={isBusyInputs}
-                >
-                  <option value="">Select Goal Type</option>
-                  <option value="cumulative">Cumulative</option>
-                  <option value="incremental">Incremental</option>
-                </select>
-                {errors.goalType ? (
-                  <p className="text-xs text-red-500">{errors.goalType.message}</p>
-                ) : null}
-              </div>
+  const goalTypeOptions: SegmentOption<"incremental" | "cumulative">[] = [
+    { value: "incremental", label: "Incremental" },
+    { value: "cumulative", label: "Cumulative" },
+  ];
 
-              <div className="mb-4">
-                <label htmlFor="goalValue" className="mb-1 block text-sm font-semibold">
-                  Goal Value
-                </label>
-                <input
-                  type="number"
-                  id="goalValue"
-                  {...register("goalValue", {
-                    valueAsNumber: true,
-                    setValueAs: (v) => (v === "" || v === null ? undefined : Number(v)),
-                  })}
-                  placeholder="e.g., 10000"
-                  className="w-full rounded border px-3 py-2"
+  const priorityOptions: SegmentOption<number>[] = [
+    { value: 1, label: "1" },
+    { value: 2, label: "2" },
+    { value: 3, label: "3" },
+    { value: 4, label: "4" },
+    { value: 5, label: "5" },
+  ];
+
+  // * Subsections
+  const subSectionContainerClass =
+    "flex flex-col gap-6 rounded rounded-xl bg-white p-4 border border-gray-100 transition";
+  const subsectionHeaderClass = "flex items-center justify-between gap-2";
+
+  const timeFrameSubSection = (
+    <div className={subSectionContainerClass}>
+      <div className={subsectionHeaderClass}>
+        <Controller
+          name="timeFrameEnabled" // string in your form DTO
+          control={control}
+          render={({ field }) => (
+            <FormField
+              invalid={!!errors.timeFrameEnabled}
+              error={errors.timeFrameEnabled?.message}
+              className="w-full flex-row items-center justify-between gap-2 space-y-0"
+            >
+              <FormField.Label className="text-md font-medium">Timeframe Enabled</FormField.Label>
+              <FormField.Control>
+                <Toggle
+                  checked={!!field.value}
+                  onCheckedChange={field.onChange}
+                  onBlur={field.onBlur}
                   disabled={isBusyInputs}
+                  size="md"
+                  onLabel="ON"
+                  offLabel=""
+                  wrapperClassName="shrink-0"
                 />
-                {errors.goalValue ? (
-                  <p className="text-xs text-red-500">{errors.goalValue.message}</p>
-                ) : null}
-              </div>
-            </>
+              </FormField.Control>
+            </FormField>
           )}
+        />
+      </div>
 
-          {/* Time Frame Settings */}
-          <h3 className="mb-2 mt-4 text-lg font-semibold">Time Frame Settings</h3>
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="timeFrameEnabled"
-              {...register("timeFrameEnabled")}
-              disabled={isBusyInputs}
-            />
-            <label htmlFor="timeFrameEnabled" className="text-sm">
-              Enable Time Frame
-            </label>
-          </div>
-
-          {watch("timeFrameEnabled") && (
-            <>
-              <div className="mb-4">
-                <label htmlFor="startDate" className="mb-1 block text-sm font-semibold">
-                  Start Date
-                </label>
-                <input
-                  type="date"
-                  id="startDate"
-                  {...register("startDate", {
-                    setValueAs: (v) => toIsoFromLocalInput(v),
-                  })}
-                  value={toInputDate(watch("startDate"))}
-                  className="w-full rounded border px-3 py-2"
-                  disabled={isBusyInputs}
-                />
-                {errors.startDate ? (
-                  <p className="text-xs text-red-500">{errors.startDate.message}</p>
-                ) : null}
-              </div>
-              <div className="mb-4">
-                <label htmlFor="deadlineDate" className="mb-1 block text-sm font-semibold">
-                  Deadline Date
-                </label>
-                <input
-                  type="date"
-                  id="deadlineDate"
-                  {...register("deadlineDate", {
-                    setValueAs: (v) => toIsoFromLocalInput(v),
-                  })}
-                  value={toInputDate(watch("deadlineDate"))}
-                  className="w-full rounded border px-3 py-2"
-                  disabled={isBusyInputs}
-                />
-                {errors.deadlineDate ? (
-                  <p className="text-xs text-red-500">{errors.deadlineDate.message}</p>
-                ) : null}
-              </div>
-            </>
-          )}
-
-          {/* Alert Settings */}
-          <h3 className="mb-2 mt-4 text-lg font-semibold">Alert Settings</h3>
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="alertEnabled"
-              {...register("alertEnabled")}
-              disabled={isBusyInputs}
-            />
-            <label htmlFor="alertEnabled" className="text-sm">
-              Enable Alerts
-            </label>
-          </div>
-
-          {watch("alertEnabled") && (
-            <div className="mb-4">
-              <label htmlFor="alertThresholds" className="mb-1 block text-sm font-semibold">
-                Alert Thresholds (%)
-              </label>
-              <input
-                type="number"
-                id="alertThresholds"
-                {...register("alertThresholds", { valueAsNumber: true })}
-                placeholder="e.g., 80"
-                className="w-full rounded border px-3 py-2"
-                disabled={isBusyInputs}
-              />
-              {errors.alertThresholds ? (
-                <p className="text-xs text-red-500">{errors.alertThresholds.message}</p>
-              ) : null}
-            </div>
-          )}
-
-          {/* Display Options */}
-          <h3 className="mb-2 mt-4 text-lg font-semibold">Display Options</h3>
-          <div className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="showOnDashboard"
-              {...register("displayOptions.showOnDashboard")}
-              disabled={isBusyInputs}
-            />
-            <label htmlFor="showOnDashboard" className="text-sm">
-              Show on Dashboard
-            </label>
-          </div>
-
-          <ReusableFormField
-            label="Priority"
-            type="number"
-            register={register("displayOptions.priority", {
-              valueAsNumber: true,
-              setValueAs: (v) => (v === "" || v === null ? undefined : Number(v)),
-            })}
-            placeholder="e.g., 1"
-            error={errors.displayOptions?.priority?.message}
-            isSubmitting={isBusyInputs}
+      {watch("timeFrameEnabled") && (
+        <>
+          <Controller
+            name="startDate" // string in your form DTO
+            control={control}
+            render={({ field }) => (
+              <FormField invalid={!!errors.startDate} error={errors.startDate?.message}>
+                <FormField.Label>Start Date</FormField.Label>
+                <FormField.Control>
+                  <DateTimePicker
+                    mode="date"
+                    value={parseDate(field.value)}
+                    onChange={(d) => field.onChange(toISODateOnly(d))}
+                    disabled={isBusyInputs}
+                    aria-label="Start date"
+                  />
+                </FormField.Control>
+              </FormField>
+            )}
           />
 
-          <div className="mb-4">
-            <label htmlFor="chartType" className="mb-1 block text-sm font-semibold">
-              Chart Type
-            </label>
-            <select
-              id="chartType"
-              {...register("displayOptions.chartType")}
-              className="w-full rounded border px-3 py-2"
-              disabled={isBusyInputs}
+          <Controller
+            name="deadlineDate"
+            control={control}
+            render={({ field }) => (
+              <FormField invalid={!!errors.deadlineDate} error={errors.deadlineDate?.message}>
+                <FormField.Label>Deadline Date</FormField.Label>
+                <FormField.Control>
+                  <DateTimePicker
+                    mode="date"
+                    value={parseDate(field.value)}
+                    onChange={(d) => field.onChange(toISODateOnly(d))}
+                    minuteStep={5}
+                    disabled={isBusyInputs}
+                    aria-label="Deadline date and time"
+                  />
+                </FormField.Control>
+              </FormField>
+            )}
+          />
+        </>
+      )}
+    </div>
+  );
+
+  const alertSubSection = (
+    <div className={subSectionContainerClass}>
+      <div className={subsectionHeaderClass}>
+        <Controller
+          name="alertEnabled"
+          control={control}
+          render={({ field }) => (
+            <FormField
+              invalid={!!errors.alertEnabled}
+              error={errors.alertEnabled?.message}
+              className="w-full flex-row items-center justify-between gap-2 space-y-0"
             >
-              <option value="">Select Chart Type</option>
-              <option value="line">Line</option>
-              <option value="bar">Bar</option>
-              <option value="area">Area</option>
-              <option value="pie">Pie</option>
-            </select>
-            {errors.displayOptions?.chartType ? (
-              <p className="text-xs text-red-500">{errors.displayOptions.chartType.message}</p>
-            ) : null}
-          </div>
+              <FormField.Label className="text-md font-medium">Alerts Enabled</FormField.Label>
+              <FormField.Control>
+                <Toggle
+                  checked={!!field.value}
+                  onCheckedChange={field.onChange}
+                  onBlur={field.onBlur}
+                  disabled={isBusyInputs}
+                  size="md"
+                  onLabel="ON"
+                  offLabel=""
+                  wrapperClassName="shrink-0"
+                />
+              </FormField.Control>
+            </FormField>
+          )}
+        />
+      </div>
 
-          <div className="mb-4">
-            <label htmlFor="color" className="mb-1 block text-sm font-semibold">
-              Color
-            </label>
-            <input
-              type="color"
-              id="color"
-              {...register("displayOptions.color")}
-              className="h-10 w-full rounded border px-3 py-2"
-              disabled={isBusyInputs}
-            />
-            {errors.displayOptions?.color ? (
-              <p className="text-xs text-red-500">{errors.displayOptions.color.message}</p>
-            ) : null}
-          </div>
-        </div>
-        {/* Buttons */}
-        <div className="flex-row space-y-4">
-          <div className="items mt-6 flex justify-center gap-2">
-            <button
-              type="button"
-              className="w-full rounded-xl bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200"
-              onClick={onClose}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
+      {watch("alertEnabled") && (
+        <Controller
+          name="alertThresholds"
+          control={control}
+          render={({ field }) => (
+            <FormField invalid={!!errors.alertThresholds} error={errors.alertThresholds?.message}>
+              <FormField.Label>Alert Threshold</FormField.Label>
+              <FormField.Control>
+                <Slider
+                  id="alertThresholds"
+                  value={field.value ?? 0}
+                  onChange={(v) => field.onChange(v)}
+                  min={0}
+                  max={100}
+                  step={5} // typical granularity
+                  showValue="inline" // or "bubble"
+                  valueFormatter={(v) => `${Math.round(v)}%`}
+                  showSteppers
+                  steppersStep={5}
+                  marks={[0, 25, 50, 75, 100]} // light ticks
+                  aria-label="Alert threshold percentage"
+                />
+              </FormField.Control>
+            </FormField>
+          )}
+        />
+      )}
+    </div>
+  );
 
-            <PrimaryButton type="submit" disabled={isSubmitting || !isValid} className="w-full">
-              {isSubmitting || isCreating || isUpdating ? "Saving..." : isEditMode ? "Save" : "Add"}
-            </PrimaryButton>
-          </div>
+  // * Sections
+  const sectionContainerClass =
+    "mb-6 flex flex-col gap-6 rounded-lg border border-gray-100 bg-gray-50 p-6 transition";
 
-          {/* Delete button (edit mode only) */}
-          {/* Currently Disabled as not part of MVP => only update feature */}
-          {/* {isEditMode && (
-            <>
-              <hr
-                style={{ borderTop: "1px solid lightgrey" }}
-                className="my-4"
+  const goalSections = (
+    <div className={sectionContainerClass}>
+      <Controller
+        name="goalEnabled"
+        control={control}
+        render={({ field }) => (
+          <FormField
+            invalid={!!errors.goalEnabled}
+            error={errors.goalEnabled?.message}
+            className="w-full flex-row items-center justify-between gap-2 space-y-0 "
+          >
+            <FormField.Label className="text-lg font-semibold">Goal Enabled</FormField.Label>
+            <FormField.Control>
+              <Toggle
+                checked={!!field.value}
+                onCheckedChange={field.onChange}
+                onBlur={field.onBlur}
+                disabled={isBusyInputs}
+                size="md"
+                onLabel="ON"
+                offLabel=""
+                wrapperClassName="shrink-0"
               />
-              <button
-                type="button"
-                className="px-4 py-2 rounded-xl bg-red-50 hover:bg-red-100 text-red-500 w-full"
-                onClick={onDeleteSubmit}
-                disabled={isSubmitting || isDeleting}
-              >
-                {isDeleting ? "Deleting..." : "Delete Settings"}
-              </button>
-            </>
-          )} */}
-        </div>
-      </form>
+            </FormField.Control>
+          </FormField>
+        )}
+      />
+
+      {watch("goalEnabled") && (
+        <>
+          <Controller
+            name="goalType"
+            control={control}
+            render={({ field }) => (
+              <FormField invalid={!!errors.goalType} error={errors.goalType?.message}>
+                <FormField.Label>Goal Type</FormField.Label>
+                <FormField.Control>
+                  <SegmentedControl
+                    options={goalTypeOptions}
+                    // value={field.value ?? null}
+                    value={
+                      watch("goalEnabled") === true && field.value !== null && field.value
+                        ? field.value
+                        : "incremental"
+                    }
+                    onChange={(v) => field.onChange(v)}
+                    size="md"
+                  />
+                </FormField.Control>
+              </FormField>
+            )}
+          />
+
+          <FormField invalid={!!errors.goalValue} error={errors.goalValue?.message}>
+            <FormField.Label>Goal Value</FormField.Label>
+            <FormField.Control>
+              <TextField
+                id="goalValue"
+                type="number"
+                placeholder="e.g., 10000"
+                registration={register("goalValue", {
+                  valueAsNumber: true,
+                  setValueAs: (v) => (v === "" || v === null ? undefined : Number(v)),
+                })}
+                leftAddon={<Tag weight="duotone" className="text-violet-500" />}
+                hasError={!!errors.goalValue}
+                clearable
+              />
+            </FormField.Control>
+          </FormField>
+
+          {timeFrameSubSection}
+
+          {alertSubSection}
+        </>
+      )}
+    </div>
+  );
+
+  const displayOptionsSection = (
+    <div className={sectionContainerClass}>
+      <h3 className="text-lg font-semibold">Display Options</h3>
+
+      <Controller
+        name="displayOptions.showOnDashboard"
+        control={control}
+        render={({ field }) => (
+          <FormField
+            invalid={!!errors.displayOptions?.showOnDashboard}
+            error={errors.displayOptions?.showOnDashboard?.message}
+            className="w-full flex-row items-center justify-between gap-2 space-y-0"
+          >
+            <FormField.Label>Show on Dashboard</FormField.Label>
+            <FormField.Control>
+              <Toggle
+                checked={!!field.value}
+                onCheckedChange={field.onChange}
+                onBlur={field.onBlur}
+                disabled={isBusyInputs}
+                size="sm"
+                onLabel=""
+                offLabel=""
+                wrapperClassName="shrink-0"
+              />
+            </FormField.Control>
+          </FormField>
+        )}
+      />
+
+      <Controller
+        name="displayOptions.priority"
+        control={control}
+        render={({ field }) => (
+          <FormField
+            invalid={!!errors.displayOptions?.priority}
+            error={errors.displayOptions?.priority?.message}
+          >
+            <FormField.Label>Priority</FormField.Label>
+            <FormField.Control>
+              <SegmentedControl
+                options={priorityOptions}
+                // value={field.value ?? null}
+                value={
+                  watch("displayOptions.showOnDashboard") === true &&
+                  field.value !== null &&
+                  field.value
+                    ? field.value
+                    : null
+                }
+                onChange={(v) => field.onChange(v)}
+                size="md"
+                className="w-auto"
+              />
+            </FormField.Control>
+          </FormField>
+        )}
+      />
+
+      <Controller
+        name="displayOptions.chartType"
+        control={control}
+        render={({ field }) => (
+          <FormField
+            invalid={!!errors.displayOptions?.chartType}
+            error={errors.displayOptions?.chartType?.message}
+          >
+            <FormField.Label>Chart Type</FormField.Label>
+            <FormField.Control>
+              <Select
+                size="md"
+                value={field.value ?? null}
+                onChange={(v) => field.onChange(v)}
+                options={chartOptions}
+                placeholder="Select Chart Type"
+                leftAddon={<TrendUp size={22} weight="duotone" />}
+                // Example of "optional children on the most right"
+                rightAddon={<span className="text-xs text-gray-400">⌘K</span>}
+                aria-label="Chart type"
+              />
+            </FormField.Control>
+          </FormField>
+        )}
+      />
+
+      <Controller
+        name="displayOptions.color"
+        control={control}
+        render={({ field }) => (
+          <FormField
+            invalid={!!errors.displayOptions?.color}
+            error={errors.displayOptions?.color?.message}
+          >
+            <FormField.Label>Color</FormField.Label>
+            <FormField.Control>
+              <ColorField
+                value={field.value ?? CATEGORY_DEFAULTS.color}
+                onChange={field.onChange}
+                disabled={isBusyInputs}
+                className="mt-1"
+                aria-label="Chart color"
+              />
+            </FormField.Control>
+          </FormField>
+        )}
+      />
+    </div>
+  );
+
+  const buttonSection = (
+    <div className="flex-row space-y-4">
+      <div className="items mt-6 flex justify-center gap-2">
+        <button
+          type="button"
+          className="w-full rounded-xl bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200"
+          onClick={onClose}
+          disabled={isSubmitting}
+        >
+          Cancel
+        </button>
+
+        <PrimaryButton type="submit" disabled={isSubmitting || !isValid} className="w-full">
+          {isSubmitting || isCreating || isUpdating ? "Saving..." : isEditMode ? "Save" : "Add"}
+        </PrimaryButton>
+      </div>
+
+      {/* Dev Note: Delete Button currently not added as not part of MVP => only update feature */}
+    </div>
+  );
+
+  const hideScrollbar =
+    "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]  overflow-y-auto";
+
+  return (
+    <Modal isOpen={open} onClose={onClose}>
+      {open ? (
+        <form
+          // className="mx-auto flex max-h-[80vh] min-w-96 max-w-xl flex-col overflow-y-auto bg-white p-2 sm:p-2 lg:p-6"
+          className={cn(
+            "mx-auto flex max-h-[80vh] min-w-96 max-w-xl flex-col bg-white transition-transform",
+          )}
+          onSubmit={handleFormSubmit}
+        >
+          <h2 className="mb-2 text-xl font-semibold">Metric Settings</h2>{" "}
+          {/* keep schema happy: register metricId */}
+          <input type="hidden" {...register("metricId")} />
+          <ErrorMessage message={errorMsg} className="mb-2"></ErrorMessage>
+          <div className={cn(hideScrollbar)}>
+            {goalSections}
+            {displayOptionsSection}
+          </div>
+          {buttonSection}
+        </form>
+      ) : null}
     </Modal>
   );
 };
