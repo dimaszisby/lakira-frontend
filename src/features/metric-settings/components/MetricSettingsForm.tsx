@@ -29,7 +29,7 @@ import TextField from "@/ui/TextField";
 import Toggle from "@/ui/Toggle";
 import { parseDate, toISODateOnly } from "@/utils/date-io";
 
-interface MetricSettingsModalProps {
+interface Props {
   open: boolean;
   onClose: () => void;
   metricId: string;
@@ -41,7 +41,7 @@ export const MetricSettingsForm = ({
   onClose,
   metricId,
   initialSettings: initialSettings,
-}: MetricSettingsModalProps) => {
+}: Props) => {
   // TODO: Refactor
   const makeDefaults = (
     set?: MetricSettingsExtendedVM | null,
