@@ -1,27 +1,33 @@
 // src/types/api/zod-metric-settings.schema.ts
-
+// TODO: Refactor to correct foldering
 import { z } from "zod";
+
 import {
-  zUUID,
-  zDateOptional,
-  zGoalValue,
-  zGoalType,
   zAlertThresholds,
   zDisplayOptions,
+  zGoalType,
+  zGoalValue,
+  zISODateTime,
+  zUUID,
 } from "@/src/constants/zod-rules";
 
+// Developer Note: currently creation handled in back-end.
+// Current MVP: one metric have one metricsettings
 export const createMetricSettingsSchema = z.object({
   body: z
     .object({
       metricId: zUUID,
       goalEnabled: z.boolean().optional().default(false),
-      goalType: zGoalType,
-      goalValue: zGoalValue,
+      goalType: zGoalType.optional().nullable(),
+      goalValue: zGoalValue.optional().nullable(),
+
       timeFrameEnabled: z.boolean().optional().default(false),
-      startDate: zDateOptional.optional().nullable(),
-      deadlineDate: zDateOptional.optional().nullable(),
+      startDate: zISODateTime.optional().nullable(),
+      deadlineDate: zISODateTime.optional().nullable(),
+
       alertEnabled: z.boolean().optional().default(false),
-      alertThresholds: zAlertThresholds,
+      alertThresholds: zAlertThresholds.optional(),
+
       displayOptions: zDisplayOptions,
     })
     .refine(
@@ -34,7 +40,7 @@ export const createMetricSettingsSchema = z.object({
       {
         message:
           "goalType and goalValue are required when goalEnabled is true.",
-      },
+      }
     )
     .refine(
       (data) => {
@@ -50,7 +56,7 @@ export const createMetricSettingsSchema = z.object({
       {
         message:
           "startDate and deadlineDate are required, and deadlineDate must be after startDate when timeFrameEnabled is true.",
-      },
+      }
     ),
 });
 
@@ -62,11 +68,14 @@ export const updateMetricSettingsSchema = z.object({
     goalEnabled: z.boolean().optional(),
     goalType: zGoalType.optional(),
     goalValue: zGoalValue.optional(),
+
     timeFrameEnabled: z.boolean().optional(),
-    startDate: zDateOptional.optional().nullable(),
-    deadlineDate: zDateOptional.optional().nullable(),
+    startDate: zISODateTime.optional().nullable(),
+    deadlineDate: zISODateTime.optional().nullable(),
+
     alertEnabled: z.boolean().optional(),
     alertThresholds: zAlertThresholds.optional(),
+
     displayOptions: zDisplayOptions.optional(),
   }),
 });
@@ -78,9 +87,11 @@ export const getMetricSettingsSchema = z.object({
 });
 
 export const getAllMetricSettingsSchema = z.object({
-  query: z.object({
-    metricId: zUUID.optional(),
-  }).optional(),
+  query: z
+    .object({
+      metricId: zUUID.optional(),
+    })
+    .optional(),
 });
 
 export const deleteMetricSettingsSchema = z.object({
