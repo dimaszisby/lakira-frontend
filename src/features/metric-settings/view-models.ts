@@ -1,28 +1,32 @@
-import type { ISODateTimeString } from "@/src/types/aliases";
+import type { ISODateTimeString } from "@/types/aliases";
+import type { MetricSettingsResponseDTO } from "@/types/dtos/metric-settings.dto";
 
-// TODO - Refactor: to Enum
-type GoalType = "cumulative" | "incremental";
-type ChartType = "line" | "bar" | "area" | "pie";
+import type { CursorPageVM } from "../metrics";
+import type { ChartType, GoalType } from "./constants";
+import type { MetricSettingsFilterViaCursor, MetricSettingsSortableKeyViaCursor } from "./sort";
 
 export type MetricSettingsExtendedVM = {
-  id?: string | null;
+  id: string;
+
+  // Relations
   metricId: string;
+
+  // Base
   isActive: boolean;
 
   goalEnabled: boolean;
   goalType: GoalType | null;
   goalValue: number | null;
-
   timeFrameEnabled: boolean;
   startDate: ISODateTimeString | null;
   deadlineDate: ISODateTimeString | null;
-
   alertEnabled: boolean;
   alertThresholds: number | null;
   isAchieved: boolean;
 
   displayOptions: DisplayVM;
 
+  // Timestamps
   createdAt?: ISODateTimeString;
   updatedAt?: ISODateTimeString;
 };
@@ -34,16 +38,9 @@ export type DisplayVM = {
   color: string | null;
 };
 
-// ===== Helpers & safe defaults =====
-// TODO: Refactor
-export const DEFAULT_DISPLAY: DisplayVM = {
-  showOnDashboard: false,
-  priority: 1,
-  chartType: "line",
-  color: "#E897A3",
-};
-
-// TODO: Refactor
-export function isChartType(x: unknown): x is ChartType {
-  return x === "line" || x === "bar" || x === "area" || x === "pie";
-}
+export type MetricSettingsCursorPageVM = CursorPageVM<
+  MetricSettingsResponseDTO,
+  MetricSettingsExtendedVM,
+  MetricSettingsSortableKeyViaCursor,
+  MetricSettingsFilterViaCursor
+>;
