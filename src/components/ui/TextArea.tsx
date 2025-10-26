@@ -1,59 +1,100 @@
+"use client";
+
+import clsx from "clsx";
 import * as React from "react";
 import type { UseFormRegisterReturn } from "react-hook-form";
 
-import FieldShell from "./FieldShell";
+import InputChrome from "./InputChrome";
 
-type Props = {
+type Size = "sm" | "md" | "lg";
+
+export type TextAreaProps = Omit<
+  React.TextareaHTMLAttributes<HTMLTextAreaElement>,
+  "size" | "children" | "onChange"
+> & {
   id: string;
-  label: string;
-  registration: UseFormRegisterReturn;
-  rows?: number;
-  placeholder?: string;
-  disabled?: boolean;
-  required?: boolean;
-  hint?: string;
-  error?: string;
-  className?: string; // wrapper class
-  textareaClassName?: string; // textarea element class
+  registration?: UseFormRegisterReturn;
+  size?: Size;
+  leftAddon?: React.ReactNode;
+  rightAddon?: React.ReactNode;
+  hasError?: boolean;
+  wrapperClassName?: string;
+  showCount?: boolean;
   onChange?: React.ChangeEventHandler<HTMLTextAreaElement>;
 };
 
-const TextAreaField = ({
+const TextArea = ({
   id,
-  label,
   registration,
-  rows = 4,
-  placeholder,
+  size = "md",
+  leftAddon,
+  rightAddon,
+  hasError,
   disabled,
-  required,
-  hint,
-  error,
+  placeholder,
   className,
-  textareaClassName,
+  wrapperClassName,
+  maxLength,
+  showCount = false,
+  rows = 4,
   onChange,
-}: Props) => {
+  ...rest
+}: TextAreaProps) => {
+  const ref = React.useRef<HTMLTextAreaElement>(null);
+  const [count, setCount] = React.useState<number>(
+    Number(rest.defaultValue?.toString().length ?? 0),
+  );
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setCount(e.currentTarget.value.length);
+    if (registration?.onChange) {
+      void registration.onChange(e);
+    }
+    onChange?.(e);
+  };
+
+  const counter =
+    showCount && maxLength ? (
+      <span className="text-xs text-gray-400">
+        {count}/{maxLength}
+      </span>
+    ) : null;
+
+  const effectiveRight = (
+    <>
+      {rightAddon}
+      {counter}
+    </>
+  );
+
   return (
-    <FieldShell
-      id={id}
-      label={label}
-      required={required}
-      error={error}
-      hint={hint}
-      className={className}
+    <InputChrome
+      hasError={hasError}
+      disabled={disabled}
+      size={size}
+      leftAddon={leftAddon}
+      rightAddon={effectiveRight}
+      className={wrapperClassName}
     >
       <textarea
+        id={id}
+        ref={ref}
         rows={rows}
-        placeholder={placeholder}
         disabled={disabled}
-        className={["input-textfield", textareaClassName].filter(Boolean).join(" ")}
+        placeholder={placeholder}
+        maxLength={maxLength}
+        className={clsx(
+          "block w-full resize-y border-none bg-transparent text-gray-900 outline-none placeholder:text-gray-400",
+          size === "sm" ? "py-1 text-sm" : size === "lg" ? "py-2 text-lg" : "py-1.5 text-base",
+          className,
+        )}
+        aria-invalid={hasError || undefined}
         {...registration}
-        onChange={(e) => {
-          void registration.onChange(e);
-          onChange?.(e);
-        }}
+        {...rest}
+        onChange={handleChange}
       />
-    </FieldShell>
+    </InputChrome>
   );
 };
 
-export default TextAreaField;
+export default TextArea;

@@ -1,59 +1,130 @@
+"use client";
+
+import clsx from "clsx";
+import { Eye, EyeSlash, XCircle } from "phosphor-react";
 import * as React from "react";
 import type { UseFormRegisterReturn } from "react-hook-form";
 
-import FieldShell from "./FieldShell";
+import InputChrome from "./InputChrome";
 
-type Props = {
-  id: string; // stable id for a11y
-  label: string;
-  registration: UseFormRegisterReturn;
-  type?: React.HTMLInputTypeAttribute;
-  placeholder?: string;
-  disabled?: boolean;
-  required?: boolean;
-  hint?: string;
-  error?: string;
-  className?: string;
-  inputClassName?: string;
+type Size = "sm" | "md" | "lg";
+
+export type TextFieldProps = Omit<
+  React.InputHTMLAttributes<HTMLInputElement>,
+  "size" | "children" | "onChange"
+> & {
+  id: string;
+  label?: string; // optional: not used here (FieldShell renders label)
+  registration?: UseFormRegisterReturn;
+  size?: Size;
+  leftAddon?: React.ReactNode;
+  rightAddon?: React.ReactNode;
+  hasError?: boolean;
+  clearable?: boolean;
+  revealToggle?: boolean; // if type=password, show reveal toggle
   onChange?: React.ChangeEventHandler<HTMLInputElement>;
+  wrapperClassName?: string;
 };
 
 const TextField = ({
   id,
-  label,
+  // Dev Note: label is intentionally unused (render labels in FieldShell). Keep to avoid breaking callers.
   registration,
+  size = "md",
+  leftAddon,
+  rightAddon,
+  hasError,
+  disabled,
   type = "text",
   placeholder,
-  disabled,
-  required,
-  hint,
-  error,
+  clearable = false,
+  revealToggle = type === "password",
   className,
-  inputClassName,
+  wrapperClassName,
   onChange,
-}: Props) => {
+  ...rest
+}: TextFieldProps) => {
+  const inputRef = React.useRef<HTMLInputElement>(null);
+  const [showPwd, setShowPwd] = React.useState(false);
+  const [hasValue, setHasValue] = React.useState<boolean>(Boolean(rest.defaultValue ?? rest.value));
+
+  // keep hasValue in sync if parent controls the value
+  React.useEffect(() => {
+    const el = inputRef.current;
+    if (el) setHasValue(el.value.length > 0);
+  }, [rest.value]);
+
+  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setHasValue(e.currentTarget.value.length > 0);
+    if (registration?.onChange) {
+      void registration.onChange(e);
+    }
+    onChange?.(e);
+  };
+
+  const clear = () => {
+    const el = inputRef.current;
+    if (!el) return;
+    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
+    setter?.call(el, "");
+    el.dispatchEvent(new Event("input", { bubbles: true }));
+    el.focus();
+  };
+
+  const effectiveRight = (
+    <>
+      {rightAddon}
+      {clearable && hasValue ? (
+        <button
+          type="button"
+          onClick={clear}
+          className="rounded-md p-1 text-gray-400 hover:bg-violet-50 hover:text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-400"
+          title="Clear"
+        >
+          <XCircle size={18} />
+        </button>
+      ) : null}
+      {revealToggle && type === "password" ? (
+        <button
+          type="button"
+          onClick={() => setShowPwd((s) => !s)}
+          className="rounded-md p-1 text-gray-400 hover:bg-violet-50 hover:text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-400"
+          title={showPwd ? "Hide password" : "Show password"}
+          aria-label={showPwd ? "Hide password" : "Show password"}
+        >
+          {showPwd ? <EyeSlash size={18} /> : <Eye size={18} />}
+        </button>
+      ) : null}
+    </>
+  );
+
   return (
-    <FieldShell
-      id={id}
-      label={label}
-      required={required}
-      error={error}
-      hint={hint}
-      className={className}
+    <InputChrome
+      hasError={hasError}
+      disabled={disabled}
+      size={size}
+      leftAddon={leftAddon}
+      rightAddon={effectiveRight}
+      className={wrapperClassName}
     >
       <input
-        type={type}
+        id={id}
+        ref={inputRef}
+        type={revealToggle && type === "password" ? (showPwd ? "text" : "password") : type}
         placeholder={placeholder}
         disabled={disabled}
-        className={["input-textfield", inputClassName].filter(Boolean).join(" ")}
+        className={clsx(
+          "block w-full border-none bg-transparent text-gray-900 outline-none placeholder:text-gray-400",
+          size === "sm" ? "text-sm" : size === "lg" ? "text-lg" : "text-base",
+          className,
+        )}
+        aria-invalid={hasError || undefined}
+        // Spread first so our handler always wins
         {...registration}
-        onChange={(e) => {
-          // keep RHF in the loop, then your side-effect
-          void registration.onChange(e);
-          onChange?.(e);
-        }}
+        {...rest}
+        onChange={handleInput}
       />
-    </FieldShell>
+    </InputChrome>
   );
 };
 
