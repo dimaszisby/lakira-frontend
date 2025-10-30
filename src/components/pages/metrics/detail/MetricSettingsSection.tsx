@@ -1,6 +1,7 @@
 import { PencilSimple } from "phosphor-react";
 import { memo, useState } from "react";
 
+import MetricSettingsForm from "@/features/metric-settings/components/MetricSettingsForm";
 import type { MetricSettingsExtendedVM } from "@/features/metric-settings/view-models";
 import DataLabel from "@/ui/DataLabel";
 import SectionCard from "@/ui/SectionCard";
@@ -8,25 +9,23 @@ import SubsectionCard from "@/ui/SubsectionCard";
 import { formatDate } from "@/utils/helpers/dateHelper";
 import { safeLabel } from "@/utils/helpers/labelHelper";
 
-import MetricSettingsForm from "../MetricSettingsForm";
+type Props = {
+  metricId: string;
+  data: MetricSettingsExtendedVM | null;
+};
 
-export const MetricSettingsSectionBase = ({ data }: { data: MetricSettingsExtendedVM }) => {
+export const MetricSettingsSectionBase = ({ metricId, data }: Props) => {
   const [modalOpen, setModalOpen] = useState(false);
-
-  const handleModalOpen = () => {
-    setModalOpen(true);
-  };
 
   return (
     <>
-      <MetricSettingsForm
-        // key={modalOpen ? data?.id ?? "create" : "closed"}
-        key={data?.id ?? `metric-${data.metricId}-create`}
-        metricId={data.metricId}
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        initialSettings={data}
-      />
+      {modalOpen ? (
+        <MetricSettingsForm
+          metricId={metricId}
+          onClose={() => setModalOpen(false)}
+          initialSettings={data}
+        />
+      ) : null}
 
       <SectionCard
         title="Metric Settings"
@@ -36,7 +35,7 @@ export const MetricSettingsSectionBase = ({ data }: { data: MetricSettingsExtend
             <button
               className="flex w-full rounded-full bg-[#F4C3CD] p-2 text-[#C76576] transition hover:bg-[#E897A3]"
               aria-label="Edit Metric"
-              onClick={handleModalOpen}
+              onClick={() => setModalOpen(true)}
             >
               <PencilSimple size={22} />
             </button>
@@ -44,12 +43,11 @@ export const MetricSettingsSectionBase = ({ data }: { data: MetricSettingsExtend
         }
       >
         {/* Settings Segment */}
-        <div className="flex-col">
-          {/* Goal & Alert */}
-          <div className="mb-2 grid grid-flow-col gap-2 rounded-xl">
-            {/* Goal */}
+        <div className="flex w-full gap-2 bg-red-400">
+          {/* Goals: Goal, Timeframe, Alert-treshold*/}
+          <div className="h-auto w-1/2 flex-row space-y-2">
             <SubsectionCard title="Goal Settings">
-              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm">
                 <DataLabel title="Goal Type" value={safeLabel(data?.goalType, "Not Set")} />
                 <DataLabel title="Goal Value" value={safeLabel(data?.goalValue, "Not Set")} />
                 <DataLabel
@@ -63,9 +61,8 @@ export const MetricSettingsSectionBase = ({ data }: { data: MetricSettingsExtend
               </div>
             </SubsectionCard>
 
-            {/* Alert */}
             <SubsectionCard title="Alert Settings">
-              <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
+              <div className="grid grid-cols-2 gap-x-4 gap-y-4 text-sm">
                 <DataLabel title="Warn" value={safeLabel(data?.alertThresholds)} />
                 <DataLabel title="Alert" value={safeLabel(data?.alertEnabled)} />
               </div>
@@ -73,8 +70,8 @@ export const MetricSettingsSectionBase = ({ data }: { data: MetricSettingsExtend
           </div>
 
           {/* Display Options */}
-          <SubsectionCard title="Display Options">
-            <div className="wrap grid grid-flow-col gap-x-4 gap-y-2">
+          <SubsectionCard title="Display Options" className="w-1/2">
+            <div className="flex-row space-y-4">
               <DataLabel
                 title="Show on Dashboard"
                 value={safeLabel(data?.displayOptions?.showOnDashboard)}

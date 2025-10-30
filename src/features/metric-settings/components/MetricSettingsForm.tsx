@@ -30,14 +30,12 @@ import Toggle from "@/ui/Toggle";
 import { parseDate, toISODateOnly } from "@/utils/date-io";
 
 interface Props {
-  open: boolean;
   onClose: () => void;
   metricId: string;
   initialSettings: MetricSettingsExtendedVM | null;
 }
 
 export const MetricSettingsForm = ({
-  open,
   onClose,
   metricId,
   initialSettings: initialSettings,
@@ -87,8 +85,8 @@ export const MetricSettingsForm = ({
   });
 
   useEffect(() => {
-    if (open) reset(defaults);
-  }, [open, defaults, reset]);
+    reset(defaults);
+  }, [defaults, reset]);
 
   // * ========== Mutations ==========
   const {
@@ -558,26 +556,24 @@ export const MetricSettingsForm = ({
     "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]  overflow-y-auto";
 
   return (
-    <Modal isOpen={open} onClose={onClose}>
-      {open ? (
-        <form
-          // className="mx-auto flex max-h-[80vh] min-w-96 max-w-xl flex-col overflow-y-auto bg-white p-2 sm:p-2 lg:p-6"
-          className={cn(
-            "mx-auto flex max-h-[80vh] min-w-96 max-w-xl flex-col bg-white transition-transform",
-          )}
-          onSubmit={handleFormSubmit}
-        >
-          <h2 className="mb-2 text-xl font-semibold">Metric Settings</h2>{" "}
-          {/* keep schema happy: register metricId */}
-          <input type="hidden" {...register("metricId")} />
-          <ErrorMessage message={errorMsg} className="mb-2"></ErrorMessage>
-          <div className={cn(hideScrollbar)}>
-            {goalSections}
-            {displayOptionsSection}
-          </div>
-          {buttonSection}
-        </form>
-      ) : null}
+    <Modal isOpen onClose={onClose}>
+      <form
+        // className="mx-auto flex max-h-[80vh] min-w-96 max-w-xl flex-col overflow-y-auto bg-white p-2 sm:p-2 lg:p-6"
+        className={cn(
+          "mx-auto flex max-h-[80vh] min-w-96 max-w-xl flex-col bg-white transition-transform",
+        )}
+        onSubmit={handleFormSubmit}
+      >
+        <h2 className="mb-2 text-xl font-semibold">Metric Settings</h2>{" "}
+        {/* keep schema happy: register metricId */}
+        <input type="hidden" {...register("metricId")} />
+        <ErrorMessage message={errorMsg} className="mb-2"></ErrorMessage>
+        <div className={cn(hideScrollbar)}>
+          {goalSections}
+          {displayOptionsSection}
+        </div>
+        {buttonSection}
+      </form>
     </Modal>
   );
 };
