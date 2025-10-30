@@ -1,10 +1,10 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 
-import MetricForm from "@/components/pages/metrics/MetricForm";
-import MetricTable from "@/components/pages/metrics/MetricTable";
+import type { MetricPreviewVM } from "@/features/metrics";
+import MetricForm from "@/features/metrics/components/MetricForm";
+import MetricTable from "@/features/metrics/components/MetricTable";
 import { useDeleteMetric, useMetricsListPaginationViaCursor } from "@/features/metrics/hooks";
-import type { MetricPreviewResponseDTO } from "@/features/metrics/metric.dto";
 import type { MetricSortParamViaCursor } from "@/features/metrics/sort";
 import { METRICS_PAGE_SIZE, nextSortForColumn, parseSort } from "@/features/metrics/sort";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
@@ -22,7 +22,6 @@ interface MetricCategorySectionProps {
 const MetricListSection: React.FC<MetricCategorySectionProps> = ({ categoryId }) => {
   const router = useRouter();
 
-  // constants
   const PAGE_SIZE = METRICS_PAGE_SIZE;
   const [sort, setSort] = useState<MetricSortParamViaCursor>("-createdAt");
   const { field: sortField, dir: sortDir } = useMemo(() => parseSort(sort), [sort]);
@@ -51,12 +50,14 @@ const MetricListSection: React.FC<MetricCategorySectionProps> = ({ categoryId })
     return p;
   }, [PAGE_SIZE, sort, debouncedQ, filterName, filterCategory]);
 
-  // Hook consumtion based on mode
+  // Hooks
   const pages = useMetricsListPaginationViaCursor({
     ...params,
     enabled: true,
   });
 
+  // Sorting
+  // TODO: create enum
   const onColumnSort = useCallback((column: string) => {
     if (
       column === "createdAt" ||
@@ -68,39 +69,50 @@ const MetricListSection: React.FC<MetricCategorySectionProps> = ({ categoryId })
     }
   }, []);
 
-  // Modal state
+  // * Modal states
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingMetric, setEditingMetric] = useState<MetricPreviewResponseDTO | null>(null);
-
+  const [editingMetric, setEditingMetric] = useState<MetricPreviewVM | null>(null);
   const { deleteMetric } = useDeleteMetric();
 
   // * Handlers
-  // Handlers for table row click
+  // Row Click Handler
   const handleRowClick = useCallback(
-    (met: MetricPreviewResponseDTO) => router.push(`/metrics/${met.id}`),
+    (met: MetricPreviewVM) => router.push(`/metrics/${met.id}`),
     [router],
   );
 
-  // Handler for add log button (create mode)
-  const handleAddMetricClick = () => {
+  // Create Handler
+  const handleCreateClick = useCallback(() => {
     setEditingMetric(null); // No log = create mode
-    setModalOpen(true);
-  };
-
-  const handleEditMetric = useCallback((metric: MetricPreviewResponseDTO) => {
-    setEditingMetric(metric);
     setModalOpen(true);
   }, []);
 
-  const handleDelete = async (metric: MetricPreviewResponseDTO) => {
-    try {
-      await deleteMetric(metric.id);
-    } catch (error) {
-      console.error("Error deleting metric:", error);
-    }
-  };
+  // Edit Handler
+  const handleEditClick = useCallback(() => {
+    setEditingMetric(editingMetric);
+    setModalOpen(true);
+  }, [setEditingMetric, editingMetric]);
 
-  // Derived
+  // Delete handler
+  const deleteMetricAsync = useCallback(
+    async (metric: MetricPreviewVM) => {
+      try {
+        await deleteMetric(metric.id);
+      } catch (error) {
+        console.error("Failed to delete metric:", error);
+      }
+    },
+    [deleteMetric],
+  );
+
+  const handleDeleteClick = useCallback(
+    (metric: MetricPreviewVM) => {
+      void deleteMetricAsync(metric);
+    },
+    [deleteMetricAsync],
+  );
+
+  // Computed values
   // const errorMsg = deleteError?.message;
   const loading = pages.isFetching && pages.items.length === 0;
   const empty = pages.items.length === 0;
@@ -108,16 +120,15 @@ const MetricListSection: React.FC<MetricCategorySectionProps> = ({ categoryId })
   return (
     <>
       {/* Log Form Modal (handles add/edit/delete) */}
-      <MetricForm
-        key={modalOpen ? (editingMetric?.id ?? "create") : "closed"}
-        metricId={null}
-        initialMetric={null}
-        open={modalOpen}
-        onClose={() => {
-          setModalOpen(false);
-          setEditingMetric(null);
-        }}
-      />
+      {modalOpen ? (
+        <MetricForm
+          initialMetric={null}
+          onClose={() => {
+            setModalOpen(false);
+            setEditingMetric(null);
+          }}
+        />
+      ) : null}
 
       <SectionCard
         title="Metrics"
@@ -133,7 +144,7 @@ const MetricListSection: React.FC<MetricCategorySectionProps> = ({ categoryId })
               className="flex-1"
             />
 
-            <PrimaryButton onClick={handleAddMetricClick}>Add Metrics</PrimaryButton>
+            <PrimaryButton onClick={handleCreateClick}>Add Metrics</PrimaryButton>
           </div>
         }
       >
@@ -154,8 +165,8 @@ const MetricListSection: React.FC<MetricCategorySectionProps> = ({ categoryId })
                 sortBy={sortField}
                 sortOrder={sortDir}
                 onSort={(col) => onColumnSort(String(col))}
-                onEdit={handleEditMetric}
-                onDelete={void handleDelete}
+                onEdit={handleEditClick}
+                onDelete={handleDeleteClick}
                 onRowClick={handleRowClick}
               />
 

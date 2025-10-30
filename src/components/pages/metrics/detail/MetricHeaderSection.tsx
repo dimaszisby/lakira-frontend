@@ -1,30 +1,29 @@
 import { PencilSimple } from "phosphor-react";
 import { memo, useState } from "react";
 
+import { fromDetail } from "@/features/metrics";
+import MetricForm from "@/features/metrics/components/MetricForm";
 import type { MetricHeaderVM } from "@/features/metrics/view-models";
 import DataLabel from "@/ui/DataLabel";
 import { formatDate } from "@/utils/helpers/dateHelper";
 import { safeLabel } from "@/utils/helpers/labelHelper";
 
-import MetricForm from "../MetricForm";
-
 export const MetricHeaderSectionBase = ({ data }: { data: MetricHeaderVM }) => {
   const [modalOpen, setModalOpen] = useState(false);
-
-  const handleModalOpen = () => {
-    setModalOpen(true);
-  };
+  const initialMetric = fromDetail(data);
 
   return (
     <>
-      <MetricForm open={modalOpen} onClose={() => setModalOpen(false)} initialMetric={data} />
+      {modalOpen ? (
+        <MetricForm onClose={() => setModalOpen(false)} initialMetric={initialMetric} />
+      ) : null}
 
       <section className="relative w-full rounded-2xl bg-white p-6 shadow">
         {/* Edit Button */}
         <button
           className="absolute right-5 top-5 rounded-full bg-[#F4C3CD] p-2 text-[#C76576] transition hover:bg-[#E897A3]"
           aria-label="Edit Metric"
-          onClick={handleModalOpen}
+          onClick={() => setModalOpen(true)}
         >
           <PencilSimple size={22} />
         </button>
@@ -33,7 +32,7 @@ export const MetricHeaderSectionBase = ({ data }: { data: MetricHeaderVM }) => {
         <DataLabel
           title="Metric Name"
           value={safeLabel(data?.name, "Not Set")}
-          valueStyle="xl"
+          size="lg"
           className="mb-4"
         />
 
@@ -62,7 +61,7 @@ export const MetricHeaderSectionBase = ({ data }: { data: MetricHeaderVM }) => {
         <DataLabel
           title="Description"
           value={safeLabel(data?.description, "Not Description Provided")}
-          valueStyle="sm"
+          size="sm"
         />
 
         {/* Created/Updated At */}
@@ -82,6 +81,9 @@ export const MetricHeaderSectionBase = ({ data }: { data: MetricHeaderVM }) => {
 };
 MetricHeaderSectionBase.displayName = "MetricHeaderSection";
 
-const MetricHeaderSection = memo(MetricHeaderSectionBase);
+const MetricHeaderSection = memo(
+  MetricHeaderSectionBase,
+  (a, b) => Object.is(a.data?.id, b.data?.id) && a.data?.updatedAt === b.data?.updatedAt,
+);
 MetricHeaderSection.displayName = "MetricHeaderSection";
 export default MetricHeaderSection;
