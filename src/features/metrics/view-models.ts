@@ -1,54 +1,60 @@
-import type { ISODateTimeString } from "@/src/types/aliases";
-import type { CursorPage } from "@/src/types/generics/cursor/CursorPage";
+import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
+import type { ISODateTimeString } from "@/types/aliases";
+import type { CursorPageVM } from "@/types/generics/cursor/CursorPage.view-model";
 
-import type { MetricCategoryVM } from "../metric-categories/view-models";
 import type { MetricSettingsExtendedVM } from "../metric-settings/view-models";
 import type { MetricPreviewResponseDTO } from "./metric.dto";
 import type { MetricFilterViaCursor, MetricSortableKeyViaCursor } from "./sort";
 
+// * Composite
 export type MetricDetailCompositeVM = {
   header: MetricHeaderVM;
-  settings: MetricSettingsExtendedVM;
+  settings: MetricSettingsExtendedVM | null;
 };
 
-// Metric Details Header
+// * Base
+// Metric Details Header Base
 export type MetricHeaderVM = {
   id: string;
-  name: string;
-  defaultUnit: string;
-  isPublic: boolean;
-  description: string | null;
-  createdAt: string;
-  updatedAt: string;
 
-  category: { id: string; name: string; color: string; icon: string } | null;
-  originalMetricId?: string | null;
-};
-
-// Preview Base
-export type MetricPreviewVM = {
   // Base
-  id: string;
   name: string;
   defaultUnit: string;
   description: string | null;
   isPublic: boolean;
 
   // Relations
-  originalMetricId?: string | null; // currently not displayed in the preview, but keep it for future use
   category: MetricCategoryVM | null;
-  goalType?: string | null; // currently not displayed in the preview, but keep it for future use
+  originalMetricId?: string | null;
+
+  // Timestamps
+  createdAt: string;
+  updatedAt: string;
+};
+
+// Preview Base
+export type MetricPreviewVM = {
+  id: string;
+
+  // Base
+  name: string;
+  defaultUnit: string;
+  description: string | null;
+  isPublic: boolean;
+
+  // Relations
+  originalMetricId?: string | null; // currently not displayed in the preview
+  category: MetricCategoryVM | null;
+  goalType?: string | null; // currently not displayed in the preview
   logCount: number;
 
   // Timestamps
-  createdAt?: ISODateTimeString; // currently not displayed in the preview, but keep it for future use
-  updatedAt?: ISODateTimeString; // currently not displayed in the preview, but keep it for future use
+  createdAt?: ISODateTimeString; // currently not displayed in the preview
+  updatedAt?: ISODateTimeString; // currently not displayed in the preview
 };
 
+// * List
 // Preview Cursor Page
-export type CursorPageVM<TIn, TOut, S extends string, F> = Omit<CursorPage<TIn, S, F>, "items"> & {
-  items: TOut[];
-};
 export type MetricCursorPageVM = CursorPageVM<
   MetricPreviewResponseDTO,
   MetricPreviewVM,

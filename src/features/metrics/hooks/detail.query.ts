@@ -1,8 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 
-import type { MetricSettingsExtendedVM } from "../../metric-settings/view-models";
+import { toMetricSettingsVM } from "@/features/metric-settings/mappers";
+
 import { metricsKeys } from "../keys";
-import { toMetricHeaderVM, toMetricSettingsVM } from "../mappers";
+import { toMetricHeaderVM } from "../mappers";
 import { getUserMetricDetails } from "../metric.api";
 
 export function useMetricDetailComposite(metricId: string) {
@@ -11,7 +12,7 @@ export function useMetricDetailComposite(metricId: string) {
     queryFn: () => getUserMetricDetails(metricId, { includes: ["category", "settings"] }),
     select: (dto) => ({
       header: toMetricHeaderVM(dto),
-      settings: toMetricSettingsVM(dto) as MetricSettingsExtendedVM,
+      settings: dto.settings ? toMetricSettingsVM(dto.settings) : null,
     }),
     enabled: !!metricId,
     staleTime: 30_000,
