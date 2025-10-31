@@ -31,7 +31,7 @@ interface Props {
   initialLog?: MetricLogVM | null;
 }
 
-const MetricLogFormModal = ({ onClose, metricId, initialLog }: Props) => {
+const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
   const isEditMode = !!initialLog;
 
   // * Form
@@ -250,4 +250,4 @@ const MetricLogFormModal = ({ onClose, metricId, initialLog }: Props) => {
   );
 };
 
-export default MetricLogFormModal;
+export default MetricLogForm;
