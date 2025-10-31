@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Tag, TrendUp } from "phosphor-react";
+import { FloppyDisk, Tag, TrendUp } from "phosphor-react";
 import { useCallback, useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 
@@ -14,12 +14,12 @@ import {
 } from "@/features/metric-settings/hooks/index";
 import type { MetricSettingsExtendedVM } from "@/features/metric-settings/view-models";
 import { cn } from "@/src/lib/cn";
+import Button from "@/ui/Button";
 import ColorField from "@/ui/ColorField";
 import DateTimePicker from "@/ui/DateTimePicker";
 import ErrorMessage from "@/ui/ErrorMessage";
 import { FormField } from "@/ui/FormField";
 import Modal from "@/ui/Modal";
-import PrimaryButton from "@/ui/PrimaryButton";
 import type { SegmentOption } from "@/ui/SegmentedControl";
 import SegmentedControl from "@/ui/SegmentedControl";
 import type { SelectOption } from "@/ui/Select";
@@ -29,9 +29,12 @@ import TextField from "@/ui/TextField";
 import Toggle from "@/ui/Toggle";
 import { parseDate, toISODateOnly } from "@/utils/date-io";
 
+import type { ChartType, GoalType } from "../constants";
+import { CHART_OPT, GOAL_TYPE_OPT, PRIORITY_OPT } from "../constants";
+
 interface Props {
   onClose: () => void;
-  metricId: string;
+  metricId: string; // non-nullable; ensure ownership
   initialSettings: MetricSettingsExtendedVM | null;
 }
 
@@ -40,12 +43,14 @@ export const MetricSettingsForm = ({
   metricId,
   initialSettings: initialSettings,
 }: Props) => {
+  const isEditMode = !!initialSettings;
+
+  // * Form
   // TODO: Refactor
   const makeDefaults = (
     set?: MetricSettingsExtendedVM | null,
     metricIdProp?: string | null,
   ): MetricSettingsFormInputs => ({
-    // IMPORTANT: use prop as fallback for create-mode
     metricId: set?.metricId ?? metricIdProp ?? "",
     goalEnabled: Boolean(set?.goalEnabled),
     goalType: set?.goalType ?? undefined,
@@ -68,8 +73,6 @@ export const MetricSettingsForm = ({
     [initialSettings, metricId],
   );
 
-  const isEditMode = !!initialSettings;
-
   const {
     register,
     handleSubmit,
@@ -88,7 +91,12 @@ export const MetricSettingsForm = ({
     reset(defaults);
   }, [defaults, reset]);
 
-  // * ========== Mutations ==========
+  // Options
+  const chartOptions: SelectOption<ChartType>[] = CHART_OPT;
+  const goalTypeOptions: SegmentOption<GoalType>[] = GOAL_TYPE_OPT;
+  const priorityOptions: SegmentOption<number>[] = PRIORITY_OPT;
+
+  // * Mutations
   const {
     createMetricSettings,
     isPending: isCreating,
@@ -112,36 +120,20 @@ export const MetricSettingsForm = ({
       }
 
       try {
+        // TODO: Normalize DTO payload helper
+        const payloadCreate = {
+          ...data,
+          metricId: data.metricId,
+        };
+
         if (isEditMode && initialSettings) {
           await updateMetricSettings({
             settingsId: initialSettings.id!,
             metricId: metricId,
-            settings: {
-              goalEnabled: data.goalEnabled,
-              goalType: data.goalType,
-              goalValue: data.goalValue,
-              timeFrameEnabled: data.timeFrameEnabled,
-              startDate: data.startDate,
-              deadlineDate: data.deadlineDate,
-              alertEnabled: data.alertEnabled,
-              alertThresholds: data.alertThresholds,
-              displayOptions: data.displayOptions,
-              // isActive and isAchieved currently managed by BE
-            },
+            settings: payloadCreate,
           });
         } else {
-          await createMetricSettings({
-            metricId: metricId,
-            goalEnabled: data.goalEnabled,
-            goalType: data.goalType,
-            goalValue: data.goalValue,
-            timeFrameEnabled: data.timeFrameEnabled,
-            startDate: data.startDate,
-            deadlineDate: data.deadlineDate,
-            alertEnabled: data.alertEnabled,
-            alertThresholds: data.alertThresholds,
-            displayOptions: data.displayOptions,
-          });
+          await createMetricSettings(payloadCreate);
         }
         reset();
         onClose();
@@ -176,30 +168,16 @@ export const MetricSettingsForm = ({
     [onSubmitForm],
   );
 
+  // Close
+  const handleCloseClick = useCallback(() => {
+    onClose();
+    reset();
+  }, [onClose, reset]);
+
+  // Computed Values
   const errorMsg = createError?.message || updateError?.message || "";
 
-  // TODO: refactor to ./src/features/metric-settings/constants
-  const chartOptions: SelectOption<string>[] = [
-    { value: "line", label: "Line Chart" },
-    { value: "bar", label: "Bar Chart" },
-    { value: "area", label: "Area Chart" },
-    { value: "pie", label: "Pie Chart" },
-  ];
-
-  const goalTypeOptions: SegmentOption<"incremental" | "cumulative">[] = [
-    { value: "incremental", label: "Incremental" },
-    { value: "cumulative", label: "Cumulative" },
-  ];
-
-  const priorityOptions: SegmentOption<number>[] = [
-    { value: 1, label: "1" },
-    { value: 2, label: "2" },
-    { value: 3, label: "3" },
-    { value: 4, label: "4" },
-    { value: 5, label: "5" },
-  ];
-
-  // * Subsections
+  // * UI: Subsections
   const subSectionContainerClass =
     "flex flex-col gap-6 rounded rounded-xl bg-white p-4 border border-gray-100 transition";
   const subsectionHeaderClass = "flex items-center justify-between gap-2";
@@ -339,9 +317,9 @@ export const MetricSettingsForm = ({
     </div>
   );
 
-  // * Sections
+  // * UI: Sections
   const sectionContainerClass =
-    "mb-6 flex flex-col gap-6 rounded-lg border border-gray-100 bg-gray-50 p-6 transition";
+    "flex flex-col gap-6 rounded-lg border border-gray-100 bg-gray-50 p-6 transition";
 
   const goalSections = (
     <div className={sectionContainerClass}>
@@ -521,7 +499,6 @@ export const MetricSettingsForm = ({
                 value={field.value ?? CATEGORY_DEFAULTS.color}
                 onChange={field.onChange}
                 disabled={isBusyInputs}
-                className="mt-1"
                 aria-label="Chart color"
               />
             </FormField.Control>
@@ -531,48 +508,42 @@ export const MetricSettingsForm = ({
     </div>
   );
 
-  const buttonSection = (
-    <div className="flex-row space-y-4">
-      <div className="items mt-6 flex justify-center gap-2">
-        <button
-          type="button"
-          className="w-full rounded-xl bg-gray-100 px-4 py-2 text-gray-700 hover:bg-gray-200"
-          onClick={onClose}
-          disabled={isSubmitting}
-        >
-          Cancel
-        </button>
-
-        <PrimaryButton type="submit" disabled={isSubmitting || !isValid} className="w-full">
-          {isSubmitting || isCreating || isUpdating ? "Saving..." : isEditMode ? "Save" : "Add"}
-        </PrimaryButton>
-      </div>
-
-      {/* Dev Note: Delete Button currently not added as not part of MVP => only update feature */}
-    </div>
-  );
-
   const hideScrollbar =
     "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]  overflow-y-auto";
 
   return (
-    <Modal isOpen onClose={onClose}>
+    <Modal isOpen onClose={handleCloseClick}>
       <form
-        // className="mx-auto flex max-h-[80vh] min-w-96 max-w-xl flex-col overflow-y-auto bg-white p-2 sm:p-2 lg:p-6"
+        noValidate
         className={cn(
           "mx-auto flex max-h-[80vh] min-w-96 max-w-xl flex-col bg-white transition-transform",
         )}
         onSubmit={handleFormSubmit}
       >
-        <h2 className="mb-2 text-xl font-semibold">Metric Settings</h2>{" "}
-        {/* keep schema happy: register metricId */}
-        <input type="hidden" {...register("metricId")} />
+        <h2 className="mb-2 text-xl font-semibold">Metric Settings</h2>
         <ErrorMessage message={errorMsg} className="mb-2"></ErrorMessage>
+
+        {/* Fields */}
         <div className={cn(hideScrollbar)}>
+          <input type="hidden" {...register("metricId")} value={metricId} />
           {goalSections}
           {displayOptionsSection}
         </div>
-        {buttonSection}
+
+        {/* Buttons */}
+        <div className="mt-8 space-y-4">
+          <Button
+            type="submit"
+            variant="primary"
+            leftIcon={<FloppyDisk size={20} />}
+            disabled={isSubmitting || isCreating || isUpdating || !isValid}
+            block
+          >
+            {isSubmitting || isCreating || isUpdating ? "Saving..." : isEditMode ? "Save" : "Add"}
+          </Button>
+
+          {/* Dev Note: Delete Button currently not added as not part of MVP => only update feature */}
+        </div>
       </form>
     </Modal>
   );

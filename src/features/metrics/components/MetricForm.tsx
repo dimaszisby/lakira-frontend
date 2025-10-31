@@ -30,10 +30,9 @@ interface Props {
 
 export const MetricForm = ({ onClose, initialMetric }: Props) => {
   const isEditMode = !!initialMetric;
-  // const [category] = useState<Partial<MetricCategoryVM | null>>(initialMetric?.category ?? null);
 
-  // Form Defaults handling
-  // TODO: refactor in /features/metrics/form.tsx
+  // * Form
+  // TODO: refactor
   const makeDefaults = (m?: MetricFormInitial | null): MetricFormInputs => ({
     categoryId: m?.category?.id ?? undefined,
     originalMetricId: m?.originalMetricId ?? undefined,
@@ -45,7 +44,6 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
 
   const defaults = useMemo(() => makeDefaults(initialMetric), [initialMetric]);
 
-  // * Form
   const {
     register,
     handleSubmit,
@@ -65,8 +63,7 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
     reset(defaults);
   }, [defaults, reset]);
 
-  // * ========== Duplicate Name Check ==========
-
+  // * Duplicate Name Check
   // Debounce the name input to prevent excessive API calls
   const nameValue = watch("name") ?? "";
   const [debouncedName, setDebouncedName] = useState(nameValue);
@@ -126,7 +123,7 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
     clearErrors,
   ]);
 
-  // * ========== Mutations ==========
+  // * Mutations
   const { createMetric, isPending: isCreating, error: createError } = useCreateMetric();
 
   const { updateMetric, isPending: isUpdating, error: updateError } = useUpdateMetric();
@@ -135,10 +132,11 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
 
   const isBusyInputs = isSubmitting || isCreating || isUpdating || isDeleting;
 
-  // * Submit Handlers
+  // * Handlers
   const onValid = useCallback(
     async (data: MetricFormInputs) => {
       try {
+        // TODO: Normalize DTO payload helper
         const payload = {
           ...data,
           categoryId: data.categoryId ?? null, // send null when cleared
@@ -170,7 +168,7 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
 
   const handleFormSubmit: React.FormEventHandler<HTMLFormElement> = useCallback(
     (e) => {
-      void onSubmitForm(e); // forward the event -> RHF will call preventDefault()
+      void onSubmitForm(e);
     },
     [onSubmitForm],
   );
@@ -200,6 +198,7 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
   // Computed values
   const errorMsg = createError?.message || updateError?.message || deleteError?.message || "";
 
+  // Styles
   const inputBg = "bg-gray-50";
 
   return (
@@ -210,7 +209,6 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
         onSubmit={handleFormSubmit}
       >
         <h2 className="mb-2 text-xl font-semibold">Manage Metric</h2>
-
         <ErrorMessage message={errorMsg} className="mb-2"></ErrorMessage>
 
         <div className="flex flex-col gap-8">
@@ -218,14 +216,13 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
             <FormField.Label>Metric Name</FormField.Label>
             <FormField.Control>
               <TextField
-                id="name" // This should not use fieldId again right? because of the FormField that already generate?
                 placeholder="e.g., 10000"
                 registration={register("name")}
                 hasError={!!errors.name}
                 disabled={isBusyInputs}
                 clearable
                 required
-                wrapperClassName={inputBg} // InputChrome bg override not working
+                wrapperClassName={inputBg}
               />
             </FormField.Control>
           </FormField>
@@ -234,19 +231,17 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
             <FormField.Label>Default Unit</FormField.Label>
             <FormField.Control>
               <TextField
-                id="defaultUnit"
                 placeholder="e.g., km, reps, hours"
                 registration={register("defaultUnit")}
                 hasError={!!errors.defaultUnit}
                 disabled={isBusyInputs}
                 clearable
                 required
-                wrapperClassName={inputBg} // InputChrome bg override not working
+                wrapperClassName={inputBg}
               />
             </FormField.Control>
           </FormField>
 
-          {/** TODO: Category still not applied when clicking update */}
           <Controller
             name="categoryId"
             control={control}
@@ -279,7 +274,7 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
                   "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]  overflow-y-auto",
                   inputBg,
                   "max-h-96",
-                )} // InputChrome bg override not working
+                )}
                 showCount
               />
             </FormField.Control>
@@ -287,7 +282,7 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
         </div>
 
         {/* Buttons */}
-        <div className="mt-6 flex-row gap-4">
+        <div className="mt-8 space-y-4">
           <Button
             type="submit"
             variant="primary"
@@ -299,19 +294,16 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
 
           {/* Delete button (edit mode only) */}
           {isEditMode ? (
-            <>
-              <hr style={{ borderTop: "1px solid lightgrey" }} className="my-4" />
-              <Button
-                type="button"
-                variant="destructive"
-                leftIcon={<Trash size={20} />}
-                onClick={handleDeleteClick}
-                disabled={isSubmitting || isDeleting}
-                block
-              >
-                {isDeleting ? "Deleting..." : "Delete Metric"}
-              </Button>
-            </>
+            <Button
+              type="button"
+              variant="destructive"
+              leftIcon={<Trash size={20} />}
+              onClick={handleDeleteClick}
+              disabled={isSubmitting || isDeleting}
+              block
+            >
+              {isDeleting ? "Deleting..." : "Delete Metric"}
+            </Button>
           ) : null}
         </div>
       </form>

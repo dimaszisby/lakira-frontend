@@ -1,6 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useCallback, useId, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { FloppyDisk, Folder, Trash } from "phosphor-react";
+import { useCallback, useEffect, useMemo } from "react";
+import { Controller, useForm } from "react-hook-form";
 
 import { CATEGORY_DEFAULTS } from "@/features/metric-categories/constants";
 import {
@@ -11,48 +12,52 @@ import {
 import type { MetricCategoryFormInput } from "@/features/metric-categories/types";
 import { metricCategoryFormSchema } from "@/features/metric-categories/types";
 import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
+import { cn } from "@/src/lib/cn";
 import type { CreateMetricCategoryRequestDTO } from "@/types/dtos/metric-category.dto";
+import Button from "@/ui/Button";
+import ColorField from "@/ui/ColorField";
 import ErrorMessage from "@/ui/ErrorMessage";
+import { FormField } from "@/ui/FormField";
 import Modal from "@/ui/Modal";
-import PrimaryButton from "@/ui/PrimaryButton";
 import TextField from "@/ui/TextField";
 
-// TODO: Create a proper Color Picker component then refactorizes
-
 interface Props {
-  open: boolean;
   onClose: () => void;
   initialCategory: MetricCategoryVM | null;
 }
 
-const MetricCategoryForm = ({ open, onClose, initialCategory }: Props) => {
+const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
   const isEditMode = !!initialCategory;
 
-  // Form Defaults handling
-  const makeDefaults = (m: MetricCategoryVM | null): CreateMetricCategoryRequestDTO => ({
-    name: m?.name ?? "",
-    color: m?.color ?? CATEGORY_DEFAULTS.color,
-    icon: m?.icon ?? CATEGORY_DEFAULTS.icon,
-  });
-
   // * Form
+  const makeDefaults = useCallback(
+    (m: MetricCategoryVM | null): CreateMetricCategoryRequestDTO => ({
+      name: m?.name ?? "",
+      color: m?.color ?? CATEGORY_DEFAULTS.color,
+      icon: m?.icon ?? CATEGORY_DEFAULTS.icon,
+    }),
+    [],
+  );
+
+  const defaults = useMemo(() => makeDefaults(initialCategory), [initialCategory, makeDefaults]);
+
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting, isValid },
+    control,
   } = useForm<CreateMetricCategoryRequestDTO>({
     resolver: zodResolver(metricCategoryFormSchema),
     mode: "onChange",
-    defaultValues: makeDefaults(initialCategory),
+    defaultValues: defaults,
   });
 
-  // * Rehydrate
-  // Field: Build unique ids per field -> prevents collisions if multiple forms render
-  const uid = useId();
-  const fieldId = (name: string) => `category-${uid}-${name}`;
+  useEffect(() => {
+    reset(defaults);
+  }, [defaults, reset]);
 
-  // * Mutation Hooks
+  // * Mutations
   const {
     createMetricCategory,
     isPending: isCreating,
@@ -76,6 +81,7 @@ const MetricCategoryForm = ({ open, onClose, initialCategory }: Props) => {
   // * Handlers
   const onValid = useCallback(
     async (data: MetricCategoryFormInput) => {
+      // TODO: Normalize DTO payload helper
       try {
         if (isEditMode && initialCategory) {
           await updateMetricCategory({ categoryId: initialCategory.id, category: data });
@@ -103,12 +109,12 @@ const MetricCategoryForm = ({ open, onClose, initialCategory }: Props) => {
 
   const handleFormSubmit: React.FormEventHandler<HTMLFormElement> = useCallback(
     (e) => {
-      void onSubmitForm(e); // forward the event -> RHF will call preventDefault()
+      void onSubmitForm(e);
     },
     [onSubmitForm],
   );
 
-  // Delete handler
+  // Delete
   const deleteCategoryAsync = useCallback(async () => {
     if (!initialCategory) return;
     try {
@@ -124,81 +130,109 @@ const MetricCategoryForm = ({ open, onClose, initialCategory }: Props) => {
     void deleteCategoryAsync();
   }, [deleteCategoryAsync]);
 
-  // Computed Value
+  // Close
+  const handleCloseClick = useCallback(() => {
+    onClose();
+    reset();
+  }, [onClose, reset]);
+
+  // Computed Values
   const errorMsg = createError?.message || updateError?.message || deleteError?.message || "";
 
+  // Styles
+  const inputBg = "bg-gray-50";
+
   return (
-    <Modal isOpen={open} onClose={onClose}>
-      {open ? (
-        <form
-          key={initialCategory?.id ?? "create"}
-          noValidate
-          className="mx-auto min-w-96 max-w-lg bg-white p-4 sm:p-4 lg:p-6"
-          onSubmit={handleFormSubmit}
-        >
-          <h2 className="mb-4 text-xl font-semibold">Manage Category</h2>
+    <Modal isOpen onClose={handleCloseClick}>
+      <form noValidate className="mx-auto bg-white p-4 sm:p-4 lg:p-6" onSubmit={handleFormSubmit}>
+        <h2 className="mb-4 text-xl font-semibold">Manage Category</h2>
 
-          {/* Error Message */}
-          <ErrorMessage message={errorMsg}></ErrorMessage>
+        {/* Error Message */}
+        <ErrorMessage message={errorMsg}></ErrorMessage>
 
-          <ul className="flex flex-col gap-4 sm:gap-4 lg:gap-6">
-            <TextField
-              id={fieldId("name")}
-              label="Name"
-              type="text"
-              registration={register("name")}
-              placeholder="i.e Muscle Group Growth"
-              error={errors.name?.message}
-              disabled={isBusyInputs}
-              required
+        <ul className="flex flex-col gap-4 sm:gap-4 lg:gap-6">
+          <FormField invalid={!!errors.name} error={errors.name?.message}>
+            <FormField.Label>Category Name</FormField.Label>
+            <FormField.Control>
+              <TextField
+                placeholder="i.e Muscle Group Growth"
+                registration={register("name")}
+                leftAddon={<Folder weight="duotone" className="text-violet-500" />}
+                hasError={!!errors.name}
+                disabled={isBusyInputs}
+                clearable
+                required
+                wrapperClassName={cn(inputBg, "w-full")}
+              />
+            </FormField.Control>
+          </FormField>
+
+          <span className="flex gap-4 sm:gap-4 lg:gap-6">
+            <FormField invalid={!!errors.icon} error={errors.icon?.message}>
+              <FormField.Label>Icon</FormField.Label>
+              <FormField.Control>
+                <TextField
+                  placeholder="i.e Muscle Group Growth"
+                  registration={register("icon")}
+                  // leftAddon={<Folder weight="duotone" className="text-violet-500" />}
+                  hasError={!!errors.icon}
+                  disabled={isBusyInputs}
+                  clearable
+                  minLength={1}
+                  maxLength={1}
+                  wrapperClassName={cn(inputBg, "flex-none w-full")}
+                />
+              </FormField.Control>
+            </FormField>
+
+            <Controller
+              name="color"
+              control={control}
+              render={({ field }) => (
+                <FormField invalid={!!errors.color} error={errors.color?.message}>
+                  <FormField.Label>Color</FormField.Label>
+                  <FormField.Control>
+                    <ColorField
+                      value={field.value ?? CATEGORY_DEFAULTS.color}
+                      onChange={field.onChange}
+                      disabled={isBusyInputs}
+                      className={cn(inputBg, "flex-shrink")}
+                      aria-label="Chart color"
+                    />
+                  </FormField.Control>
+                </FormField>
+              )}
             />
+          </span>
+        </ul>
 
-            <span className="flex gap-4 sm:gap-4 lg:gap-6">
-              <TextField
-                id={fieldId("icon")}
-                label="Icon"
-                type="text"
-                registration={register("icon")}
-                placeholder="e.g., km, reps, hours"
-                error={errors.icon?.message}
-                disabled={isBusyInputs}
-              />
+        {/* Buttons */}
+        <div className="mt-8 space-y-4">
+          <Button
+            type="submit"
+            variant="primary"
+            leftIcon={<FloppyDisk size={20} />}
+            disabled={isSubmitting || isCreating || isUpdating || !isValid}
+            block
+          >
+            {isSubmitting || isCreating || isUpdating ? "Saving..." : isEditMode ? "Save" : "Add"}
+          </Button>
 
-              <TextField
-                id={fieldId("color")}
-                label="color"
-                type="text"
-                registration={register("color")}
-                placeholder="#000000"
-                error={errors.color?.message}
-                disabled={isBusyInputs}
-              />
-            </span>
-          </ul>
-
-          {/* Buttons */}
-          <ul className="lg:gap-6c mt-12 flex-row gap-4 sm:gap-4">
-            <PrimaryButton type="submit" disabled={isSubmitting || !isValid} className="w-full">
-              {isSubmitting || isCreating || isUpdating ? "Saving..." : isEditMode ? "Save" : "Add"}
-            </PrimaryButton>
-
-            {/* Delete button (edit mode only) */}
-            {isEditMode ? (
-              <ul>
-                <hr style={{ borderTop: "1px solid lightgrey" }} className="my-4" />
-                <button
-                  type="button"
-                  className="w-full rounded-xl bg-red-50 px-4 py-2 text-red-500 hover:bg-red-100"
-                  onClick={handleDeleteClick}
-                  disabled={isSubmitting || isDeleting}
-                >
-                  {isDeleting ? "Deleting..." : "Delete Category"}
-                </button>
-              </ul>
-            ) : null}
-          </ul>
-        </form>
-      ) : null}
+          {/* Delete button (edit mode only) */}
+          {isEditMode ? (
+            <Button
+              type="button"
+              variant="destructive"
+              leftIcon={<Trash size={20} />}
+              onClick={handleDeleteClick}
+              disabled={isSubmitting || isDeleting}
+              block
+            >
+              {isDeleting ? "Deleting..." : "Delete Metric"}
+            </Button>
+          ) : null}
+        </div>
+      </form>
     </Modal>
   );
 };
