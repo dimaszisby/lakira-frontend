@@ -2,8 +2,7 @@ import type { InfiniteData } from "@tanstack/react-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-import { httpStatusFrom } from "@/src/services/api/http-status";
-import { getNextCursor, makeInfiniteItemsSelect } from "@/src/utils/query-cursor";
+import { httpStatusFrom } from "@/services/api/http-status";
 
 import { getMetricSettingsListViaCursor } from "../api";
 import { metricSettingsKeys } from "../keys";
@@ -14,6 +13,7 @@ import type {
   MetricSettingsSortViaCursor,
 } from "../sort";
 import type { MetricSettingsCursorPageVM } from "../view-models";
+import { getNextCursor, makeInfiniteItemsSelect } from "@/src/utils/cursor/page-map";
 
 type UseMetricSettingsArgs = {
   limit?: number;

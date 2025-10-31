@@ -3,13 +3,13 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 import { httpStatusFrom } from "@/services/api/http-status";
-import { getNextCursor, makeInfiniteItemsSelect } from "@/src/utils/query-cursor";
 
 import { metricsKeys } from "../keys";
 import { toMetricPreviewVM } from "../mappers";
 import { getMetricLibraryViaCursor } from "../metric.api";
 import type { MetricCursorPage, MetricFilterViaCursor, MetricSortViaCursor } from "../sort";
 import type { MetricCursorPageVM } from "../view-models";
+import { getNextCursor, makeInfiniteItemsSelect } from "@/src/utils/cursor/page-map";
 
 type UseMetricArgs = {
   limit?: number;
