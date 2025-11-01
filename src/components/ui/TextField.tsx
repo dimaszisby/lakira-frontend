@@ -1,9 +1,10 @@
 "use client";
 
-import clsx from "clsx";
 import { Eye, EyeSlash, XCircle } from "phosphor-react";
 import * as React from "react";
 import type { UseFormRegisterReturn } from "react-hook-form";
+
+import { cn } from "@/src/lib/cn";
 
 import InputChrome from "./InputChrome";
 
@@ -13,7 +14,7 @@ export type TextFieldProps = Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
   "size" | "children" | "onChange"
 > & {
-  id: string;
+  id?: string;
   label?: string; // optional: not used here (FieldShell renders label)
   registration?: UseFormRegisterReturn;
   size?: Size;
@@ -80,6 +81,7 @@ const TextField = ({
           onClick={clear}
           className="rounded-md p-1 text-gray-400 hover:bg-violet-50 hover:text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-400"
           title="Clear"
+          aria-label="Clear input"
         >
           <XCircle size={18} />
         </button>
@@ -113,15 +115,14 @@ const TextField = ({
         type={revealToggle && type === "password" ? (showPwd ? "text" : "password") : type}
         placeholder={placeholder}
         disabled={disabled}
-        className={clsx(
+        className={cn(
           "block w-full border-none bg-transparent text-gray-900 outline-none placeholder:text-gray-400",
           size === "sm" ? "text-sm" : size === "lg" ? "text-lg" : "text-base",
           className,
         )}
-        aria-invalid={hasError || undefined}
-        // Spread first so our handler always wins
+        // Dev Note: FormField.Control provide aria-invalid / aria-describedby / aria-errormessage
         {...registration}
-        {...rest}
+        {...rest} // carries injected ARIA from FormField.Control
         onChange={handleInput}
       />
     </InputChrome>

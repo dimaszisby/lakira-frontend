@@ -1,7 +1,8 @@
 "use client";
 
-import clsx from "clsx";
 import React from "react";
+
+import { cn } from "@/src/lib/cn";
 
 type Size = "sm" | "md" | "lg";
 
@@ -13,6 +14,7 @@ export type InputChromeProps = {
   disabled?: boolean;
   size?: Size;
   className?: string;
+  multiline?: boolean; // NEW
 };
 
 // Compliance: Visually consistent field shell with hover/focus/error/disabled states.
@@ -24,18 +26,26 @@ const InputChrome = ({
   disabled,
   size = "md",
   className,
+  multiline = false,
 }: InputChromeProps) => {
-  const sizeCls =
-    size === "sm"
-      ? "h-10 px-3 rounded-xl text-sm gap-2"
+  // height & alignment differ for multiline
+  const sizeCls = multiline
+    ? size === "sm"
+      ? "px-3 py-2 rounded-xl text-sm gap-2"
       : size === "lg"
-        ? "h-14 px-5 rounded-2xl text-base gap-3"
-        : "h-12 px-4 rounded-2xl text-base gap-3";
+        ? "px-5 py-3 rounded-2xl text-base gap-3"
+        : "px-4 py-2.5 rounded-2xl text-base gap-3"
+    : size === "sm"
+      ? "min-h-10 px-3 rounded-xl text-sm gap-2"
+      : size === "lg"
+        ? "min-h-14 px-5 rounded-2xl text-base gap-3"
+        : "min-h-12 px-4 rounded-2xl text-base gap-3";
 
   return (
     <div
-      className={clsx(
-        "group/input relative flex w-full items-center",
+      className={cn(
+        "group/input relative flex w-full",
+        multiline ? "items-start" : "items-center",
         "border border-gray-200 bg-white shadow-sm transition-colors",
         "hover:border-gray-300",
         "focus-within:border-violet-300 focus-within:ring-2 focus-within:ring-violet-400",
