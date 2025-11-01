@@ -1,8 +1,8 @@
-import type { ISODateTimeString } from "@/src/types/aliases";
-import type { MetricLogResponseDTO } from "@/src/types/dtos/metric-log.dto";
-import type { CursorPage } from "@/src/types/generics/CursorPage";
+import type { CursorPageVM } from "@/generics/cursor/view-model";
+import type { ISODateTimeString } from "@/types/aliases";
+import type { MetricLogResponseDTO } from "@/types/dtos/metric-log.dto";
 
-import type { MetricLogFilterViaCursor, MetricLogSortableKeyViaCursor } from "./sort";
+import type { MetricLogFilter, MetricLogSortableKey } from "./sort";
 
 export type MetricLogVM = {
   id: string;
@@ -21,13 +21,9 @@ export type MetricLogVM = {
 };
 
 // Preview Cursor Page
-// TODO: Refactor
-export type CursorPageVM<TIn, TOut, S extends string, F> = Omit<CursorPage<TIn, S, F>, "items"> & {
-  items: TOut[];
-};
 export type MetricLogCursorPageVM = CursorPageVM<
   MetricLogResponseDTO,
   MetricLogVM,
-  MetricLogSortableKeyViaCursor,
-  MetricLogFilterViaCursor
+  MetricLogSortableKey,
+  MetricLogFilter
 >;

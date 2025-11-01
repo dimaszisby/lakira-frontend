@@ -4,20 +4,16 @@ import { useEffect, useState } from "react";
 import { getMetricLogsListViaCursor } from "../api";
 import { metricLogsKeys } from "../keys";
 import { toMetricLogVM } from "../mappers";
-import type {
-  MetricLogCursorPageResponse,
-  MetricLogFilterViaCursor,
-  MetricLogSortViaCursor,
-} from "../sort";
+import type { MetricLogCursorPageResponse, MetricLogFilter, MetricLogSortParam } from "../sort";
 import type { MetricLogCursorPageVM } from "../view-models";
 
 type LogCursorPageDTO = MetricLogCursorPageResponse;
 
 export function useMetricLogListCursorPage(params: {
   limit: number;
-  sort: MetricLogSortViaCursor;
+  sort: MetricLogSortParam;
   q?: string;
-  filter?: MetricLogFilterViaCursor;
+  filter?: MetricLogFilter;
   enabled: boolean;
 }) {
   type Map = Record<number, string | null>;

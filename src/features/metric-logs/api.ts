@@ -11,18 +11,15 @@ import type ApiResponse from "@/types/generics/ApiResponse";
 import { unwrap } from "@/types/generics/ApiResponse";
 import type { RequestOpts } from "@/types/generics/RequestOpts";
 
-import type {
-  MetricLogCursorPageResponse,
-  MetricLogFilterViaCursor,
-  MetricLogSortViaCursor,
-} from "./sort";
+import type { MetricLogCursorPageResponse, MetricLogFilter, MetricLogSortParam } from "./sort";
+import { DEFAULT_METRIC_LOG_SORT } from "./sort";
 
 // TODO: Generic/Shared Function
 type ListLogsRequestParams = {
   limit?: number; // default 20
-  sort?: MetricLogSortViaCursor;
+  sort?: MetricLogSortParam;
   q?: string;
-  filter?: MetricLogFilterViaCursor;
+  filter?: MetricLogFilter;
   after?: string; // cursor
   includeTotal?: boolean;
 };
@@ -72,7 +69,7 @@ export const getMetricLogs = async ({
  */
 export async function getMetricLogsListViaCursor({
   limit = 20,
-  sort = "-createdAt",
+  sort = DEFAULT_METRIC_LOG_SORT,
   q,
   filter,
   after,

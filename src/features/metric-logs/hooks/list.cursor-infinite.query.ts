@@ -4,22 +4,19 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { getMetricLogsListViaCursor } from "../api";
 import { metricLogsKeys } from "../keys";
 import { toMetricLogVM } from "../mappers";
-import type {
-  MetricLogCursorPageResponse,
-  MetricLogFilterViaCursor,
-  MetricLogSortViaCursor,
-} from "../sort";
+import type { MetricLogCursorPageResponse, MetricLogFilter, MetricLogSortParam } from "../sort";
+import { DEFAULT_METRIC_LOG_SORT } from "../sort";
 import type { MetricLogCursorPageVM } from "../view-models";
 
 type UseMetricLogArgs = {
   limit?: number;
-  sort?: MetricLogSortViaCursor;
+  sort?: MetricLogSortParam;
   q?: string;
-  filter?: MetricLogFilterViaCursor;
+  filter?: MetricLogFilter;
 };
 
 export function useMetricLogListCursorInfinite(opts: UseMetricLogArgs & { enabled: boolean }) {
-  const { limit = 20, sort = "-createdAt", q, filter, enabled = true } = opts;
+  const { limit = 20, sort = DEFAULT_METRIC_LOG_SORT, q, filter, enabled = true } = opts;
 
   const query = useInfiniteQuery<
     MetricLogCursorPageResponse, // TQueryFnData

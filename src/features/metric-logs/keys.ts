@@ -1,8 +1,4 @@
-import type {
-  MetricLogFilterViaCursor,
-  MetricLogSortViaCursor,
-  MetricsLogsListParams,
-} from "./sort";
+import type { MetricLogFilter, MetricLogSortParam, MetricsLogsListParams } from "./sort";
 
 // helpers to keep keys stable
 const normalizeList = (p: MetricsLogsListParams) => ({
@@ -17,9 +13,9 @@ const normalizeList = (p: MetricsLogsListParams) => ({
 
 const normalizeCursor = (p: {
   limit: number;
-  sort: MetricLogSortViaCursor;
+  sort: MetricLogSortParam;
   q?: string;
-  filter?: MetricLogFilterViaCursor;
+  filter?: MetricLogFilter;
   includeTotal?: boolean;
   page?: number; // for paged cursor hook
   after?: string; // for infinite hook pageParam
@@ -50,17 +46,17 @@ export const metricLogsKeys = {
     root: () => [...metricLogsKeys.all, "cursor"] as const,
     pages: (p: {
       limit: number;
-      sort: MetricLogSortViaCursor;
+      sort: MetricLogSortParam;
       q?: string;
-      filter?: MetricLogFilterViaCursor;
+      filter?: MetricLogFilter;
       includeTotal?: boolean;
       page: number;
     }) => [...metricLogsKeys.cursor.root(), "pages", normalizeCursor(p)] as const,
     infinite: (p: {
       limit: number;
-      sort: MetricLogSortViaCursor;
+      sort: MetricLogSortParam;
       q?: string;
-      filter?: MetricLogFilterViaCursor;
+      filter?: MetricLogFilter;
       after?: string;
     }) => [...metricLogsKeys.cursor.root(), "infinite", normalizeCursor(p)] as const,
   },

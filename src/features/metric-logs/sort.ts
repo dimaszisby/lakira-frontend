@@ -1,13 +1,16 @@
+import type { CursorPage, SortParam } from "@/src/generics/cursor/types";
+import type { SortOrder } from "@/src/generics/sort";
+import { createCursorSort } from "@/src/lib/sort/cursorSort";
 import type { MetricLogResponseDTO } from "@/src/types/dtos/metric-log.dto";
-import type { CursorPage, SortParam } from "@/src/types/generics/CursorPage";
 
 // MetricExtended Opts
 export type ListOptions = { enabled?: boolean; staleTime?: number };
 
+// * Offset (Deprecated)
 export type MetricsLogsListParams = {
   page?: number;
   limit?: number;
-  sortBy?: MetricLogSortableKeyViaCursor;
+  sortBy?: MetricLogSortParam;
   sortOrder?: SortOrder;
   // optional filters you actually support on BE:
   q?: string;
@@ -17,49 +20,32 @@ export type MetricsLogsListParams = {
 };
 
 // * Cursor
-export type SortOrder = "ASC" | "DESC";
-export type MetricLogSortParamViaCursor =
-  | "createdAt"
-  | "-createdAt"
-  | "updatedAt"
-  | "-updatedAt"
-  | "logValue"
-  | "-logValue"
-  | "loggedAt"
-  | "-loggedAt";
+export const METRIC_LOG_SORT_KEYS = ["createdAt", "updatedAt", "logValue", "loggedAt"] as const;
 
-/** Only the keys MetricCategory can sort by */
-export type MetricLogSortableKeyViaCursor = "createdAt" | "updatedAt" | "logValue" | "loggedAt";
+export type MetricLogSortableKey = (typeof METRIC_LOG_SORT_KEYS)[number];
+export type MetricLogSortParam = SortParam<MetricLogSortableKey>;
 
-/** Optional: strong typing for your filter block */
-export type MetricLogFilterViaCursor = {
-  name?: string;
-  metricId?: string;
-};
+// Filter
+export type MetricLogFilter = { name?: string; metricId?: string };
 
-export type MetricLogSortViaCursor = SortParam<MetricLogSortParamViaCursor>;
+// Cursor Page Response DTO
 export type MetricLogCursorPageResponse = CursorPage<
   MetricLogResponseDTO,
-  MetricLogSortableKeyViaCursor,
-  MetricLogFilterViaCursor
+  MetricLogSortableKey,
+  MetricLogFilter
 >;
 
-// TODO: Refactor
-export const parseSort = (s: MetricLogSortParamViaCursor) => {
-  const dir = s.startsWith("-") ? "DESC" : "ASC";
-  const field = s.startsWith("-") ? s.slice(1) : s;
-  return { field, dir } as { field: string; dir: "ASC" | "DESC" };
-};
+// Domain-configured sort instance
+export const metricLogSort = createCursorSort({
+  keys: METRIC_LOG_SORT_KEYS,
+  defaultDesc: ["createdAt", "updatedAt", "logValue", "loggedAt"] as const,
+  defaultSort: "-createdAt" as const,
+});
 
-// TODO: Refactor
-export const nextSortForColumn = (
-  current: MetricLogSortParamViaCursor,
-  column: MetricLogSortableKeyViaCursor,
-): MetricLogSortParamViaCursor => {
-  const { field, dir } = parseSort(current);
-  if (field === column) {
-    return (dir === "ASC" ? `-${column}` : column) as MetricLogSortParamViaCursor; // toggle direction
-  }
-  if (column === "logValue") return "logValue"; // default direction per field: dates & numbers -> DESC, strings -> ASC
-  return `-${column}` as MetricLogSortParamViaCursor;
-};
+export const {
+  DEFAULT_SORT: DEFAULT_METRIC_LOG_SORT,
+  parseSort,
+  nextSortForColumn,
+  sortFromSearchParams,
+  isKey: isSortableColumn,
+} = metricLogSort;
