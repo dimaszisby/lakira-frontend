@@ -1,9 +1,10 @@
 "use client";
 
-import clsx from "clsx";
 import { WarningCircle } from "phosphor-react";
 import { useId } from "react";
 import type { FieldError } from "react-hook-form";
+
+import { cn } from "@/src/lib/cn";
 
 type Size = "sm" | "md" | "lg";
 type Variant = "plain" | "subtle" | "solid";
@@ -63,7 +64,7 @@ const ErrorMessage = ({
   return (
     <div
       id={domId}
-      className={clsx(
+      className={cn(
         "inline-flex items-start gap-2",
         s.minH,
         fullWidth ? "w-full" : "w-auto",
@@ -77,10 +78,10 @@ const ErrorMessage = ({
       {...aria}
     >
       {show && !hideIcon ? (
-        <WarningCircle aria-hidden className={clsx(v.icon, s.icon, "mt-[1px] shrink-0")} />
+        <WarningCircle aria-hidden className={cn(v.icon, s.icon, "mt-[1px] shrink-0")} />
       ) : null}
       {/* Keep text color outside conditional so classes don’t jump */}
-      <span className={clsx(v.text, s.text)}>{show ? String(msg) : ""}</span>
+      <span className={cn(v.text, s.text)}>{show ? String(msg) : ""}</span>
     </div>
   );
 };

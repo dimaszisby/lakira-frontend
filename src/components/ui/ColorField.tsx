@@ -1,8 +1,9 @@
 "use client";
 
-import clsx from "clsx";
-import { Check, PencilSimpleLine } from "phosphor-react";
+import { Check, Palette, PencilSimpleLine } from "phosphor-react";
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
+
+import { cn } from "@/src/lib/cn";
 
 export type ColorFieldProps = {
   id?: string;
@@ -98,22 +99,23 @@ const ColorField = ({
   };
 
   return (
-    <div className={clsx("relative", className)}>
+    <div className={cn("relative")}>
       <label htmlFor={inputId} className="sr-only">
         Color
       </label>
 
-      {/* Field shell (matches your screenshot) */}
+      {/* Field shell */}
       <div
-        className={clsx(
-          "flex h-12 items-center gap-3 rounded-2xl border border-gray-200 bg-white py-3 pl-2 pr-4 shadow-sm",
+        className={cn(
+          "flex h-12 items-center gap-3 rounded-2xl border border-gray-200 bg-white py-2 px-2 shadow-sm",
           disabled && "cursor-not-allowed opacity-60",
+          className,
         )}
         aria-disabled={disabled || undefined}
       >
         {/* Swatch */}
         <span
-          className="inline-block h-8 w-12 rounded-xl shadow-sm ring-1 ring-black/5"
+          className="inline-block aspect-square h-8 rounded-xl shadow-sm ring-1 ring-black/5"
           style={{ backgroundColor: current }}
           aria-hidden="true"
         />
@@ -139,7 +141,7 @@ const ColorField = ({
           }}
           placeholder={placeholder}
           disabled={disabled}
-          className={clsx(
+          className={cn(
             "w-full border-none bg-transparent text-base font-medium text-gray-900 outline-none placeholder:text-gray-400",
           )}
           aria-invalid={!HEX_RE.test(draft)}
@@ -151,7 +153,7 @@ const ColorField = ({
           type="button"
           ref={btnRef}
           onClick={() => !disabled && setOpen((s) => !s)}
-          className={clsx(
+          className={cn(
             "grid place-items-center rounded-lg p-2 outline-none transition hover:bg-violet-50 focus-visible:ring-2 focus-visible:ring-violet-400",
             disabled && "pointer-events-none",
           )}
@@ -173,7 +175,7 @@ const ColorField = ({
           ref={popoverRef}
           className="absolute z-50 mt-2 w-72 rounded-xl border border-gray-200 bg-white p-3 shadow-lg"
         >
-          <div className="mb-2 flex items-center justify-between">
+          <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span
                 className="h-5 w-5 rounded ring-1 ring-black/5"
@@ -183,7 +185,7 @@ const ColorField = ({
             </div>
             <button
               type="button"
-              className={clsx(
+              className={cn(
                 "inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium",
                 HEX_RE.test(draft)
                   ? "bg-violet-600 text-white hover:bg-violet-700"
@@ -198,7 +200,7 @@ const ColorField = ({
           </div>
 
           {/* Quick palette */}
-          <div className="mb-3 grid grid-cols-6 gap-2">
+          <div className="mb-4 grid grid-cols-6 gap-2">
             {PALETTE.map((c) => (
               <button
                 key={c}
@@ -221,7 +223,7 @@ const ColorField = ({
               value={draft}
               onChange={(e) => setDraft(e.target.value.toUpperCase())}
               maxLength={7}
-              className={clsx(
+              className={cn(
                 "flex-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 font-mono text-sm outline-none",
                 HEX_RE.test(draft) ? "focus:ring-2 focus:ring-violet-300" : "ring-2 ring-red-200",
               )}
@@ -231,10 +233,10 @@ const ColorField = ({
             <button
               type="button"
               onClick={triggerNativePicker}
-              className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              className="flex-none rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
               title="Advanced picker"
             >
-              Advanced…
+              <Palette size={20} className="text-violet-600" />
             </button>
             {/* Hidden native input to get OS color dialog when needed */}
             <input

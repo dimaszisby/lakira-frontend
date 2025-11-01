@@ -1,9 +1,9 @@
-// src/components/ui/Select.tsx
 "use client";
 
-import clsx from "clsx";
 import { CaretDown, CaretUp } from "phosphor-react";
 import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+
+import { cn } from "@/src/lib/cn";
 
 type Size = "sm" | "md" | "lg";
 type V = string | number;
@@ -27,8 +27,8 @@ export type SelectProps<T extends V = string> = {
   className?: string;
 
   // Slots inside the field (not the menu)
-  leftAddon?: React.ReactNode; // e.g., Trend icon (like your screenshot)
-  rightAddon?: React.ReactNode; // e.g., an extra icon/button at the far right
+  leftAddon?: React.ReactNode;
+  rightAddon?: React.ReactNode;
 
   // Customizers
   renderOption?: (
@@ -157,7 +157,7 @@ const Select = <T extends V = string>({
   const isPlaceholder = selected.opt == null;
 
   return (
-    <div ref={wrapperRef} className={clsx("relative", className)}>
+    <div ref={wrapperRef} className={cn("relative", className)}>
       {/* Trigger */}
       <button
         id={triggerId}
@@ -185,7 +185,7 @@ const Select = <T extends V = string>({
             else setOpen(true);
           }
         }}
-        className={clsx(
+        className={cn(
           "flex w-full items-center justify-between border border-gray-200 bg-white shadow-sm hover:bg-violet-50 focus-visible:ring-2 focus-visible:ring-violet-400",
           sizing.shell,
           disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
@@ -201,7 +201,7 @@ const Select = <T extends V = string>({
             </span>
           ) : null}
           <span
-            className={clsx(
+            className={cn(
               "truncate font-medium",
               sizing.text,
               isPlaceholder ? "text-gray-400" : "text-violet-600",
@@ -228,20 +228,20 @@ const Select = <T extends V = string>({
           ref={listRef}
           role="listbox"
           aria-labelledby={triggerId}
-          className={clsx(
+          className={cn(
             "absolute left-0 right-0 top-full z-50 max-h-60 overflow-auto border border-gray-200 bg-white shadow-lg",
             sizing.menu,
           )}
         >
           {options.length === 0 ? (
-            <span className={clsx("px-3 py-3 text-sm text-gray-500")} aria-disabled="true">
+            <span className={cn("px-3 py-3 text-sm text-gray-500")} aria-disabled="true">
               No options
             </span>
           ) : (
             options.map((opt, i) => {
               const active = i === activeIdx;
               const selected = value === opt.value;
-              const commonCls = clsx(
+              const commonCls = cn(
                 "flex cursor-pointer items-center gap-3",
                 sizing.item,
                 active ? "bg-violet-50" : "",
@@ -265,7 +265,7 @@ const Select = <T extends V = string>({
                   ) : (
                     <>
                       {opt.left ? <span className="text-gray-700">{opt.left}</span> : null}
-                      <span className={clsx(selected ? "text-violet-700" : "text-gray-800")}>
+                      <span className={cn(selected ? "text-violet-700" : "text-gray-800")}>
                         {opt.label}
                       </span>
                     </>
@@ -277,7 +277,7 @@ const Select = <T extends V = string>({
         </ul>
       ) : null}
 
-      {/* Optional hidden input if you want to pair with plain HTML forms */}
+      {/* Optional: hidden input -> to pair with plain HTML forms */}
       {name ? <input type="hidden" name={name} value={value ?? ""} /> : null}
     </div>
   );

@@ -1,8 +1,9 @@
 "use client";
 
-import clsx from "clsx";
 import { CalendarBlank, CaretLeft, CaretRight, Clock } from "phosphor-react";
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
+
+import { cn } from "@/src/lib/cn";
 
 type Mode = "date" | "datetime";
 
@@ -177,7 +178,7 @@ const DateTimePicker = ({
   }, [minuteStep]);
 
   return (
-    <div ref={wrapperRef} className={clsx("relative", className)} onKeyDown={handleKeyCalendar}>
+    <div ref={wrapperRef} className={cn("relative", className)} onKeyDown={handleKeyCalendar}>
       {/* Trigger */}
       <button
         id={triggerId}
@@ -190,7 +191,7 @@ const DateTimePicker = ({
         }
         onClick={() => !disabled && setOpen((s) => !s)}
         disabled={disabled}
-        className={clsx(
+        className={cn(
           "flex w-full items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 shadow-sm",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400",
           "hover:bg-violet-50",
@@ -270,7 +271,7 @@ const DateTimePicker = ({
                   onClick={() => {
                     if (!cellDisabled) commitDate(date);
                   }}
-                  className={clsx(
+                  className={cn(
                     "h-9 rounded-lg text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400",
                     isSelected
                       ? "bg-violet-500 font-semibold text-white"

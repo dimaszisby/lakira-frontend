@@ -1,7 +1,8 @@
 "use client";
 
-import clsx from "clsx";
 import React, { useCallback } from "react";
+
+import { cn } from "@/src/lib/cn";
 
 type Size = "sm" | "md" | "lg";
 
@@ -69,10 +70,10 @@ const Toggle = ({
   );
 
   return (
-    <div className={clsx("inline-flex items-center gap-2", wrapperClassName)}>
+    <div className={cn("inline-flex items-center gap-2", wrapperClassName)}>
       {/* Optional labels for ON/OFF */}
       {offLabel && !checked ? (
-        <span className={clsx("text-gray-400", s.text)}>{offLabel}</span>
+        <span className={cn("text-gray-400", s.text)}>{offLabel}</span>
       ) : null}
 
       <button
@@ -85,7 +86,7 @@ const Toggle = ({
         onClick={handleClick}
         onKeyDown={handleKeyDown}
         onBlur={onBlur}
-        className={clsx(
+        className={cn(
           "relative inline-flex shrink-0 cursor-pointer select-none items-center rounded-full outline-none transition-colors focus-visible:ring-2 focus-visible:ring-violet-400",
           s.root,
           checked ? "bg-violet-500" : "bg-gray-300",
@@ -96,7 +97,7 @@ const Toggle = ({
         {/* Knob */}
         <span
           aria-hidden="true"
-          className={clsx(
+          className={cn(
             "pointer-events-none inline-block rounded-full bg-white shadow transition-transform",
             s.knob,
             checked ? s.shift : "translate-x-0",
@@ -104,7 +105,7 @@ const Toggle = ({
         />
       </button>
 
-      {onLabel && checked ? <span className={clsx("text-gray-700", s.text)}>{onLabel}</span> : null}
+      {onLabel && checked ? <span className={cn("text-gray-700", s.text)}>{onLabel}</span> : null}
     </div>
   );
 };

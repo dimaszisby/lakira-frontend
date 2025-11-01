@@ -1,7 +1,8 @@
 "use client";
 
-import clsx from "clsx";
 import React, { useCallback, useId } from "react";
+
+import { cn } from "@/src/lib/cn";
 
 type Size = "sm" | "md" | "lg";
 type V = string | number;
@@ -94,7 +95,7 @@ const SegmentedControl = <T extends V = string>({
       role="radiogroup"
       aria-disabled={disabled || undefined}
       onKeyDown={onKeyDown}
-      className={clsx(
+      className={cn(
         "relative inline-grid grid-flow-col items-center gap-2 rounded-2xl border border-gray-200 bg-white p-1 shadow-sm",
         sizing.height,
         fullWidth ? "w-full" : "w-auto",
@@ -115,7 +116,7 @@ const SegmentedControl = <T extends V = string>({
             tabIndex={selected ? 0 : -1} // roving tabindex
             disabled={disabled || opt.disabled}
             onClick={() => selectByIndex(idx)}
-            className={clsx(
+            className={cn(
               "flex items-center justify-center rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400",
               sizing.itemPad,
               sizing.font,

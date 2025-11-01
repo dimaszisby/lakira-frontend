@@ -1,8 +1,9 @@
 "use client";
 
-import clsx from "clsx";
 import { Minus, Plus } from "phosphor-react";
 import React, { useCallback, useMemo, useRef, useState } from "react";
+
+import { cn } from "@/src/lib/cn";
 
 type Size = "sm" | "md" | "lg";
 
@@ -189,13 +190,13 @@ const Slider = ({
   const showBubble = showValue === "bubble" && (dragging || thumbFocused);
 
   return (
-    <div className={clsx("flex items-center gap-3", className)}>
+    <div className={cn("flex items-center gap-3", className)}>
       {showSteppers ? (
         <button
           type="button"
           onClick={dec}
           disabled={disabled || value <= amin}
-          className={clsx(
+          className={cn(
             "grid h-8 w-8 place-items-center rounded-lg border border-gray-200 bg-white text-gray-600",
             "hover:bg-violet-50 hover:text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-400",
             (disabled || value <= amin) && "cursor-not-allowed opacity-50",
@@ -210,7 +211,7 @@ const Slider = ({
       {/* Track */}
       <div
         ref={trackRef}
-        className={clsx(
+        className={cn(
           "relative w-full select-none",
           s.trackH,
           "cursor-pointer rounded-full bg-gray-200",
@@ -259,7 +260,7 @@ const Slider = ({
           onKeyDown={onKeyDown}
           onFocus={() => setThumbFocused(true)}
           onBlur={() => setThumbFocused(false)}
-          className={clsx(
+          className={cn(
             "absolute top-1/2 -translate-y-1/2 translate-x-[-50%]",
             "grid place-items-center rounded-full bg-white shadow",
             "focus-visible:ring-2 focus-visible:ring-violet-400",
@@ -270,7 +271,7 @@ const Slider = ({
           {/* Bubble value */}
           {showBubble ? (
             <span
-              className={clsx(
+              className={cn(
                 "absolute -top-8 rounded-md bg-violet-600 text-white shadow",
                 "whitespace-nowrap",
                 s.bubble,
@@ -294,7 +295,7 @@ const Slider = ({
           type="button"
           onClick={inc}
           disabled={disabled || value >= amax}
-          className={clsx(
+          className={cn(
             "grid h-8 w-8 place-items-center rounded-lg border border-gray-200 bg-white text-gray-600",
             "hover:bg-violet-50 hover:text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-400",
             (disabled || value >= amax) && "cursor-not-allowed opacity-50",
