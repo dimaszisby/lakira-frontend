@@ -4,13 +4,17 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { listMetricCategories } from "../api";
 import { metricCategoriesKeys } from "../keys";
 import { toVM } from "../mappers";
-import type { MetricCategoryCursorPage, MetricCategoryFilter, MetricCategorySort } from "../sort";
+import type {
+  MetricCategoryCursorPage,
+  MetricCategoryFilter,
+  MetricCategorySortParam,
+} from "../sort";
+import { DEFAULT_METRIC_CATEGORY_SORT } from "../sort";
 import type { MetricCategoryCursorPageVM } from "../view-models";
 
-// Infinite Mobile
 type UseMetricCategoriesArgs = {
   limit?: number;
-  sort?: MetricCategorySort;
+  sort?: MetricCategorySortParam;
   q?: string;
   filter?: MetricCategoryFilter;
 };
@@ -18,7 +22,7 @@ type UseMetricCategoriesArgs = {
 export const useMetricCategoryListCursorInfinite = (
   opts: UseMetricCategoriesArgs & { enabled: boolean },
 ) => {
-  const { limit = 20, sort = "-createdAt", q, filter, enabled = true } = opts;
+  const { limit = 20, sort = DEFAULT_METRIC_CATEGORY_SORT, q, filter, enabled = true } = opts;
 
   const query = useInfiniteQuery<
     MetricCategoryCursorPage, // TQueryFnData

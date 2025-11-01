@@ -1,21 +1,26 @@
-import { handleApiError } from "@/src/services/api/handleApiError";
+import api from "@/services/api/api";
+import { handleApiError } from "@/services/api/handleApiError";
 import type {
   CreateMetricCategoryRequestDTO,
   GenerateDummyMetricCategoriesRequestDTO,
   MetricCategoryResponseDTO,
   PaginatedMetricCategoryListResponseDTO,
   UpdateMetricCategoryRequestDTO,
-} from "@/src/types/dtos/metric-category.dto";
-import type ApiResponse from "@/src/types/generics/ApiResponse";
-import { unwrap } from "@/src/types/generics/ApiResponse";
+} from "@/types/dtos/metric-category.dto";
+import type ApiResponse from "@/types/generics/ApiResponse";
+import { unwrap } from "@/types/generics/ApiResponse";
 
-import api from "../../services/api/api";
-import type { MetricCategoryCursorPage, MetricCategoryFilter, MetricCategorySort } from "./sort";
+import type {
+  MetricCategoryCursorPage,
+  MetricCategoryFilter,
+  MetricCategorySortParam,
+} from "./sort";
+import { DEFAULT_METRIC_CATEGORY_SORT } from "./sort";
 
 // Developer Note: Should this replaced with generics?
 export type ListCategoryParams = {
   limit?: number; // default 50
-  sort?: MetricCategorySort;
+  sort?: MetricCategorySortParam;
   q?: string;
   filter?: MetricCategoryFilter;
   after?: string;
@@ -35,7 +40,7 @@ type RequestOpts = {
  */
 export async function listMetricCategories({
   limit = 20,
-  sort = "-createdAt",
+  sort = DEFAULT_METRIC_CATEGORY_SORT,
   q,
   filter,
   after,

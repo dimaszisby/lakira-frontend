@@ -1,8 +1,8 @@
-import type { MetricCategoryFilter, MetricCategorySort } from "./sort";
+import type { MetricCategoryFilter, MetricCategorySortParam } from "./sort";
 
 const normalizeCursor = (p: {
   limit: number;
-  sort: MetricCategorySort;
+  sort: MetricCategorySortParam;
   q?: string;
   filter?: MetricCategoryFilter;
   includeTotal?: boolean;
@@ -30,7 +30,7 @@ export const metricCategoriesKeys = {
     root: () => [...metricCategoriesKeys.all, "cursor"] as const,
     pages: (p: {
       limit: number;
-      sort: MetricCategorySort;
+      sort: MetricCategorySortParam;
       q?: string;
       filter?: MetricCategoryFilter;
       includeTotal?: boolean;
@@ -38,7 +38,7 @@ export const metricCategoriesKeys = {
     }) => [...metricCategoriesKeys.cursor.root(), "pages", normalizeCursor(p)] as const,
     infinite: (p: {
       limit: number;
-      sort: MetricCategorySort;
+      sort: MetricCategorySortParam;
       q?: string;
       filter?: MetricCategoryFilter;
       after?: string;

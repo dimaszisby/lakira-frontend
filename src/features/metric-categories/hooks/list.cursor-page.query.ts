@@ -4,14 +4,18 @@ import { useEffect, useState } from "react";
 import { listMetricCategories } from "../api";
 import { metricCategoriesKeys } from "../keys";
 import { toVM } from "../mappers";
-import type { MetricCategoryCursorPage, MetricCategoryFilter, MetricCategorySort } from "../sort";
+import type {
+  MetricCategoryCursorPage,
+  MetricCategoryFilter,
+  MetricCategorySortParam,
+} from "../sort";
 import type { MetricCategoryCursorPageVM } from "../view-models";
 
 type CategegoryCursorPageDTO = MetricCategoryCursorPage;
 
 export function useMetricCategoryListCursorPagination(params: {
   limit: number;
-  sort: MetricCategorySort;
+  sort: MetricCategorySortParam;
   q?: string;
   filter?: MetricCategoryFilter;
   enabled: boolean;
