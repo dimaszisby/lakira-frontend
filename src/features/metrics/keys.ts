@@ -1,4 +1,4 @@
-import type { MetricFilterViaCursor, MetricSortViaCursor } from "./sort";
+import type { MetricFilterViaCursor, MetricSortParamViaCursor } from "./sort";
 import type { IncludeKey, MetricsListParams } from "./types";
 
 /**
@@ -25,7 +25,7 @@ const normalizeList = (p: MetricsListParams) => ({
 
 const normalizeCursor = (p: {
   limit: number;
-  sort: MetricSortViaCursor;
+  sort: MetricSortParamViaCursor;
   q?: string;
   filter?: MetricFilterViaCursor;
   includeTotal?: boolean;
@@ -57,7 +57,7 @@ export const metricsKeys = {
     root: () => [...metricsKeys.all, "cursor"] as const,
     pages: (p: {
       limit: number;
-      sort: MetricSortViaCursor;
+      sort: MetricSortParamViaCursor;
       q?: string;
       filter?: MetricFilterViaCursor;
       includeTotal?: boolean;
@@ -65,7 +65,7 @@ export const metricsKeys = {
     }) => [...metricsKeys.cursor.root(), "pages", normalizeCursor(p)] as const,
     infinite: (p: {
       limit: number;
-      sort: MetricSortViaCursor;
+      sort: MetricSortParamViaCursor;
       q?: string;
       filter?: MetricFilterViaCursor;
     }) =>

@@ -1,5 +1,6 @@
-import type { MetricPreviewResponseDTO } from "@/src/features/metrics/metric.dto";
-import type { CursorPage, SortParam } from "@/src/types/generics/cursor/CursorPage";
+import type { MetricPreviewResponseDTO } from "@/features/metrics/metric.dto";
+import type { CursorPage, SortParam } from "@/generics/cursor/types";
+import { createCursorSort } from "@/lib/sort/cursorSort";
 
 // * =================== OFFSET - Deprecated (Currently Migrating to Cursor) ===================
 
@@ -15,7 +16,7 @@ export type ServerSortBy = (typeof SERVER_SORTABLE_COLUMNS)[number];
 export type SortOrder = "ASC" | "DESC";
 export type SortState<K extends string> = { sortBy: K; sortOrder: SortOrder };
 
-export const DEFAULT_METRIC_SORT: SortState<ServerSortBy> = {
+export const DEFAULT_METRIC_SORT_OFFSET: SortState<ServerSortBy> = {
   sortBy: "createdAt",
   sortOrder: "DESC",
 };
@@ -42,9 +43,9 @@ export function nextSort<K extends string>(
 /**
  * Parse sort from URL while clamping to server-allowed values
  * */
-export function sortFromSearchParams(
+export function sortFromSearchParamsOffset(
   sp: URLSearchParams,
-  fallback: SortState<ServerSortBy> = DEFAULT_METRIC_SORT,
+  fallback: SortState<ServerSortBy> = DEFAULT_METRIC_SORT_OFFSET,
 ): SortState<ServerSortBy> {
   const sb = sp.get("sortBy");
   const so = sp.get("sortOrder");
@@ -55,47 +56,35 @@ export function sortFromSearchParams(
 
 // * =================== CURSOR ===================
 
-export type MetricSortParamViaCursor =
-  | "createdAt"
-  | "-createdAt"
-  | "updatedAt"
-  | "-updatedAt"
-  | "name"
-  | "-name"
-  | "logCount"
-  | "-logCount";
+export const METRIC_SORT_KEYS = ["createdAt", "updatedAt", "name", "logCount"] as const;
 
-/** Only the keys MetricCategory can sort by */
-export type MetricSortableKeyViaCursor = "createdAt" | "updatedAt" | "name" | "logCount";
+export type MetricSortableKeyViaCursor = (typeof METRIC_SORT_KEYS)[number];
+export type MetricSortParamViaCursor = SortParam<MetricSortableKeyViaCursor>;
 
-/** Optional: strong typing for your filter block */
+// Filter
 export type MetricFilterViaCursor = {
   name?: string;
   categoryId?: string;
 };
 
-export type MetricSortViaCursor = SortParam<MetricSortParamViaCursor>;
+// Cursor Page Response DTO
 export type MetricCursorPage = CursorPage<
   MetricPreviewResponseDTO,
   MetricSortableKeyViaCursor,
   MetricFilterViaCursor
 >;
 
-// TODO: Refactor
-export const parseSort = (s: MetricSortParamViaCursor) => {
-  const dir = s.startsWith("-") ? "DESC" : "ASC";
-  const field = s.startsWith("-") ? s.slice(1) : s;
-  return { field, dir } as { field: string; dir: "ASC" | "DESC" };
-};
-// TODO: Refactor
-export const nextSortForColumn = (
-  current: MetricSortParamViaCursor,
-  column: MetricSortableKeyViaCursor,
-): MetricSortParamViaCursor => {
-  const { field, dir } = parseSort(current);
-  if (field === column) {
-    return (dir === "ASC" ? `-${column}` : column) as MetricSortParamViaCursor; // toggle direction
-  }
-  if (column === "name") return "name"; // default direction per field: dates & numbers -> DESC, strings -> ASC
-  return `-${column}` as MetricSortParamViaCursor;
-};
+// Domain-configured sort instance
+export const metricSort = createCursorSort({
+  keys: METRIC_SORT_KEYS,
+  defaultDesc: ["createdAt", "updatedAt", "logCount"] as const, // dates & numbers → DESC
+  defaultSort: "-createdAt" as const,
+});
+
+export const {
+  DEFAULT_SORT: DEFAULT_METRIC_SORT,
+  parseSort,
+  nextSortForColumn,
+  sortFromSearchParams,
+  isKey: isSortableColumn,
+} = metricSort;

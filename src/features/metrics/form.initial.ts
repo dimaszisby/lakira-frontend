@@ -1,77 +1,54 @@
-import type {
-  MetricPreviewResponseDTO,
-  MetricResponseDTO,
-  UserMetricDetailResponseDTO,
-} from "./metric.dto";
+import type { MetricCategoryVM } from "../metric-categories/view-models";
+import type { MetricHeaderVM, MetricPreviewVM } from "./view-models";
 
+// Base data types used in metric form
 export type MetricFormInitial = {
   id?: string;
   name: string;
-  description: string | null;
   defaultUnit: string;
+  description: string | null;
   isPublic: boolean;
-  originalMetricId?: string | null;
-  categoryId?: string | null;
 
-  // optional hint for the CategorySelect label/icon/color
-  categoryHint?: {
-    label: string;
-    color: string;
-    icon: string;
-    metricCount: number;
-  };
+  // Relations
+  originalMetricId?: string | null;
+  category?: Pick<MetricCategoryVM, "id" | "name" | "color" | "icon" | "metricCount">;
 };
 
 // TODO: unify these conversion functions with the ones in /features/metrics/utils.ts
-export function fromPreview(m: MetricPreviewResponseDTO): MetricFormInitial {
+export function fromPreview(m: MetricPreviewVM): MetricFormInitial {
   return {
     id: m.id,
     name: m.name,
-    description: m.description,
     defaultUnit: m.defaultUnit,
+    description: m.description,
     isPublic: m.isPublic,
-    categoryId: m.category?.id ?? null,
+
+    // Relations
     originalMetricId: null,
-    categoryHint: m.category
-      ? {
-          label: m.category.name,
-          color: m.category.color,
-          icon: m.category.icon,
-          metricCount: m.logCount ?? 0, // preview has logCount; if you have per-category count elsewhere, use that
-        }
-      : undefined,
+    category: m.category ? normalizeCategory(m.category) : undefined,
   };
 }
 
-export function fromDetail(m: UserMetricDetailResponseDTO): MetricFormInitial {
+export function fromDetail(m: MetricHeaderVM): MetricFormInitial {
   return {
     id: m.id,
     name: m.name,
     description: m.description,
     defaultUnit: m.defaultUnit,
     isPublic: m.isPublic,
-    categoryId: m.categoryId,
+
+    // Relations
     originalMetricId: m.originalMetricId,
-    categoryHint: m.category
-      ? {
-          label: m.category.name,
-          color: m.category.color,
-          icon: m.category.icon,
-          metricCount: m.category.metricCount ?? 0,
-        }
-      : undefined,
+    category: m.category ? normalizeCategory(m.category) : undefined,
   };
 }
 
-export function fromResponse(m: MetricResponseDTO): MetricFormInitial {
+function normalizeCategory(c: MetricCategoryVM): MetricCategoryVM {
   return {
-    id: m.id,
-    name: m.name,
-    description: m.description,
-    defaultUnit: m.defaultUnit,
-    isPublic: m.isPublic,
-    categoryId: m.categoryId,
-    originalMetricId: m.originalMetricId,
-    // no hint available in this DTO
+    id: c.id ?? undefined,
+    name: c.name,
+    color: c.color,
+    icon: c.icon,
+    metricCount: c.metricCount ?? undefined,
   };
 }

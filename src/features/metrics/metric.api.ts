@@ -3,23 +3,23 @@ import type {
   MetricResponseDTO,
   UpdateMetricRequestDTO,
   UserMetricDetailResponseDTO,
-} from "@/src/features/metrics/metric.dto";
-import type { CreateMetricRequestDTO } from "@/src/features/metrics/metric.dto";
-import type { PaginatedMetricListResponseDTO } from "@/src/features/metrics/metric.dto";
-import api from "@/src/services/api/api";
-import { handleApiError } from "@/src/services/api/handleApiError";
+} from "@/features/metrics/metric.dto";
+import type { CreateMetricRequestDTO } from "@/features/metrics/metric.dto";
+import type { PaginatedMetricListResponseDTO } from "@/features/metrics/metric.dto";
+import api from "@/services/api/api";
+import { handleApiError } from "@/services/api/handleApiError";
 import type ApiResponse from "@/types/generics/ApiResponse";
 import { unwrap } from "@/types/generics/ApiResponse";
 
 import { normalizeIncludes } from "./keys";
-import type { MetricCursorPage, MetricFilterViaCursor, MetricSortViaCursor } from "./sort";
-import { DEFAULT_METRIC_SORT, METRICS_PAGE_SIZE } from "./sort";
+import type { MetricCursorPage, MetricFilterViaCursor, MetricSortParamViaCursor } from "./sort";
+import { DEFAULT_METRIC_SORT, DEFAULT_METRIC_SORT_OFFSET, METRICS_PAGE_SIZE } from "./sort";
 import type { IncludeKey, MetricsListParams } from "./types";
 
 // TODO: Generic Function
 export type ListMetricParams = {
   limit?: number; // default 20
-  sort?: MetricSortViaCursor;
+  sort?: MetricSortParamViaCursor;
   q?: string;
   filter?: MetricFilterViaCursor;
   after?: string; // cursor
@@ -61,8 +61,8 @@ export async function getMetricLibraryList(
   const {
     page = 1,
     limit = METRICS_PAGE_SIZE,
-    sortBy = DEFAULT_METRIC_SORT.sortBy,
-    sortOrder = DEFAULT_METRIC_SORT.sortOrder,
+    sortBy = DEFAULT_METRIC_SORT_OFFSET.sortBy,
+    sortOrder = DEFAULT_METRIC_SORT_OFFSET.sortOrder,
     q,
     name,
     categoryId,
@@ -90,7 +90,7 @@ export async function getMetricLibraryList(
 // GET ALL via Cursor
 export async function getMetricLibraryViaCursor({
   limit = 20,
-  sort = "-createdAt",
+  sort = DEFAULT_METRIC_SORT,
   q,
   filter,
   after,
