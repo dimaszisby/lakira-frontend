@@ -1,11 +1,11 @@
-import clsx from "clsx";
 import { WarningCircle } from "phosphor-react";
 import type { HTMLAttributes, LabelHTMLAttributes, ReactElement } from "react";
 import React, { cloneElement, createContext, useContext, useId } from "react";
 
 import { cn } from "@/src/lib/cn";
 
-type Ctx = { id: string; describedBy?: string; invalid?: boolean };
+type Ctx = { id: string; descId?: string; errId?: string; invalid?: boolean };
+
 const FormFieldCtx = createContext<Ctx | null>(null);
 const useFF = () => {
   const v = useContext(FormFieldCtx);
@@ -35,10 +35,9 @@ export const FormField = ({
   const id = idProp ?? `ff-${rid}`;
   const descId = description ? `${id}-desc` : undefined;
   const errId = error ? `${id}-err` : undefined;
-  const describedBy = [descId, errId].filter(Boolean).join(" ") || undefined;
 
   return (
-    <FormFieldCtx.Provider value={{ id, describedBy, invalid }}>
+    <FormFieldCtx.Provider value={{ id, descId, errId, invalid }}>
       <div className={cn("flex flex-col space-y-1.5", className)} {...rest}>
         {children}
 
@@ -50,8 +49,8 @@ export const FormField = ({
 
         {error ? (
           <div className="inline-flex min-h-[1rem] items-start gap-2">
-            <WarningCircle aria-hidden className={clsx("mt-[1px] h-4 w-4 shrink-0 text-red-600")} />
-            <p id={errId} className="text-xs text-red-600" role="alert" aria-live="polite">
+            <WarningCircle aria-hidden className={cn("mt-[1px] h-4 w-4 shrink-0 text-red-600")} />
+            <p id={errId} className="text-xs text-red-600" aria-live="polite">
               {error}
             </p>
           </div>
@@ -61,6 +60,7 @@ export const FormField = ({
   );
 };
 
+// ===== Label
 type LabelProps = LabelHTMLAttributes<HTMLLabelElement>;
 const FFLabel = ({ className, ...props }: LabelProps) => {
   const { id } = useFF();
@@ -74,18 +74,20 @@ const FFLabel = ({ className, ...props }: LabelProps) => {
 };
 FormField.Label = FFLabel;
 
+// ===== Control
 // Make the child’s props indexable so cloneElement can accept arbitrary keys.
 type AnyProps = Record<string, unknown>;
 type ControlProps = { children: ReactElement<AnyProps> };
 
-FormField.Control = function FFControl({ children }: ControlProps) {
-  const { id, describedBy, invalid } = useFF();
+const FFControl = ({ children }: ControlProps) => {
+  const { id, descId, errId, invalid } = useFF();
   const injected: Partial<AnyProps> = {
     id,
     "aria-invalid": invalid || undefined,
-    "aria-describedby": describedBy,
-    "aria-errormessage": invalid && describedBy ? describedBy.split(" ").pop() : undefined,
+    "aria-describedby": descId,
+    "aria-errormessage": invalid ? errId : undefined,
     "data-invalid": invalid ? "" : undefined,
   };
   return cloneElement(children, injected);
 };
+FormField.Control = FFControl;
