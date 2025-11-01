@@ -1,10 +1,12 @@
-import type { MetricSettingsFilterViaCursor, MetricSettingsSortViaCursor, SortOrder } from "./sort";
+import type { SortOrder } from "@/generics/sort";
+
+import type { MetricSettingsFilter, MetricSettingsSortParam } from "./sort";
 
 // Define parameters for offset-based list queries
 export type MetricSettingsListParams = {
   page?: number;
   limit?: number;
-  sortBy?: MetricSettingsSortViaCursor;
+  sortBy?: MetricSettingsSortParam;
   sortOrder?: SortOrder;
   metricId?: string;
 };
@@ -20,8 +22,8 @@ const normalizeList = (p: MetricSettingsListParams) => ({
 
 const normalizeCursor = (p: {
   limit: number;
-  sort: MetricSettingsSortViaCursor;
-  filter?: MetricSettingsFilterViaCursor;
+  sort: MetricSettingsSortParam;
+  filter?: MetricSettingsFilter;
   includeTotal?: boolean;
   page?: number; // for paged cursor hook
   after?: string; // for infinite hook pageParam
@@ -50,15 +52,15 @@ export const metricSettingsKeys = {
     root: () => [...metricSettingsKeys.all, "cursor"] as const,
     pages: (p: {
       limit: number;
-      sort: MetricSettingsSortViaCursor;
-      filter?: MetricSettingsFilterViaCursor;
+      sort: MetricSettingsSortParam;
+      filter?: MetricSettingsFilter;
       includeTotal?: boolean;
       page: number;
     }) => [...metricSettingsKeys.cursor.root(), "pages", normalizeCursor(p)] as const,
     infinite: (p: {
       limit: number;
-      sort: MetricSettingsSortViaCursor;
-      filter?: MetricSettingsFilterViaCursor;
+      sort: MetricSettingsSortParam;
+      filter?: MetricSettingsFilter;
       after?: string;
     }) => [...metricSettingsKeys.cursor.root(), "infinite", normalizeCursor(p)] as const,
   },

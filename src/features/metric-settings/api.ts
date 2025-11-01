@@ -1,24 +1,25 @@
-import { handleApiError } from "@/src/services/api/handleApiError";
+import api from "@/services/api/api";
+import { handleApiError } from "@/services/api/handleApiError";
 import type {
   CreateMetricSettingsRequestDTO,
   DisplayOptionsDTO,
   MetricSettingsResponseDTO,
   UpdateMetricSettingsRequestDTO,
-} from "@/src/types/dtos/metric-settings.dto";
-import type ApiResponse from "@/src/types/generics/ApiResponse";
-import { unwrap } from "@/src/types/generics/ApiResponse";
+} from "@/types/dtos/metric-settings.dto";
+import type ApiResponse from "@/types/generics/ApiResponse";
+import { unwrap } from "@/types/generics/ApiResponse";
 
-import api from "../../services/api/api";
 import type {
   MetricSettingsCursorPageResponse,
-  MetricSettingsFilterViaCursor,
-  MetricSettingsSortViaCursor,
+  MetricSettingsFilter,
+  MetricSettingsSortParam,
 } from "./sort";
+import { DEFAULT_METRIC_SETTINGS_SORT } from "./sort";
 
 type ListSettingsRequestParams = {
   limit?: number; // default 20
-  sort?: MetricSettingsSortViaCursor;
-  filter?: MetricSettingsFilterViaCursor;
+  sort?: MetricSettingsSortParam;
+  filter?: MetricSettingsFilter;
   after?: string; // cursor
   includeTotal?: boolean;
 };
@@ -75,7 +76,7 @@ export const getAllMetricSettings = async (
  */
 export async function getMetricSettingsListViaCursor({
   limit = 20,
-  sort = "-createdAt",
+  sort = DEFAULT_METRIC_SETTINGS_SORT,
   filter,
   after,
   includeTotal = false,

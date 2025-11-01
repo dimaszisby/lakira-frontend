@@ -1,16 +1,17 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 
+import { useCursorPager } from "@/lib/cursor/useCursorPager";
 import { httpStatusFrom } from "@/services/api/http-status";
-import { computeTotalPages, makePageItemsSelect, useCursorPager } from "@/utils/query-cursor";
+import { computeTotalPages, makePageItemsSelect } from "@/utils/cursor/page-map";
 
 import { getMetricSettingsListViaCursor } from "../api";
 import { metricSettingsKeys } from "../keys";
 import { toMetricSettingsVM } from "../mappers";
 import type {
   MetricSettingsCursorPageResponse,
-  MetricSettingsFilterViaCursor,
-  MetricSettingsSortViaCursor,
+  MetricSettingsFilter,
+  MetricSettingsSortParam,
 } from "../sort";
 import type { MetricSettingsCursorPageVM } from "../view-models";
 
@@ -18,8 +19,8 @@ type MetricSettingsCursorPageDTO = MetricSettingsCursorPageResponse;
 
 export function useMetricSettingsListCursorPage(params: {
   limit: number;
-  sort: MetricSettingsSortViaCursor;
-  filter?: MetricSettingsFilterViaCursor;
+  sort: MetricSettingsSortParam;
+  filter?: MetricSettingsFilter;
   enabled: boolean;
 }) {
   const { limit, sort, filter, enabled = true } = params;

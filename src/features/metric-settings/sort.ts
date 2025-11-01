@@ -1,47 +1,37 @@
-import type { CursorPage, SortParam } from "@/src/types/generics/CursorPage";
-
-import type { MetricSettingsExtendedVM } from "./view-models";
+import type { CursorPage, SortParam } from "@/generics/cursor/types";
+import { createCursorSort } from "@/lib/sort/cursorSort";
+import type { MetricSettingsResponseDTO } from "@/types/dtos/metric-settings.dto";
 
 // MetricExtended Opts
 export type ListOptions = { enabled?: boolean; staleTime?: number };
 
 // * Cursor
-export type SortOrder = "ASC" | "DESC"; // Keep local for now, or move to a shared generics file
-export type MetricSettingsSortParamViaCursor =
-  | "createdAt"
-  | "-createdAt"
-  | "updatedAt"
-  | "-updatedAt";
+export const METRIC_SETTINGS_SORT_KEYS = ["createdAt", "updatedAt"] as const;
 
-/** Only the keys MetricSettings can sort by */
-export type MetricSettingsSortableKeyViaCursor = "createdAt" | "updatedAt";
+export type MetricSettingsSortableKey = (typeof METRIC_SETTINGS_SORT_KEYS)[number];
+export type MetricSettingsSortParam = SortParam<MetricSettingsSortableKey>;
 
-export type MetricSettingsSortViaCursor = SortParam<MetricSettingsSortParamViaCursor>;
-export type MetricSettingsFilterViaCursor = {
-  metricId?: string;
-};
+// Filter
+export type MetricSettingsFilter = { metricId?: string };
+
+// Cursor Page Response DTO
 export type MetricSettingsCursorPageResponse = CursorPage<
-  MetricSettingsExtendedVM,
-  MetricSettingsSortableKeyViaCursor,
-  MetricSettingsFilterViaCursor
+  MetricSettingsResponseDTO,
+  MetricSettingsSortableKey,
+  MetricSettingsFilter
 >;
 
-// TODO: Refactor
-export const parseSort = (s: MetricSettingsSortViaCursor) => {
-  const dir = s.startsWith("-") ? "DESC" : "ASC";
-  const field = s.startsWith("-") ? s.slice(1) : s;
-  return { field, dir } as { field: string; dir: "ASC" | "DESC" };
-};
+// Domain-configured sort instance
+export const metricSettingsSort = createCursorSort({
+  keys: METRIC_SETTINGS_SORT_KEYS,
+  defaultDesc: ["createdAt", "updatedAt"] as const,
+  defaultSort: "-createdAt" as const,
+});
 
-// TODO: Refactor
-export const nextSortForColumn = (
-  current: MetricSettingsSortViaCursor,
-  column: MetricSettingsSortableKeyViaCursor,
-): MetricSettingsSortViaCursor => {
-  const { field, dir } = parseSort(current);
-  if (field === column) {
-    return (dir === "ASC" ? `-${column}` : column) as MetricSettingsSortViaCursor; // toggle direction
-  }
-  // Default direction for dates is DESC
-  return `-${column}` as MetricSettingsSortViaCursor;
-};
+export const {
+  DEFAULT_SORT: DEFAULT_METRIC_SETTINGS_SORT,
+  parseSort,
+  nextSortForColumn,
+  sortFromSearchParams,
+  isKey: isSortableColumn,
+} = metricSettingsSort;

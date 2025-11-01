@@ -3,28 +3,29 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
 import { httpStatusFrom } from "@/services/api/http-status";
+import { getNextCursor, makeInfiniteItemsSelect } from "@/utils/cursor/page-map";
 
 import { getMetricSettingsListViaCursor } from "../api";
 import { metricSettingsKeys } from "../keys";
 import { toMetricSettingsVM } from "../mappers";
 import type {
   MetricSettingsCursorPageResponse,
-  MetricSettingsFilterViaCursor,
-  MetricSettingsSortViaCursor,
+  MetricSettingsFilter,
+  MetricSettingsSortParam,
 } from "../sort";
+import { DEFAULT_METRIC_SETTINGS_SORT } from "../sort";
 import type { MetricSettingsCursorPageVM } from "../view-models";
-import { getNextCursor, makeInfiniteItemsSelect } from "@/src/utils/cursor/page-map";
 
 type UseMetricSettingsArgs = {
   limit?: number;
-  sort?: MetricSettingsSortViaCursor;
-  filter?: MetricSettingsFilterViaCursor;
+  sort?: MetricSettingsSortParam;
+  filter?: MetricSettingsFilter;
 };
 
 export function useMetricSettingsListCursorInfinite(
   opts: UseMetricSettingsArgs & { enabled: boolean },
 ) {
-  const { limit = 20, sort = "-createdAt", filter, enabled = true } = opts;
+  const { limit = 20, sort = DEFAULT_METRIC_SETTINGS_SORT, filter, enabled = true } = opts;
 
   type TQueryFnData = MetricSettingsCursorPageResponse; // DTO from API
   type TPageParam = string | undefined; // cursor type

@@ -1,9 +1,9 @@
+import type { CursorPageVM } from "@/generics/cursor/view-model";
 import type { ISODateTimeString } from "@/types/aliases";
 import type { MetricSettingsResponseDTO } from "@/types/dtos/metric-settings.dto";
 
-import type { CursorPageVM } from "../metrics";
 import type { ChartType, GoalType } from "./constants";
-import type { MetricSettingsFilterViaCursor, MetricSettingsSortableKeyViaCursor } from "./sort";
+import type { MetricSettingsFilter, MetricSettingsSortableKey } from "./sort";
 
 export type MetricSettingsExtendedVM = {
   id: string;
@@ -41,6 +41,6 @@ export type DisplayVM = {
 export type MetricSettingsCursorPageVM = CursorPageVM<
   MetricSettingsResponseDTO,
   MetricSettingsExtendedVM,
-  MetricSettingsSortableKeyViaCursor,
-  MetricSettingsFilterViaCursor
+  MetricSettingsSortableKey,
+  MetricSettingsFilter
 >;
