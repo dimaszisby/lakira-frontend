@@ -6,8 +6,15 @@ import MetricForm from "@/features/metrics/components/MetricForm";
 import MetricTable from "@/features/metrics/components/MetricTable";
 import { useDeleteMetric, useMetricsListPaginationViaCursor } from "@/features/metrics/hooks";
 import type { MetricSortParamViaCursor } from "@/features/metrics/sort";
-import { METRICS_PAGE_SIZE, nextSortForColumn, parseSort } from "@/features/metrics/sort";
+import {
+  DEFAULT_METRIC_SORT,
+  isSortableColumn,
+  METRICS_PAGE_SIZE,
+  nextSortForColumn,
+  parseSort,
+} from "@/features/metrics/sort";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { makeOnColumnSort } from "@/src/lib/sort/makeOnColumnSort";
 import EmptyDataIndicator from "@/ui/EmptyDataIndicator";
 import { Pagination } from "@/ui/Pagination";
 import PrimaryButton from "@/ui/PrimaryButton";
@@ -23,7 +30,7 @@ const MetricListSection: React.FC<MetricCategorySectionProps> = ({ categoryId })
   const router = useRouter();
 
   const PAGE_SIZE = METRICS_PAGE_SIZE;
-  const [sort, setSort] = useState<MetricSortParamViaCursor>("-createdAt");
+  const [sort, setSort] = useState<MetricSortParamViaCursor>(DEFAULT_METRIC_SORT);
   const { field: sortField, dir: sortDir } = useMemo(() => parseSort(sort), [sort]);
 
   // * Search
@@ -57,17 +64,10 @@ const MetricListSection: React.FC<MetricCategorySectionProps> = ({ categoryId })
   });
 
   // Sorting
-  // TODO: create enum
-  const onColumnSort = useCallback((column: string) => {
-    if (
-      column === "createdAt" ||
-      column === "updatedAt" ||
-      column === "name" ||
-      column === "logCount"
-    ) {
-      setSort((cur) => nextSortForColumn(cur, column));
-    }
-  }, []);
+  const onColumnSort = useMemo(
+    () => makeOnColumnSort(isSortableColumn, nextSortForColumn, setSort),
+    [setSort],
+  );
 
   // * Modal states
   const [modalOpen, setModalOpen] = useState(false);

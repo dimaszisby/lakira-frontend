@@ -19,7 +19,7 @@ type SafeLabelFormatter = (val: SafeLabelValue) => string;
 export function safeLabel(
   val: SafeLabelValue,
   fallback: string = "-",
-  formatter?: SafeLabelFormatter
+  formatter?: SafeLabelFormatter,
 ): string {
   if (val === undefined || val === null) return fallback;
 
@@ -47,9 +47,7 @@ export function safeLabel(
   // Array: display comma-separated, fallback if empty
   if (Array.isArray(val)) {
     if (val.length === 0) return fallback;
-    return val
-      .map((item) => safeLabel(item as SafeLabelValue, fallback))
-      .join(", ");
+    return val.map((item) => safeLabel(item as SafeLabelValue, fallback)).join(", ");
   }
 
   // Object: display JSON, fallback if empty object

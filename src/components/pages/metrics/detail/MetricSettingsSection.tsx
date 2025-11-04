@@ -3,11 +3,11 @@ import { memo, useState } from "react";
 
 import MetricSettingsForm from "@/features/metric-settings/components/MetricSettingsForm";
 import type { MetricSettingsExtendedVM } from "@/features/metric-settings/view-models";
+import { formatHuman } from "@/src/utils/date-io";
+import { safeLabel } from "@/src/utils/label";
 import DataLabel from "@/ui/DataLabel";
 import SectionCard from "@/ui/SectionCard";
 import SubsectionCard from "@/ui/SubsectionCard";
-import { formatDate } from "@/utils/helpers/dateHelper";
-import { safeLabel } from "@/utils/helpers/labelHelper";
 
 type Props = {
   metricId: string;
@@ -52,11 +52,11 @@ export const MetricSettingsSectionBase = ({ metricId, data }: Props) => {
                 <DataLabel title="Goal Value" value={safeLabel(data?.goalValue, "Not Set")} />
                 <DataLabel
                   title="Start Date"
-                  value={safeLabel(formatDate(data?.startDate), "Not Set")}
+                  value={safeLabel(formatHuman(data?.startDate), "Not Set")}
                 />
                 <DataLabel
                   title="Deadline Date"
-                  value={safeLabel(formatDate(data?.deadlineDate), "Not Set")}
+                  value={safeLabel(formatHuman(data?.deadlineDate), "Not Set")}
                 />
               </div>
             </SubsectionCard>

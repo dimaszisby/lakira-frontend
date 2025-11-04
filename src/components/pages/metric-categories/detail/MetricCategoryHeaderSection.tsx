@@ -1,13 +1,12 @@
 import { PencilSimple } from "phosphor-react";
 import { useState } from "react";
 
-import { useMetricCategoryById } from "@/src/features/metric-categories/hooks";
+import MetricCategoryForm from "@/features/metric-categories/components/MetricCategoryForm";
+import { useMetricCategoryById } from "@/features/metric-categories/hooks/index";
+import { formatHuman } from "@/src/utils/date-io";
+import { safeLabel } from "@/src/utils/label";
 import DataLabel from "@/ui/DataLabel";
 import SkeletonLoader from "@/ui/SekeletonLoader";
-import { formatDate } from "@/utils/helpers/dateHelper";
-import { safeLabel } from "@/utils/helpers/labelHelper";
-
-import MetricCategoryForm from "../MetricCategoryForm";
 
 // TODO: (Question) Should use ViewModel instead as static params. Data should be fetched on main Page?
 const MetricCategoryHeaderSection = ({ categoryId }: { categoryId: string }) => {
@@ -24,12 +23,12 @@ const MetricCategoryHeaderSection = ({ categoryId }: { categoryId: string }) => 
 
   return (
     <>
-      <MetricCategoryForm
-        categoryId={category ? category.id : null}
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        initialCategory={category ? category : null}
-      />
+      {modalOpen ? (
+        <MetricCategoryForm
+          onClose={() => setModalOpen(false)}
+          initialCategory={category ? category : null}
+        />
+      ) : null}
 
       <section className="relative w-full rounded-2xl bg-white p-6 shadow">
         {/* Edit Button */}
@@ -45,7 +44,7 @@ const MetricCategoryHeaderSection = ({ categoryId }: { categoryId: string }) => 
         <DataLabel
           title="NAME"
           value={safeLabel(category?.name, "Not Set")}
-          valueStyle="xl"
+          size="lg"
           className="mb-4"
         />
 
@@ -60,11 +59,11 @@ const MetricCategoryHeaderSection = ({ categoryId }: { categoryId: string }) => 
         <div className="mt-3 flex gap-6 text-xs text-gray-400">
           <span>
             Created at&nbsp;
-            {formatDate(category?.createdAt, true)}
+            {formatHuman(category?.createdAt)}
           </span>
           <span>
             Updated at&nbsp;
-            {formatDate(category?.updatedAt, true)}
+            {formatHuman(category?.updatedAt)}
           </span>
         </div>
       </section>

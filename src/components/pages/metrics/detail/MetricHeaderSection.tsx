@@ -4,9 +4,9 @@ import { memo, useState } from "react";
 import { fromDetail } from "@/features/metrics";
 import MetricForm from "@/features/metrics/components/MetricForm";
 import type { MetricHeaderVM } from "@/features/metrics/view-models";
+import { formatHuman } from "@/src/utils/date-io";
+import { safeLabel } from "@/src/utils/label";
 import DataLabel from "@/ui/DataLabel";
-import { formatDate } from "@/utils/helpers/dateHelper";
-import { safeLabel } from "@/utils/helpers/labelHelper";
 
 export const MetricHeaderSectionBase = ({ data }: { data: MetricHeaderVM }) => {
   const [modalOpen, setModalOpen] = useState(false);
@@ -68,11 +68,11 @@ export const MetricHeaderSectionBase = ({ data }: { data: MetricHeaderVM }) => {
         <div className="mt-3 flex gap-6 text-xs text-gray-400">
           <span>
             Created at&nbsp;
-            {formatDate(data?.createdAt, true)}
+            {formatHuman(data?.createdAt)}
           </span>
           <span>
             Updated at&nbsp;
-            {formatDate(data?.updatedAt, true)}
+            {formatHuman(data?.updatedAt)}
           </span>
         </div>
       </section>

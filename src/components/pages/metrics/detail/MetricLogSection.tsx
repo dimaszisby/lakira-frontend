@@ -2,20 +2,23 @@
 
 import React, { memo, useCallback, useMemo, useState } from "react";
 
-import MetricLogFormModal from "@/components/pages/logs/LogFormModal";
-import LogTable from "@/components/pages/logs/LogTable";
+import LogTable from "@/features/metric-logs/components/LogTable";
 import {
   useCreateMetricLogDummy,
   useDeleteMetricLog,
-  useMetricLogsListPaginationViaCursor,
-} from "@/features/metricLogs/hooks";
-import type {
-  MetricLogFilterViaCursor,
-  MetricLogSortParamViaCursor,
-} from "@/features/metricLogs/sort";
-import { nextSortForColumn, parseSort } from "@/features/metricLogs/sort";
+  useMetricLogListCursorPage,
+} from "@/features/metric-logs/hooks/index";
+import type { MetricLogFilter, MetricLogSortParam } from "@/features/metric-logs/sort";
+import {
+  DEFAULT_METRIC_LOG_SORT,
+  isSortableColumn,
+  nextSortForColumn,
+  parseSort,
+} from "@/features/metric-logs/sort";
+import type { MetricLogVM } from "@/features/metric-logs/view-models";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import type { MetricLogResponseDTO } from "@/types/dtos/metric-log.dto";
+import MetricLogForm from "@/src/features/metric-logs/components/LogForm";
+import { makeOnColumnSort } from "@/src/lib/sort/makeOnColumnSort";
 import EmptyDataIndicator from "@/ui/EmptyDataIndicator";
 import { Pagination } from "@/ui/Pagination";
 import PrimaryButton from "@/ui/PrimaryButton";
@@ -26,7 +29,7 @@ import SkeletonLoader from "@/ui/SekeletonLoader";
 export const MetricLogsSectionBase = ({ metricId }: { metricId: string }) => {
   // * Contants
   const PAGE_SIZE = 50;
-  const [sort, setSort] = useState<MetricLogSortParamViaCursor>("-createdAt");
+  const [sort, setSort] = useState<MetricLogSortParam>(DEFAULT_METRIC_LOG_SORT);
   const { field: sortField, dir: sortDir } = useMemo(() => parseSort(sort), [sort]);
 
   // * Search
@@ -38,14 +41,14 @@ export const MetricLogsSectionBase = ({ metricId }: { metricId: string }) => {
   const params = useMemo(() => {
     const p: {
       limit: number;
-      sort: MetricLogSortParamViaCursor;
+      sort: MetricLogSortParam;
       q?: string;
-      filter?: MetricLogFilterViaCursor;
+      filter?: MetricLogFilter;
     } = { limit: PAGE_SIZE, sort };
 
     if (debouncedQ) p.q = debouncedQ;
 
-    const f: MetricLogFilterViaCursor = {};
+    const f: MetricLogFilter = {};
     if (filterName) f.name = filterName;
     if (filterMetric) f.metricId = filterMetric;
     if (Object.keys(f).length) p.filter = f;
@@ -54,46 +57,65 @@ export const MetricLogsSectionBase = ({ metricId }: { metricId: string }) => {
   }, [PAGE_SIZE, sort, debouncedQ, filterName, filterMetric]);
 
   // Hook consumtion based on mode
-  const pages = useMetricLogsListPaginationViaCursor({
+  const pages = useMetricLogListCursorPage({
     ...params,
     enabled: true,
   });
 
-  const onColumnSort = useCallback((column: string) => {
-    if (
-      column === "createdAt" ||
-      column === "updatedAt" ||
-      column === "logValue" ||
-      column === "loggedAt"
-    ) {
-      setSort((cur) => nextSortForColumn(cur, column));
-    }
-  }, []);
+  // Sort Handler
+  const onColumnSort = useMemo(
+    () => makeOnColumnSort(isSortableColumn, nextSortForColumn, setSort),
+    [setSort],
+  );
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedLog, setSelectedLog] = useState<MetricLogResponseDTO | null>(null);
+  const [selectedLog, setSelectedLog] = useState<MetricLogVM | null>(null);
 
-  // Use the new useMetricLogs with pagination
+  // * Mutations
   const { deleteMetricLog } = useDeleteMetricLog();
+  const { createMetricLogDummy } = useCreateMetricLogDummy();
 
   // * Handlers
-  const handleEditLog = useCallback((log: MetricLogResponseDTO) => {
+  // Row Click Handler
+  const handleRowClick = (log: MetricLogVM) => {
+    setSelectedLog(log);
+    setModalOpen(true);
+  };
+
+  // Add Log Handler
+  const handleAddLogClick = () => {
+    setSelectedLog(null); // No log = create mode
+    setModalOpen(true);
+  };
+
+  // Edit Log Handler
+  const handleEditLogClick = useCallback((log: MetricLogVM) => {
     setSelectedLog(log);
     setModalOpen(true);
   }, []);
 
-  const handleDelete = async (log: MetricLogResponseDTO) => {
-    try {
-      await deleteMetricLog(log.id);
-    } catch (error) {
-      console.error("Error deleting log:", error);
-    }
-  };
+  // Delete Log Handler
+  const deleteLogAsync = useCallback(
+    async (log: MetricLogVM) => {
+      try {
+        await deleteMetricLog(log.id);
+      } catch (error) {
+        console.error("Error deleting log:", error);
+      }
+    },
+    [deleteMetricLog],
+  );
 
-  // * Dummy Metrics
-  const { createMetricLogDummy } = useCreateMetricLogDummy();
-  const onDummyDataSubmit = async () => {
+  const handleDeleteClick = useCallback(
+    (log: MetricLogVM) => {
+      void deleteLogAsync(log);
+    },
+    [deleteLogAsync],
+  );
+
+  // Dummy Data Handler
+  const dummyLogAsync = useCallback(async () => {
     try {
       await createMetricLogDummy({
         count: 5,
@@ -102,18 +124,11 @@ export const MetricLogsSectionBase = ({ metricId }: { metricId: string }) => {
     } catch (error) {
       console.error("Form submission error:", error);
     }
-  };
+  }, [createMetricLogDummy, metricId]);
 
-  // * Handlers
-  const handleRowClick = (log: MetricLogResponseDTO) => {
-    setSelectedLog(log);
-    setModalOpen(true);
-  };
-
-  const handleAddLogClick = () => {
-    setSelectedLog(null); // No log = create mode
-    setModalOpen(true);
-  };
+  const handleDummyCreateClick = useCallback(() => {
+    void dummyLogAsync();
+  }, [dummyLogAsync]);
 
   // Derived
   const loading = pages.isFetching && pages.items.length === 0;
@@ -121,13 +136,14 @@ export const MetricLogsSectionBase = ({ metricId }: { metricId: string }) => {
 
   return (
     <>
-      {/* Log Form Modal (handles add/edit/delete) */}
-      <MetricLogFormModal
-        metricId={metricId}
-        open={modalOpen}
-        onClose={() => setModalOpen(false)}
-        initialLog={selectedLog}
-      />
+      {/* Log Form Modal */}
+      {modalOpen ? (
+        <MetricLogForm
+          metricId={metricId}
+          onClose={() => setModalOpen(false)}
+          initialLog={selectedLog}
+        />
+      ) : null}
 
       <SectionCard
         title="Logs"
@@ -144,7 +160,7 @@ export const MetricLogsSectionBase = ({ metricId }: { metricId: string }) => {
             />
 
             <PrimaryButton
-              onClick={void onDummyDataSubmit}
+              onClick={handleDummyCreateClick}
               ariaLabel="Generate Logs"
               className="bg-blue-600 text-white hover:bg-blue-700"
             >
@@ -172,8 +188,8 @@ export const MetricLogsSectionBase = ({ metricId }: { metricId: string }) => {
                 sortBy={sortField}
                 sortOrder={sortDir}
                 onSort={(col) => onColumnSort(String(col))}
-                onEdit={handleEditLog}
-                onDelete={void handleDelete}
+                onEdit={handleEditLogClick}
+                onDelete={handleDeleteClick}
                 onRowClick={handleRowClick}
               />
 
