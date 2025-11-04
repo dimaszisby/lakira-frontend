@@ -1,5 +1,5 @@
-import type { MetricLogVM } from "@/src/features/metric-logs/view-models";
-import { formatDate } from "@/utils/helpers/dateHelper";
+import type { MetricLogVM } from "@/features/metric-logs/view-models";
+import { formatHuman } from "@/utils/date-io";
 
 /**
  * Renders a row in the metric table, with navigation to the metric detail page.
@@ -27,7 +27,7 @@ const LogTableRow: React.FC<LogTableRowProps> = ({ log, onClick }) => {
       data-testid={`metric-row-${log.id}`} // Optionally add data-testid for testing
     >
       {/* Log Date */}
-      <td className="px-4 py-2 font-semibold">{formatDate(log.loggedAt, true)}</td>
+      <td className="px-4 py-2 font-semibold">{formatHuman(log.loggedAt)}</td>
 
       {/* Log Value */}
       <td className="max-w-xs truncate px-4 py-2 text-gray-500">
