@@ -1,0 +1,87 @@
+@layer components {
+  .button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--btn-gap-md);
+    height: var(--btn-h-md);
+    padding-inline: var(--btn-px-md);
+    border-radius: var(--radius-md);
+    font-weight: var(--btn-weight);
+    box-shadow: var(--btn-shadow);
+    border: 1px solid hsl(var(--button-border, var(--border)) / 1);
+    background-color: hsl(var(--button-bg, var(--surface)) / 1);
+    color: hsl(var(--button-fg, var(--text)) / 1);
+    transition: var(--btn-transition);
+  }
+
+  .button:hover {
+    background-color: hsl(var(--button-hover-bg, var(--button-bg)) / 1);
+  }
+  .button:active {
+    background-color: hsl(var(--button-active-bg, var(--button-bg)) / 1);
+  }
+  .button:disabled,
+  .button[aria-disabled="true"] {
+    background-color: hsl(var(--button-disabled-bg, var(--button-bg)) / 1);
+    color: hsl(var(--button-disabled-fg, var(--button-fg)) / 1);
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  /* Variant mapping */
+  .button[data-variant="primary"] {
+    --button-bg: var(--button-primary-bg);
+    --button-fg: var(--button-primary-fg);
+    --button-border: var(--button-primary-border);
+    --button-hover-bg: var(--button-primary-hover-bg);
+    --button-active-bg: var(--button-primary-active-bg);
+    --button-disabled-bg: var(--button-primary-disabled-bg);
+    --button-disabled-fg: var(--button-primary-disabled-fg);
+  }
+  .button[data-variant="secondary"] {
+    --button-bg: var(--button-secondary-bg);
+    --button-fg: var(--button-secondary-fg);
+    --button-border: var(--button-secondary-border);
+    --button-hover-bg: var(--button-secondary-hover-bg);
+    --button-active-bg: var(--button-secondary-active-bg);
+    --button-disabled-bg: var(--button-secondary-disabled-bg);
+    --button-disabled-fg: var(--button-secondary-disabled-fg);
+  }
+  .button[data-variant="destructive"] {
+    --button-bg: var(--button-destructive-bg);
+    --button-fg: var(--button-destructive-fg);
+    --button-border: var(--button-destructive-border);
+    --button-hover-bg: var(--button-destructive-hover-bg);
+    --button-active-bg: var(--button-destructive-active-bg);
+    --button-disabled-bg: var(--button-destructive-disabled-bg);
+    --button-disabled-fg: var(--button-destructive-disabled-fg);
+  }
+  .button[data-variant="tertiary"] {
+    --button-bg: var(--button-tertiary-bg);
+    --button-fg: var(--button-tertiary-fg);
+    --button-border: var(--button-tertiary-border);
+    --button-hover-bg: var(--button-tertiary-hover-bg);
+    --button-active-bg: var(--button-tertiary-active-bg);
+  }
+
+  /* Size mapping (uses scales) */
+  .button[data-size="sm"] {
+    height: var(--btn-h-sm);
+    padding-inline: var(--btn-px-sm);
+    gap: var(--btn-gap-sm);
+    border-radius: var(--radius-sm);
+  }
+  .button[data-size="md"] {
+    height: var(--btn-h-md);
+    padding-inline: var(--btn-px-md);
+    gap: var(--btn-gap-md);
+    border-radius: var(--radius-md);
+  }
+  .button[data-size="lg"] {
+    height: var(--btn-h-lg);
+    padding-inline: var(--btn-px-lg);
+    gap: var(--btn-gap-lg);
+    border-radius: var(--radius-lg);
+  }
+}

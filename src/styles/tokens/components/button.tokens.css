@@ -1,0 +1,43 @@
+@layer base {
+  :root {
+    /* Primary */
+    --button-primary-bg: var(--core-secondary);
+    --button-primary-fg: var(--gray-white);
+    --button-primary-border: var(--core-secondary);
+    --button-primary-hover-bg: var(--primary-matchagreen-700);
+    --button-primary-active-bg: var(--primary-matchagreen-700);
+    --button-primary-disabled-bg: var(--gray-400);
+    --button-primary-disabled-fg: var(--gray-600);
+
+    /* Secondary (outline) */
+    --button-secondary-bg: var(--gray-white);
+    --button-secondary-fg: var(--core-secondary);
+    --button-secondary-border: var(--core-secondary);
+    --button-secondary-hover-bg: var(--primary-softwhite-700);
+    --button-secondary-active-bg: var(--primary-softwhite-700);
+    --button-secondary-disabled-bg: var(--gray-100);
+    --button-secondary-disabled-fg: var(--gray-400);
+
+    /* Destructive */
+    --button-destructive-bg: var(--accent-vividcoral-500);
+    --button-destructive-fg: var(--gray-white);
+    --button-destructive-border: var(--accent-vividcoral-500);
+    --button-destructive-hover-bg: var(--accent-vividcoral-500);
+    --button-destructive-active-bg: var(--accent-vividcoral-500);
+    --button-destructive-disabled-bg: var(--gray-400);
+    --button-destructive-disabled-fg: var(--gray-600);
+
+    /* Optional: Tertiary/Accent */
+    --button-tertiary-bg: var(--core-accent);
+    --button-tertiary-fg: var(--gray-white);
+    --button-tertiary-border: var(--core-accent);
+    --button-tertiary-hover-bg: var(--accent-softlavender-700);
+    --button-tertiary-active-bg: var(--accent-softlavender-700);
+  }
+
+  :root[data-theme="dark"] {
+    --button-primary-fg: var(--gray-900);
+    --button-secondary-bg: var(--gray-900);
+    --button-tertiary-fg: var(--gray-900);
+  }
+}
