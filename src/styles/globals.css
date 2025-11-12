@@ -1,164 +1,48 @@
+/* Dev Note: 
+- Tokens order matters: palette → semantic → component tokens
+*/
+@import "./tokens/palette.css";
+@import "./tokens/semantic.css";
+@import "./tokens/scales.css";
+@import "./tokens/typography.css";
+
+@import "./tokens/components/button.tokens.css";
+@import "./tokens/components/button.recipe.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-:root {
-  /* * Core Colors */
-  --core-primary: var(--primary-sakura-500);
-  --core-secondary: var(--primary-matcha-500);
-  --core-accent: var(--accent-softlavender-500);
-
-  /* * Primary Colors */
-  /* 🌸 Primary Colors */
-  --primary-sakura-100: hsl(348, 69%, 86%);
-  --primary-sakura-500: #e897a3;
-  --primary-sakura-700: #c76576;
-
-  --primary-matcha-100: #d4e2c5;
-  --primary-matcha-500: #a8c28b;
-  --primary-matcha-700: #7c9b63;
-
-  --primary-softwhite-100: #ffffff;
-  --primary-softwhite-500: #fdf7f4;
-  --primary-softwhite-700: #ede8e4;
-
-  /* * Secondary Colors */
-  /* 🔵 Secondary Colors */
-  --secondary-origami-100: #b7d3dd;
-  --secondary-origami-500: #82aebe;
-  --secondary-origami-700: #578c9c;
-
-  --secondary-lightpeach-100: #fbe3d0;
-  --secondary-lightpeach-500: #f5c49a;
-  --secondary-lightpeach-700: #d89b6a;
-
-  --secondary-washigray-100: #f2f2f7;
-  --secondary-washigray-500: #e0ded8;
-  --secondary-washigray-700: #2c2c2c;
-
-  /* * Accent Colors */
-  /* 🟡 Accent Colors */
-  --accent-vividcoral-100: #f2a5a5;
-  --accent-vividcoral-500: #e26d6d;
-  --accent-vividcoral-700: #030202;
-
-  --accent-goldenyellow-100: #f2deaa;
-  --accent-goldenyellow-500: #e8c76f;
-  --accent-goldenyellow-700: #c09b43;
-
-  --accent-softlavender-100: #d8c2ee;
-  --accent-softlavender-500: #b690d7;
-  --accent-softlavender-700: #8c6aad;
-
-  /* * Info Colors */
-  /* 🟡 Info Colors */
-  --info-100: #f7f9fc;
-  --info-500: #a3c7d6;
-  --info-700: #4a4a4a;
-
-  /* * Grayscale Colors */
-  /* Grayscale Colors */
-  --grayscale-white: #ffffff;
-  --grayscale-gray-100: #f2f2f2;
-  --grayscale-gray-200: #ebebeb;
-  --grayscale-gray-300: #d9d9d9;
-  --grayscale-gray-400: #a6a6a6;
-  --grayscale-gray-500: #8c8c8c;
-  --grayscale-gray-600: #737373;
-  --grayscale-gray-700: #5c5c5c;
-  --grayscale-gray-800: #4a4a4a;
-  --grayscale-gray-900: #2c2c2c;
-  --grayscale-black: #000000;
-
-  /* * Text Colors */
-  /* 🌐 Text Colors */
-  --text-emphasis: var(--grayscale-gray-900);
-  --text-primary: var(--grayscale-gray-800);
-  --text-secondary: var(--grayscale-gray-700);
-  --text-tertiary: var(--grayscale-gray-600);
-  --text-overline: var(--secondary-origami-700);
-  --text-error: var(--accent-vividcoral-500);
-  --text-placeholder: var(--grayscale-gray-500);
-  --text-disabled: var(--grayscale-gray-400);
-  --text-inverted: var(--grayscale-white); /* For dark backgrounds */
-
-  /* * Status Colors */
-  /* ⚠️ Status Colors */
-  --status-error-bg: var(--accent-vividcoral-100);
-  --status-error: var(--accent-vividcoral-500);
-  --status-error-emphasis: var(--accent-vividcoral-700);
-
-  --status-success-bg: var(--primary-matcha-100);
-  --status-success: var(--primary-matcha-500);
-  --status-success-emphasis: var(--primary-matcha-700);
-
-  --status-warning-bg: var(--accent-goldenyellow-100);
-  --status-warning: var(--accent-goldenyellow-500);
-  --status-warning-emphasis: var(--accent-goldenyellow-700);
-
-  --status-info-bg: var(--info-100);
-  --status-info: var(--info-500);
-  --status-info-emphasis: var(--info-700);
-
-  /* * Background Colors */
-  /* 📌 Background Colors */
-  --background-primary: var(--primary-softwhite-100);
-  --background-secondary: var(--info-100);
-  --background-tertiary: var(--secondary-washigray-100);
-  --background-overlay: rgba(0, 0, 0, 0.5);
-  --background-disabled: var(--grayscale-gray-400);
-
-  /* * Borders & Dividers */
-  /* 🛑 Borders & Dividers */
-  --border-default: var(--secondary-origami-100);
-  --border-active: var(--accent-softlavender-500);
-  --border-error: var(--accent-vividcoral-500);
-  --border-focus: var(--core-primary);
-
-  /* * Interaction */
-  /* Button */
-  --button-bg: var(--core-primary);
-  --button-bg-secondary: var(--core-secondary);
-  --button-bg-accent: var(--core-accent);
-  --button-bg-disabled: var(--grayscale-gray-400);
-  --button-bg-destructive: var(--status-error);
-
-  --button-fg: var(--grayscale-white);
-  --button-fg-secondary: var(--grayscale-white);
-  --button-fg-accent: var(--grayscale-white);
-  --button-fg-disabled: var(--grayscale-gray-600);
-  --button-fg-destructive: var(--grayscale-white);
-
-  /* * Textfield */
-  /* Textfield */
-  --textfield-bg: var(--background-secondary);
-  --textfield-fg: var(--text-primary);
-  --textfield-bg-disabled: var(--background-disabled);
-  --textfield-fg-disabled: var(--text-disabled);
-  --textfield-border: var(--border-default);
-  --textfield-border-active: var(--border-focus);
-  --textfield-border-error: var(--border-error);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #ededed;
-    --foreground: #0a0a0a;
+/* Base page styling using semantic tokens */
+@layer base {
+  html,
+  body {
+    background-color: hsl(var(--bg));
+    color: hsl(var(--text));
+    font-family:
+      var(--font-plus-jakarta),
+      system-ui,
+      -apple-system,
+      Segoe UI,
+      Roboto,
+      "Helvetica Neue",
+      Arial,
+      "Noto Sans",
+      "Apple Color Emoji",
+      "Segoe UI Emoji",
+      "Segoe UI Symbol";
   }
-}
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Tell the UA how to render form controls, scrollbars, etc. */
+  /* :root,
+  :root[data-theme="light"] {
+    color-scheme: light;
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+  } */
 }
-
-/* globals.css */
+/* Small base utilities */
 @layer base {
   /* Hide native clear ('x') button in Chromium/WebKit browsers */
   input[type="search"]::-webkit-search-cancel-button {
@@ -169,143 +53,5 @@ body {
   /* Hide native clear in Firefox */
   input[type="search"]::-moz-search-clear {
     display: none;
-  }
-}
-
-@layer components {
-  /* Text */
-  .text-page-title {
-    @apply text-black text-5xl font-bold;
-  }
-
-  .text-segment-title {
-    @apply text-gray-800 text-2xl font-bold;
-  }
-
-  .text-segment-title {
-    @apply text-gray-800 text-2xl font-bold;
-  }
-
-  .text-component-title {
-    @apply text-gray-700 text-lg font-medium;
-  }
-}
-
-@layer components {
-  /* ✅ Headings */
-  .text-h1 {
-    @apply font-quicksand font-bold text-text-emphasis text-5xl leading-tight;
-  }
-
-  .text-h2 {
-    @apply font-quicksand font-bold text-text-emphasis text-4xl leading-snug;
-  }
-
-  .text-h3 {
-    @apply font-quicksand font-bold text-text-emphasis text-3xl;
-  }
-
-  .text-h4 {
-    @apply font-quicksand font-bold text-text-emphasis text-2xl;
-  }
-
-  .text-h5 {
-    @apply font-quicksand font-semibold text-text-primary text-xl;
-  }
-
-  .text-h6 {
-    @apply font-quicksand font-semibold text-text-primary text-lg;
-  }
-
-  /* ✅ Body Text */
-  .text-body1 {
-    @apply font-jakarta font-regular text-text-primary text-base leading-relaxed;
-  }
-
-  .text-body2 {
-    @apply font-jakarta font-regular text-text-secondary text-sm leading-normal;
-  }
-
-  /* ✅ Caption, Overline, & Small Text */
-  .text-caption {
-    @apply font-jakarta font-regular uppercase text-text-tertiary text-xs tracking-wide;
-  }
-
-  .text-overline {
-    @apply font-jakarta font-bold uppercase text-text-overline text-xs tracking-widest;
-  }
-
-  /* ✅ Buttons */
-  .text-button {
-    @apply font-quicksand font-bold text-text-secondary text-base;
-  }
-
-  .text-button-small {
-    @apply font-quicksand font-bold text-text-secondary text-sm;
-  }
-
-  /* ✅ Input Label */
-  .text-input-label {
-    @apply font-jakarta font-semibold text-text-primary text-sm;
-  }
-
-  /* ✅ Footer & Tooltip */
-  .text-footer {
-    @apply font-jakarta font-regular text-text-tertiary text-xs;
-  }
-
-  .text-tooltip {
-    @apply font-jakarta font-regular text-text-tertiary text-xs;
-  }
-
-  /* ✅ Alerts & Notifications */
-  .text-alert {
-    @apply font-quicksand font-bold text-text-primary text-base;
-  }
-
-  .text-navigation-item {
-    @apply font-quicksand font-semibold text-text-primary text-base;
-  }
-
-  /* ✅ Badges & Links */
-  .text-badge {
-    @apply font-jakarta font-medium uppercase text-text-tertiary text-2xs;
-  }
-
-  .text-link {
-    @apply font-jakarta font-regular underline text-blue-500 hover:text-blue-700 transition text-sm;
-  }
-}
-
-@layer components {
-  /* ✅ Card */
-  .card-xl {
-    @apply bg-background-primary p-12 rounded-[2rem];
-  }
-
-  .card-large {
-    @apply bg-background-secondary p-8 rounded-2xl;
-  }
-
-  .card-medium {
-    @apply bg-background-secondary p-6 rounded-xl;
-  }
-
-  .card-small {
-    @apply bg-background-secondary p-4 rounded-xl;
-  }
-}
-
-@layer components {
-  .btn-primary {
-    @apply bg-button-bg text-button-fg px-4 py-2 rounded-2xl size-fit;
-  }
-
-  .input-group {
-    @apply text-gray-700 text-xl font-medium mb-8;
-  }
-
-  .input-textfield {
-    @apply bg-textfield-bg w-full border-textfield-border px-4 py-2 rounded-lg;
   }
 }

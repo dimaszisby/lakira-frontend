@@ -1,39 +1,35 @@
 "use client";
 
+import type { DehydratedState } from "@tanstack/react-query";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { HydrationBoundary } from "@tanstack/react-query";
-import { useState } from "react";
 import { Provider as JotaiProvider } from "jotai";
-import { Quicksand, Plus_Jakarta_Sans } from "next/font/google";
+import { ThemeProvider } from "next-themes";
+import { useState } from "react";
 
-// Font Optimization
-const quicksand = Quicksand({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-quicksand",
-  display: "swap",
-});
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-plus-jakarta",
-  display: "swap",
-});
-
-export function Providers({ children }: { children: React.ReactNode }) {
+export const Providers = ({
+  children,
+  dehydratedState,
+}: {
+  children: React.ReactNode;
+  dehydratedState?: DehydratedState;
+}) => {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
-    <div className={`${quicksand.className} ${plusJakartaSans.className}`}>
+    <ThemeProvider
+      attribute="data-theme" // we theme via [data-theme="dark"]
+      defaultTheme="system" // explicit default (no system surprises)
+      enableSystem
+      disableTransitionOnChange // no janky transitions on toggle
+    >
       <JotaiProvider>
         <QueryClientProvider client={queryClient}>
-          {/* Ensures hydration for server-side data fetching */}
-          <HydrationBoundary>
-            {children}
-          </HydrationBoundary>
+          {/* Currently SSR is not being set yet */}
+          {/* <HydrationBoundary state={dehydratedState}>{children}</HydrationBoundary> */}
+
+          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
         </QueryClientProvider>
       </JotaiProvider>
-    </div>
+    </ThemeProvider>
   );
-}
+};
