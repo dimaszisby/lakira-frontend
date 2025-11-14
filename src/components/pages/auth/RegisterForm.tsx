@@ -1,171 +1,170 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
-import { userAtom } from "@/src/services/state/atoms";
+import { useCallback, useMemo } from "react";
+import { useForm } from "react-hook-form";
+
+import { useRegisterUserMutation } from "@/src/features/auth/hooks/register.mutation";
+import { cn } from "@/src/lib/cn";
 import { handleApiError } from "@/src/services/api/handleApiError";
-import { registerUser } from "@/src/services/api/auth.api";
+import type { CreateUserRequestDTO } from "@/src/types/dtos/user.dto";
 import { createUserSchema } from "@/types/api/zod-user.schema";
-import { CreateUserRequestDTO } from "@/src/types/dtos/user.dto";
+import Button from "@/ui/Button";
+import Card from "@/ui/Card";
+import ErrorMessage from "@/ui/ErrorMessage";
+import { FormField } from "@/ui/FormField";
+import TextField from "@/ui/TextField";
 
 const RegisterForm = () => {
+  const router = useRouter();
+
+  const { registerUser, isPending, error } = useRegisterUserMutation(
+    async () => {
+      router.push("/dashboard");
+    },
+    (err) => {
+      console.error("Register Error:", err);
+    },
+  );
+
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isSubmitting },
     watch,
   } = useForm<CreateUserRequestDTO>({
     resolver: zodResolver(createUserSchema.shape.body),
     mode: "onChange",
   });
 
-  const [, setUser] = useAtom(userAtom);
-  const router = useRouter();
-  const [isLoading, setIsLoading] = useState(false);
-  const [serverErrors, setServerErrors] = useState<string[]>([]);
-
   // Watch password and passwordConfirmation for live validation
   const password = watch("password");
   const passwordConfirmation = watch("passwordConfirmation");
 
-  /**
-   * Handles form submission for user registration.
-   * Uses `useCallback` to optimize re-renders.
-   */
-  const onSubmit = useCallback(
+  const onValid = useCallback(
     async (data: CreateUserRequestDTO) => {
-      setIsLoading(true);
-      setServerErrors([]);
-
-      // Note: We are setting the `isPublicProfile` to `true` by default
+      // Dev Note: We are setting the `isPublicProfile` to `true` by default
       // Public profile will be implemented in a future release
       const finalData: CreateUserRequestDTO = {
         ...data,
         isPublicProfile: true,
       };
-
-      try {
-        const response = await registerUser(finalData); // Calls registerUser on metric API
-        console.log("Register API Response:", response);
-
-        if (response.token) {
-          localStorage.setItem("token", response.token);
-        } else {
-          throw new Error("Token missing in response.");
-        }
-
-        if (response.user) {
-          setUser(response.user);
-        } else {
-          throw new Error("User data missing in response.");
-        }
-
-        router.push("/dashboard");
-      } catch (error) {
-        console.error("Register Error:", error);
-        setServerErrors(handleApiError(error));
-      } finally {
-        setIsLoading(false);
-      }
+      await registerUser(finalData);
     },
-    [setUser, router]
+    [registerUser],
   );
 
+  const onInvalid = useCallback((formErrors: typeof errors) => {
+    console.warn("Form has errors, preventing submission.", formErrors);
+  }, []);
+
+  const onSubmitForm = useMemo(
+    () => handleSubmit(onValid, onInvalid),
+    [handleSubmit, onValid, onInvalid],
+  );
+
+  const handleFormSubmit: React.FormEventHandler<HTMLFormElement> = useCallback(
+    (e) => {
+      void onSubmitForm(e);
+    },
+    [onSubmitForm],
+  );
+
+  const serverErrorMsg = useMemo(() => (error ? handleApiError(error).join(", ") : ""), [error]);
+  const isBusyInputs = isPending || isSubmitting;
+  const passwordsMismatch = !!(passwordConfirmation && password !== passwordConfirmation);
+
   return (
-    <div className="card-xl max-w-md mx-auto">
-      <h1 className="text-h1 text-center mb-4">Register</h1>
-      <label className="text-body text-text-secondary block text-center mb-8">
-        Create your Lakira Account
-      </label>
+    <Card variant="secondary" className="mx-auto">
+      <form noValidate onSubmit={handleFormSubmit} className="flex-row space-y-6">
+        <h1 className={cn("text-h1")}>Register</h1>
 
-      {serverErrors.length > 0 && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 border border-red-400 rounded">
-          {serverErrors.map((err, index) => (
-            <p key={index}>{err}</p>
-          ))}
-        </div>
-      )}
+        <p className={cn("block text-center")}>Create your Lakira Account</p>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+        {serverErrorMsg ? <ErrorMessage message={serverErrorMsg} className="mb-4" /> : null}
+
         {/* Username Field */}
-        <div className="mb-6 space-y-2">
-          <label className="text-input-label">Username</label>
-          <input
-            {...register("username")}
-            className="input-textfield"
-            type="text"
-          />
-          {errors.username && (
-            <span className="text-footer text-text-error block mt-2">
-              {errors.username.message}
-            </span>
-          )}
-        </div>
+        <FormField invalid={!!errors.username} error={errors.username?.message}>
+          <FormField.Label>Username</FormField.Label>
+          <FormField.Control>
+            <TextField
+              placeholder="e.g., john.doe"
+              registration={register("username")}
+              hasError={!!errors.username}
+              disabled={isBusyInputs}
+              clearable
+              required
+            />
+          </FormField.Control>
+        </FormField>
 
         {/* Email Field */}
-        <div className="mb-6 space-y-2">
-          <label className="text-input-label">Email</label>
-          <input
-            {...register("email")}
-            className="input-textfield"
-            type="email"
-          />
-          {errors.email && (
-            <span className="text-footer text-text-error block mt-2">
-              {errors.email.message}
-            </span>
-          )}
-        </div>
+        <FormField invalid={!!errors.email} error={errors.email?.message}>
+          <FormField.Label>Email</FormField.Label>
+          <FormField.Control>
+            <TextField
+              placeholder="e.g., john.doe@example.com"
+              registration={register("email")}
+              hasError={!!errors.email}
+              disabled={isBusyInputs}
+              clearable
+              required
+              type="email"
+            />
+          </FormField.Control>
+        </FormField>
 
         {/* Password Field */}
-        <div className="mb-6 space-y-2">
-          <label className="text-input-label">Password</label>
-          <input
-            {...register("password")}
-            className="input-textfield"
-            type="password"
-            autoComplete="new-password"
-          />
-          {errors.password && (
-            <span className="text-footer text-text-error block mt-2">
-              {errors.password.message}
-            </span>
-          )}
-        </div>
+        <FormField invalid={!!errors.password} error={errors.password?.message}>
+          <FormField.Label>Password</FormField.Label>
+          <FormField.Control>
+            <TextField
+              placeholder="Enter your password"
+              registration={register("password")}
+              hasError={!!errors.password}
+              disabled={isBusyInputs}
+              clearable
+              required
+              type="password"
+              autoComplete="new-password"
+            />
+          </FormField.Control>
+        </FormField>
 
         {/* Confirm Password Field */}
-        <div className="mb-6 space-y-2">
-          <label className="text-input-label">Confirm Password</label>
-          <input
-            {...register("passwordConfirmation")}
-            className="input-textfield"
-            type="password"
-            autoComplete="new-password"
-          />
-          {passwordConfirmation && password !== passwordConfirmation && (
-            <span className="text-footer text-text-error block mt-2">
-              Passwords do not match
-            </span>
-          )}
-          {errors.passwordConfirmation && (
-            <span className="text-footer text-text-error block mt-2">
-              {errors.passwordConfirmation.message}
-            </span>
-          )}
-        </div>
-
-        <button
-          type="submit"
-          className="btn-primary w-full"
-          disabled={!isValid || isLoading}
+        <FormField
+          invalid={Boolean(errors.passwordConfirmation) || passwordsMismatch}
+          error={
+            errors.passwordConfirmation?.message ||
+            (passwordsMismatch ? "Passwords do not match" : undefined)
+          }
         >
-          {isLoading ? "Registering..." : "Sign Up"}
-        </button>
+          <FormField.Label>Confirm Password</FormField.Label>
+          <FormField.Control>
+            <TextField
+              placeholder="Confirm your password"
+              registration={register("passwordConfirmation")}
+              hasError={Boolean(errors.passwordConfirmation) || passwordsMismatch}
+              disabled={isBusyInputs}
+              clearable
+              required
+              type="password"
+              autoComplete="new-password"
+            />
+          </FormField.Control>
+        </FormField>
+
+        <Button
+          type="submit"
+          variant="primary"
+          disabled={isBusyInputs || !isValid || passwordsMismatch}
+          block
+        >
+          {isBusyInputs ? "Registering..." : "Sign Up"}
+        </Button>
       </form>
-    </div>
+    </Card>
   );
 };
 

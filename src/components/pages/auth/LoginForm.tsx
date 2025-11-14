@@ -1,136 +1,115 @@
 "use client";
 
-// components/Auth/LoginForm.tsx
-
-import { useState, useCallback } from "react";
-import { useForm } from "react-hook-form";
-import { useAtom } from "jotai";
-import { useRouter } from "next/navigation";
-import { userAtom } from "@/src/services/state/atoms";
-import { loginUser } from "@/src/services/api/auth.api";
-import { handleApiError } from "@/src/services/api/handleApiError";
-import { LoginRequestDTO } from "@/src/types/dtos/user.dto";
-import { loginUserSchema } from "@/types/api/zod-user.schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { useCallback, useMemo } from "react";
+import { useForm } from "react-hook-form";
+
+import { useLoginUserMutation } from "@/src/features/auth/hooks/login.mutation";
+import { cn } from "@/src/lib/cn";
+import { handleApiError } from "@/src/services/api/handleApiError";
+import type { LoginRequestDTO } from "@/src/types/dtos/user.dto";
+import { loginUserSchema } from "@/types/api/zod-user.schema";
+import Button from "@/ui/Button";
+import Card from "@/ui/Card";
+import ErrorMessage from "@/ui/ErrorMessage";
+import { FormField } from "@/ui/FormField";
+import TextField from "@/ui/TextField";
 
 const LoginForm = () => {
-  // React Hook Form for form validation
+  const router = useRouter();
+
+  const { loginUser, isPending, error } = useLoginUserMutation(
+    async () => {
+      router.push("/dashboard");
+    },
+    (err) => {
+      console.error("Login Error:", err);
+    },
+  );
+
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid, isSubmitting },
   } = useForm<LoginRequestDTO>({
     resolver: zodResolver(loginUserSchema.shape.body),
+    mode: "onChange",
   });
 
-  // Jotai state management for user session
-  const [, setUser] = useAtom(userAtom);
-
-  // Next.js router for navigation
-  const router = useRouter();
-
-  // Loading and error states
-  const [isLoading, setIsLoading] = useState(false);
-  const [serverErrors, setServerErrors] = useState<string[]>([]);
-
-  /**
-   * Handles form submission for user login.
-   * Uses `useCallback` to optimize re-renders.
-   */
-  const onSubmit = useCallback(
+  const onValid = useCallback(
     async (data: LoginRequestDTO) => {
-      setIsLoading(true);
-      setServerErrors([]); // Reset errors before submission
-
-      try {
-        const response = await loginUser(data);
-        console.log("Login API Response:", response); // Debug log
-
-        // Ensure token exists before storing it
-        const token = response.token;
-        if (token) {
-          localStorage.setItem("token", token);
-        } else {
-          throw new Error("Token missing in response.");
-        }
-
-        // Ensure user data exists before setting the state
-        const user = response.user;
-        if (user) {
-          setUser(user);
-        } else {
-          throw new Error("User data missing in response.");
-        }
-
-        // Redirect user to dashboard after successful login
-        router.push("/dashboard");
-      } catch (error) {
-        console.error("Login Error:", error);
-        setServerErrors(handleApiError(error)); // Centralized error handling
-      } finally {
-        setIsLoading(false);
-      }
+      await loginUser(data);
     },
-    [setUser, router]
+    [loginUser],
   );
 
+  const onInvalid = useCallback((formErrors: typeof errors) => {
+    console.warn("Form has errors, preventing submission.", formErrors);
+  }, []);
+
+  const onSubmitForm = useMemo(
+    () => handleSubmit(onValid, onInvalid),
+    [handleSubmit, onValid, onInvalid],
+  );
+
+  const handleFormSubmit: React.FormEventHandler<HTMLFormElement> = useCallback(
+    (e) => {
+      void onSubmitForm(e);
+    },
+    [onSubmitForm],
+  );
+
+  const serverErrorMsg = useMemo(() => (error ? handleApiError(error).join(", ") : ""), [error]);
+  const isBusyInputs = isPending || isSubmitting;
+
   return (
-    <div className="card-xl max-w-md mx-auto">
-      <h1 className="text-h1 text-center mb-4">Login</h1>
-      <label className="text-body text-text-secondary block text-center mb-8">
-        Login using your Lakira Account
-      </label>
+    <Card variant="secondary" className="mx-auto">
+      <form noValidate onSubmit={handleFormSubmit} className="flex-row space-y-6">
+        <h1 className={cn("text-h1", "text-center")}>Login</h1>
 
-      {/* Display Server Error Messages */}
-      {serverErrors.length > 0 && (
-        <div className="mb-4 p-3 bg-red-100 text-red-700 border border-red-400 rounded">
-          {serverErrors.map((err, index) => (
-            <p key={index}>{err}</p>
-          ))}
-        </div>
-      )}
+        <p className={cn("block text-center")}>Login using your Lakira Account</p>
 
-      <form onSubmit={handleSubmit(onSubmit)}>
+        {/* Display Server Error Messages */}
+        {serverErrorMsg ? <ErrorMessage message={serverErrorMsg} className="mb-4" /> : null}
+
         {/* Email Field */}
-        <div className="mb-8 space-y-2">
-          <label className="text-input-label">Email</label>
-          <input
-            {...register("email", { required: "Email is required" })}
-            className="input-textfield"
-            type="email"
-          />
-          {errors.email && (
-            <span className="text-footer text-text-error block mt-2">
-              {errors.email.message}
-            </span>
-          )}
-        </div>
+        <FormField invalid={!!errors.email} error={errors.email?.message}>
+          <FormField.Label>Email</FormField.Label>
+          <FormField.Control>
+            <TextField
+              placeholder="e.g., john.doe@example.com"
+              registration={register("email")}
+              hasError={!!errors.email}
+              disabled={isBusyInputs}
+              clearable
+              required
+            />
+          </FormField.Control>
+        </FormField>
 
         {/* Password Field */}
-        <div className="mb-8 space-y-2">
-          <label className="text-input-label">Password</label>
-          <input
-            {...register("password", { required: "Password is required" })}
-            className="input-textfield"
-            type="password"
-          />
-          {errors.password && (
-            <span className="text-footer text-text-error block mt-2">
-              {errors.password.message}
-            </span>
-          )}
-        </div>
+        <FormField invalid={!!errors.password} error={errors.password?.message}>
+          <FormField.Label>Password</FormField.Label>
+          <FormField.Control>
+            <TextField
+              placeholder="Enter your password"
+              registration={register("password")}
+              hasError={!!errors.password}
+              disabled={isBusyInputs}
+              clearable
+              required
+              type="password"
+            />
+          </FormField.Control>
+        </FormField>
 
         {/* Submit Button */}
-        <button
-          type="submit"
-          className="btn-primary w-full"
-          disabled={isLoading}
-        >
-          {isLoading ? "Logging In..." : "Log in"}
-        </button>
+        <Button type="submit" variant="primary" disabled={isBusyInputs || !isValid} block>
+          {isBusyInputs ? "Logging In..." : "Log in"}
+        </Button>
       </form>
-    </div>
+    </Card>
   );
 };
 
