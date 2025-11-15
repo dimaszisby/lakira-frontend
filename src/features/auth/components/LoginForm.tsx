@@ -11,7 +11,7 @@ import { handleApiError } from "@/src/services/api/handleApiError";
 import type { LoginRequestDTO } from "@/src/types/dtos/user.dto";
 import { loginUserSchema } from "@/types/api/zod-user.schema";
 import Button from "@/ui/Button";
-import Card from "@/ui/Card";
+import Card, { CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
 import ErrorMessage from "@/ui/ErrorMessage";
 import { FormField } from "@/ui/FormField";
 import TextField from "@/ui/TextField";
@@ -64,51 +64,53 @@ const LoginForm = () => {
   const isBusyInputs = isPending || isSubmitting;
 
   return (
-    <Card variant="secondary" className="mx-auto">
-      <form noValidate onSubmit={handleFormSubmit} className="flex-row space-y-6">
-        <h1 className={cn("text-h1", "text-center")}>Login</h1>
+    <Card variant="primary" size="md" className="mx-auto w-full max-w-md">
+      <CardHeader className="text-center">
+        <CardTitle>Login</CardTitle>
+        <CardDescription>Login using your Lakira Account</CardDescription>
+      </CardHeader>
 
-        <p className={cn("block text-center")}>Login using your Lakira Account</p>
+      <CardContent>
+        <form noValidate onSubmit={handleFormSubmit} className="flex flex-col gap-6">
+          {serverErrorMsg ? <ErrorMessage message={serverErrorMsg} className="mb-2" /> : null}
 
-        {/* Display Server Error Messages */}
-        {serverErrorMsg ? <ErrorMessage message={serverErrorMsg} className="mb-4" /> : null}
+          {/* Email Field */}
+          <FormField invalid={!!errors.email} error={errors.email?.message}>
+            <FormField.Label>Email</FormField.Label>
+            <FormField.Control>
+              <TextField
+                placeholder="e.g., john.doe@example.com"
+                registration={register("email")}
+                hasError={!!errors.email}
+                disabled={isBusyInputs}
+                clearable
+                required
+              />
+            </FormField.Control>
+          </FormField>
 
-        {/* Email Field */}
-        <FormField invalid={!!errors.email} error={errors.email?.message}>
-          <FormField.Label>Email</FormField.Label>
-          <FormField.Control>
-            <TextField
-              placeholder="e.g., john.doe@example.com"
-              registration={register("email")}
-              hasError={!!errors.email}
-              disabled={isBusyInputs}
-              clearable
-              required
-            />
-          </FormField.Control>
-        </FormField>
+          {/* Password Field */}
+          <FormField invalid={!!errors.password} error={errors.password?.message}>
+            <FormField.Label>Password</FormField.Label>
+            <FormField.Control>
+              <TextField
+                placeholder="Enter your password"
+                registration={register("password")}
+                hasError={!!errors.password}
+                disabled={isBusyInputs}
+                clearable
+                required
+                type="password"
+              />
+            </FormField.Control>
+          </FormField>
 
-        {/* Password Field */}
-        <FormField invalid={!!errors.password} error={errors.password?.message}>
-          <FormField.Label>Password</FormField.Label>
-          <FormField.Control>
-            <TextField
-              placeholder="Enter your password"
-              registration={register("password")}
-              hasError={!!errors.password}
-              disabled={isBusyInputs}
-              clearable
-              required
-              type="password"
-            />
-          </FormField.Control>
-        </FormField>
-
-        {/* Submit Button */}
-        <Button type="submit" variant="primary" disabled={isBusyInputs || !isValid} block>
-          {isBusyInputs ? "Logging In..." : "Log in"}
-        </Button>
-      </form>
+          {/* Submit Button */}
+          <Button type="submit" variant="primary" disabled={isBusyInputs || !isValid} block>
+            {isBusyInputs ? "Logging In..." : "Log in"}
+          </Button>
+        </form>
+      </CardContent>
     </Card>
   );
 };
