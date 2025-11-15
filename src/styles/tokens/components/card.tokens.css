@@ -1,0 +1,13 @@
+@layer base {
+  :root {
+    --card-primary-bg: var(--surface);
+    --card-secondary-bg: var(--surface-2);
+    --card-fg: var(--gray-600);
+  }
+
+  :root[data-theme="dark"] {
+    --card-primary-bg: var(--surface);
+    --card-secondary-bg: var(--surface-2);
+    --card-fg: var(--gray-500);
+  }
+}

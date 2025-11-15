@@ -6,7 +6,18 @@
     --radius-md: 1rem;
     --radius-lg: 1.25rem;
 
-    /* Button sizes */
+    /* Card */
+    --card-p-sm: 2.5rem; /* 24px */
+    --card-p-md: 3rem; /* 32px */
+    --card-p-lg: 3.5rem; /* 40px */
+
+    --card-gap-sm: 1.5rem;
+    --card-gap-md: 2rem;
+    --card-gap-lg: 2.5rem;
+
+    --card-shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.08);
+
+    /* Button */
     --btn-h-sm: 2.5rem; /* 40px */
     --btn-h-md: 3rem; /* 48px */
     --btn-h-lg: 3.5rem; /* 56px */

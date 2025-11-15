@@ -1,0 +1,79 @@
+@layer components {
+  .card {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+
+    padding: var(--card-p-md);
+    gap: var(--card-gap-md);
+    border-radius: var(--radius-md);
+
+    background-color: hsl(var(--card-bg, var(--gray-100)) / 1);
+    color: hsl(var(--card-fg, var(--text)) / 1);
+
+    box-shadow: var(--card-shadow-soft, none);
+    border: 1px solid hsl(var(--border) / 0.6);
+  }
+
+  /* Variant mapping */
+  .card[data-variant="primary"] {
+    --card-bg: var(--card-primary-bg);
+  }
+
+  .card[data-variant="secondary"] {
+    --card-bg: var(--card-secondary-bg);
+  }
+
+  /* Size mapping */
+  .card[data-size="sm"] {
+    padding: var(--card-p-sm);
+    gap: var(--card-gap-sm);
+  }
+
+  .card[data-size="md"] {
+    padding: var(--card-p-md);
+    gap: var(--card-gap-md);
+  }
+
+  .card[data-size="lg"] {
+    padding: var(--card-p-lg);
+    gap: var(--card-gap-lg);
+  }
+
+  /* ===== Card sub-parts ===== */
+  .card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem; /* 6px-ish */
+  }
+
+  .card-title {
+    font-size: 1.25rem; /* ~20px, adjust to match text-h4 scale */
+    line-height: 1.4;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: hsl(var(--text) / 1);
+  }
+
+  .card-description {
+    font-size: 0.875rem; /* ~14px */
+    line-height: 1.5;
+    color: hsl(var(--text-secondary) / 1);
+  }
+
+  .card-content {
+    /* There’s already padding & gap on .card */
+    display: flex;
+    flex-direction: column;
+    gap: var(--card-gap-md);
+  }
+
+  .card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: auto; /* let footer stick to bottom if content grows */
+  }
+}
