@@ -1,13 +1,9 @@
-import React from "react";
 import Link from "next/link";
-import { NavigationProps } from "./type";
 
-const SideBarNavigationItems = ({
-  navItems,
-  pathname,
-  onClick,
-  className,
-}: NavigationProps) => {
+import type { NavigationProps } from "./type";
+import { cn } from "@/lib/cn";
+
+const SideBarNavigationItems = ({ navItems, pathname, onClick, className }: NavigationProps) => {
   return (
     <nav className={className}>
       <ul className="space-y-3">
@@ -16,11 +12,10 @@ const SideBarNavigationItems = ({
             <Link
               href={item.href}
               onClick={onClick}
-              className={`flex items-center px-4 py-2 rounded-lg transition font-semibold ${
-                pathname === item.href
-                  ? "bg-pink-500 text-white"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
+              className={cn("flex items-center rounded-md px-4 py-2 transition", {
+                "text-brand-primary font-bold": pathname === item.href,
+                "text-ink hover:bg-surface2": pathname !== item.href,
+              })}
             >
               <item.icon size={20} className="mr-2" />
               {item.name}

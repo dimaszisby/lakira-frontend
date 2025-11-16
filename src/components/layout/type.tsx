@@ -1,4 +1,4 @@
-import { SquaresFour, ChartBar, Folder, UserCircle } from "phosphor-react";
+import { ChartBar, Folder, SquaresFour, UserCircle } from "phosphor-react";
 
 export interface NavItem {
   name: string;
