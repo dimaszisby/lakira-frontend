@@ -1,11 +1,20 @@
 import { memo } from "react";
 
+import { cn } from "@/src/lib/cn";
+
+export type ResponsiveWidth = {
+  sm?: string;
+  md?: string;
+  lg?: string;
+  xl?: string;
+};
+
 export interface TableColumn<T> {
   key: keyof T;
   label: string;
   align?: "left" | "center" | "right";
   width?: string;
-  responsiveWidth?: { sm?: string; md?: string; lg?: string; xl?: string };
+  responsiveWidth?: ResponsiveWidth;
   sortable?: boolean;
   renderHeader?: (sorted: boolean, order: "ASC" | "DESC" | null) => React.ReactNode;
   renderCell?: (row: T, value: T[keyof T]) => React.ReactNode;
@@ -36,10 +45,7 @@ function getAlignClass(align: "left" | "center" | "right" = "left") {
   }
 }
 
-const getResponsiveWidthClass = <T,>(
-  width?: string,
-  responsiveWidth?: TableColumn<T>["responsiveWidth"],
-) => {
+const getResponsiveWidthClass = (width?: string, responsiveWidth?: ResponsiveWidth) => {
   const classes: string[] = [];
   if (width) classes.push(width);
   if (responsiveWidth?.sm) classes.push(`sm:${responsiveWidth.sm}`);
@@ -49,19 +55,8 @@ const getResponsiveWidthClass = <T,>(
   return classes.join(" ");
 };
 
-// util: prevent row-click from firing when clicking controls inside the row
-function isInteractive(el: HTMLElement) {
-  const tag = el.tagName.toLowerCase();
-  return (
-    tag === "button" ||
-    tag === "a" ||
-    tag === "input" ||
-    tag === "select" ||
-    tag === "textarea" ||
-    el.getAttribute("role") === "button" ||
-    el.getAttribute("role") === "link"
-  );
-}
+// Selector for interactive elements that should prevent row click propagation
+const INTERACTIVE_ELEMENT_SELECTOR = "button,a,input,select,textarea,[role=button],[role=link]";
 
 export const TableBase = <T,>({
   data,
@@ -75,16 +70,14 @@ export const TableBase = <T,>({
   className = "",
 }: TableProps<T>) => {
   return (
-    <div
-      className={`hidden overflow-x-auto rounded-xl bg-white text-sm text-gray-700 shadow-sm sm:block ${className}`}
-    >
-      <table className="min-w-full table-fixed divide-y divide-gray-200">
-        <thead className="bg-gray-100">
+    <div className={cn("hidden overflow-x-auto rounded-xl text-sm shadow-sm sm:block", className)}>
+      <table className="min-w-full table-fixed divide-y divide-border">
+        <thead className={cn("bg-bg")}>
           <tr>
             {columns.map((col) => {
-              // Computed Values
+              // Computed values
               const isSorted = sortBy === col.key;
-              const widthClasses = getResponsiveWidthClass<T>(col.width, col.responsiveWidth);
+              const widthClasses = getResponsiveWidthClass(col.width, col.responsiveWidth);
 
               return (
                 <th
@@ -124,7 +117,7 @@ export const TableBase = <T,>({
             })}
           </tr>
         </thead>
-        <tbody className="space-y-2 divide-y divide-gray-200 bg-gray-50">
+        <tbody className={cn("bg-surface2", "space-y-2 divide-y divide-border")}>
           {data.length > 0 ? (
             data.map((item) =>
               renderRow ? (
@@ -133,18 +126,15 @@ export const TableBase = <T,>({
                 <tr
                   key={rowKey(item)}
                   // only look clickable if handler exists
-                  className={`transition-colors hover:bg-gray-50 ${
-                    onRowClick ? "cursor-pointer" : ""
-                  }`}
+                  className={cn("transition-colors hover:bg-surface", {
+                    "cursor-pointer": onRowClick,
+                  })}
                   // mouse
                   onClick={(e) => {
                     if (!onRowClick) return;
                     const target = e.target as HTMLElement;
                     // ignore clicks from interactive descendants
-                    if (
-                      isInteractive(target) ||
-                      target.closest("button,a,input,select,textarea,[role=button],[role=link]")
-                    ) {
+                    if (target.closest(INTERACTIVE_ELEMENT_SELECTOR)) {
                       return;
                     }
                     onRowClick(item);
@@ -163,7 +153,7 @@ export const TableBase = <T,>({
                   aria-label={onRowClick ? "View row details" : undefined}
                 >
                   {columns.map((col) => {
-                    // Computed Valus
+                    // Computed values
                     const widthClasses = getResponsiveWidthClass(col.width, col.responsiveWidth);
                     const value = item[col.key as keyof T];
 
@@ -173,12 +163,7 @@ export const TableBase = <T,>({
                         className={`${widthClasses} px-4 py-2 ${getAlignClass(col.align)}`}
                         onClick={(e) => {
                           const target = e.target as HTMLElement;
-                          if (
-                            isInteractive(target) ||
-                            target.closest(
-                              "button,a,input,select,textarea,[role=button],[role=link]",
-                            )
-                          ) {
+                          if (target.closest(INTERACTIVE_ELEMENT_SELECTOR)) {
                             e.stopPropagation();
                           }
                         }}
@@ -196,7 +181,7 @@ export const TableBase = <T,>({
             )
           ) : (
             <tr>
-              <td colSpan={columns.length} className="px-4 py-6 text-center text-gray-500">
+              <td colSpan={columns.length} className="px-4 py-6 text-center">
                 No data available
               </td>
             </tr>

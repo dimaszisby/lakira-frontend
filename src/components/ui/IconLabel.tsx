@@ -2,9 +2,12 @@ import classNames from "classnames";
 import type { ComponentType, ReactNode } from "react";
 import { memo } from "react";
 
+type IconWeight = "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
+type ToneText = "default" | "muted" | "success" | "warning" | "danger";
+
 export type IconProps = {
   size?: number | string;
-  weight?: "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
+  weight?: IconWeight;
   className?: string;
 };
 
@@ -12,17 +15,17 @@ interface IconLabelProps {
   label: ReactNode;
   icon: ComponentType<IconProps>;
   size?: "sm" | "md"; // layout scale
-  tone?: "muted" | "default" | "success" | "warning" | "danger"; // semantic color
+  tone?: ToneText; // semantic color
   className?: string;
   iconClassName?: string;
 }
 
 const toneToText = {
-  muted: "text-gray-500",
-  default: "text-gray-600",
-  success: "text-green-600",
-  warning: "text-yellow-600",
-  danger: "text-red-600",
+  default: "text-ink",
+  muted: "text-ink-secondary",
+  success: "text-status-success",
+  warning: "text-status-warning",
+  danger: "text-status-error",
 } as const;
 
 const sizeToGap = { sm: "text-xs", md: "text-sm" } as const;

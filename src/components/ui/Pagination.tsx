@@ -1,9 +1,11 @@
+import { cn } from "@/lib/cn";
+
 type PaginationProps = {
   page: number;
   pageSize: number;
   onChange: (page: number) => void;
-  total?: number; // Optional when total count is unknown (cursor w/o includeTotal)
-  canPrev?: boolean; // Optional explicit guards when total is unknown
+  total?: number;
+  canPrev?: boolean;
   canNext?: boolean;
 };
 
@@ -17,30 +19,33 @@ export const Pagination = ({
 }: PaginationProps) => {
   const totalPages =
     typeof total === "number" ? Math.max(1, Math.ceil(total / pageSize)) : undefined;
-  const disabledStyle = "cursor-not-allowed opacity-50";
-  const enabledStyle = "text-gray-700 hover:bg-gray-200";
 
-  // IF total page unknown => show simple Prev/Next controls
+  // button styling
+  const btnBaseStyle = "rounded-lg px-3 py-1";
+  const disabledStyle = "cursor-not-allowed opacity-50";
+  const enabledStyle = "text-ink-secondary hover:bg-surface2";
+
+  // If total page unknown, show simple Prev/Next controls
   if (!totalPages) {
     const prevDisabled = typeof canPrev === "boolean" ? !canPrev : page <= 1;
-    // Dont know total => allow Next unless parent disables via canNext
+    // Allow Next unless parent disables via canNext
     const nextDisabled = typeof canNext === "boolean" ? !canNext : false;
 
     return (
-      <nav className="mt-8 flex items-center justify-center space-x-1">
+      <nav className="flex items-center justify-center space-x-1" aria-label="Pagination">
         <button
-          className={`rounded-lg px-3 py-1 ${prevDisabled ? disabledStyle : enabledStyle}`}
+          className={cn(btnBaseStyle, prevDisabled ? disabledStyle : enabledStyle)}
           onClick={() => onChange(page - 1)}
           disabled={prevDisabled}
           aria-label="Previous page"
         >
           Prev
         </button>
-        <span className="px-3 py-1 text-gray-600" aria-live="polite">
+        <span className="px-3 py-1 text-ink-secondary" aria-live="polite">
           Page {page}
         </span>
         <button
-          className={`rounded-lg px-3 py-1 ${prevDisabled ? disabledStyle : enabledStyle}`}
+          className={cn(btnBaseStyle, nextDisabled ? disabledStyle : enabledStyle)}
           onClick={() => onChange(page + 1)}
           disabled={nextDisabled}
           aria-label="Next page"
@@ -52,22 +57,12 @@ export const Pagination = ({
   }
 
   // Known total: render full pager with numbers + ellipses
-  const pageNumbers: Array<number | "..."> = [];
-  for (let i = 1; i <= totalPages; i++) {
-    if (i === 1 || i === totalPages || Math.abs(page - i) <= 2) {
-      pageNumbers.push(i);
-    } else if ((i === 2 && page > 4) || (i === totalPages - 1 && page < totalPages - 3)) {
-      // avoid duplicate "..." entries
-      if (pageNumbers[pageNumbers.length - 1] !== "...") {
-        pageNumbers.push("...");
-      }
-    }
-  }
+  const pageNumbers = getPaginationItems(page, totalPages);
 
   return (
-    <nav className="mt-8 flex items-center justify-center space-x-1">
+    <nav className="flex items-center justify-center space-x-1" aria-label="Pagination">
       <button
-        className={`rounded-lg px-3 py-1 ${page === 1 ? disabledStyle : enabledStyle}`}
+        className={cn(btnBaseStyle, page === 1 ? disabledStyle : enabledStyle)}
         onClick={() => onChange(page - 1)}
         disabled={page === 1}
         aria-label="Previous page"
@@ -77,20 +72,20 @@ export const Pagination = ({
 
       {pageNumbers.map((num, idx) =>
         num === "..." ? (
-          <span key={`ellipsis-${idx}`} className="px-2 text-gray-400">
+          <span key={`ellipsis-${idx}`} className="px-2 text-ink-tertiary" aria-hidden="true">
             ...
           </span>
         ) : (
           <button
             key={`page-${num}`}
-            className={`rounded-lg px-3 py-1 ${
-              page === num
-                ? "bg-purple-200 font-bold text-purple-800"
-                : "text-gray-700 hover:bg-gray-200"
-            }`}
+            className={cn(
+              btnBaseStyle,
+              page === num ? "bg-brand-primary/20 font-bold text-brand-primary" : enabledStyle,
+            )}
             onClick={() => onChange(num)}
             disabled={page === num}
             aria-current={page === num ? "page" : undefined}
+            aria-label={`Page ${num}`}
           >
             {num}
           </button>
@@ -98,7 +93,7 @@ export const Pagination = ({
       )}
 
       <button
-        className={`rounded-lg px-3 py-1 ${page === totalPages ? disabledStyle : enabledStyle}`}
+        className={cn(btnBaseStyle, page === totalPages ? disabledStyle : enabledStyle)}
         onClick={() => onChange(page + 1)}
         disabled={page === totalPages}
         aria-label="Next page"
@@ -108,3 +103,26 @@ export const Pagination = ({
     </nav>
   );
 };
+
+// Helper
+function getPaginationItems(
+  currentPage: number,
+  totalPages: number,
+  range = 2,
+): Array<number | "..."> {
+  const items: Array<number | "..."> = [];
+  let lastPushed: number | "..." | null = null;
+
+  for (let i = 1; i <= totalPages; i++) {
+    // Always show first and last page, and pages within the range of the current page
+    if (i === 1 || i === totalPages || (i >= currentPage - range && i <= currentPage + range)) {
+      items.push(i);
+      lastPushed = i;
+    } else if (lastPushed !== "...") {
+      // Insert ellipsis if not already inserted
+      items.push("...");
+      lastPushed = "...";
+    }
+  }
+  return items;
+}

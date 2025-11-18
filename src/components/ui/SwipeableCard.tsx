@@ -1,6 +1,7 @@
 import { motion, useAnimation, useMotionValue } from "framer-motion";
-import { memo } from "react";
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
+
+import { cn } from "@/src/lib/cn";
 
 interface SwipeAction {
   label: string;
@@ -16,12 +17,6 @@ interface Props {
   onClose?: () => void;
 }
 
-function getRoundedClass(index: number, total: number) {
-  if (index === 0) return "rounded-l-xl";
-  if (index === total - 1) return "rounded-r-2xl";
-  return "";
-}
-
 const SWIPE_THRESHOLD = 0.4; // % of button area width
 
 export const SwipeableCardBase = ({ children, actions, open = false, onClose }: Props) => {
@@ -30,15 +25,12 @@ export const SwipeableCardBase = ({ children, actions, open = false, onClose }: 
   const controls = useAnimation();
   const dragRef = useRef<HTMLDivElement | null>(null);
 
-  // NEW: track dragging + “open” states to suppress child clicks
   const isDraggingRef = useRef(false);
 
-  // If "open" prop changes, animate
   useEffect(() => {
     void controls.start({ x: open ? -cardWidth : 0 });
   }, [open, cardWidth, controls]);
 
-  // Click outside to close (optional)
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (open && dragRef.current && !dragRef.current.contains(e.target as Node)) {
@@ -49,11 +41,8 @@ export const SwipeableCardBase = ({ children, actions, open = false, onClose }: 
     return () => document.removeEventListener("mousedown", handleClick);
   }, [open, onClose]);
 
-  // * Styling Variables
-  const cornerRadius = "rounded-2xl"; // Tailwind's rounded-xl equivalent
-
   return (
-    <div className="relative w-full select-none">
+    <div className="relative w-full select-none overflow-clip rounded-2xl antialiased">
       {/* Actions */}
       <div className="absolute inset-y-0 right-0 z-0 flex h-full">
         {actions.map((action, i) => (
@@ -63,12 +52,12 @@ export const SwipeableCardBase = ({ children, actions, open = false, onClose }: 
               action.onClick();
               onClose?.(); // Optionally close after action
             }}
-            className={`relative flex h-full w-16 items-center justify-center 
-        text-2xl text-white  ${getRoundedClass(i, actions.length)}
-        ${action.color || "bg-red-500"}
-        transition-all duration-200 hover:brightness-90 active:scale-95`}
+            className={cn(
+              "relative flex h-full w-16 items-center justify-center text-2xl text-ink",
+              action.color || "bg-status-error",
+              "transition-all duration-200 hover:brightness-90 active:scale-95",
+            )}
             aria-label={action.label}
-            // tabIndex={0}
             type="button"
           >
             {action.icon || action.label}
@@ -79,7 +68,10 @@ export const SwipeableCardBase = ({ children, actions, open = false, onClose }: 
       {/* Card (swipeable) */}
       <motion.div
         ref={dragRef}
-        className={`relative z-10 bg-white ${cornerRadius} cursor-grab touch-pan-x border p-4 active:cursor-grabbing`}
+        className={cn(
+          "relative z-10 bg-surface",
+          "cursor-grab touch-pan-x border border-border p-4 active:cursor-grabbing",
+        )}
         drag="x"
         dragDirectionLock
         dragConstraints={{ left: -cardWidth, right: 0 }}
@@ -101,7 +93,6 @@ export const SwipeableCardBase = ({ children, actions, open = false, onClose }: 
             isDraggingRef.current = false;
           }, 120);
         }}
-        // --- NEW: consume taps when open or just dragged ---
         onClickCapture={(e) => {
           const isOpen = x.get() === -cardWidth;
           if (isDraggingRef.current) {
@@ -117,23 +108,14 @@ export const SwipeableCardBase = ({ children, actions, open = false, onClose }: 
             onClose?.();
           }
         }}
-        onClick={() => {
-          // If open, close on tap
-          if (x.get() === -cardWidth) {
-            void controls.start({ x: 0 });
-            onClose?.();
-          }
-        }}
-        // role="group"
-        // tabIndex={0}
       >
         {children}
       </motion.div>
     </div>
   );
 };
-SwipeableCardBase.displayName = "SwipableCard";
+SwipeableCardBase.displayName = "SwipeableCard";
 
 const SwipeableCard = memo(SwipeableCardBase);
-SwipeableCard.displayName = "SwipableCard";
+SwipeableCard.displayName = "SwipeableCard";
 export default SwipeableCard;
