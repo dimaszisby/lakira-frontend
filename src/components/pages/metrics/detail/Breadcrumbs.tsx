@@ -1,43 +1,46 @@
 "use client";
 
-import { Link } from "phosphor-react";
+import Link from "next/link";
 import { memo } from "react";
 
 import type { MetricDetailCompositeVM } from "@/features/metrics/view-models";
+import Card from "@/ui/Card";
 
 interface Props {
   category: MetricDetailCompositeVM["header"]["category"];
   metricName: string;
 }
 
-export const BreadcrumbsBase = ({ category, metricName }: Props) => (
-  <nav className="w-full rounded-2xl bg-white px-6 py-4" aria-label="Breadcrumb">
-    <ol className="flex items-center gap-4 text-sm font-medium text-gray-500">
-      <li>
-        <Link href="/metrics" className="hover:underline">
-          Metric Library
-        </Link>
-        <span className="mx-2">/</span>
-      </li>
+export const BreadcrumbsBase = ({ category, metricName }: Props) => {
+  return (
+    <Card size="xs" className="w-full">
+      <nav aria-label="Breadcrumb">
+        <ol className="flex flex-row items-center text-caption text-ink-tertiary">
+          <li>
+            <Link href="/metrics" className="hover:underline">
+              Metric Library
+            </Link>
+            <span className="mx-2">/</span>
+          </li>
 
-      {category !== null ? (
-        <li className="flex gap-4">
-          <Link href={`/category/${category.id}`} className="hover:underline">
-            {category.name}
-          </Link>
-          <span>/</span>
-        </li>
-      ) : (
-        <li className="flex gap-4">
-          <span>Uncategorized</span>
-          <span>/</span>
-        </li>
-      )}
+          {category !== null ? (
+            <li>
+              <Link href={`/metric-categories/${category.id}`}>{category.name}</Link>
+              <span className="mx-4">/</span>
+            </li>
+          ) : (
+            <li>
+              <span>Uncategorized</span>
+              <span className="mx-4">/</span>
+            </li>
+          )}
 
-      <li className="truncate font-semibold text-[#EA5678]">{metricName}</li>
-    </ol>
-  </nav>
-);
+          <li className="text-brand-primary">{metricName}</li>
+        </ol>
+      </nav>
+    </Card>
+  );
+};
 BreadcrumbsBase.displayName = "Breadcrumbs";
 
 const Breadcrumbs = memo(BreadcrumbsBase);

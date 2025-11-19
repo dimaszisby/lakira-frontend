@@ -1,7 +1,6 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import React from "react";
 
 import Breadcrumbs from "@/components/pages/metrics/detail/Breadcrumbs";
 import MetricHeaderSection from "@/components/pages/metrics/detail/MetricHeaderSection";
@@ -22,17 +21,16 @@ const MetricDetailContent = () => {
   if (!data) return <div>Empty metric details</div>;
 
   return (
-    <div className="m-2 mx-auto max-w-6xl flex-row space-y-4">
+    <div className="mx-auto flex flex-col gap-4">
       <Breadcrumbs category={data.header.category} metricName={data.header.name} />
 
       <MetricHeaderSection data={data?.header} />
 
-      {/* <MetricInsightSection logs={sortedLogs} /> */}
-      <VisualizationSection metricId={metricId} goalValue={data.settings.goalValue ?? null} />
+      <VisualizationSection metricId={metricId} goalValue={data.settings?.goalValue ?? null} />
 
       <MetricLogsSection metricId={metricId} />
 
-      <MetricSettingsSection data={data?.settings} />
+      <MetricSettingsSection metricId={metricId} data={data.settings} />
     </div>
   );
 };

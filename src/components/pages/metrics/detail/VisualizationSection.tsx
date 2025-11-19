@@ -1,4 +1,4 @@
-import SectionCard from "@/ui/SectionCard";
+import Card from "@/ui/Card";
 import Visualization from "@/ui/Visualization";
 
 const VisualizationSection = ({
@@ -9,9 +9,9 @@ const VisualizationSection = ({
   goalValue: number | null;
 }) => {
   return (
-    <SectionCard>
+    <Card>
       <Visualization metricId={metricId} goalValue={goalValue}></Visualization>
-    </SectionCard>
+    </Card>
   );
 };
 

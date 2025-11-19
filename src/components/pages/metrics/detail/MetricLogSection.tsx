@@ -2,6 +2,7 @@
 
 import React, { memo, useCallback, useMemo, useState } from "react";
 
+import MetricLogForm from "@/features/metric-logs/components/LogForm";
 import LogTable from "@/features/metric-logs/components/LogTable";
 import {
   useCreateMetricLogDummy,
@@ -17,13 +18,12 @@ import {
 } from "@/features/metric-logs/sort";
 import type { MetricLogVM } from "@/features/metric-logs/view-models";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
-import MetricLogForm from "@/src/features/metric-logs/components/LogForm";
-import { makeOnColumnSort } from "@/src/lib/sort/makeOnColumnSort";
+import { makeOnColumnSort } from "@/lib/sort/makeOnColumnSort";
+import Button from "@/ui/Button";
+import Card, { CardHeader, CardTitle } from "@/ui/Card";
 import EmptyDataIndicator from "@/ui/EmptyDataIndicator";
 import { Pagination } from "@/ui/Pagination";
-import PrimaryButton from "@/ui/PrimaryButton";
 import SearchInput from "@/ui/SearchInput";
-import SectionCard from "@/ui/SectionCard";
 import SkeletonLoader from "@/ui/SekeletonLoader";
 
 export const MetricLogsSectionBase = ({ metricId }: { metricId: string }) => {
@@ -145,67 +145,68 @@ export const MetricLogsSectionBase = ({ metricId }: { metricId: string }) => {
         />
       ) : null}
 
-      <SectionCard
-        title="Logs"
-        className="mb-8"
-        headerComponent={
-          <div className="bg-items-center mb-4 flex justify-between space-x-4">
+      <Card title="Logs">
+        <CardHeader className="flex w-full flex-row flex-wrap items-center justify-between gap-y-4">
+          <section className="flex flex-row items-center gap-4">
+            <CardTitle className="text-h3">Logs</CardTitle>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleDummyCreateClick}
+              aria-label="Generate Dummy"
+            >
+              Generate Dummy
+            </Button>
+          </section>
+
+          <section className="flex flex-row items-center gap-4">
             <SearchInput
               value={search}
               onChange={setSearch}
               onClear={() => setSearch("")}
               isLoading={pages.isFetching ? !!pages.items.length : undefined}
               placeholder="Search by log value…"
-              className="flex-1"
+            />
+            <Button variant="primary" onClick={handleAddLogClick} aria-label="Create New Log">
+              Add Logs
+            </Button>
+          </section>
+        </CardHeader>
+
+        {/* Pagination Placeholder (unchanged) */}
+        {loading ? (
+          <SkeletonLoader count={10} className="h-10" />
+        ) : empty ? (
+          <EmptyDataIndicator
+            title="No Data Available"
+            description="You haven't created any data yet."
+            tooltip="Create your first data"
+          />
+        ) : (
+          <>
+            <LogTable
+              logs={pages.items}
+              sortBy={sortField}
+              sortOrder={sortDir}
+              onSort={(col) => onColumnSort(String(col))}
+              onEdit={handleEditLogClick}
+              onDelete={handleDeleteClick}
+              onRowClick={handleRowClick}
+              mobileClassName="bg-surface2"
             />
 
-            <PrimaryButton
-              onClick={handleDummyCreateClick}
-              ariaLabel="Generate Logs"
-              className="bg-blue-600 text-white hover:bg-blue-700"
-            >
-              Generate Dummy
-            </PrimaryButton>
-
-            <PrimaryButton onClick={handleAddLogClick}>Add Logs</PrimaryButton>
-          </div>
-        }
-      >
-        <>
-          {/* Pagination Placeholder (unchanged) */}
-          {loading ? (
-            <SkeletonLoader count={10} className="h-10" />
-          ) : empty ? (
-            <EmptyDataIndicator
-              title="No Data Available"
-              description="You haven't created any data yet."
-              tooltip="Create your first data"
+            {/**Pagination Segment */}
+            <Pagination
+              page={pages.page}
+              pageSize={PAGE_SIZE}
+              total={pages.totalCount}
+              onChange={pages.setPage}
+              canPrev={pages.canPrev}
+              canNext={pages.canNext}
             />
-          ) : (
-            <>
-              <LogTable
-                logs={pages.items}
-                sortBy={sortField}
-                sortOrder={sortDir}
-                onSort={(col) => onColumnSort(String(col))}
-                onEdit={handleEditLogClick}
-                onDelete={handleDeleteClick}
-                onRowClick={handleRowClick}
-              />
-
-              {/**Pagination Segment */}
-              <Pagination
-                page={pages.page}
-                pageSize={PAGE_SIZE}
-                total={pages.totalCount}
-                onChange={pages.setPage}
-                canPrev={pages.canPrev}
-                canNext={pages.canNext}
-              />
-            </>
-          )}
-        </>
-      </SectionCard>
+          </>
+        )}
+      </Card>
     </>
   );
 };
