@@ -27,7 +27,7 @@ export const MetricSettingsSectionBase = ({ metricId, data }: Props) => {
         />
       ) : null}
 
-      <Card className="mb-24 flex flex-col sm:mb-24">
+      <Card className="flex flex-col ">
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle className="text-h3">Metric Setting</CardTitle>
           <Button
