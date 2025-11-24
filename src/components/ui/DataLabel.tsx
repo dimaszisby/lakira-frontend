@@ -2,8 +2,6 @@ import { memo } from "react";
 
 import { cn } from "@/src/lib/cn";
 
-import OverlineLabel from "./OverlineLabel";
-
 type Size = "lg" | "md" | "sm";
 
 interface Props {
@@ -28,7 +26,7 @@ function getSize(valueStyle: Size) {
 export const DataLabelBase = ({ title, value, className, size = "md", renderValue }: Props) => {
   return (
     <div className={cn("flex flex-col gap-2", className)}>
-      <OverlineLabel text={title} />
+      <p className="text-overline">{title}</p>
       {renderValue ? renderValue : <span className={cn("w-full", getSize(size))}>{value}</span>}
     </div>
   );
