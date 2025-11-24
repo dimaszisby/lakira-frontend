@@ -17,17 +17,17 @@ interface Props {
 function getSize(valueStyle: Size) {
   switch (valueStyle) {
     case "lg":
-      return "font-bold text-xl text-gray-800";
+      return "font-bold text-h4";
     case "md":
-      return "text-gray-700 font-mono text-base";
+      return "text-body1";
     case "sm":
-      return "text-gray-500 text-base";
+      return "text-body2";
   }
 }
 
 export const DataLabelBase = ({ title, value, className, size = "md", renderValue }: Props) => {
   return (
-    <div className={cn("bg-red-100 block gap-2", className)}>
+    <div className={cn("flex flex-col gap-2", className)}>
       <OverlineLabel text={title} />
       {renderValue ? renderValue : <span className={cn("w-full", getSize(size))}>{value}</span>}
     </div>

@@ -15,11 +15,18 @@ interface Props {
   actions: SwipeAction[];
   open?: boolean;
   onClose?: () => void;
+  className?: string;
 }
 
 const SWIPE_THRESHOLD = 0.4; // % of button area width
 
-export const SwipeableCardBase = ({ children, actions, open = false, onClose }: Props) => {
+export const SwipeableCardBase = ({
+  children,
+  actions,
+  open = false,
+  onClose,
+  className,
+}: Props) => {
   const cardWidth = actions.length * 64; // px
   const x = useMotionValue(0);
   const controls = useAnimation();
@@ -70,7 +77,8 @@ export const SwipeableCardBase = ({ children, actions, open = false, onClose }: 
         ref={dragRef}
         className={cn(
           "relative z-10 bg-surface",
-          "cursor-grab touch-pan-x border border-border p-4 active:cursor-grabbing",
+          "cursor-grab touch-pan-x border border-border p-4 active:cursor-grabbing rounded-2xl",
+          className,
         )}
         drag="x"
         dragDirectionLock

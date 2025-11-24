@@ -4,8 +4,9 @@ import React from "react";
 
 import { cn } from "@/src/lib/cn";
 
+// Dev Note: Implements CSS
 type Size = "sm" | "md" | "lg";
-type Variant = "primary" | "secondary" | "destructive" | "neutral";
+type Variant = "primary" | "secondary" | "tertiary" | "destructive" | "neutral" | "ghost" | "link";
 
 export type ButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "children"> & {
   children?: React.ReactNode;
@@ -15,23 +16,20 @@ export type ButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "c
   variant?: Variant;
   block?: boolean; // full width
   loading?: boolean; // shows spinner & disables
+  asChild?: boolean; // for polymorphic behavior
 };
 
-const SIZE: Record<Size, string> = {
-  sm: "h-10 px-3 text-sm gap-2 rounded-xl",
-  md: "h-12 px-5 text-base gap-3 rounded-2xl",
-  lg: "h-14 px-7 text-lg gap-4 rounded-2xl",
-};
+// const SIZE: Record<Size, string> = {
+//   sm: "h-10 px-3 text-sm gap-2 rounded-xl",
+//   md: "h-12 px-5 text-base gap-3 rounded-2xl",
+//   lg: "h-14 px-7 text-lg gap-4 rounded-2xl",
+// };
 
-// TODO: Update colors to match design system
-const VARIANT: Record<Variant, string> = {
-  primary: "bg-[#A8C28B] text-white hover:bg-[#7C9B63] focus-visible:ring-violet-400",
-  secondary:
-    "bg-white text-[#7C9B63] border border-[#A8C28B]/30 hover:bg-[#A8C28B]/10 focus-visible:ring-violet-400",
-  destructive:
-    "bg-white text-[#C76576] border border-[#C76576]/30 hover:bg-[#C76576]/10 focus-visible:ring-violet-400",
-  neutral: "bg-gray-200 text-gray-700 hover:bg-gray-300 focus-visible:ring-violet-400",
-};
+// const SIZE: Record<Size, string> = {
+//   sm: "data-[size=sm]:[]", // size is handled by CSS recipe; this keeps API explicit
+//   md: "data-[size=md]:[]",
+//   lg: "data-[size=lg]:[]",
+// };
 
 const Spinner = () => {
   return (
@@ -42,6 +40,7 @@ const Spinner = () => {
   );
 };
 
+// Do this need arialabel?
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
@@ -60,9 +59,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) => {
     const isDisabled = disabled || loading;
+    const isIconOnly = !children && !!(leftIcon || rightIcon); // If it's icon-only, enforce accessible label
 
-    // If it's icon-only, enforce accessible label
-    const isIconOnly = !children && !!(leftIcon || rightIcon);
     if (process.env.NODE_ENV !== "production") {
       if (isIconOnly && !("aria-label" in rest)) {
         console.warn("[Button] Icon-only buttons must have an aria-label for accessibility.");
@@ -76,12 +74,15 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         disabled={isDisabled}
         aria-disabled={isDisabled || undefined}
         aria-busy={loading || undefined}
+        data-variant={variant}
+        data-size={size}
         className={cn(
-          "inline-flex select-none items-center justify-center font-semibold shadow-sm transition-colors",
-          "focus-visible:outline-none focus-visible:ring-2",
-          "disabled:cursor-not-allowed disabled:opacity-60",
-          SIZE[size],
-          VARIANT[variant],
+          // Color & states come from CSS tokens in button.css
+          "button",
+          // "inline-flex select-none items-center justify-center font-semibold shadow-sm transition-colors",
+          // Focus ring uses Tailwind + semantic ring token
+          "focus-visible:outline-none focus-visible:ring-2 ring-ring",
+          // "disabled:cursor-not-allowed disabled:opacity-60",
           block ? "w-full" : "w-auto",
           className,
         )}
@@ -96,10 +97,8 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
           <span className="mr-2 inline-flex">{leftIcon}</span>
         ) : null}
 
-        {/* Right icon  */}
         {children ? <span className="truncate">{children}</span> : null}
 
-        {/* Right icon */}
         {rightIcon ? <span className="ml-2 inline-flex">{rightIcon}</span> : null}
       </button>
     );

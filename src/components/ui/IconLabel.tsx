@@ -39,14 +39,22 @@ export const IconLabelBase = ({
   className,
   iconClassName,
 }: IconLabelProps) => (
-  <div className={classNames("flex items-center", sizeToGap[size], toneToText[tone], className)}>
+  <div
+    className={classNames(
+      "flex items-center",
+      sizeToGap[size],
+      toneToText[tone],
+      "text-bold",
+      className,
+    )}
+  >
     <Icon
       size={sizeToIcon[size]}
-      weight="regular"
+      weight="bold"
       className={classNames("mr-1", iconClassName)}
       aria-hidden
     />
-    <span>{label}</span>
+    <span className="font-bold">{label}</span>
   </div>
 );
 IconLabelBase.displayName = "IconLabel";
