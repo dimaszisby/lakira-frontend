@@ -6,7 +6,6 @@ import { useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 
 import { useRegisterUserMutation } from "@/src/features/auth/hooks/register.mutation";
-import { cn } from "@/src/lib/cn";
 import { handleApiError } from "@/src/services/api/handleApiError";
 import type { CreateUserRequestDTO } from "@/src/types/dtos/user.dto";
 import { createUserSchema } from "@/types/api/zod-user.schema";
@@ -161,7 +160,9 @@ const RegisterForm = () => {
             type="submit"
             variant="primary"
             disabled={isBusyInputs || !isValid || passwordsMismatch}
+            className="mt-4"
             block
+            aria-label="Register"
           >
             {isBusyInputs ? "Registering..." : "Sign Up"}
           </Button>

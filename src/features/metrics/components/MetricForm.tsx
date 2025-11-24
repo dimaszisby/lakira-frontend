@@ -202,16 +202,11 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
   const inputBg = "bg-gray-50";
 
   return (
-    <Modal isOpen onClose={handleCloseClick}>
-      <form
-        noValidate
-        className="mx-auto flex min-w-96 max-w-lg flex-col bg-white p-2 sm:p-2 lg:p-6"
-        onSubmit={handleFormSubmit}
-      >
-        <h2 className="mb-2 text-xl font-semibold">Manage Metric</h2>
-        <ErrorMessage message={errorMsg} className="mb-2"></ErrorMessage>
+    <Modal title="Manage Metric" isOpen onClose={handleCloseClick}>
+      <form noValidate className="mx-auto w-full min-w-96 max-w-md" onSubmit={handleFormSubmit}>
+        {errorMsg ? <ErrorMessage message={errorMsg} className="mb-2" /> : null}
 
-        <div className="flex flex-col gap-8">
+        <section className="flex flex-col gap-8">
           <FormField invalid={!!errors.name} error={errors.name?.message}>
             <FormField.Label>Metric Name</FormField.Label>
             <FormField.Control>
@@ -279,7 +274,7 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
               />
             </FormField.Control>
           </FormField>
-        </div>
+        </section>
 
         {/* Buttons */}
         <div className="mt-8 space-y-4">
@@ -288,6 +283,7 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
             variant="primary"
             disabled={isSubmitting || isCreating || isUpdating || !isValid}
             block
+            aria-label="Save Metric"
           >
             {isSubmitting || isCreating || isUpdating ? "Saving..." : isEditMode ? "Save" : "Add"}
           </Button>
@@ -301,6 +297,7 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
               onClick={handleDeleteClick}
               disabled={isSubmitting || isDeleting}
               block
+              aria-label="Delete Metric"
             >
               {isDeleting ? "Deleting..." : "Delete Metric"}
             </Button>

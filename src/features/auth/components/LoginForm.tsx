@@ -6,7 +6,6 @@ import { useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 
 import { useLoginUserMutation } from "@/src/features/auth/hooks/login.mutation";
-import { cn } from "@/src/lib/cn";
 import { handleApiError } from "@/src/services/api/handleApiError";
 import type { LoginRequestDTO } from "@/src/types/dtos/user.dto";
 import { loginUserSchema } from "@/types/api/zod-user.schema";
@@ -106,7 +105,14 @@ const LoginForm = () => {
           </FormField>
 
           {/* Submit Button */}
-          <Button type="submit" variant="primary" disabled={isBusyInputs || !isValid} block>
+          <Button
+            type="submit"
+            variant="primary"
+            className="mt-4"
+            disabled={isBusyInputs || !isValid}
+            block
+            aria-label="Login"
+          >
             {isBusyInputs ? "Logging In..." : "Log in"}
           </Button>
         </form>

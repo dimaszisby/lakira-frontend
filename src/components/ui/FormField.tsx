@@ -42,15 +42,15 @@ export const FormField = ({
         {children}
 
         {description ? (
-          <p id={descId} className="text-xs text-gray-500">
+          <p id={descId} className="text-caption">
             {description}
           </p>
         ) : null}
 
         {error ? (
           <div className="inline-flex min-h-[1rem] items-start gap-2">
-            <WarningCircle aria-hidden className={cn("mt-[1px] h-4 w-4 shrink-0 text-red-600")} />
-            <p id={errId} className="text-xs text-red-600" aria-live="polite">
+            <WarningCircle aria-hidden className={cn("mt-[1px] h-4 w-4 shrink-0 text-ink-error")} />
+            <p id={errId} className="text-caption text-ink-error" aria-live="polite">
               {error}
             </p>
           </div>
@@ -64,13 +64,7 @@ export const FormField = ({
 type LabelProps = LabelHTMLAttributes<HTMLLabelElement>;
 const FFLabel = ({ className, ...props }: LabelProps) => {
   const { id } = useFF();
-  return (
-    <label
-      htmlFor={id}
-      className={cn("block text-sm font-medium text-gray-700", className)}
-      {...props}
-    />
-  );
+  return <label htmlFor={id} className={cn("text-input-label", "block", className)} {...props} />;
 };
 FormField.Label = FFLabel;
 
