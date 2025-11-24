@@ -6,6 +6,7 @@ import { userAtom } from "@/src/services/state/atoms";
 import type { AuthResponseDTO, LoginRequestDTO } from "@/types/dtos/user.dto";
 
 import { setCachedUserProfile } from "../cache";
+import { persistSessionToken } from "../session.client";
 import { clearAuthToken, setAuthToken } from "../token.storage";
 
 export function useLoginUserMutation(
@@ -20,8 +21,10 @@ export function useLoginUserMutation(
     onSuccess: async (response) => {
       if (response.token) {
         setAuthToken(response.token);
+        await persistSessionToken(response.token);
       } else {
         clearAuthToken();
+        await persistSessionToken(null);
       }
 
       if (response.user) {
