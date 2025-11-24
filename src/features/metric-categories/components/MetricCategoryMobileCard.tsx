@@ -1,8 +1,7 @@
 import { useRouter } from "next/navigation";
 import { memo, useCallback } from "react";
 
-import type { MetricCategoryVM } from "@/src/features/metric-categories/view-models";
-import OverlineLabel from "@/ui/OverlineLabel";
+import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
 
 interface Props {
   category: MetricCategoryVM;
@@ -31,34 +30,28 @@ export const MetricCategoryMobileCardBase = ({ category, onClick }: Props) => {
         }
       }}
       // className="cursor-pointer flex items-center p-4 bg-gray-500 rounded-2xl shadow-sm transition-shadow hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-      className=""
+      className="flex flex-row items-center justify-between gap-2"
       aria-label={`Open category ${name}`}
     >
-      <div>
-        <span className="mb-2 inline-block text-base font-semibold text-gray-900">{name}</span>
-
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <OverlineLabel text="Icon"></OverlineLabel>
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-gray-200">
-              {icon}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <OverlineLabel text="Color"></OverlineLabel>
-            <span
-              className="inline-block h-6 w-6 rounded-full border-2 border-gray-200"
-              style={{ backgroundColor: color }}
-              aria-label={color}
-            />
-          </div>
-
-          <div className="flex items-center gap-2">
-            <OverlineLabel text="metrics"></OverlineLabel>
-            <span className="text-sm font-semibold text-gray-500">{metricCount}</span>
-          </div>
+      <section className="flex w-full flex-row gap-4">
+        <div className="flex flex-row items-center gap-2">
+          <p className="relative bottom-0.5 line-clamp-1 inline-block max-w-full">{icon}</p>
         </div>
+
+        <div className="flex flex-row items-center gap-2">
+          <span
+            className="border-1 relative inline-block h-5 w-5 rounded-full border-border"
+            style={{ backgroundColor: color }}
+            aria-label={color}
+          />
+        </div>
+
+        <h6 className="line-clamp-1">{name}</h6>
+      </section>
+
+      <div className="flex flex-row items-center gap-2">
+        <p className="text-overline">metrics</p>
+        <p className="relative bottom-0.5 inline-block font-bold">{metricCount}</p>
       </div>
     </div>
   );

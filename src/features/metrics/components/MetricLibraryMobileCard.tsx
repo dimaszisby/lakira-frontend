@@ -3,8 +3,8 @@ import { CalendarBlank, Eye, Tag } from "phosphor-react";
 import { memo, useCallback } from "react";
 
 import CategoryChip from "@/features/metric-categories/components/CategoryChip";
-import { toCategoryUI } from "@/src/features/metric-categories/presenters/toCategoryUI";
-import type { MetricPreviewVM } from "@/src/features/metrics/view-models";
+import { toCategoryUI } from "@/features/metric-categories/presenters/toCategoryUI";
+import type { MetricPreviewVM } from "@/features/metrics/view-models";
 import IconLabel from "@/ui/IconLabel";
 
 export interface MetricLibraryCardProps {
@@ -16,15 +16,7 @@ export const MetricLibraryMobileCardBase = ({ metric, onClick }: MetricLibraryCa
   const router = useRouter();
   const { id, name, defaultUnit, isPublic, category, logCount } = metric;
 
-  // * Sizing
-  // Trim to avoid overflow
-  // const maxDescriptionLength = 100;
-  // const truncatedDescription =
-  //   displayDescription.length > maxDescriptionLength
-  //     ? `${displayDescription.slice(0, maxDescriptionLength)}…`
-  //     : displayDescription;
-
-  // * Handler
+  // Handler
   const handleCardClick = useCallback(() => {
     if (onClick) return onClick(metric); // prefer parent handler
     router.push(`/metrics/${id}`); // fallback behaviour
@@ -43,60 +35,41 @@ export const MetricLibraryMobileCardBase = ({ metric, onClick }: MetricLibraryCa
           handleCardClick();
         }
       }}
-      // className="cursor-pointer flex items-center p-4 bg-gray-500 rounded-2xl shadow-sm transition-shadow hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-      className=""
+      className="flex flex-col gap-2"
       aria-label={`Open metric ${name}`}
     >
-      {/* Metric name */}
-      <span className="truncate text-lg font-semibold" title={name}>
+      <h6 className="line-clamp-1" title={name}>
         {name}
-      </span>
+      </h6>
 
-      {/* Metric description */}
-      {/* <span
-          className="text-sm text-gray-600 truncate"
-          title={displayDescription}
-        >
-          {truncatedDescription}
-        </span> */}
-
-      <div className="mt-2 flex items-center justify-between">
+      <div className="flex items-center justify-between">
         <span>
           <CategoryChip category={categoryUI} />
         </span>
 
-        {/* Default Unit */}
-        <span>
-          <IconLabel
-            icon={Tag}
-            label={defaultUnit ?? "-"}
-            tone="muted"
-            size="sm"
-            iconClassName="mr-1"
-          />
-        </span>
+        <IconLabel
+          icon={Tag}
+          label={defaultUnit ?? "-"}
+          tone="muted"
+          size="sm"
+          iconClassName="mr-1"
+        />
 
-        {/* Visibility */}
-        <span>
-          <IconLabel
-            icon={Eye}
-            label={isPublic ? "Public" : "Private"}
-            tone="muted"
-            size="sm"
-            iconClassName="mr-1"
-          />
-        </span>
+        <IconLabel
+          icon={Eye}
+          label={isPublic ? "Public" : "Private"}
+          tone="muted"
+          size="sm"
+          iconClassName="mr-1"
+        />
 
-        {/* Log Count */}
-        <span>
-          <IconLabel
-            icon={CalendarBlank}
-            label={logCount}
-            tone="muted"
-            size="sm"
-            iconClassName="mr-1"
-          />
-        </span>
+        <IconLabel
+          icon={CalendarBlank}
+          label={logCount}
+          tone="muted"
+          size="sm"
+          iconClassName="mr-1"
+        />
       </div>
     </div>
   );

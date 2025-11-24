@@ -20,6 +20,7 @@ export interface MetricTableProps {
   onRowClick?: (metric: MetricPreviewVM) => void;
   rowKey?: (item: MetricPreviewVM) => string; // Mobile, Optional for SwipeableCard
   className?: string;
+  variant?: "desktop" | "mobile" | "both";
 }
 
 export const mobileColumns: SortChipsColumns<MetricPreviewVM>[] = [

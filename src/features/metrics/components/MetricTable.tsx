@@ -1,6 +1,7 @@
 import { memo } from "react";
 
 import type { MetricPreviewVM } from "@/src/features/metrics";
+import { cn } from "@/src/lib/cn";
 
 import MetricDesktopTable from "./MetricDesktopTable";
 import MetricMobileTable from "./MetricMobileTable";
@@ -14,30 +15,38 @@ export const MetricTableBase = ({
   onEdit,
   onDelete,
   onRowClick,
+  className,
+  variant = "both",
 }: MetricTableProps) => {
+  const showDesktop = variant === "desktop" || variant === "both";
+  const showMobile = variant === "mobile" || variant === "both";
+
   return (
     <>
-      <MetricDesktopTable
-        metrics={metrics}
-        sortBy={sortBy as keyof MetricPreviewVM}
-        sortOrder={sortOrder}
-        onSort={onSort}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        onRowClick={onRowClick}
-        className="space-y-4"
-      />
+      {showDesktop ? (
+        <MetricDesktopTable
+          metrics={metrics}
+          sortBy={sortBy as keyof MetricPreviewVM}
+          sortOrder={sortOrder}
+          onSort={onSort}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onRowClick={onRowClick}
+        />
+      ) : null}
 
-      <MetricMobileTable
-        metrics={metrics}
-        rowKey={(met) => met.id}
-        sortBy={sortBy as keyof MetricPreviewVM}
-        sortOrder={sortOrder}
-        onSort={onSort}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        className="block sm:hidden"
-      />
+      {showMobile ? (
+        <MetricMobileTable
+          metrics={metrics}
+          rowKey={(met) => met.id}
+          sortBy={sortBy as keyof MetricPreviewVM}
+          sortOrder={sortOrder}
+          onSort={onSort}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          className={cn(variant === "mobile" ? "block" : "block sm:hidden", className)}
+        />
+      ) : null}
     </>
   );
 };

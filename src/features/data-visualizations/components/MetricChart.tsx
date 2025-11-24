@@ -16,6 +16,8 @@ import {
 import { memo, useMemo } from "react";
 import { Line } from "react-chartjs-2";
 
+import { cn } from "@/src/lib/cn";
+
 import type { VizResponse } from "../types";
 import { isAllMissing, seriesToXY, toTimeUnit } from "../viz-helpers";
 
@@ -37,7 +39,14 @@ const MetricChart = ({ data, goalValue, height = 260 }: Props) => {
 
   if (isAllMissing(xy)) {
     return (
-      <div className="text-muted-foreground flex h-full items-center justify-center rounded-xl bg-gray-50 text-xs">
+      <div
+        className={cn(
+          "bg-surface2",
+          "flex h-full items-center justify-center rounded-xl",
+          "text-sm text-muted-foreground",
+        )}
+        style={{ height }}
+      >
         No data
       </div>
     );

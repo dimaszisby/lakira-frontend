@@ -1,5 +1,6 @@
 "use client";
 
+import { CaretDown, PencilSimple } from "phosphor-react";
 import { useEffect, useState } from "react";
 
 import type { RelativeLast, TimeRangeValue } from "../types";
@@ -26,75 +27,110 @@ const TimeRangePicker = ({ value, onChange }: Props) => {
 
   return (
     <div className="flex items-center gap-2">
-      <select
-        aria-label="Range mode"
-        className="rounded-md border px-2 py-1"
-        value={mode}
-        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-          const m = e.target.value as "relative" | "absolute";
-          setMode(m);
-          if (m === "relative") {
-            const next: RelativeLast = isRelativeLast(draftLast) ? draftLast : "30d";
-            onChange({ mode: "relative", last: next });
-          } else {
-            const end = new Date().toISOString();
-            const start = new Date(Date.now() - 30 * 86400000).toISOString();
-            onChange({ mode: "absolute", start, end });
-          }
-        }}
-      >
-        <option value="relative">Last</option>
-        <option value="absolute">Custom</option>
-      </select>
-
-      {mode === "relative" ? (
-        <input
-          aria-label="Last"
-          className="w-28 rounded-md border px-2 py-1"
-          placeholder="e.g. 7d"
-          pattern={RELATIVE_RE.source}
-          title="Format: number + unit (h,d,w,m,y). Example: 7d"
-          value={draftLast}
-          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-            const raw = e.target.value;
-            setDraftLast(raw);
-            if (isRelativeLast(raw)) {
-              onChange({ mode: "relative", last: raw });
+      <div className="relative inline-flex items-center">
+        <select
+          aria-label="Range mode"
+          className="
+          /*
+          =
+          space for the chevron
+          */ w-full appearance-none rounded-xl border border-border bg-bg py-2 pl-3 pr-6
+          text-sm
+          outline-none ring-0 focus:border-brand-accent
+        "
+          value={mode}
+          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+            const m = e.target.value as "relative" | "absolute";
+            setMode(m);
+            if (m === "relative") {
+              const next: RelativeLast = isRelativeLast(draftLast) ? draftLast : "30d";
+              onChange({ mode: "relative", last: next });
+            } else {
+              const end = new Date().toISOString();
+              const start = new Date(Date.now() - 30 * 86400000).toISOString();
+              onChange({ mode: "absolute", start, end });
             }
           }}
-        />
-      ) : (
-        <>
-          <input
-            type="datetime-local"
-            className="rounded-md border px-2 py-1"
-            aria-label="Start"
-            value={value.mode === "absolute" ? toLocal(value.start) : ""}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              const v = e.target.value ? new Date(e.target.value).toISOString() : "";
-              const cur =
-                value.mode === "absolute"
-                  ? value
-                  : { mode: "absolute", start: "", end: "" as string };
-              onChange({ mode: "absolute", start: v, end: cur.end });
-            }}
-          />
-          <input
-            type="datetime-local"
-            className="rounded-md border px-2 py-1"
-            aria-label="End"
-            value={value.mode === "absolute" ? toLocal(value.end) : ""}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-              const v = e.target.value ? new Date(e.target.value).toISOString() : "";
-              const cur =
-                value.mode === "absolute"
-                  ? value
-                  : { mode: "absolute", start: "", end: "" as string };
-              onChange({ mode: "absolute", start: cur.start, end: v });
-            }}
-          />
-        </>
-      )}
+        >
+          <option value="relative">Last</option>
+          <option value="absolute">Custom</option>
+        </select>
+
+        <span
+          className="
+          pointer-events-none
+          absolute inset-y-0 right-2
+          flex items-center 
+        "
+          aria-hidden="true"
+        >
+          <CaretDown size={14} className="text-brand-accent" />
+        </span>
+      </div>
+
+      <div className="flex flex-row items-center gap-2">
+        {mode === "relative" ? (
+          <div className="relative flex h-9 w-28 flex-row items-center overflow-clip rounded-xl border-border bg-bg">
+            <input
+              aria-label="Last"
+              className="h-full w-full rounded-xl border border-border bg-transparent px-3 outline-none ring-0 focus:border-brand-accent"
+              placeholder="e.g. 7d"
+              pattern={RELATIVE_RE.source}
+              title="Format: number + unit (h,d,w,m,y). Example: 7d"
+              value={draftLast}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const raw = e.target.value;
+                setDraftLast(raw);
+                if (isRelativeLast(raw)) {
+                  onChange({ mode: "relative", last: raw });
+                }
+              }}
+            />
+
+            <span
+              className="
+          pointer-events-none
+          absolute inset-y-0 right-2
+          flex items-center
+        "
+              aria-hidden="true"
+            >
+              <PencilSimple size={16} className="text-brand-accent" />
+            </span>
+          </div>
+        ) : (
+          <>
+            <input
+              type="datetime-local"
+              className="rounded-xl border px-2 py-1 outline-none ring-0 focus:border-brand-accent"
+              aria-label="Start"
+              value={value.mode === "absolute" ? toLocal(value.start) : ""}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const v = e.target.value ? new Date(e.target.value).toISOString() : "";
+                const cur =
+                  value.mode === "absolute"
+                    ? value
+                    : { mode: "absolute", start: "", end: "" as string };
+                onChange({ mode: "absolute", start: v, end: cur.end });
+              }}
+            />
+            <input
+              type="datetime-local"
+              className="rounded-xl border px-2 py-1 outline-none ring-0 focus:border-brand-accent"
+              aria-label="End"
+              value={value.mode === "absolute" ? toLocal(value.end) : ""}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                const v = e.target.value ? new Date(e.target.value).toISOString() : "";
+                const cur =
+                  value.mode === "absolute"
+                    ? value
+                    : { mode: "absolute", start: "", end: "" as string };
+                onChange({ mode: "absolute", start: cur.start, end: v });
+              }}
+            />
+          </>
+        )}
+      </div>
     </div>
   );
 };

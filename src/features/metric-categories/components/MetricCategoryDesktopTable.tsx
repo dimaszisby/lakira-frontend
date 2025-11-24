@@ -1,8 +1,8 @@
 import React, { memo } from "react";
 
-import type { TableColumn } from "@/components/ui/Table";
-import { TableBase } from "@/components/ui/Table";
-import type { MetricCategoryVM } from "@/src/features/metric-categories/view-models";
+import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
+import type { TableColumn } from "@/ui/Table";
+import { TableBase } from "@/ui/Table";
 
 import type { CategoryTableProps } from "./table-config";
 
