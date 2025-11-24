@@ -1,10 +1,10 @@
 import React, { memo } from "react";
 
-import type { MetricLogVM } from "@/src/features/metric-logs/view-models";
+import type { MetricLogVM } from "@/features/metric-logs/view-models";
 import type { TableColumn } from "@/ui/Table";
 import { TableBase } from "@/ui/Table";
 
-import type { LogTableProps } from "../../../components/pages/logs/types";
+import type { LogTableProps } from "./table-config";
 
 const columns: TableColumn<MetricLogVM>[] = [
   {

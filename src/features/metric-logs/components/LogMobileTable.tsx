@@ -14,13 +14,15 @@ const LogMobileTable = React.memo(
     onDelete,
     onRowClick,
     className = "",
-  }: LogTableProps) => {
+    mobileClassName,
+  }: LogTableProps & { mobileClassName?: string }) => {
     return (
       <div className={`block space-y-4 ${className}`}>
         {logs.length > 0 ? (
           logs.map((item) => (
             <SwipeableCard
               key={rowKey(item)}
+              className={mobileClassName}
               actions={[
                 {
                   label: "Edit",

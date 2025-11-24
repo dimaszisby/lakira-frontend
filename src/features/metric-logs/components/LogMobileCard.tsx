@@ -1,3 +1,4 @@
+import { Lightning } from "phosphor-react";
 import { memo, useCallback } from "react";
 
 import type { MetricLogVM } from "@/src/features/metric-logs/view-models";
@@ -7,38 +8,41 @@ interface LogMobileCardProps {
   onClick?: (log: MetricLogVM) => void;
 }
 
+const LogMobileCardBase = ({ log, onClick }: LogMobileCardProps) => {
+  const { logValue, loggedAt } = log;
+
+  const handleCardClick = useCallback(() => {
+    if (onClick) return onClick(log); // prefer parent handler
+  }, [onClick, log]);
+
+  return (
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={handleCardClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleCardClick();
+        }
+      }}
+      className="flex flex-row flex-wrap justify-between"
+      aria-label={`Open category ${name}`}
+    >
+      <section className="flex flex-row items-center gap-2">
+        <Lightning size={18} weight="fill" className="text-status-warning" />
+        <p>{loggedAt}</p>
+      </section>
+      <h6 className="font-bold">{logValue}</h6>
+    </div>
+  );
+};
+
+LogMobileCardBase.displayName = "MetricCategoryMobileCard";
+
 const LogMobileCard = memo(
-  ({ log, onClick }: LogMobileCardProps) => {
-    const { logValue, loggedAt } = log;
-
-    const handleCardClick = useCallback(() => {
-      if (onClick) return onClick(log); // prefer parent handler
-    }, [onClick, log]);
-
-    return (
-      <div
-        role="button"
-        tabIndex={0}
-        onClick={handleCardClick}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            handleCardClick();
-          }
-        }}
-        // className="cursor-pointer flex items-center p-4 bg-gray-500 rounded-2xl shadow-sm transition-shadow hover:shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        className=""
-        aria-label={`Open category ${name}`}
-      >
-        <span className="text-base font-semibold text-gray-900">{loggedAt}</span>
-
-        <span className="text-sm font-regular text-gray-500">{logValue}</span>
-      </div>
-    );
-  },
+  LogMobileCardBase,
   (prev, next) => prev.log.id === next.log.id && prev.onClick === next.onClick,
 );
-
 LogMobileCard.displayName = "MetricCategoryMobileCard";
-
 export default LogMobileCard;

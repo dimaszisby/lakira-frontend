@@ -7,7 +7,16 @@ import LogMobileTable from "./LogMobileTable";
 import type { LogTableProps } from "./table-config";
 
 const LogTable = React.memo(
-  ({ logs, sortBy, sortOrder, onSort, onEdit, onDelete, onRowClick }: LogTableProps) => {
+  ({
+    logs,
+    sortBy,
+    sortOrder,
+    onSort,
+    onEdit,
+    onDelete,
+    onRowClick,
+    mobileClassName,
+  }: LogTableProps & { mobileClassName?: string }) => {
     return (
       <>
         {/* Desktop view */}
@@ -32,6 +41,7 @@ const LogTable = React.memo(
           onEdit={onEdit}
           onDelete={onDelete}
           className="block sm:hidden"
+          mobileClassName={mobileClassName}
         />
       </>
     );
