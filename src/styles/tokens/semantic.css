@@ -1,11 +1,12 @@
+/* src/styles/tokens/semantic.css */
 @layer base {
   /* Light (default) */
   :root,
   :root[data-theme="light"] {
     /* Base surfaces & text */
-    --bg: var(--gray-50);
-    --surface: var(--primary-softwhite-100);
-    --surface-2: var(--primary-softwhite-700);
+    --bg: var(--gray-200);
+    --surface: var(--gray-50);
+    --surface-2: var(--gray-100);
 
     --text: var(--gray-900);
     --text-secondary: var(--gray-700);
@@ -33,6 +34,9 @@
     --status-info-bg: var(--info-100);
     --status-info: var(--info-500);
     --status-info-emphasis: var(--info-700);
+
+    /* IO */
+    --input-bg: var(--gray-100);
   }
 
   /* Dark overrides */
@@ -51,5 +55,6 @@
     --ring: var(--secondary-origamiblue-500);
 
     /* status tokens can stay; override if needed */
+    --input-bg: var(--gray-800);
   }
 }

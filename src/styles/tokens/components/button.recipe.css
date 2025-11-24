@@ -39,15 +39,26 @@
     --button-disabled-bg: var(--button-primary-disabled-bg);
     --button-disabled-fg: var(--button-primary-disabled-fg);
   }
+
+  /* Variant mapping */
   .button[data-variant="secondary"] {
-    --button-bg: var(--button-secondary-bg);
+    --button-bg: hsl(var(--button-secondary-bg) / 0);
     --button-fg: var(--button-secondary-fg);
     --button-border: var(--button-secondary-border);
-    --button-hover-bg: var(--button-secondary-hover-bg);
+    --button-hover-bg: hsl(var(--button-secondary-hover-bg) / 0.5);
     --button-active-bg: var(--button-secondary-active-bg);
     --button-disabled-bg: var(--button-secondary-disabled-bg);
     --button-disabled-fg: var(--button-secondary-disabled-fg);
   }
+
+  .button[data-variant="tertiary"] {
+    --button-bg: var(--button-tertiary-bg);
+    --button-fg: var(--button-tertiary-fg);
+    --button-border: var(--button-tertiary-border);
+    --button-hover-bg: var(--button-tertiary-hover-bg);
+    --button-active-bg: var(--button-tertiary-active-bg);
+  }
+
   .button[data-variant="destructive"] {
     --button-bg: var(--button-destructive-bg);
     --button-fg: var(--button-destructive-fg);
@@ -56,13 +67,6 @@
     --button-active-bg: var(--button-destructive-active-bg);
     --button-disabled-bg: var(--button-destructive-disabled-bg);
     --button-disabled-fg: var(--button-destructive-disabled-fg);
-  }
-  .button[data-variant="tertiary"] {
-    --button-bg: var(--button-tertiary-bg);
-    --button-fg: var(--button-tertiary-fg);
-    --button-border: var(--button-tertiary-border);
-    --button-hover-bg: var(--button-tertiary-hover-bg);
-    --button-active-bg: var(--button-tertiary-active-bg);
   }
 
   /* Size mapping (uses scales) */

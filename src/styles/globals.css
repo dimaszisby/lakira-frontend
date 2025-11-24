@@ -8,6 +8,10 @@
 
 @import "./tokens/components/button.tokens.css";
 @import "./tokens/components/button.recipe.css";
+@import "./tokens/components/card.tokens.css";
+@import "./tokens/components/card.recipe.css";
+@import "./tokens/components/container.tokens.css";
+@import "./tokens/components/container.recipe.css";
 
 @tailwind base;
 @tailwind components;

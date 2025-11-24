@@ -7,7 +7,7 @@
     --button-primary-hover-bg: var(--primary-matchagreen-700);
     --button-primary-active-bg: var(--primary-matchagreen-700);
     --button-primary-disabled-bg: var(--gray-400);
-    --button-primary-disabled-fg: var(--gray-600);
+    --button-primary-disabled-fg: var(--gray-800);
 
     /* Secondary (outline) */
     --button-secondary-bg: var(--gray-white);
@@ -25,7 +25,7 @@
     --button-destructive-hover-bg: var(--accent-vividcoral-500);
     --button-destructive-active-bg: var(--accent-vividcoral-500);
     --button-destructive-disabled-bg: var(--gray-400);
-    --button-destructive-disabled-fg: var(--gray-600);
+    --button-destructive-disabled-fg: var(--gray-800);
 
     /* Optional: Tertiary/Accent */
     --button-tertiary-bg: var(--core-accent);
