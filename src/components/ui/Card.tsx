@@ -2,19 +2,19 @@ import React from "react";
 
 import { cn } from "@/src/lib/cn";
 
-type Size = "sm" | "md" | "lg";
-type Variant = "primary" | "secondary";
+export type CardSize = "xs" | "sm" | "md" | "lg";
+export type CardVariant = "primary" | "secondary" | "ghost" | "outlined";
+export type CardRadius = "sm" | "md" | "lg";
+export type CardElevation = "none" | "sm" | "md";
 
 /**
  * Reusable Primitive: Card
  *
- * A versatile Card component with customizable size and variant options.
- *
- * Props:
- * - size: Determines the size of the card. Options are "sm", "md", "lg". Default is "md".
- * - variant: Determines the visual style of the card. Options are "primary", "secondary". Default is "primary".
- * - className: Additional CSS classes to apply to the card.
- * - children: The content of the card.
+ * A versatile surface primitive for Lakira:
+ * - size: padding/gap density ("xs" | "sm" | "md" | "lg")
+ * - variant: visual tone ("primary" | "secondary" | "ghost" | "outlined")
+ * - radius: corner rounding ("sm" | "md" | "lg")
+ * - elevation: shadow depth ("none" | "sm" | "md")
  *
  * Usage:
  * ```tsx
@@ -34,18 +34,25 @@ type Variant = "primary" | "secondary";
  */
 
 type CardProps = React.HTMLAttributes<HTMLDivElement> & {
-  size?: Size;
-  variant?: Variant;
+  size?: CardSize;
+  variant?: CardVariant;
+  radius?: CardRadius;
+  elevation?: CardElevation;
 };
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
-  ({ size = "md", variant = "primary", className, ...rest }, ref) => {
+  (
+    { size = "md", variant = "primary", radius = "md", elevation = "sm", className, ...rest },
+    ref,
+  ) => {
     return (
       <div
         ref={ref}
         className={cn("card", className)}
         data-size={size}
         data-variant={variant}
+        data-radius={radius}
+        data-elevation={elevation}
         {...rest}
       />
     );

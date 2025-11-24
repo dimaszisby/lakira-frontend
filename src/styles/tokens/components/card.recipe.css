@@ -7,25 +7,22 @@
 
     padding: var(--card-p-md);
     gap: var(--card-gap-md);
-    border-radius: var(--radius-md);
+    border-radius: var(--card-radius-md);
 
-    background-color: hsl(var(--card-bg, var(--gray-100)) / 1);
-    color: hsl(var(--card-fg, var(--text)) / 1);
+    background-color: hsl(var(--card-bg, var(--card-primary-bg)) / 1);
+    color: hsl(var(--card-fg) / 1);
+    border: 1px solid hsl(var(--card-border-color) / 0.7);
 
-    box-shadow: var(--card-shadow-soft, none);
-    border: 1px solid hsl(var(--border) / 0.6);
+    box-shadow: var(--card-shadow-sm); /* default elevation, can be overridden */
   }
 
-  /* Variant mapping */
-  .card[data-variant="primary"] {
-    --card-bg: var(--card-primary-bg);
+  /* ===== Size mapping ===== */
+
+  .card[data-size="xs"] {
+    padding: var(--card-p-xs);
+    gap: var(--card-gap-xs);
   }
 
-  .card[data-variant="secondary"] {
-    --card-bg: var(--card-secondary-bg);
-  }
-
-  /* Size mapping */
   .card[data-size="sm"] {
     padding: var(--card-p-sm);
     gap: var(--card-gap-sm);
@@ -41,11 +38,62 @@
     gap: var(--card-gap-lg);
   }
 
+  /* ===== Variant mapping ===== */
+
+  .card[data-variant="primary"] {
+    --card-bg: var(--card-primary-bg);
+    --card-border-color: var(--border);
+  }
+
+  .card[data-variant="secondary"] {
+    --card-bg: var(--card-secondary-bg);
+    --card-border-color: var(--border);
+  }
+
+  .card[data-variant="ghost"] {
+    --card-bg: var(--card-ghost-bg);
+    --card-border-color: transparent;
+  }
+
+  .card[data-variant="outlined"] {
+    --card-bg: var(--card-outlined-bg);
+    --card-border-color: var(--border);
+    /* shadow still controlled by elevation */
+  }
+
+  /* ===== Radius mapping ===== */
+
+  .card[data-radius="sm"] {
+    border-radius: var(--card-radius-sm);
+  }
+
+  .card[data-radius="md"] {
+    border-radius: var(--card-radius-md);
+  }
+
+  .card[data-radius="lg"] {
+    border-radius: var(--card-radius-lg);
+  }
+
+  /* ===== Elevation (shadow) mapping ===== */
+
+  .card[data-elevation="none"] {
+    box-shadow: var(--card-shadow-none);
+  }
+
+  .card[data-elevation="sm"] {
+    box-shadow: var(--card-shadow-sm);
+  }
+
+  .card[data-elevation="md"] {
+    box-shadow: var(--card-shadow-md);
+  }
+
   /* ===== Card sub-parts ===== */
   .card-header {
     display: flex;
     flex-direction: column;
-    gap: 0.375rem; /* 6px-ish */
+    gap: 0.375rem; /* 6px */
   }
 
   .card-title {

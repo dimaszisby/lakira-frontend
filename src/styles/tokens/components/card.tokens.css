@@ -1,13 +1,44 @@
 @layer base {
   :root {
+    /* Card padding (using global space tokens) */
+    --card-p-xs: var(--space-4); /* 16px */
+    --card-p-sm: var(--space-5); /* 20px */
+    --card-p-md: var(--space-6); /* 24px */
+    --card-p-lg: var(--space-7); /* 32px */
+
+    /* Card gaps */
+    --card-gap-xs: var(--space-3); /* 12px */
+    --card-gap-sm: var(--space-4); /* 16px */
+    --card-gap-md: var(--space-5); /* 20px */
+    --card-gap-lg: var(--space-6); /* 24px */
+
+    /* Card radii (mapping from global radius) */
+    --card-radius-sm: var(--radius-sm);
+    --card-radius-md: var(--radius-md);
+    --card-radius-lg: var(--radius-lg);
+
+    /* Card shadows (mapping from global shadow) */
+    --card-shadow-none: none;
+    --card-shadow-sm: var(--shadow-sm);
+    --card-shadow-md: var(--shadow-md);
+
+    /* Color Tokens */
     --card-primary-bg: var(--surface);
     --card-secondary-bg: var(--surface-2);
-    --card-fg: var(--gray-600);
+    --card-ghost-bg: var(--bg);
+    --card-outlined-bg: var(--bg);
+
+    --card-fg: var(--text);
+    --card-border-color: var(--border);
   }
 
   :root[data-theme="dark"] {
     --card-primary-bg: var(--surface);
     --card-secondary-bg: var(--surface-2);
-    --card-fg: var(--gray-500);
+    --card-ghost-bg: var(--bg);
+    --card-outlined-bg: var(--bg);
+
+    --card-fg: var(--text);
+    --card-border-color: var(--border);
   }
 }
