@@ -13,10 +13,17 @@ export const navItems: NavItem[] = [
   { name: "Account", href: "/account", icon: UserCircle },
 ];
 
-export interface NavigationProps {
+export interface NavigationListProps {
   navItems: NavItem[];
   pathname: string;
-  onClick?: () => void;
+  onLinkClick?: () => void;
   className?: string;
-  style?: React.CSSProperties;
+}
+
+export interface SidebarProps {
+  navItems: NavItem[];
+  pathname: string;
+  onLinkClick?: () => void;
+  isMobileOpen: boolean;
+  onClose: () => void;
 }

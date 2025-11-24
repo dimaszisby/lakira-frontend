@@ -2,35 +2,56 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAtom } from "jotai";
-import { usePathname, useRouter } from "next/navigation";
-import { SignOut } from "phosphor-react";
-import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { SignOut, X } from "phosphor-react";
+import type { ReactNode } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "react-hot-toast";
 
+import { cn } from "@/lib/cn";
 import { logoutUser } from "@/services/api/auth.api";
 import { userAtom } from "@/services/state/atoms";
-
-import BottomNavigationBar from "./BottomNavigationBar";
-import SideBarNavigationItems from "./SideBarNavigationItems";
-import { navItems } from "./type";
-import ModalProps from "@/ui/Modal";
-import Container from "@/ui/Container";
 import Button from "@/ui/Button";
-import { cn } from "@/lib/cn";
+import Card from "@/ui/Card";
+import Modal from "@/ui/Modal";
 
-const Sidebar = () => {
-  const pathname = usePathname();
+import SideBarNavigationItems from "./SideBarNavigationItems";
+import type { SidebarProps } from "./type";
+
+interface SidebarContentProps {
+  includeCloseButton?: boolean;
+  onClose?: () => void;
+  children: ReactNode;
+}
+
+const SidebarContentWrapper = ({ includeCloseButton, onClose, children }: SidebarContentProps) => (
+  <div className="flex h-full flex-col">
+    <div className="flex items-center justify-between pb-6">
+      <div>
+        <p className="text-2xl font-semibold text-ink">Lakira</p>
+        <p className="text-ink-muted text-sm">Measure what matters</p>
+      </div>
+      {includeCloseButton ? (
+        <button
+          type="button"
+          onClick={onClose}
+          className="text-ink-muted p-2 transition hover:text-ink"
+          aria-label="Close navigation"
+        >
+          <X size={20} />
+        </button>
+      ) : null}
+    </div>
+    {children}
+  </div>
+);
+
+const Sidebar = ({ navItems, pathname, onLinkClick, isMobileOpen, onClose }: SidebarProps) => {
   const router = useRouter();
-  const [, setMobileOpen] = useState(false);
-  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
-  const [, setUser] = useAtom(userAtom);
-
   const queryClient = useQueryClient();
+  const [, setUser] = useAtom(userAtom);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
-  // Mobile state handlers
-  const closeMobileMenu = () => setMobileOpen(false);
-
-  // Updated: Using "status" property to check if the mutation is loading.
   const { mutate: handleLogout, status } = useMutation({
     mutationFn: logoutUser,
     onSuccess: () => {
@@ -45,13 +66,21 @@ const Sidebar = () => {
     },
   });
 
-  const logoutButton = () => (
-    <div className="mt-auto">
+  const handleNavigationSelection = useCallback(() => {
+    if (isMobileOpen) {
+      onClose();
+    }
+    onLinkClick?.();
+  }, [isMobileOpen, onClose, onLinkClick]);
+
+  const logoutButton = (
+    <div className="mt-auto pt-6">
       <Button
         variant="ghost"
         onClick={() => setLogoutModalOpen(true)}
-        className="w-full hover:text-status-error"
+        className="w-full justify-start px-4 text-ink hover:text-status-error"
         leftIcon={<SignOut size={20} />}
+        aria-label="Logout"
       >
         Sign Out
       </Button>
@@ -60,39 +89,66 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* Desktop Sidebar */}
-      <Container
-        size="lg"
-        className={cn("fixed bottom-4 left-4 right-4 top-4 z-50 hidden w-64 lg:flex")}
-      >
-        <h2 className="mb-4 text-2xl font-bold">Lakira</h2>
-        <SideBarNavigationItems
-          navItems={navItems}
-          pathname={pathname || ""}
-          onClick={closeMobileMenu}
+      <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
+        <Card className="flex h-full flex-col border-r border-surface2 px-4 py-6">
+          <SidebarContentWrapper>
+            <SideBarNavigationItems
+              navItems={navItems}
+              pathname={pathname}
+              onLinkClick={handleNavigationSelection}
+              className="flex-1"
+            />
+            {logoutButton}
+          </SidebarContentWrapper>
+        </Card>
+      </aside>
+
+      <div className="lg:hidden" aria-live="polite">
+        <div
+          className={cn(
+            "fixed inset-0 z-40 bg-ink/40 transition-opacity duration-200",
+            isMobileOpen ? "opacity-100" : "pointer-events-none opacity-0",
+          )}
+          aria-hidden="true"
+          onClick={onClose}
         />
 
-        {logoutButton()}
-      </Container>
+        <aside
+          className={cn(
+            "fixed inset-y-0 left-0 z-50 w-72 max-w-sm",
+            "transform transition-transform duration-200 ease-out",
+            isMobileOpen ? "translate-x-0" : "-translate-x-full",
+          )}
+          aria-label="Mobile navigation"
+        >
+          <Card className="flex h-full flex-col rounded-none border-r border-surface2 px-4 py-6">
+            <SidebarContentWrapper includeCloseButton onClose={onClose}>
+              <SideBarNavigationItems
+                navItems={navItems}
+                pathname={pathname}
+                onLinkClick={handleNavigationSelection}
+                className="flex-1"
+              />
+              {logoutButton}
+            </SidebarContentWrapper>
+          </Card>
+        </aside>
+      </div>
 
-      <BottomNavigationBar
-        navItems={navItems}
-        pathname={pathname || ""}
-        onClick={closeMobileMenu}
-        className="lg:hidden"
-        // style={{ display: mobileOpen ? "block" : "hidden" }}
-      />
-
-      {/* Logout Confirmation Modal */}
-      <ModalProps
+      <Modal
         title="Logout"
-        description="Are you sure to log out?"
+        description="Are you sure you want to log out?"
         isOpen={logoutModalOpen}
         onClose={() => setLogoutModalOpen(false)}
         className="mx-auto w-full max-w-md"
       >
         <div className="flex justify-center gap-4">
-          <Button variant="ghost" onClick={() => setLogoutModalOpen(false)} className="w-full">
+          <Button
+            variant="ghost"
+            onClick={() => setLogoutModalOpen(false)}
+            className="w-full"
+            aria-label="Cancel logout"
+          >
             Cancel
           </Button>
 
@@ -101,11 +157,12 @@ const Sidebar = () => {
             onClick={() => handleLogout()}
             disabled={status === "pending"}
             className="w-full"
+            aria-label="Confirm logout"
           >
             {status === "pending" ? "Logging Out..." : "Log Out"}
           </Button>
         </div>
-      </ModalProps>
+      </Modal>
     </>
   );
 };

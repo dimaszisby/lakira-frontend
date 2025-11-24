@@ -1,17 +1,23 @@
 import Link from "next/link";
 
-import type { NavigationProps } from "./type";
 import { cn } from "@/lib/cn";
 
-const SideBarNavigationItems = ({ navItems, pathname, onClick, className }: NavigationProps) => {
+import type { NavigationListProps } from "./type";
+
+const SideBarNavigationItems = ({
+  navItems,
+  pathname,
+  onLinkClick,
+  className,
+}: NavigationListProps) => {
   return (
-    <nav className={className}>
+    <nav className={cn("flex flex-col", className)}>
       <ul className="space-y-3">
         {navItems.map((item) => (
           <li key={item.href}>
             <Link
               href={item.href}
-              onClick={onClick}
+              onClick={onLinkClick}
               className={cn("flex items-center rounded-md px-4 py-2 transition", {
                 "text-brand-primary font-bold": pathname === item.href,
                 "text-ink hover:bg-surface2": pathname !== item.href,

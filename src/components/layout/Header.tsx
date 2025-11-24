@@ -4,7 +4,7 @@ import { useAtom } from "jotai";
 import Link from "next/link";
 
 import { userAtom } from "@/services/state/atoms";
-import Container from "@/ui/Container";
+import Card from "@/ui/Card";
 
 const Header = () => {
   const [user] = useAtom(userAtom);
@@ -12,22 +12,20 @@ const Header = () => {
   return (
     <>
       {user ? null : (
-        <Container className="m-4">
+        <Card variant="primary" size="xs" className="m-4">
           <header>
-            <nav className="flex w-full justify-between items-center">
-              <>
-                <Link href="/" className="text-h5 font-bold text-brand-primary">
-                  Lakira
-                </Link>
+            <nav className="flex w-full items-center justify-between">
+              <Link href="/" className="text-h5 font-bold text-brand-primary">
+                Lakira
+              </Link>
 
-                <div className="flex flex-row gap-12 text-nav-item">
-                  <Link href="/login">Login</Link>
-                  <Link href="/register">Register</Link>
-                </div>
-              </>
+              <div className="text-nav-item flex flex-row gap-12">
+                <Link href="/login">Login</Link>
+                <Link href="/register">Register</Link>
+              </div>
             </nav>
           </header>
-        </Container>
+        </Card>
       )}
     </>
   );
