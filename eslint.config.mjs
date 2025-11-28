@@ -15,6 +15,7 @@ import testingLibrary from "eslint-plugin-testing-library";
 import jestDom from "eslint-plugin-jest-dom";
 import cypress from "eslint-plugin-cypress";
 import boundaries from "eslint-plugin-boundaries";
+import tseslint from "@typescript-eslint/eslint-plugin";
 import parserTs from "@typescript-eslint/parser";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -34,6 +35,7 @@ const config = [
       "cypress/videos/**",
       "cypress/screenshots/**",
       "documents", // currently documents only used for temp-docs
+      "public/scripts/**",
     ],
   },
 
@@ -60,6 +62,7 @@ const config = [
       "import-x": importX,
       "simple-import-sort": simpleImportSort,
       "unused-imports": unusedImports,
+      "@typescript-eslint": tseslint,
       promise,
       security,
       sonarjs,
@@ -185,7 +188,10 @@ const config = [
           default: "disallow",
           rules: [
             // app (Next.js routes) can depend on everything below it
-            { from: "app", allow: ["features", "lib", "utils", "generics"] },
+            {
+              from: "app",
+              allow: ["features", "services", "lib", "utils", "generics"],
+            },
 
             // features can use cross-cutting libs & pure utils/types
             { from: "features", allow: ["services", "lib", "utils", "types", "generics"] },

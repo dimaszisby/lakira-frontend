@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -11,7 +15,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "plugins": [
       {
@@ -19,22 +23,64 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"],
-      "@/constants/*": ["./src/constants/*"],
-      "@/validators/*": ["./src/validators/*"],
-      "@/types/*": ["./src/types/*"],
-      "@/api/*": ["./src/services/api/*"],
-      "@/utils/*": ["./src/utils/*"],
-      "@/styles/*": ["./src/styles/*"],
-      "@/hooks/*": ["./src/hooks/*"],
-      "@/components/*": ["./src/components/*"],
-      "@/features/*": ["./src/features/*"],
-      "@/services/*": ["./src/services/*"],
-      "@/src/*": ["./src/*"],
-      "@/app/*": ["./src/app/*"],
-      "@/lib/*": ["./src/lib"]
+      "@/*": [
+        "./*"
+      ],
+      "@/src/*": [
+        "./src/*"
+      ],
+      "@/app/*": [
+        "./src/app/*"
+      ],
+      "@/features/*": [
+        "./src/features/*"
+      ],
+      "@/validators/*": [
+        "./src/validators/*"
+      ],
+      "@/api/*": [
+        "./src/services/api/*"
+      ],
+      "@/hooks/*": [
+        "./src/hooks/*"
+      ],
+      "@/constants/*": [
+        "./src/constants/*"
+      ],
+      "@/types/*": [
+        "./src/types/*"
+      ],
+      "@/generics/*": [
+        "./src/generics/*"
+      ],
+      "@/services/*": [
+        "./src/services/*"
+      ],
+      "@/utils/*": [
+        "./src/utils/*"
+      ],
+      "@/lib/*": [
+        "./src/lib/*"
+      ],
+      "@/styles/*": [
+        "./src/styles/*"
+      ],
+      "@/components/*": [
+        "./src/components/*"
+      ],
+      "@/ui/*": [
+        "./src/components/ui/*"
+      ]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules"]
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

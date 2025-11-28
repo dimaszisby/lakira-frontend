@@ -12,7 +12,7 @@ const connectSources = ["'self'"];
 if (apiOrigin) connectSources.push(apiOrigin);
 
 const isDev = process.env.NODE_ENV !== "production";
-const scriptSrc = isDev ? "'self' 'unsafe-eval'" : "'self'";
+const scriptSrc = isDev ? "'self' 'unsafe-eval' 'unsafe-inline'" : "'self' 'unsafe-inline'";
 
 const securityHeaders = [
   {
@@ -27,6 +27,7 @@ const securityHeaders = [
       "frame-ancestors 'self'",
       "base-uri 'self'",
       "form-action 'self'",
+      "report-uri /api/security/csp-report",
     ].join("; "),
   },
   {

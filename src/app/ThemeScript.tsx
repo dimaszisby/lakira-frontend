@@ -1,4 +1,3 @@
-// src/app/ThemeScript.tsx
 import Script from "next/script";
 
 const ThemeScript = () => {
