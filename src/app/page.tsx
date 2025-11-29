@@ -1,8 +1,17 @@
 import Link from "next/link";
 
-import Button from "../components/ui/Button";
+import { authRoutes } from "@/lib/routes";
+import Button from "@/ui/Button";
 
-const HomePage = () => {
+type HomePageProps = {
+  searchParams?: {
+    returnUrl?: string;
+  };
+};
+
+const HomePage = ({ searchParams }: HomePageProps) => {
+  const returnUrl = searchParams?.returnUrl;
+
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center gap-6">
       {/* Branding */}
@@ -13,11 +22,19 @@ const HomePage = () => {
 
       {/* Actions */}
       <div className="flex gap-4">
-        <Link href="/login" aria-label="Login to your account" className="w-auto">
+        <Link
+          href={authRoutes.login(returnUrl)}
+          aria-label="Login to your account"
+          className="w-auto"
+        >
           <Button variant="primary">Login</Button>
         </Link>
 
-        <Link href="/register" aria-label="Create a new account" className="w-auto">
+        <Link
+          href={authRoutes.register(returnUrl)}
+          aria-label="Create a new account"
+          className="w-auto"
+        >
           <Button variant="secondary">Register</Button>
         </Link>
       </div>

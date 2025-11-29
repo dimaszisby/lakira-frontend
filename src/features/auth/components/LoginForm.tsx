@@ -1,14 +1,15 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 
-import { useLoginUserMutation } from "@/src/features/auth/hooks/login.mutation";
-import { handleApiError } from "@/src/services/api/handleApiError";
-import type { LoginRequestDTO } from "@/src/types/dtos/user.dto";
+import { useLoginUserMutation } from "@/features/auth/hooks/login.mutation";
+import { authRoutes } from "@/lib/routes";
+import { handleApiError } from "@/services/api/handleApiError";
 import { loginUserSchema } from "@/types/api/zod-user.schema";
+import type { LoginRequestDTO } from "@/types/dtos/user.dto";
 import Button from "@/ui/Button";
 import Card, { CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
 import ErrorMessage from "@/ui/ErrorMessage";
@@ -17,10 +18,13 @@ import TextField from "@/ui/TextField";
 
 const LoginForm = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get("returnUrl");
+  const redirectTarget = useMemo(() => authRoutes.afterAuth(returnUrl), [returnUrl]);
 
   const { loginUser, isPending, error } = useLoginUserMutation(
     async () => {
-      router.push("/dashboard");
+      router.push(redirectTarget);
     },
     (err) => {
       console.error("Login Error:", err);
@@ -30,7 +34,7 @@ const LoginForm = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid, isSubmitting },
+    formState: { errors, isSubmitting },
   } = useForm<LoginRequestDTO>({
     resolver: zodResolver(loginUserSchema.shape.body),
     mode: "onChange",
@@ -47,16 +51,15 @@ const LoginForm = () => {
     console.warn("Form has errors, preventing submission.", formErrors);
   }, []);
 
-  const onSubmitForm = useMemo(
-    () => handleSubmit(onValid, onInvalid),
-    [handleSubmit, onValid, onInvalid],
-  );
+  const handleFormSubmit = useCallback(
+    (event: React.FormEvent<HTMLFormElement>) => {
+      event.preventDefault();
+      event.stopPropagation();
 
-  const handleFormSubmit: React.FormEventHandler<HTMLFormElement> = useCallback(
-    (e) => {
-      void onSubmitForm(e);
+      const submitHandler = handleSubmit(onValid, onInvalid);
+      void submitHandler(event);
     },
-    [onSubmitForm],
+    [handleSubmit, onValid, onInvalid],
   );
 
   const serverErrorMsg = useMemo(() => (error ? handleApiError(error).join(", ") : ""), [error]);
@@ -109,7 +112,7 @@ const LoginForm = () => {
             type="submit"
             variant="primary"
             className="mt-4"
-            disabled={isBusyInputs || !isValid}
+            disabled={isBusyInputs}
             block
             aria-label="Login"
           >

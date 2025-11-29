@@ -1,14 +1,15 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 
-import { useRegisterUserMutation } from "@/src/features/auth/hooks/register.mutation";
-import { handleApiError } from "@/src/services/api/handleApiError";
-import type { CreateUserRequestDTO } from "@/src/types/dtos/user.dto";
+import { useRegisterUserMutation } from "@/features/auth/hooks/register.mutation";
+import { authRoutes } from "@/lib/routes";
+import { handleApiError } from "@/services/api/handleApiError";
 import { createUserSchema } from "@/types/api/zod-user.schema";
+import type { CreateUserRequestDTO } from "@/types/dtos/user.dto";
 import Button from "@/ui/Button";
 import Card, { CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
 import ErrorMessage from "@/ui/ErrorMessage";
@@ -17,10 +18,13 @@ import TextField from "@/ui/TextField";
 
 const RegisterForm = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnUrl = searchParams.get("returnUrl");
+  const redirectTarget = useMemo(() => authRoutes.afterAuth(returnUrl), [returnUrl]);
 
   const { registerUser, isPending, error } = useRegisterUserMutation(
     async () => {
-      router.push("/dashboard");
+      router.push(redirectTarget);
     },
     (err) => {
       console.error("Register Error:", err);
