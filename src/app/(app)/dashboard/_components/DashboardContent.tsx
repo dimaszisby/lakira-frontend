@@ -1,26 +1,24 @@
 "use client";
 
-import { useAtom } from "jotai";
-
 import { useDashboardVisualizations } from "@/features/data-visualizations/hooks";
-import { globalBucketAtom, globalRangeAtom } from "@/features/data-visualizations/state";
+import { useDashboardFilters } from "@/features/data-visualizations/useDashboardFilters";
 import type { VizQuery } from "@/features/data-visualizations/types";
 import {
   buildVizQuery,
   DEFAULT_FILL,
   DEFAULT_TZ,
 } from "@/features/data-visualizations/viz-helpers";
+import { DASHBOARD_VIZ_LIMIT } from "@/features/data-visualizations/dashboardConfig";
 
 import MetricCardFromBatch from "./MetricCardFromBatch";
 
 const DashboardContent = () => {
-  const [bucket] = useAtom(globalBucketAtom);
-  const [range] = useAtom(globalRangeAtom);
+  const { bucket, range } = useDashboardFilters();
 
   const base = buildVizQuery(range, bucket, DEFAULT_TZ, DEFAULT_FILL) as VizQuery & {
     limit?: number;
   };
-  const query = { ...base, limit: 12 } as const;
+  const query = { ...base, limit: DASHBOARD_VIZ_LIMIT } as const;
 
   const { data, isFetching, isError, error } = useDashboardVisualizations(query, {
     staleTime: 60_000,
