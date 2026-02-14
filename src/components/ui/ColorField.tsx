@@ -1,8 +1,9 @@
 "use client";
 
 import { Check, Palette, PencilSimpleLine } from "phosphor-react";
-import React, { useEffect, useId, useMemo, useRef, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
 
+import { COLOR_FIELD_PRESET_HEXES, DEFAULT_COLOR_HEX } from "@/constants/color-presets";
 import { cn } from "@/src/lib/cn";
 
 export type ColorFieldProps = {
@@ -11,42 +12,35 @@ export type ColorFieldProps = {
   onChange: (hex: string | null) => void;
   disabled?: boolean;
   placeholder?: string;
-  defaultColor?: string; // used when value is null
+  defaultColor?: string;
   className?: string;
   "aria-label"?: string;
 };
 
-// Defaults
-// TODO: Import/uses real color system
-const PALETTE = [
-  "#E897A3",
-  "#A8C28B",
-  "#82AEBE",
-  "#F5C49A",
-  "#578C9C",
-  "#7C9B63",
-  "#C76576",
-  "#212529",
-  "#FFFFFF",
-  "#FDF7F4",
-  "#EDE8E4",
-  "#B7D3DD",
-];
-
 const HEX_RE = /^#([0-9A-Fa-f]{6})$/;
+const HEX_SHORT_RE = /^#([0-9A-Fa-f]{3})$/;
 
-function normalizeHex(input: string | null | undefined, fallback: string) {
-  if (!input) return fallback.toUpperCase();
+function toValidHex(input: string | null | undefined): string | null {
+  if (!input) return null;
   const v = input.trim();
-  if (v.startsWith("#") && v.length === 7) return v.toUpperCase();
-  // allow 3-digit shorthand
-  if (/^#[0-9A-Fa-f]{3}$/.test(v)) {
-    const r = v[1],
-      g = v[2],
-      b = v[3];
+  if (HEX_RE.test(v)) return v.toUpperCase();
+  if (HEX_SHORT_RE.test(v)) {
+    const r = v[1];
+    const g = v[2];
+    const b = v[3];
     return ("#" + r + r + g + g + b + b).toUpperCase();
   }
-  return fallback.toUpperCase();
+  return null;
+}
+
+function normalizeHex(input: string | null | undefined, fallback: string) {
+  return toValidHex(input) ?? toValidHex(fallback) ?? DEFAULT_COLOR_HEX;
+}
+
+function toDraftHexInput(rawInput: string): string {
+  const raw = rawInput.toUpperCase().replace(/\s/g, "");
+  if (!raw) return "";
+  return `#${raw.replace(/^#+/, "").replace(/#/g, "")}`;
 }
 
 const ColorField = ({
@@ -54,23 +48,20 @@ const ColorField = ({
   value,
   onChange,
   disabled,
-  placeholder = "#FFFFFF",
-  defaultColor = "#FFFFFF",
+  placeholder = DEFAULT_COLOR_HEX,
+  defaultColor = DEFAULT_COLOR_HEX,
   className,
   ...aria
 }: ColorFieldProps) => {
   const uid = useId();
   const inputId = id ?? `color-input-${uid}`;
+  const current = normalizeHex(value, defaultColor);
   const [open, setOpen] = useState(false);
-  const [draft, setDraft] = useState(() => normalizeHex(value, defaultColor));
+  const [draft, setDraft] = useState(current);
+  const [isEditingInput, setIsEditingInput] = useState(false);
   const popoverRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
   const nativeRef = useRef<HTMLInputElement>(null);
-
-  const current = useMemo(() => normalizeHex(value, defaultColor), [value, defaultColor]);
-
-  // sync draft when external value changes
-  useEffect(() => setDraft(current), [current]);
 
   // click outside to close
   useEffect(() => {
@@ -86,8 +77,10 @@ const ColorField = ({
   }, [open]);
 
   const commitHex = (hex: string) => {
-    if (HEX_RE.test(hex)) {
-      onChange(hex.toUpperCase());
+    const normalized = toValidHex(hex);
+    if (normalized) {
+      onChange(normalized);
+      setDraft(normalized);
       setOpen(false);
     }
   };
@@ -107,7 +100,8 @@ const ColorField = ({
       {/* Field shell */}
       <div
         className={cn(
-          "flex h-12 items-center gap-3 rounded-2xl border border-gray-200 bg-white py-2 px-2 shadow-sm",
+          "flex h-12 items-center gap-3 rounded-2xl border border-border bg-surface px-2 py-2 shadow-sm",
+          "focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30",
           disabled && "cursor-not-allowed opacity-60",
           className,
         )}
@@ -126,25 +120,26 @@ const ColorField = ({
           type="text"
           inputMode="text"
           maxLength={7}
-          value={draft}
+          value={isEditingInput ? draft : current}
+          onFocus={() => {
+            setIsEditingInput(true);
+            setDraft(current);
+          }}
           onChange={(e) =>
-            setDraft(
-              e.target.value.startsWith("#")
-                ? e.target.value.toUpperCase()
-                : `#${e.target.value.toUpperCase()}`,
-            )
+            setDraft(toDraftHexInput(e.target.value))
           }
           onBlur={() => {
-            // If valid on blur, commit; otherwise revert to current
-            if (HEX_RE.test(draft)) onChange(draft.toUpperCase());
-            else setDraft(current);
+            const normalized = toValidHex(draft);
+            if (normalized) onChange(normalized);
+            setDraft(normalized ?? current);
+            setIsEditingInput(false);
           }}
           placeholder={placeholder}
           disabled={disabled}
           className={cn(
-            "w-full border-none bg-transparent text-base font-medium text-gray-900 outline-none placeholder:text-gray-400",
+            "w-full border-none bg-transparent text-base font-medium text-ink outline-none placeholder:text-ink-tertiary",
           )}
-          aria-invalid={!HEX_RE.test(draft)}
+          aria-invalid={isEditingInput ? !toValidHex(draft) : false}
           {...aria}
         />
 
@@ -153,8 +148,9 @@ const ColorField = ({
           type="button"
           ref={btnRef}
           onClick={() => !disabled && setOpen((s) => !s)}
+          onMouseDown={() => setDraft(current)}
           className={cn(
-            "grid place-items-center rounded-lg p-2 outline-none transition hover:bg-violet-50 focus-visible:ring-2 focus-visible:ring-violet-400",
+            "grid place-items-center rounded-lg p-2 outline-none transition hover:bg-surface2/60 focus-visible:ring-2 focus-visible:ring-ring",
             disabled && "pointer-events-none",
           )}
           aria-haspopup="dialog"
@@ -162,7 +158,7 @@ const ColorField = ({
           aria-controls={`${inputId}-popover`}
           title="Open color picker"
         >
-          <PencilSimpleLine size={20} weight="duotone" className="text-violet-500" />
+          <PencilSimpleLine size={20} weight="duotone" className="text-ink-secondary" />
         </button>
       </div>
 
@@ -173,7 +169,7 @@ const ColorField = ({
           role="dialog"
           aria-label="Choose color"
           ref={popoverRef}
-          className="absolute z-50 mt-2 w-72 rounded-xl border border-gray-200 bg-white p-3 shadow-lg"
+          className="absolute z-50 mt-2 w-72 rounded-xl border border-border bg-surface p-3 shadow-lg"
         >
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -181,18 +177,18 @@ const ColorField = ({
                 className="h-5 w-5 rounded ring-1 ring-black/5"
                 style={{ backgroundColor: draft }}
               />
-              <span className="text-sm text-gray-600">Preview</span>
+              <span className="text-sm text-ink-secondary">Preview</span>
             </div>
             <button
               type="button"
               className={cn(
                 "inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium",
-                HEX_RE.test(draft)
-                  ? "bg-violet-600 text-white hover:bg-violet-700"
-                  : "cursor-not-allowed bg-gray-100 text-gray-400",
+                toValidHex(draft)
+                  ? "bg-brand-primary text-ink-inverted hover:bg-brand-primary/90"
+                  : "cursor-not-allowed bg-surface2 text-ink-tertiary",
               )}
               onClick={() => commitHex(draft)}
-              disabled={!HEX_RE.test(draft)}
+              disabled={!toValidHex(draft)}
               title="Use this color"
             >
               <Check size={16} /> Apply
@@ -201,7 +197,7 @@ const ColorField = ({
 
           {/* Quick palette */}
           <div className="mb-4 grid grid-cols-6 gap-2">
-            {PALETTE.map((c) => (
+            {COLOR_FIELD_PRESET_HEXES.map((c) => (
               <button
                 key={c}
                 type="button"
@@ -209,7 +205,7 @@ const ColorField = ({
                   setDraft(c.toUpperCase());
                   commitHex(c);
                 }}
-                className="h-8 w-8 rounded-lg ring-1 ring-black/5 hover:ring-2 hover:ring-violet-400"
+                className="h-8 w-8 rounded-lg ring-1 ring-black/5 hover:ring-2 hover:ring-ring"
                 style={{ backgroundColor: c }}
                 aria-label={`Choose ${c}`}
               />
@@ -221,11 +217,13 @@ const ColorField = ({
             <input
               type="text"
               value={draft}
-              onChange={(e) => setDraft(e.target.value.toUpperCase())}
+              onChange={(e) => setDraft(toDraftHexInput(e.target.value))}
               maxLength={7}
               className={cn(
-                "flex-1 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 font-mono text-sm outline-none",
-                HEX_RE.test(draft) ? "focus:ring-2 focus:ring-violet-300" : "ring-2 ring-red-200",
+                "flex-1 rounded-lg border border-border bg-surface2 px-3 py-2 font-mono text-sm text-ink outline-none",
+                toValidHex(draft)
+                  ? "focus:ring-2 focus:ring-ring/40"
+                  : "ring-2 ring-status-error/20",
               )}
               placeholder="#RRGGBB"
               aria-label="Hex value"
@@ -233,18 +231,21 @@ const ColorField = ({
             <button
               type="button"
               onClick={triggerNativePicker}
-              className="flex-none rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+              className="flex-none rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-ink-secondary hover:bg-surface2/80"
               title="Advanced picker"
             >
-              <Palette size={20} className="text-violet-600" />
+              <Palette size={20} className="text-ink-secondary" />
             </button>
             {/* Hidden native input to get OS color dialog when needed */}
             <input
               ref={nativeRef}
               type="color"
-              value={draft}
+              value={toValidHex(draft) ?? current}
               onChange={(e) => setDraft(e.target.value.toUpperCase())}
-              onBlur={() => HEX_RE.test(draft) && commitHex(draft)}
+              onBlur={() => {
+                const normalized = toValidHex(draft);
+                if (normalized) commitHex(normalized);
+              }}
               className="sr-only"
               aria-hidden="true"
               tabIndex={-1}
