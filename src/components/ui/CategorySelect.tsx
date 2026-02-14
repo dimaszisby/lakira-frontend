@@ -10,6 +10,7 @@ import {
 import { X } from "phosphor-react";
 import { forwardRef, useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 
+import { CATEGORY_DEFAULTS } from "@/features/metric-categories/constants";
 import { useCreateMetricCategory } from "@/features/metric-categories/hooks";
 import { useCategoryTypeahead } from "@/features/metric-categories/useCategoryTypehead";
 import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
@@ -85,8 +86,8 @@ const CategorySelect = forwardRef<HTMLInputElement, Props>(function CategorySele
       return {
         id: hint.id!,
         name: hint.name!,
-        color: hint.color ?? "#EDEDED",
-        icon: hint.icon ?? "📁",
+        color: hint.color ?? CATEGORY_DEFAULTS.color,
+        icon: hint.icon ?? CATEGORY_DEFAULTS.icon,
         metricCount: typeof hint.metricCount === "number" ? hint.metricCount : 0,
       };
     }
@@ -122,7 +123,11 @@ const CategorySelect = forwardRef<HTMLInputElement, Props>(function CategorySele
     async (name: string) => {
       const trimmed = name.trim();
       if (!trimmed) return;
-      const created = await createMetricCategory({ name: trimmed, color: "#E897A3", icon: "📁" });
+      const created = await createMetricCategory({
+        name: trimmed,
+        color: CATEGORY_DEFAULTS.color,
+        icon: CATEGORY_DEFAULTS.icon,
+      });
       onChange(created.id);
       setQuery("");
       store.setOpen(false);
@@ -165,9 +170,10 @@ const CategorySelect = forwardRef<HTMLInputElement, Props>(function CategorySele
       {/* Chrome */}
       <div
         className={cn(
-          "flex items-center rounded-2xl border px-4 py-3 shadow-sm bg-white border-gray-200",
-          "focus-within:border-violet-300 focus-within:ring-2 focus-within:ring-violet-200",
-          isInvalid && "border-red-300 ring-2 ring-red-100",
+          "flex items-center rounded-2xl border border-border bg-surface px-4 py-3 shadow-sm",
+          "focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30",
+          isInvalid &&
+            "border-status-error ring-2 ring-status-error/20 focus-within:border-status-error focus-within:ring-status-error/30",
           disabled && "cursor-not-allowed opacity-60",
         )}
       >
@@ -177,17 +183,17 @@ const CategorySelect = forwardRef<HTMLInputElement, Props>(function CategorySele
               aria-hidden
               className={cn(
                 "pointer-events-none absolute inset-0 flex items-center gap-3 px-[2px]",
-                "text-gray-600",
+                "text-ink-secondary",
               )}
             >
-              <span className="text-gray-500">{selected.icon}</span>
+              <span className="text-ink-tertiary">{selected.icon}</span>
               <span
                 className="inline-block h-3 w-3 rounded-[3px]"
                 style={{ backgroundColor: selected.color }}
               />
               <span className="min-w-0 flex-1 truncate">{selected.name}</span>
               {selectedPreview === "full" ? (
-                <span className="ml-2 shrink-0 text-xs tabular-nums text-gray-400">
+                <span className="ml-2 shrink-0 text-xs tabular-nums text-ink-tertiary">
                   {selected.metricCount}
                 </span>
               ) : null}
@@ -208,7 +214,8 @@ const CategorySelect = forwardRef<HTMLInputElement, Props>(function CategorySele
             aria-invalid={ariaInvalid}
             aria-describedby={ariaDescribedBy}
             aria-errormessage={ariaErrorMessage}
-            className="relative z-10 w-full bg-transparent text-gray-900 outline-none placeholder:text-gray-400"
+            aria-busy={isLoading || isFetching || isCreating || undefined}
+            className="relative z-10 w-full bg-transparent text-ink outline-none placeholder:text-ink-tertiary"
             onFocus={() => setOpen(true)}
             onKeyDown={(e) => {
               if (e.key === "ArrowDown") setOpen(true);
@@ -228,11 +235,11 @@ const CategorySelect = forwardRef<HTMLInputElement, Props>(function CategorySele
             type="button"
             onMouseDown={(e) => e.preventDefault()} // keep focus: don't trigger blur handlers
             onClick={clear}
-            className="ml-2 aspect-square items-center rounded-md p-1 hover:bg-violet-50 focus-visible:ring-2 focus-visible:ring-violet-400"
+            className="ml-2 aspect-square items-center rounded-md p-1 hover:bg-surface2/60 focus-visible:ring-2 focus-visible:ring-ring"
             title="Clear"
             aria-label="Clear selected category"
           >
-            <X size={12} className="text-violet-600" />
+            <X size={12} className="text-ink-secondary" />
           </button>
         ) : null}
       </div>
@@ -243,10 +250,10 @@ const CategorySelect = forwardRef<HTMLInputElement, Props>(function CategorySele
         store={store}
         gutter={8}
         sameWidth
-        className="z-50 mt-2 w-full rounded-2xl border border-gray-200 bg-white shadow-lg"
+        className="z-50 mt-2 w-full rounded-2xl border border-border bg-surface shadow-lg"
       >
         <ComboboxList ref={listRef} className="max-h-64 overflow-auto py-1">
-          {isLoading ? <div className="px-4 py-2 text-sm text-gray-500">Loading…</div> : null}
+          {isLoading ? <div className="px-4 py-2 text-sm text-ink-tertiary">Loading…</div> : null}
 
           {!isLoading &&
             options.map((opt) => {
@@ -264,17 +271,17 @@ const CategorySelect = forwardRef<HTMLInputElement, Props>(function CategorySele
                     inputRef.current?.focus();
                   }}
                   className={cn(
-                    "flex cursor-pointer items-center gap-3 px-4 py-2 hover:bg-gray-50",
-                    active && "bg-violet-50",
+                    "flex cursor-pointer items-center gap-3 px-4 py-2 hover:bg-surface2/60",
+                    active && "bg-brand-primary/10",
                   )}
                 >
-                  <span className="text-gray-500">{opt.icon}</span>
+                  <span className="text-ink-tertiary">{opt.icon}</span>
                   <span
                     className="inline-block h-3 w-3 rounded-full"
                     style={{ backgroundColor: opt.color }}
                   />
-                  <span className="min-w-0 flex-1 truncate text-gray-900">{opt.name}</span>
-                  <span className="ml-2 shrink-0 text-xs tabular-nums text-gray-500">
+                  <span className="min-w-0 flex-1 truncate text-ink">{opt.name}</span>
+                  <span className="ml-2 shrink-0 text-xs tabular-nums text-ink-tertiary">
                     {opt.metricCount}
                   </span>
                 </ComboboxItem>
@@ -282,13 +289,13 @@ const CategorySelect = forwardRef<HTMLInputElement, Props>(function CategorySele
             })}
 
           {!isLoading && options.length === 0 && !canCreate && (
-            <div className="px-4 py-2 text-sm text-gray-500">No categories found</div>
+            <div className="px-4 py-2 text-sm text-ink-tertiary">No categories found</div>
           )}
 
           {canCreate ? (
             <button
               type="button"
-              className="flex w-full items-center gap-2 border-t px-4 py-2 text-left text-violet-700 hover:bg-violet-50"
+              className="flex w-full items-center gap-2 border-t border-border px-4 py-2 text-left text-brand-primary hover:bg-surface2/60"
               onMouseDown={(e) => e.preventDefault()}
               onClick={() => void createNew(query)}
               disabled={isCreating}
@@ -298,7 +305,7 @@ const CategorySelect = forwardRef<HTMLInputElement, Props>(function CategorySele
           ) : null}
 
           {isFetching && !isLoading ? (
-            <div className="px-4 py-2 text-xs text-gray-400">Loading more…</div>
+            <div className="px-4 py-2 text-xs text-ink-tertiary">Loading more…</div>
           ) : null}
         </ComboboxList>
       </ComboboxPopover>
