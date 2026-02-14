@@ -2,7 +2,7 @@ import type { ChangeEvent } from "react";
 import type { KeyboardEvent } from "react";
 import { forwardRef, memo, useCallback, useId } from "react";
 
-import { cn } from "../../../src/lib/cn";
+import { cn } from "@/lib/cn";
 
 type Props = {
   value: string;
@@ -45,7 +45,11 @@ export const SearchInputBase = forwardRef<HTMLInputElement, Props>(function Sear
   );
 
   const clear = useCallback(() => {
-    (onClear ?? onChange)("");
+    if (onClear) {
+      onClear();
+      return;
+    }
+    onChange("");
   }, [onClear, onChange]);
 
   const handleKeyDown = useCallback(
@@ -58,8 +62,8 @@ export const SearchInputBase = forwardRef<HTMLInputElement, Props>(function Sear
     [value, clear],
   );
 
-  // If spinner is visible, give a bit more right padding so text doesn't collide with icons.
-  const inputPaddingRight = isLoading || value ? "pr-12" : "pr-4";
+  // Reserve space for trailing controls so content never overlaps spinner/clear button.
+  const inputPaddingRight = isLoading && value ? "pr-20" : isLoading || value ? "pr-12" : "pr-4";
 
   return (
     <div className={cn("relative w-full sm:max-w-md", className)}>
@@ -85,10 +89,11 @@ export const SearchInputBase = forwardRef<HTMLInputElement, Props>(function Sear
         aria-describedby={ariaDescribedById}
         data-testid={dataTestId}
         className={cn(
-          "w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-2",
+          "w-full rounded-xl border border-border px-4 py-2",
           inputPaddingRight,
-          "outline-none ring-0 focus:border-gray-400",
-          "placeholder:text-gray-400",
+          "bg-surface text-ink outline-none ring-0",
+          "placeholder:text-ink-tertiary",
+          "focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/30",
           "disabled:opacity-60 disabled:cursor-not-allowed",
         )}
       />
@@ -101,7 +106,7 @@ export const SearchInputBase = forwardRef<HTMLInputElement, Props>(function Sear
           aria-live="polite"
           aria-label="Loading"
         >
-          <span className="inline-block h-4 w-4 animate-spin rounded-full border-[2px] border-gray-300 border-t-gray-500" />
+          <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-border border-t-brand-primary" />
           <span className="sr-only">Loading</span>
         </div>
       ) : null}
@@ -115,13 +120,14 @@ export const SearchInputBase = forwardRef<HTMLInputElement, Props>(function Sear
           onClick={clear}
           disabled={disabled}
           className={cn(
-            "absolute right-2 top-1/2 -translate-y-1/2",
-            "rounded h-8 w-8 flex items-center justify-center",
-            "hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-300",
+            "absolute right-1 top-1/2 -translate-y-1/2",
+            "rounded-xl h-8 w-8 flex items-center justify-center",
+            "text-ink-secondary hover:bg-surface2 hover:text-ink",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
             "disabled:opacity-60",
           )}
         >
-          <span aria-hidden>✕</span>
+          <span aria-hidden>X</span>
         </button>
       ) : null}
     </div>
