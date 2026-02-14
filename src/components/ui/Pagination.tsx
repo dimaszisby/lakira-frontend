@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 import { cn } from "@/lib/cn";
 
 type PaginationProps = {
@@ -7,7 +9,18 @@ type PaginationProps = {
   total?: number;
   canPrev?: boolean;
   canNext?: boolean;
+  className?: string;
+  ariaLabel?: string;
 };
+
+type PageItem = number | "...";
+
+const RANGE_AROUND_CURRENT = 2;
+
+const pagerButtonClassName =
+  "inline-flex h-9 min-w-9 items-center justify-center rounded-lg border border-border bg-surface px-3 text-sm font-medium text-ink-secondary transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50";
+const pagerButtonEnabledClassName = "hover:bg-surface2";
+const pagerButtonCurrentClassName = "border-brand-primary/30 bg-brand-primary/15 text-brand-primary";
 
 export const Pagination = ({
   page,
@@ -16,113 +29,153 @@ export const Pagination = ({
   onChange,
   canPrev,
   canNext,
+  className,
+  ariaLabel = "Pagination",
 }: PaginationProps) => {
+  const safePageSize = Math.max(1, pageSize);
   const totalPages =
-    typeof total === "number" ? Math.max(1, Math.ceil(total / pageSize)) : undefined;
+    typeof total === "number" ? Math.max(1, Math.ceil(Math.max(0, total) / safePageSize)) : null;
 
-  // button styling
-  const btnBaseStyle = "rounded-lg px-3 py-1";
-  const disabledStyle = "cursor-not-allowed opacity-50";
-  const enabledStyle = "text-ink-secondary hover:bg-surface2";
+  const currentPage =
+    totalPages === null ? Math.max(1, page) : clampPage(Math.max(1, page), 1, totalPages);
+  const prevDisabled = typeof canPrev === "boolean" ? !canPrev : currentPage <= 1;
+  const nextDisabled =
+    typeof canNext === "boolean" ? !canNext : totalPages === null ? false : currentPage >= totalPages;
 
-  // If total page unknown, show simple Prev/Next controls
-  if (!totalPages) {
-    const prevDisabled = typeof canPrev === "boolean" ? !canPrev : page <= 1;
-    // Allow Next unless parent disables via canNext
-    const nextDisabled = typeof canNext === "boolean" ? !canNext : false;
+  const goToPage = (targetPage: number) => {
+    const nextPage =
+      totalPages === null ? Math.max(1, targetPage) : clampPage(targetPage, 1, totalPages);
+    if (nextPage !== currentPage) onChange(nextPage);
+  };
 
+  if (totalPages === null) {
     return (
-      <nav className="flex items-center justify-center space-x-1" aria-label="Pagination">
-        <button
-          className={cn(btnBaseStyle, prevDisabled ? disabledStyle : enabledStyle)}
-          onClick={() => onChange(page - 1)}
+      <nav className={cn("flex items-center justify-center gap-1", className)} aria-label={ariaLabel}>
+        <PagerButton
+          label="Prev"
+          ariaLabel="Previous page"
           disabled={prevDisabled}
-          aria-label="Previous page"
-        >
-          Prev
-        </button>
-        <span className="px-3 py-1 text-ink-secondary" aria-live="polite">
-          Page {page}
+          onClick={() => goToPage(currentPage - 1)}
+        />
+        <span className="px-3 py-1 text-sm text-ink-secondary" aria-live="polite">
+          Page {currentPage}
         </span>
-        <button
-          className={cn(btnBaseStyle, nextDisabled ? disabledStyle : enabledStyle)}
-          onClick={() => onChange(page + 1)}
+        <PagerButton
+          label="Next"
+          ariaLabel="Next page"
           disabled={nextDisabled}
-          aria-label="Next page"
-        >
-          Next
-        </button>
+          onClick={() => goToPage(currentPage + 1)}
+        />
       </nav>
     );
   }
 
-  // Known total: render full pager with numbers + ellipses
-  const pageNumbers = getPaginationItems(page, totalPages);
+  const pageItems = getPaginationItems(currentPage, totalPages);
 
   return (
-    <nav className="flex items-center justify-center space-x-1" aria-label="Pagination">
-      <button
-        className={cn(btnBaseStyle, page === 1 ? disabledStyle : enabledStyle)}
-        onClick={() => onChange(page - 1)}
-        disabled={page === 1}
-        aria-label="Previous page"
-      >
-        Prev
-      </button>
+    <nav className={cn("flex items-center justify-center gap-1", className)} aria-label={ariaLabel}>
+      <PagerButton
+        label="Prev"
+        ariaLabel="Previous page"
+        disabled={prevDisabled}
+        onClick={() => goToPage(currentPage - 1)}
+      />
 
-      {pageNumbers.map((num, idx) =>
-        num === "..." ? (
-          <span key={`ellipsis-${idx}`} className="px-2 text-ink-tertiary" aria-hidden="true">
+      {pageItems.map((item, index) =>
+        item === "..." ? (
+          <span key={`ellipsis-${index}`} className="px-2 text-ink-tertiary" aria-hidden="true">
             ...
           </span>
         ) : (
-          <button
-            key={`page-${num}`}
-            className={cn(
-              btnBaseStyle,
-              page === num ? "bg-brand-primary/20 font-bold text-brand-primary" : enabledStyle,
-            )}
-            onClick={() => onChange(num)}
-            disabled={page === num}
-            aria-current={page === num ? "page" : undefined}
-            aria-label={`Page ${num}`}
-          >
-            {num}
-          </button>
+          <PagerButton
+            key={`page-${item}`}
+            label={item}
+            ariaLabel={`Go to page ${item}`}
+            disabled={item === currentPage}
+            isCurrent={item === currentPage}
+            onClick={() => goToPage(item)}
+            ariaCurrent={item === currentPage ? "page" : undefined}
+          />
         ),
       )}
 
-      <button
-        className={cn(btnBaseStyle, page === totalPages ? disabledStyle : enabledStyle)}
-        onClick={() => onChange(page + 1)}
-        disabled={page === totalPages}
-        aria-label="Next page"
-      >
-        Next
-      </button>
+      <PagerButton
+        label="Next"
+        ariaLabel="Next page"
+        disabled={nextDisabled}
+        onClick={() => goToPage(currentPage + 1)}
+      />
+
+      <span className="sr-only" aria-live="polite">
+        Page {currentPage} of {totalPages}
+      </span>
     </nav>
   );
 };
 
-// Helper
-function getPaginationItems(
-  currentPage: number,
-  totalPages: number,
-  range = 2,
-): Array<number | "..."> {
-  const items: Array<number | "..."> = [];
-  let lastPushed: number | "..." | null = null;
+type PagerButtonProps = {
+  label: ReactNode;
+  onClick: () => void;
+  disabled: boolean;
+  ariaLabel: string;
+  isCurrent?: boolean;
+  ariaCurrent?: "page";
+};
 
-  for (let i = 1; i <= totalPages; i++) {
-    // Always show first and last page, and pages within the range of the current page
-    if (i === 1 || i === totalPages || (i >= currentPage - range && i <= currentPage + range)) {
-      items.push(i);
-      lastPushed = i;
-    } else if (lastPushed !== "...") {
-      // Insert ellipsis if not already inserted
+const PagerButton = ({
+  label,
+  onClick,
+  disabled,
+  ariaLabel,
+  isCurrent = false,
+  ariaCurrent,
+}: PagerButtonProps) => (
+  <button
+    type="button"
+    className={cn(
+      pagerButtonClassName,
+      isCurrent ? pagerButtonCurrentClassName : pagerButtonEnabledClassName,
+    )}
+    onClick={onClick}
+    disabled={disabled}
+    aria-label={ariaLabel}
+    aria-current={ariaCurrent}
+  >
+    {label}
+  </button>
+);
+
+function getPaginationItems(currentPage: number, totalPages: number): PageItem[] {
+  const items: PageItem[] = [];
+  let hasLeftEllipsis = false;
+  let hasRightEllipsis = false;
+
+  for (let pageNumber = 1; pageNumber <= totalPages; pageNumber++) {
+    const isBoundary = pageNumber === 1 || pageNumber === totalPages;
+    const isNearCurrent =
+      pageNumber >= currentPage - RANGE_AROUND_CURRENT &&
+      pageNumber <= currentPage + RANGE_AROUND_CURRENT;
+
+    if (isBoundary || isNearCurrent) {
+      items.push(pageNumber);
+      continue;
+    }
+
+    if (pageNumber < currentPage && !hasLeftEllipsis) {
       items.push("...");
-      lastPushed = "...";
+      hasLeftEllipsis = true;
+      continue;
+    }
+
+    if (pageNumber > currentPage && !hasRightEllipsis) {
+      items.push("...");
+      hasRightEllipsis = true;
     }
   }
+
   return items;
+}
+
+function clampPage(value: number, min: number, max: number): number {
+  return Math.min(Math.max(value, min), max);
 }
