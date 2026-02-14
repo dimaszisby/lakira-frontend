@@ -4,7 +4,12 @@ import React, { cloneElement, createContext, useContext, useId } from "react";
 
 import { cn } from "@/src/lib/cn";
 
-type Ctx = { id: string; descId?: string; errId?: string; invalid?: boolean };
+type Ctx = {
+  id: string;
+  describedBy?: string;
+  errId?: string;
+  invalid: boolean;
+};
 
 const FormFieldCtx = createContext<Ctx | null>(null);
 const useFF = () => {
@@ -35,9 +40,11 @@ export const FormField = ({
   const id = idProp ?? `ff-${rid}`;
   const descId = description ? `${id}-desc` : undefined;
   const errId = error ? `${id}-err` : undefined;
+  const describedBy = [descId, errId].filter(Boolean).join(" ") || undefined;
+  const isInvalid = Boolean(invalid || error);
 
   return (
-    <FormFieldCtx.Provider value={{ id, descId, errId, invalid }}>
+    <FormFieldCtx.Provider value={{ id, describedBy, errId, invalid: isInvalid }}>
       <div className={cn("flex flex-col space-y-1.5", className)} {...rest}>
         {children}
 
@@ -74,11 +81,17 @@ type AnyProps = Record<string, unknown>;
 type ControlProps = { children: ReactElement<AnyProps> };
 
 const FFControl = ({ children }: ControlProps) => {
-  const { id, descId, errId, invalid } = useFF();
+  const { id, describedBy, errId, invalid } = useFF();
+  const childDescribedBy =
+    typeof children.props["aria-describedby"] === "string"
+      ? children.props["aria-describedby"]
+      : undefined;
+  const mergedDescribedBy = [childDescribedBy, describedBy].filter(Boolean).join(" ") || undefined;
+
   const injected: Partial<AnyProps> = {
     id,
     "aria-invalid": invalid || undefined,
-    "aria-describedby": descId,
+    "aria-describedby": mergedDescribedBy,
     "aria-errormessage": invalid ? errId : undefined,
     "data-invalid": invalid ? "" : undefined,
   };

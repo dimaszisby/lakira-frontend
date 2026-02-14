@@ -15,7 +15,7 @@ export type TextFieldProps = Omit<
   "size" | "children" | "onChange"
 > & {
   id?: string;
-  label?: string; // optional: not used here (FieldShell renders label)
+  label?: string;
   registration?: UseFormRegisterReturn;
   size?: Size;
   leftAddon?: React.ReactNode;
@@ -29,7 +29,6 @@ export type TextFieldProps = Omit<
 
 const TextField = ({
   id,
-  // Dev Note: label is intentionally unused (render labels in FieldShell). Keep to avoid breaking callers.
   registration,
   size = "md",
   leftAddon,
@@ -79,7 +78,7 @@ const TextField = ({
         <button
           type="button"
           onClick={clear}
-          className="rounded-md p-1 text-gray-400 hover:bg-violet-50 hover:text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-400"
+          className="rounded-md p-1 text-ink-tertiary hover:bg-surface2/60 hover:text-ink-emphasis focus-visible:ring-2 focus-visible:ring-ring"
           title="Clear"
           aria-label="Clear input"
         >
@@ -90,7 +89,7 @@ const TextField = ({
         <button
           type="button"
           onClick={() => setShowPwd((s) => !s)}
-          className="rounded-md p-1 text-gray-400 hover:bg-violet-50 hover:text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-400"
+          className="rounded-md p-1 text-ink-tertiary hover:bg-surface2/60 hover:text-ink-emphasis focus-visible:ring-2 focus-visible:ring-ring"
           title={showPwd ? "Hide password" : "Show password"}
           aria-label={showPwd ? "Hide password" : "Show password"}
         >
@@ -116,13 +115,12 @@ const TextField = ({
         placeholder={placeholder}
         disabled={disabled}
         className={cn(
-          "block w-full border-none bg-transparent text-gray-900 outline-none placeholder:text-gray-400",
+          "block w-full border-none bg-transparent text-ink outline-none placeholder:text-ink-tertiary",
           size === "sm" ? "text-sm" : size === "lg" ? "text-lg" : "text-base",
           className,
         )}
-        // Dev Note: FormField.Control provide aria-invalid / aria-describedby / aria-errormessage
         {...registration}
-        {...rest} // carries injected ARIA from FormField.Control
+        {...rest}
         onChange={handleInput}
       />
     </InputChrome>

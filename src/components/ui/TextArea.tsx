@@ -62,10 +62,9 @@ const TextArea = ({
     onChange?.(e);
   };
 
-  // Visual counter only (silent for SRs by default)
   const counter =
     showCount && maxLength ? (
-      <span className="text-xs text-gray-400" aria-hidden="true">
+      <span className="text-xs text-ink-tertiary" aria-hidden="true">
         {count}/{maxLength}
       </span>
     ) : null;
@@ -83,8 +82,6 @@ const TextArea = ({
       hasError={hasError}
       disabled={disabled}
       size={size}
-      // leftAddon={leftAddon}
-      // rightAddon={effectiveRight}
       className={wrapperClassName}
     >
       <div className="flex-col space-y-4">
@@ -96,13 +93,12 @@ const TextArea = ({
           placeholder={placeholder}
           maxLength={maxLength}
           className={cn(
-            "block w-full resize-y border-none bg-transparent text-gray-900 outline-none placeholder:text-gray-400",
+            "block w-full resize-y border-none bg-transparent text-ink outline-none placeholder:text-ink-tertiary",
             size === "sm" ? "py-1 text-sm" : size === "lg" ? "py-2 text-lg" : "py-1.5 text-base",
             className,
           )}
-          // Dev Note: FormField.Control provide aria-invalid / aria-describedby / aria-errormessage
           {...registration}
-          {...rest} // carries injected ARIA from FormField.Control
+          {...rest}
           onChange={handleChange}
         />
 
