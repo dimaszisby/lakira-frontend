@@ -4,7 +4,6 @@ import React from "react";
 
 import { cn } from "@/src/lib/cn";
 
-// Dev Note: Implements CSS
 type Size = "sm" | "md" | "lg";
 type Variant = "primary" | "secondary" | "tertiary" | "destructive" | "neutral" | "ghost" | "link";
 
@@ -14,22 +13,9 @@ export type ButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "c
   rightIcon?: React.ReactNode;
   size?: Size;
   variant?: Variant;
-  block?: boolean; // full width
-  loading?: boolean; // shows spinner & disables
-  asChild?: boolean; // for polymorphic behavior
+  block?: boolean;
+  loading?: boolean;
 };
-
-// const SIZE: Record<Size, string> = {
-//   sm: "h-10 px-3 text-sm gap-2 rounded-xl",
-//   md: "h-12 px-5 text-base gap-3 rounded-2xl",
-//   lg: "h-14 px-7 text-lg gap-4 rounded-2xl",
-// };
-
-// const SIZE: Record<Size, string> = {
-//   sm: "data-[size=sm]:[]", // size is handled by CSS recipe; this keeps API explicit
-//   md: "data-[size=md]:[]",
-//   lg: "data-[size=lg]:[]",
-// };
 
 const Spinner = () => {
   return (
@@ -40,7 +26,6 @@ const Spinner = () => {
   );
 };
 
-// Do this need arialabel?
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   (
     {
@@ -59,10 +44,14 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) => {
     const isDisabled = disabled || loading;
-    const isIconOnly = !children && !!(leftIcon || rightIcon); // If it's icon-only, enforce accessible label
+    const isIconOnly = !children && !!(leftIcon || rightIcon);
+    const hasAriaLabel =
+      typeof rest["aria-label"] === "string" && rest["aria-label"].trim().length > 0;
+    const hasAriaLabelledBy =
+      typeof rest["aria-labelledby"] === "string" && rest["aria-labelledby"].trim().length > 0;
 
     if (process.env.NODE_ENV !== "production") {
-      if (isIconOnly && !("aria-label" in rest)) {
+      if (isIconOnly && !hasAriaLabel && !hasAriaLabelledBy) {
         console.warn("[Button] Icon-only buttons must have an aria-label for accessibility.");
       }
     }
@@ -77,18 +66,13 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         data-variant={variant}
         data-size={size}
         className={cn(
-          // Color & states come from CSS tokens in button.css
           "button",
-          // "inline-flex select-none items-center justify-center font-semibold shadow-sm transition-colors",
-          // Focus ring uses Tailwind + semantic ring token
           "focus-visible:outline-none focus-visible:ring-2 ring-ring",
-          // "disabled:cursor-not-allowed disabled:opacity-60",
           block ? "w-full" : "w-auto",
           className,
         )}
         {...rest}
       >
-        {/* Left icon / spinner */}
         {loading ? (
           <span className="mr-2 inline-flex">
             <Spinner />
