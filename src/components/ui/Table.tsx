@@ -1,6 +1,7 @@
-import { memo } from "react";
+import type { ReactNode } from "react";
+import { Fragment, memo } from "react";
 
-import { cn } from "@/src/lib/cn";
+import { cn } from "@/lib/cn";
 
 export type ResponsiveWidth = {
   sm?: string;
@@ -16,8 +17,8 @@ export interface TableColumn<T> {
   width?: string;
   responsiveWidth?: ResponsiveWidth;
   sortable?: boolean;
-  renderHeader?: (sorted: boolean, order: "ASC" | "DESC" | null) => React.ReactNode;
-  renderCell?: (row: T, value: T[keyof T]) => React.ReactNode;
+  renderHeader?: (sorted: boolean, order: "ASC" | "DESC" | null) => ReactNode;
+  renderCell?: (row: T, value: T[keyof T]) => ReactNode;
 }
 
 interface TableProps<T> {
@@ -27,12 +28,18 @@ interface TableProps<T> {
   sortOrder?: "ASC" | "DESC" | null;
   onSort?: (column: keyof T) => void;
   rowKey: (item: T) => string;
-  renderRow?: (item: T) => React.ReactNode;
+  renderRow?: (item: T) => ReactNode;
   className?: string;
+  ariaLabel?: string;
+  emptyMessage?: string;
   onEdit?: (item: T) => void;
   onDelete?: (item: T) => void;
-  onRowClick?: (item: T) => void; // Not implemented yet
+  onRowClick?: (item: T) => void;
+  onRowHover?: (item: T) => void;
 }
+
+const INTERACTIVE_ELEMENT_SELECTOR =
+  "button,a,input,select,textarea,[role=button],[role=link],[data-stop-row-click=true]";
 
 function getAlignClass(align: "left" | "center" | "right" = "left") {
   switch (align) {
@@ -55,8 +62,16 @@ const getResponsiveWidthClass = (width?: string, responsiveWidth?: ResponsiveWid
   return classes.join(" ");
 };
 
-// Selector for interactive elements that should prevent row click propagation
-const INTERACTIVE_ELEMENT_SELECTOR = "button,a,input,select,textarea,[role=button],[role=link]";
+const getHeaderSortState = (
+  sortable: boolean | undefined,
+  isSorted: boolean,
+  sortOrder: "ASC" | "DESC" | null | undefined,
+) => {
+  if (!sortable || !isSorted) return undefined;
+  if (sortOrder === "ASC") return "ascending";
+  if (sortOrder === "DESC") return "descending";
+  return "none";
+};
 
 export const TableBase = <T,>({
   data,
@@ -65,111 +80,116 @@ export const TableBase = <T,>({
   sortOrder,
   onSort,
   onRowClick,
+  onRowHover,
   rowKey,
   renderRow,
   className = "",
+  ariaLabel = "Data table",
+  emptyMessage = "No data available",
 }: TableProps<T>) => {
+  const colSpan = Math.max(1, columns.length);
+
   return (
-    <div className={cn("hidden overflow-x-auto rounded-xl text-sm shadow-sm sm:block", className)}>
-      <table className="min-w-full table-fixed divide-y divide-border">
-        <thead className={cn("bg-bg")}>
+    <div
+      className={cn(
+        "hidden overflow-x-auto rounded-xl border border-border bg-surface text-sm shadow-sm sm:block",
+        className,
+      )}
+    >
+      <table className="min-w-full table-fixed border-collapse" aria-label={ariaLabel}>
+        <thead className="bg-bg">
           <tr>
-            {columns.map((col) => {
-              // Computed values
-              const isSorted = sortBy === col.key;
-              const widthClasses = getResponsiveWidthClass(col.width, col.responsiveWidth);
+            {columns.map((column) => {
+              const isSorted = sortBy === column.key;
+              const widthClasses = getResponsiveWidthClass(column.width, column.responsiveWidth);
+              const ariaSort = getHeaderSortState(column.sortable, isSorted, sortOrder);
 
               return (
                 <th
-                  key={String(col.key)}
+                  key={String(column.key)}
                   scope="col"
-                  aria-sort={
-                    col.sortable && isSorted
-                      ? sortOrder === "ASC"
-                        ? "ascending"
-                        : "descending"
-                      : undefined
-                  }
-                  className={`${widthClasses} px-4 py-3 font-medium ${getAlignClass(col.align)}`}
+                  aria-sort={ariaSort}
+                  className={cn(
+                    widthClasses,
+                    "px-4 py-3 text-xs font-semibold uppercase tracking-wide text-ink-secondary",
+                    getAlignClass(column.align),
+                  )}
                 >
-                  {col.sortable && onSort ? (
+                  {column.sortable && onSort ? (
                     <button
                       type="button"
-                      onClick={() => onSort(col.key)}
-                      className="w-full text-inherit hover:underline focus:outline-none"
+                      onClick={() => onSort(column.key)}
+                      className={cn(
+                        "w-full rounded-sm text-inherit hover:underline",
+                        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      )}
+                      aria-label={`Sort by ${column.label}`}
                     >
-                      {col.renderHeader ? (
-                        col.renderHeader(isSorted, sortOrder || null)
+                      {column.renderHeader ? (
+                        column.renderHeader(isSorted, sortOrder ?? null)
                       ) : (
                         <>
-                          {col.label}
-                          {isSorted ? (
-                            <span className="ml-1 text-xs">{sortOrder === "ASC" ? "▲" : "▼"}</span>
+                          {column.label}
+                          {isSorted && sortOrder ? (
+                            <span className="ml-1 text-[10px]">{sortOrder === "ASC" ? "▲" : "▼"}</span>
                           ) : null}
                         </>
                       )}
                     </button>
                   ) : (
-                    col.label
+                    column.label
                   )}
                 </th>
               );
             })}
           </tr>
         </thead>
-        <tbody className={cn("bg-surface2", "space-y-2 divide-y divide-border")}>
+        <tbody className="divide-y divide-border bg-surface2">
           {data.length > 0 ? (
             data.map((item) =>
               renderRow ? (
-                renderRow(item)
+                <Fragment key={rowKey(item)}>{renderRow(item)}</Fragment>
               ) : (
                 <tr
                   key={rowKey(item)}
-                  // only look clickable if handler exists
                   className={cn("transition-colors hover:bg-surface", {
-                    "cursor-pointer": onRowClick,
+                    "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring":
+                      onRowClick,
                   })}
-                  // mouse
-                  onClick={(e) => {
+                  onMouseEnter={() => onRowHover?.(item)}
+                  onFocus={() => onRowHover?.(item)}
+                  onClick={(event) => {
                     if (!onRowClick) return;
-                    const target = e.target as HTMLElement;
-                    // ignore clicks from interactive descendants
-                    if (target.closest(INTERACTIVE_ELEMENT_SELECTOR)) {
-                      return;
-                    }
+                    const target = event.target as HTMLElement;
+                    if (target.closest(INTERACTIVE_ELEMENT_SELECTOR)) return;
                     onRowClick(item);
                   }}
-                  // keyboard accessibility (Enter/Space)
-                  tabIndex={onRowClick ? 0 : -1}
-                  onKeyDown={(e) => {
+                  onKeyDown={(event) => {
                     if (!onRowClick) return;
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
                       onRowClick(item);
                     }
                   }}
-                  // testing hook
+                  tabIndex={onRowClick ? 0 : -1}
                   data-rowid={rowKey(item)}
                   aria-label={onRowClick ? "View row details" : undefined}
                 >
-                  {columns.map((col) => {
-                    // Computed values
-                    const widthClasses = getResponsiveWidthClass(col.width, col.responsiveWidth);
-                    const value = item[col.key as keyof T];
+                  {columns.map((column) => {
+                    const widthClasses = getResponsiveWidthClass(column.width, column.responsiveWidth);
+                    const value = item[column.key as keyof T];
 
                     return (
                       <td
-                        key={String(col.key)}
-                        className={`${widthClasses} px-4 py-2 ${getAlignClass(col.align)}`}
-                        onClick={(e) => {
-                          const target = e.target as HTMLElement;
-                          if (target.closest(INTERACTIVE_ELEMENT_SELECTOR)) {
-                            e.stopPropagation();
-                          }
+                        key={String(column.key)}
+                        className={cn(widthClasses, "px-4 py-2 text-ink", getAlignClass(column.align))}
+                        onClick={(event) => {
+                          const target = event.target as HTMLElement;
+                          if (target.closest(INTERACTIVE_ELEMENT_SELECTOR)) event.stopPropagation();
                         }}
                       >
-                        {col.renderCell
-                          ? col.renderCell(item, value)
+                        {column.renderCell
+                          ? column.renderCell(item, value)
                           : value == null
                             ? ""
                             : String(value)}
@@ -181,8 +201,8 @@ export const TableBase = <T,>({
             )
           ) : (
             <tr>
-              <td colSpan={columns.length} className="px-4 py-6 text-center">
-                No data available
+              <td colSpan={colSpan} className="px-4 py-6 text-center text-ink-secondary">
+                {emptyMessage}
               </td>
             </tr>
           )}
@@ -191,6 +211,7 @@ export const TableBase = <T,>({
     </div>
   );
 };
+
 TableBase.displayName = "Table";
 
 export const Table = memo(TableBase) as typeof TableBase;
