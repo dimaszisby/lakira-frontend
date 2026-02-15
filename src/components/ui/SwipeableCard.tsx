@@ -1,88 +1,153 @@
+"use client";
+
 import { motion, useAnimation, useMotionValue } from "framer-motion";
-import { memo, useEffect, useRef } from "react";
+import type { ReactNode } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 
-import { cn } from "@/src/lib/cn";
+import { cn } from "@/lib/cn";
 
-interface SwipeAction {
+export type SwipeAction = {
+  id?: string;
   label: string;
   onClick: () => void;
-  color?: string; // Tailwind color class
-  icon?: React.ReactNode;
-}
+  color?: string;
+  className?: string;
+  icon?: ReactNode;
+  disabled?: boolean;
+};
 
-interface Props {
-  children: React.ReactNode;
+type SwipeableCardProps = {
+  children: ReactNode;
   actions: SwipeAction[];
   open?: boolean;
+  defaultOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
   onClose?: () => void;
   className?: string;
-}
+  actionsAriaLabel?: string;
+  disabled?: boolean;
+};
 
-const SWIPE_THRESHOLD = 0.4; // % of button area width
+const SWIPE_THRESHOLD = 0.4;
+const ACTION_WIDTH = 64;
 
 export const SwipeableCardBase = ({
   children,
   actions,
-  open = false,
+  open,
+  defaultOpen = false,
+  onOpenChange,
   onClose,
   className,
-}: Props) => {
-  const cardWidth = actions.length * 64; // px
+  actionsAriaLabel = "Swipe actions",
+  disabled = false,
+}: SwipeableCardProps) => {
+  const hasActions = actions.length > 0;
+  const actionAreaWidth = hasActions ? actions.length * ACTION_WIDTH : 0;
+  const isControlled = typeof open === "boolean";
+  const [internalOpen, setInternalOpen] = useState(defaultOpen);
+  const isOpen = isControlled ? !!open : internalOpen;
+
   const x = useMotionValue(0);
   const controls = useAnimation();
-  const dragRef = useRef<HTMLDivElement | null>(null);
-
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const isDraggingRef = useRef(false);
+  const dragResetTimeoutRef = useRef<number | null>(null);
+
+  const syncOpenState = useCallback(
+    (nextOpen: boolean) => {
+      if (!isControlled) setInternalOpen(nextOpen);
+      onOpenChange?.(nextOpen);
+      if (!nextOpen) onClose?.();
+    },
+    [isControlled, onClose, onOpenChange],
+  );
 
   useEffect(() => {
-    void controls.start({ x: open ? -cardWidth : 0 });
-  }, [open, cardWidth, controls]);
+    void controls.start({ x: isOpen && hasActions ? -actionAreaWidth : 0 });
+  }, [actionAreaWidth, controls, hasActions, isOpen]);
 
   useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (open && dragRef.current && !dragRef.current.contains(e.target as Node)) {
-        onClose?.();
+    if (!isOpen) return;
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!containerRef.current || containerRef.current.contains(event.target as Node)) return;
+      syncOpenState(false);
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [isOpen, syncOpenState]);
+
+  useEffect(
+    () => () => {
+      if (dragResetTimeoutRef.current != null) {
+        window.clearTimeout(dragResetTimeoutRef.current);
       }
-    }
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [open, onClose]);
+    },
+    [],
+  );
+
+  const closePanel = () => {
+    if (!isOpen) return;
+    syncOpenState(false);
+    void controls.start({ x: 0 });
+  };
+
+  const openPanel = () => {
+    if (!hasActions || disabled) return;
+    syncOpenState(true);
+    void controls.start({ x: -actionAreaWidth });
+  };
 
   return (
-    <div className="relative w-full select-none overflow-clip rounded-2xl antialiased">
-      {/* Actions */}
-      <div className="absolute inset-y-0 right-0 z-0 flex h-full">
-        {actions.map((action, i) => (
+    <div
+      ref={containerRef}
+      className="relative w-full select-none overflow-clip rounded-2xl antialiased"
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && isOpen) {
+          event.preventDefault();
+          closePanel();
+        }
+      }}
+    >
+      <div
+        className="absolute inset-y-0 right-0 z-0 flex h-full"
+        role="group"
+        aria-label={actionsAriaLabel}
+      >
+        {actions.map((action, index) => (
           <button
-            key={i}
+            key={action.id ?? `${action.label}-${index}`}
+            type="button"
+            aria-label={action.label}
+            aria-hidden={!isOpen}
+            tabIndex={isOpen ? 0 : -1}
+            disabled={action.disabled}
             onClick={() => {
               action.onClick();
-              onClose?.(); // Optionally close after action
+              closePanel();
             }}
             className={cn(
               "relative flex h-full w-16 items-center justify-center text-2xl text-ink",
-              action.color || "bg-status-error",
-              "transition-all duration-200 hover:brightness-90 active:scale-95",
+              action.color ?? "bg-status-error",
+              action.className,
+              "transition-all duration-200 hover:brightness-95 active:scale-95 disabled:opacity-60",
             )}
-            aria-label={action.label}
-            type="button"
           >
-            {action.icon || action.label}
+            {action.icon ?? action.label}
           </button>
         ))}
       </div>
 
-      {/* Card (swipeable) */}
       <motion.div
-        ref={dragRef}
         className={cn(
-          "relative z-10 bg-surface",
-          "cursor-grab touch-pan-x border border-border p-4 active:cursor-grabbing rounded-2xl",
+          "relative z-10 rounded-2xl border border-border bg-surface p-4",
+          "cursor-grab touch-pan-x active:cursor-grabbing",
           className,
         )}
-        drag="x"
+        drag={disabled || !hasActions ? false : "x"}
         dragDirectionLock
-        dragConstraints={{ left: -cardWidth, right: 0 }}
+        dragConstraints={{ left: -actionAreaWidth, right: 0 }}
         dragElastic={0.15}
         style={{ x }}
         animate={controls}
@@ -91,39 +156,47 @@ export const SwipeableCardBase = ({
           isDraggingRef.current = true;
         }}
         onDragEnd={(_, info) => {
-          const percentDragged = Math.abs(info.offset.x) / cardWidth;
-          const shouldOpen = info.offset.x < 0 && percentDragged > SWIPE_THRESHOLD;
-          void controls.start({ x: shouldOpen ? -cardWidth : 0 });
-          if (!shouldOpen) onClose?.();
+          if (!hasActions || disabled || actionAreaWidth <= 0) {
+            closePanel();
+            return;
+          }
 
-          // small delay before re-enabling taps to avoid “drag → click”
-          setTimeout(() => {
+          const percentDragged = Math.abs(info.offset.x) / actionAreaWidth;
+          const shouldOpen = info.offset.x < 0 && percentDragged > SWIPE_THRESHOLD;
+          if (shouldOpen) openPanel();
+          else closePanel();
+
+          if (dragResetTimeoutRef.current != null) {
+            window.clearTimeout(dragResetTimeoutRef.current);
+          }
+          dragResetTimeoutRef.current = window.setTimeout(() => {
             isDraggingRef.current = false;
           }, 120);
         }}
-        onClickCapture={(e) => {
-          const isOpen = x.get() === -cardWidth;
+        onClickCapture={(event) => {
           if (isDraggingRef.current) {
-            e.stopPropagation();
-            e.preventDefault();
+            event.preventDefault();
+            event.stopPropagation();
             return;
           }
+
           if (isOpen) {
-            // tap on the card while open should close, not trigger child click
-            e.stopPropagation();
-            e.preventDefault();
-            void controls.start({ x: 0 });
-            onClose?.();
+            event.preventDefault();
+            event.stopPropagation();
+            closePanel();
           }
         }}
+        data-open={isOpen}
       >
         {children}
       </motion.div>
     </div>
   );
 };
+
 SwipeableCardBase.displayName = "SwipeableCard";
 
 const SwipeableCard = memo(SwipeableCardBase);
 SwipeableCard.displayName = "SwipeableCard";
+
 export default SwipeableCard;
