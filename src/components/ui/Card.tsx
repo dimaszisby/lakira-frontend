@@ -1,52 +1,39 @@
+import type { ElementType, HTMLAttributes } from "react";
 import React from "react";
 
-import { cn } from "@/src/lib/cn";
+import { cn } from "@/lib/cn";
 
 export type CardSize = "xs" | "sm" | "md" | "lg";
 export type CardVariant = "primary" | "secondary" | "ghost" | "outlined";
 export type CardRadius = "sm" | "md" | "lg";
 export type CardElevation = "none" | "sm" | "md";
 
-/**
- * Reusable Primitive: Card
- *
- * A versatile surface primitive for Lakira:
- * - size: padding/gap density ("xs" | "sm" | "md" | "lg")
- * - variant: visual tone ("primary" | "secondary" | "ghost" | "outlined")
- * - radius: corner rounding ("sm" | "md" | "lg")
- * - elevation: shadow depth ("none" | "sm" | "md")
- *
- * Usage:
- * ```tsx
- * <Card size="lg" variant="secondary" className="custom-class">
- *   <CardHeader>
- *     <CardTitle>Card Title</CardTitle>
- *     <CardDescription>This is a description.</CardDescription>
- *   </CardHeader>
- *   <CardContent>
- *     Main content goes here.
- *   </CardContent>
- *   <CardFooter>
- *     Footer content here.
- *   </CardFooter>
- * </Card>
- * ```
- */
+type CardElement = "article" | "section" | "aside" | "div";
 
-type CardProps = React.HTMLAttributes<HTMLDivElement> & {
+type CardProps = HTMLAttributes<HTMLElement> & {
+  as?: CardElement;
   size?: CardSize;
   variant?: CardVariant;
   radius?: CardRadius;
   elevation?: CardElevation;
 };
 
-const Card = React.forwardRef<HTMLDivElement, CardProps>(
+const Card = React.forwardRef<HTMLElement, CardProps>(
   (
-    { size = "md", variant = "primary", radius = "md", elevation = "sm", className, ...rest },
+    {
+      as = "div",
+      size = "md",
+      variant = "primary",
+      radius = "md",
+      elevation = "sm",
+      className,
+      ...rest
+    },
     ref,
   ) => {
+    const Component = as as ElementType;
     return (
-      <div
+      <Component
         ref={ref}
         className={cn("card", className)}
         data-size={size}
@@ -71,11 +58,16 @@ export const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
 
 CardHeader.displayName = "CardHeader";
 
-export type CardTitleProps = React.HTMLAttributes<HTMLHeadingElement>;
+type CardTitleElement = "h1" | "h2" | "h3" | "h4" | "h5" | "h6";
+
+export type CardTitleProps = React.HTMLAttributes<HTMLHeadingElement> & {
+  as?: CardTitleElement;
+};
 
 export const CardTitle = React.forwardRef<HTMLHeadingElement, CardTitleProps>(
-  ({ className, ...rest }, ref) => {
-    return <h2 ref={ref} className={cn("card-title", className)} {...rest} />;
+  ({ as = "h2", className, ...rest }, ref) => {
+    const Component = as as ElementType;
+    return <Component ref={ref} className={cn("card-title", className)} {...rest} />;
   },
 );
 
