@@ -1,47 +1,42 @@
 "use client";
 
 import { Minus, Plus } from "phosphor-react";
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 
-import { cn } from "@/src/lib/cn";
+import { cn } from "@/lib/cn";
 
 type Size = "sm" | "md" | "lg";
 
 export type SliderProps = {
   id?: string;
-  value: number; // controlled
+  value: number;
   onChange: (v: number) => void;
-  onChangeEnd?: (v: number) => void; // fires on drag end / keyboard commit
-  min?: number; // default 0
-  max?: number; // default 100
-  step?: number; // e.g., 1 | 5 | 10
-  allowed?: number[]; // Override: restrict values to this set (sorted automatically), Overrides step.
+  onChangeEnd?: (v: number) => void;
+  min?: number;
+  max?: number;
+  step?: number;
+  allowed?: number[];
   disabled?: boolean;
   size?: Size;
   className?: string;
   trackClassName?: string;
-
-  // Visual indicator: inline text on the right, or bubble above the thumb
   showValue?: "none" | "inline" | "bubble";
-  valueFormatter?: (v: number) => string; // default: `${v}`
-
-  // Optionals: steppers on both sides
+  valueFormatter?: (v: number) => string;
   showSteppers?: boolean;
-  steppersStep?: number; // default to step or 1/20 of range
-
-  // Optionals: tick marks (defaults to allowed if provided)
+  steppersStep?: number;
   marks?: number[];
   markLabel?: (v: number) => string | undefined;
-
   "aria-label"?: string;
   "aria-labelledby"?: string;
 };
 
 const SIZE: Record<Size, { trackH: string; thumb: string; bubble: string }> = {
-  sm: { trackH: "h-1.5", thumb: "h-4 w-4", bubble: "text-xs px-2 py-0.5" },
-  md: { trackH: "h-2", thumb: "h-5 w-5", bubble: "text-sm px-2 py-1" },
-  lg: { trackH: "h-3", thumb: "h-6 w-6", bubble: "text-base px-2.5 py-1.5" },
+  sm: { trackH: "h-1.5", thumb: "h-4 w-4", bubble: "px-2 py-0.5 text-xs" },
+  md: { trackH: "h-2", thumb: "h-5 w-5", bubble: "px-2 py-1 text-sm" },
+  lg: { trackH: "h-3", thumb: "h-6 w-6", bubble: "px-2.5 py-1.5 text-base" },
 };
+
+const SWIPE_STEP_FRACTION = 0.1;
 
 const Slider = ({
   id,
@@ -61,132 +56,144 @@ const Slider = ({
   showValue = "inline",
   valueFormatter = (v) => `${v}`,
   marks,
+  markLabel,
   ...aria
 }: SliderProps) => {
   const trackRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState(false);
   const [thumbFocused, setThumbFocused] = useState(false);
 
-  // Normalize constraints
   const [amin, amax] = min <= max ? [min, max] : [max, min];
+  const range = amax - amin;
+  const safeStep = Math.max(0.000001, step);
+
   const allowedSorted = useMemo(
     () => (allowed ? Array.from(new Set(allowed)).sort((a, b) => a - b) : null),
     [allowed],
   );
-  const effectiveMarks = marks ?? allowedSorted ?? null;
 
-  const range = amax - amin;
-  const clamp = useCallback((v: number) => Math.min(amax, Math.max(amin, v)), [amax, amin]);
+  const clamp = useCallback((nextValue: number) => Math.min(amax, Math.max(amin, nextValue)), [amax, amin]);
 
   const snap = useCallback(
-    (v: number) => {
-      const c = clamp(v);
+    (nextValue: number) => {
+      const clamped = clamp(nextValue);
       if (allowedSorted && allowedSorted.length > 0) {
-        // nearest allowed
-        let best = allowedSorted[0];
-        let diff = Math.abs(c - best);
-        for (const n of allowedSorted) {
-          const d = Math.abs(c - n);
-          if (d < diff) {
-            best = n;
-            diff = d;
-          }
-        }
-        return best;
+        return getNearest(allowedSorted, clamped);
       }
-      // step snap
-      const s = Math.max(0.000001, step);
-      const snapped = Math.round((c - amin) / s) * s + amin;
-      // Avoid IEEE floating drift
-      const fixed = Number(snapped.toFixed(6));
-      return clamp(fixed);
+      const snapped = Math.round((clamped - amin) / safeStep) * safeStep + amin;
+      return clamp(Number(snapped.toFixed(6)));
     },
-    [amin, allowedSorted, step, clamp],
+    [allowedSorted, amin, clamp, safeStep],
   );
 
+  const currentValue = useMemo(() => snap(value), [snap, value]);
+
+  const effectiveMarks = useMemo(() => marks ?? allowedSorted ?? null, [allowedSorted, marks]);
+
   const percent = useMemo(() => {
-    const p = range === 0 ? 0 : ((value - amin) / range) * 100;
-    return Math.max(0, Math.min(100, p));
-  }, [value, amin, range]);
+    if (range <= 0) return 0;
+    return Math.min(100, Math.max(0, ((currentValue - amin) / range) * 100));
+  }, [amin, currentValue, range]);
 
   const computeFromPointer = (clientX: number) => {
-    const el = trackRef.current;
-    if (!el) return value;
-    const rect = el.getBoundingClientRect();
-    const frac = rect.width === 0 ? 0 : (clientX - rect.left) / rect.width;
-    return snap(amin + frac * range);
+    const track = trackRef.current;
+    if (!track || range <= 0) return currentValue;
+    const rect = track.getBoundingClientRect();
+    const fraction = rect.width === 0 ? 0 : (clientX - rect.left) / rect.width;
+    return snap(amin + fraction * range);
   };
 
-  const beginDrag = (e: React.PointerEvent) => {
+  const beginDrag = (event: React.PointerEvent<HTMLDivElement>) => {
     if (disabled) return;
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    event.currentTarget.setPointerCapture(event.pointerId);
+    const next = computeFromPointer(event.clientX);
     setDragging(true);
-    onChange(computeFromPointer(e.clientX));
+    onChange(next);
   };
-  const moveDrag = (e: React.PointerEvent) => {
+
+  const moveDrag = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!dragging || disabled) return;
-    onChange(computeFromPointer(e.clientX));
+    onChange(computeFromPointer(event.clientX));
   };
-  const endDrag = () => {
+
+  const endDrag = (event: React.PointerEvent<HTMLDivElement>) => {
     if (!dragging) return;
+    const next = computeFromPointer(event.clientX);
     setDragging(false);
-    onChangeEnd?.(value);
+    onChange(next);
+    onChangeEnd?.(next);
   };
 
-  const keyStep = allowedSorted
-    ? // move to next allowed value
-      (v: number, dir: 1 | -1) => {
-        const idx = indexOfNearest(allowedSorted, v);
-        return clamp(allowedSorted[Math.min(allowedSorted.length - 1, Math.max(0, idx + dir))]);
-      }
-    : // move by step
-      (v: number, dir: 1 | -1) => snap(v + dir * step);
+  const keyStep = useMemo(
+    () =>
+      allowedSorted
+        ? (current: number, direction: 1 | -1) => {
+            const index = indexOfNearest(allowedSorted, current);
+            return clamp(
+              allowedSorted[Math.min(allowedSorted.length - 1, Math.max(0, index + direction))],
+            );
+          }
+        : (current: number, direction: 1 | -1) => snap(current + direction * safeStep),
+    [allowedSorted, clamp, safeStep, snap],
+  );
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+  const onKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
     if (disabled) return;
+
     let next: number | null = null;
-    if (e.key === "ArrowLeft" || e.key === "ArrowDown") {
-      e.preventDefault();
-      next = keyStep(value, -1);
-    } else if (e.key === "ArrowRight" || e.key === "ArrowUp") {
-      e.preventDefault();
-      next = keyStep(value, +1);
-    } else if (e.key === "Home") {
-      e.preventDefault();
+    if (event.key === "ArrowLeft" || event.key === "ArrowDown") {
+      event.preventDefault();
+      next = keyStep(currentValue, -1);
+    } else if (event.key === "ArrowRight" || event.key === "ArrowUp") {
+      event.preventDefault();
+      next = keyStep(currentValue, 1);
+    } else if (event.key === "Home") {
+      event.preventDefault();
       next = amin;
-    } else if (e.key === "End") {
-      e.preventDefault();
+    } else if (event.key === "End") {
+      event.preventDefault();
       next = amax;
-    } else if (e.key === "PageUp") {
-      e.preventDefault();
-      next = snap(value + Math.max(step, range * 0.1));
-    } else if (e.key === "PageDown") {
-      e.preventDefault();
-      next = snap(value - Math.max(step, range * 0.1));
+    } else if (event.key === "PageUp") {
+      event.preventDefault();
+      next = snap(currentValue + Math.max(safeStep, range * SWIPE_STEP_FRACTION));
+    } else if (event.key === "PageDown") {
+      event.preventDefault();
+      next = snap(currentValue - Math.max(safeStep, range * SWIPE_STEP_FRACTION));
     }
-    if (next != null) {
-      onChange(next);
-      onChangeEnd?.(next);
-    }
+
+    if (next == null) return;
+    onChange(next);
+    onChangeEnd?.(next);
   };
 
-  const decIncAmount = useMemo(() => {
+  const decrementIncrementAmount = useMemo(() => {
     if (steppersStep && steppersStep > 0) return steppersStep;
-    if (allowedSorted) {
-      // default to the smallest gap in allowed
-      let smallest = Infinity;
+    if (allowedSorted && allowedSorted.length > 1) {
+      let smallestGap = Infinity;
       for (let i = 1; i < allowedSorted.length; i++) {
-        smallest = Math.min(smallest, allowedSorted[i] - allowedSorted[i - 1]);
+        smallestGap = Math.min(smallestGap, allowedSorted[i] - allowedSorted[i - 1]);
       }
-      return Number.isFinite(smallest) ? smallest : step;
+      if (Number.isFinite(smallestGap)) return smallestGap;
     }
-    return step > 0 ? step : Math.max(1, Math.round(range / 20));
-  }, [steppersStep, allowedSorted, step, range]);
+    if (safeStep > 0) return safeStep;
+    return Math.max(1, Math.round(range / 20));
+  }, [allowedSorted, range, safeStep, steppersStep]);
 
-  const dec = () => !disabled && onChange(snap(value - decIncAmount));
-  const inc = () => !disabled && onChange(snap(value + decIncAmount));
+  const dec = () => {
+    if (disabled) return;
+    const next = snap(currentValue - decrementIncrementAmount);
+    onChange(next);
+    onChangeEnd?.(next);
+  };
 
-  const s = SIZE[size];
+  const inc = () => {
+    if (disabled) return;
+    const next = snap(currentValue + decrementIncrementAmount);
+    onChange(next);
+    onChangeEnd?.(next);
+  };
+
+  const sliderSize = SIZE[size];
   const showBubble = showValue === "bubble" && (dragging || thumbFocused);
 
   return (
@@ -195,11 +202,11 @@ const Slider = ({
         <button
           type="button"
           onClick={dec}
-          disabled={disabled || value <= amin}
+          disabled={disabled || currentValue <= amin}
           className={cn(
-            "grid h-8 w-8 place-items-center rounded-lg border border-gray-200 bg-white text-gray-600",
-            "hover:bg-violet-50 hover:text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-400",
-            (disabled || value <= amin) && "cursor-not-allowed opacity-50",
+            "grid h-8 w-8 place-items-center rounded-lg border border-border bg-surface text-ink-secondary",
+            "hover:bg-surface2 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            (disabled || currentValue <= amin) && "cursor-not-allowed opacity-50",
           )}
           aria-label="Decrease"
           title="Decrease"
@@ -208,13 +215,12 @@ const Slider = ({
         </button>
       ) : null}
 
-      {/* Track */}
       <div
         ref={trackRef}
         className={cn(
-          "relative w-full select-none",
-          s.trackH,
-          "cursor-pointer rounded-full bg-gray-200",
+          "relative w-full select-none rounded-full bg-surface2",
+          "cursor-pointer",
+          sliderSize.trackH,
           disabled && "cursor-not-allowed opacity-60",
           trackClassName,
         )}
@@ -223,37 +229,42 @@ const Slider = ({
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
       >
-        {/* Filled range */}
         <div
-          className="absolute left-0 top-0 h-full rounded-full bg-violet-500"
+          className="absolute left-0 top-0 h-full rounded-full bg-brand-primary"
           style={{ width: `${percent}%` }}
           aria-hidden
         />
 
-        {/* Marks */}
-        {effectiveMarks?.map((m) => {
-          const p = ((clamp(m) - amin) / range) * 100;
+        {effectiveMarks?.map((mark) => {
+          const p = range <= 0 ? 0 : ((clamp(mark) - amin) / range) * 100;
+          const label = markLabel?.(mark);
           return (
             <div
-              key={m}
-              className="absolute top-1/2 h-2 w-0.5 -translate-y-1/2 bg-gray-300"
+              key={mark}
+              className="absolute top-1/2 -translate-y-1/2"
               style={{ left: `${p}%` }}
               aria-hidden
-              title={aria["aria-label"] ? undefined : `${m}`}
-            />
+            >
+              <div className="h-2 w-0.5 bg-border" />
+              {label ? (
+                <span className="absolute left-1/2 top-full mt-1 -translate-x-1/2 whitespace-nowrap text-[10px] text-ink-tertiary">
+                  {label}
+                </span>
+              ) : null}
+            </div>
           );
         })}
 
-        {/* Thumb */}
         <button
           id={id}
           type="button"
           role="slider"
           aria-valuemin={amin}
           aria-valuemax={amax}
-          aria-valuenow={Math.round(value * 100000) / 100000}
-          aria-valuetext={valueFormatter(value)}
+          aria-valuenow={Number(currentValue.toFixed(6))}
+          aria-valuetext={valueFormatter(currentValue)}
           aria-disabled={disabled || undefined}
+          aria-orientation="horizontal"
           aria-label={aria["aria-label"]}
           aria-labelledby={aria["aria-labelledby"]}
           disabled={disabled}
@@ -261,44 +272,41 @@ const Slider = ({
           onFocus={() => setThumbFocused(true)}
           onBlur={() => setThumbFocused(false)}
           className={cn(
-            "absolute top-1/2 -translate-y-1/2 translate-x-[-50%]",
-            "grid place-items-center rounded-full bg-white shadow",
-            "focus-visible:ring-2 focus-visible:ring-violet-400",
-            s.thumb,
+            "absolute top-1/2 -translate-x-1/2 -translate-y-1/2",
+            "grid place-items-center rounded-full border border-border bg-surface shadow-sm",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            sliderSize.thumb,
           )}
           style={{ left: `${percent}%` }}
         >
-          {/* Bubble value */}
           {showBubble ? (
             <span
               className={cn(
-                "absolute -top-8 rounded-md bg-violet-600 text-white shadow",
-                "whitespace-nowrap",
-                s.bubble,
+                "absolute -top-8 whitespace-nowrap rounded-md bg-brand-primary text-ink-inverted shadow",
+                sliderSize.bubble,
               )}
             >
-              {valueFormatter(value)}
+              {valueFormatter(currentValue)}
             </span>
           ) : null}
         </button>
       </div>
 
-      {/* Inline indicator */}
-      {showValue === "inline" && (
-        <span className="min-w-[3ch] text-right text-sm font-medium text-violet-700">
-          {valueFormatter(value)}
+      {showValue === "inline" ? (
+        <span className="min-w-[3ch] text-right text-sm font-medium text-ink-secondary">
+          {valueFormatter(currentValue)}
         </span>
-      )}
+      ) : null}
 
       {showSteppers ? (
         <button
           type="button"
           onClick={inc}
-          disabled={disabled || value >= amax}
+          disabled={disabled || currentValue >= amax}
           className={cn(
-            "grid h-8 w-8 place-items-center rounded-lg border border-gray-200 bg-white text-gray-600",
-            "hover:bg-violet-50 hover:text-violet-600 focus-visible:ring-2 focus-visible:ring-violet-400",
-            (disabled || value >= amax) && "cursor-not-allowed opacity-50",
+            "grid h-8 w-8 place-items-center rounded-lg border border-border bg-surface text-ink-secondary",
+            "hover:bg-surface2 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            (disabled || currentValue >= amax) && "cursor-not-allowed opacity-50",
           )}
           aria-label="Increase"
           title="Increase"
@@ -312,17 +320,19 @@ const Slider = ({
 
 export default Slider;
 
-/* ---------- helpers ---------- */
-
-function indexOfNearest(arr: number[], v: number) {
-  let idx = 0,
-    best = Infinity;
-  for (let i = 0; i < arr.length; i++) {
-    const d = Math.abs(arr[i] - v);
-    if (d < best) {
-      best = d;
-      idx = i;
+function indexOfNearest(items: number[], value: number) {
+  let nearestIndex = 0;
+  let nearestDistance = Infinity;
+  for (let i = 0; i < items.length; i++) {
+    const distance = Math.abs(items[i] - value);
+    if (distance < nearestDistance) {
+      nearestDistance = distance;
+      nearestIndex = i;
     }
   }
-  return idx;
+  return nearestIndex;
+}
+
+function getNearest(items: number[], value: number) {
+  return items[indexOfNearest(items, value)];
 }
