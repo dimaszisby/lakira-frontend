@@ -1,44 +1,38 @@
 "use client";
 
-import { CaretDown, CaretUp } from "phosphor-react";
-import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import { CaretDown } from "phosphor-react";
+import type { ReactNode } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 
-import { cn } from "@/src/lib/cn";
+import { cn } from "@/lib/cn";
 
 type Size = "sm" | "md" | "lg";
-type V = string | number;
+type Value = string | number;
 
-export type SelectOption<T extends V = string> = {
+export type SelectOption<T extends Value = string> = {
   value: T;
   label: string;
-  left?: React.ReactNode; // per-option leading icon/chip (in menu)
+  left?: ReactNode;
   disabled?: boolean;
 };
 
-export type SelectProps<T extends V = string> = {
+export type SelectProps<T extends Value = string> = {
   id?: string;
   value: T | null;
   onChange: (next: T | null, option?: SelectOption<T> | null) => void;
   options: SelectOption<T>[];
-
   placeholder?: string;
   disabled?: boolean;
   size?: Size;
   className?: string;
-
-  // Slots inside the field (not the menu)
-  leftAddon?: React.ReactNode;
-  rightAddon?: React.ReactNode;
-
-  // Customizers
+  leftAddon?: ReactNode;
+  rightAddon?: ReactNode;
   renderOption?: (
-    opt: SelectOption<T>,
+    option: SelectOption<T>,
     state: { active: boolean; selected: boolean },
-  ) => React.ReactNode;
-
-  // a11y
+  ) => ReactNode;
   "aria-label"?: string;
-  name?: string; // (optional) to pair with hidden input if needed
+  name?: string;
 };
 
 const SIZING: Record<
@@ -46,21 +40,21 @@ const SIZING: Record<
   { shell: string; text: string; menu: string; item: string; chevron: number }
 > = {
   sm: {
-    shell: "h-10 px-3 rounded-xl",
+    shell: "h-10 rounded-xl px-3",
     text: "text-sm",
     menu: "mt-2 rounded-xl py-1",
     item: "px-3 py-2 text-sm",
     chevron: 14,
   },
   md: {
-    shell: "h-12 px-4 rounded-2xl",
+    shell: "h-12 rounded-2xl px-4",
     text: "text-base",
     menu: "mt-2 rounded-2xl py-2",
     item: "px-3.5 py-2.5 text-base",
     chevron: 16,
   },
   lg: {
-    shell: "h-14 px-5 rounded-2xl",
+    shell: "h-14 rounded-2xl px-5",
     text: "text-lg",
     menu: "mt-2 rounded-2xl py-2",
     item: "px-4 py-3 text-lg",
@@ -68,13 +62,38 @@ const SIZING: Record<
   },
 };
 
-const Select = <T extends V = string>({
+function findFirstEnabledIndex<T extends Value>(options: SelectOption<T>[]) {
+  return options.findIndex((option) => !option.disabled);
+}
+
+function findLastEnabledIndex<T extends Value>(options: SelectOption<T>[]) {
+  for (let i = options.length - 1; i >= 0; i--) {
+    if (!options[i]?.disabled) return i;
+  }
+  return -1;
+}
+
+function getNextEnabledIndex<T extends Value>(
+  options: SelectOption<T>[],
+  currentIndex: number,
+  direction: 1 | -1,
+) {
+  if (options.length === 0) return -1;
+  let nextIndex = currentIndex;
+  for (let i = 0; i < options.length; i++) {
+    nextIndex = (nextIndex + direction + options.length) % options.length;
+    if (!options[nextIndex]?.disabled) return nextIndex;
+  }
+  return -1;
+}
+
+const Select = <T extends Value = string>({
   id,
   value,
   onChange,
   options,
   placeholder = "Select…",
-  disabled,
+  disabled = false,
   size = "md",
   className,
   leftAddon,
@@ -84,119 +103,159 @@ const Select = <T extends V = string>({
   ...aria
 }: SelectProps<T>) => {
   const uid = useId();
-  const triggerId = id ?? `sel-${uid}`;
+  const triggerId = id ?? `select-${uid}`;
   const listboxId = `${triggerId}-listbox`;
 
   const [open, setOpen] = useState(false);
-  const [activeIdx, setActiveIdx] = useState<number>(-1);
+  const [activeIndex, setActiveIndex] = useState(-1);
 
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
-
   const sizing = SIZING[size];
 
   const selected = useMemo(() => {
-    const idx = options.findIndex((o) => o.value === value);
-    return { idx, opt: idx >= 0 ? options[idx] : null };
+    const index = options.findIndex((option) => option.value === value);
+    return {
+      index,
+      option: index >= 0 ? options[index] : null,
+    };
   }, [options, value]);
+
+  const openList = useCallback(() => {
+    if (disabled) return;
+    setOpen(true);
+    setActiveIndex(selected.index >= 0 ? selected.index : findFirstEnabledIndex(options));
+  }, [disabled, options, selected.index]);
+
+  const closeList = useCallback(() => {
+    setOpen(false);
+    setActiveIndex(-1);
+  }, []);
+
+  const commit = useCallback(
+    (index: number) => {
+      const option = options[index];
+      if (!option || option.disabled) return;
+      onChange(option.value, option);
+      closeList();
+      triggerRef.current?.focus();
+    },
+    [closeList, onChange, options],
+  );
+
+  useEffect(() => {
+    if (!open || activeIndex < 0) return;
+    const optionId = `${listboxId}-opt-${activeIndex}`;
+    const element = document.getElementById(optionId);
+    if (
+      element &&
+      listRef.current?.contains(element) &&
+      typeof (element as HTMLElement).scrollIntoView === "function"
+    ) {
+      element.scrollIntoView({ block: "nearest" });
+    }
+  }, [activeIndex, listboxId, open]);
 
   useEffect(() => {
     if (!open) return;
-    // set active to selected (or first enabled)
-    if (selected.idx >= 0) setActiveIdx(selected.idx);
-    else {
-      const first = options.findIndex((o) => !o.disabled);
-      setActiveIdx(first);
-    }
 
-    function onDocClick(e: MouseEvent) {
-      const t = e.target as Node;
-      if (!wrapperRef.current?.contains(t)) setOpen(false);
-    }
-    function onEscape(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
-    }
-    document.addEventListener("mousedown", onDocClick);
-    document.addEventListener("keydown", onEscape);
-    return () => {
-      document.removeEventListener("mousedown", onDocClick);
-      document.removeEventListener("keydown", onEscape);
+    const handlePointerDown = (event: PointerEvent) => {
+      if (wrapperRef.current?.contains(event.target as Node)) return;
+      closeList();
     };
-  }, [open, options, selected.idx]);
 
-  useEffect(() => {
-    // ensure active item is visible
-    if (!open || activeIdx < 0) return;
-    const el = document.getElementById(`${listboxId}-opt-${activeIdx}`);
-    el?.scrollIntoView({ block: "nearest" });
-  }, [open, activeIdx, listboxId]);
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => document.removeEventListener("pointerdown", handlePointerDown);
+  }, [closeList, open]);
 
-  const setNext = (dir: 1 | -1) => {
-    if (!options.length) return;
-    let i = activeIdx;
-    for (let step = 0; step < options.length; step++) {
-      i = (i + dir + options.length) % options.length;
-      if (!options[i].disabled) {
-        setActiveIdx(i);
-        break;
-      }
-    }
+  const setNextActive = (direction: 1 | -1) => {
+    const fallback = selected.index >= 0 ? selected.index : findFirstEnabledIndex(options);
+    const baseIndex = activeIndex >= 0 ? activeIndex : fallback;
+    const nextIndex = getNextEnabledIndex(options, baseIndex, direction);
+    if (nextIndex >= 0) setActiveIndex(nextIndex);
   };
 
-  const commit = useCallback(
-    (idx: number) => {
-      const opt = options[idx];
-      if (!opt || opt.disabled) return;
-      onChange(opt.value, opt);
-      setOpen(false);
-    },
-    [onChange, options],
-  );
-
-  const label = selected.opt?.label ?? placeholder;
-  const isPlaceholder = selected.opt == null;
+  const label = selected.option?.label ?? placeholder;
+  const isPlaceholder = selected.option == null;
 
   return (
-    <div ref={wrapperRef} className={cn("relative", className)}>
-      {/* Trigger */}
+    <div
+      ref={wrapperRef}
+      className={cn("relative", className)}
+      onBlurCapture={(event) => {
+        if (!open) return;
+        const nextFocused = event.relatedTarget as Node | null;
+        if (nextFocused && wrapperRef.current?.contains(nextFocused)) return;
+        closeList();
+      }}
+    >
       <button
         id={triggerId}
+        ref={triggerRef}
         type="button"
         disabled={disabled}
         aria-disabled={disabled || undefined}
-        role="combobox"
+        aria-haspopup="listbox"
         aria-controls={listboxId}
         aria-expanded={open}
-        aria-activedescendant={open && activeIdx >= 0 ? `${listboxId}-opt-${activeIdx}` : undefined}
-        onClick={() => !disabled && setOpen((s) => !s)}
-        onKeyDown={(e) => {
+        aria-activedescendant={open && activeIndex >= 0 ? `${listboxId}-opt-${activeIndex}` : undefined}
+        onClick={() => (open ? closeList() : openList())}
+        onKeyDown={(event) => {
           if (disabled) return;
-          if (e.key === "ArrowDown") {
-            e.preventDefault();
-            if (!open) setOpen(true);
-            setNext(1);
-          } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            if (!open) setOpen(true);
-            setNext(-1);
-          } else if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            if (open && activeIdx >= 0) commit(activeIdx);
-            else setOpen(true);
+
+          if (event.key === "ArrowDown") {
+            event.preventDefault();
+            if (!open) openList();
+            else setNextActive(1);
+            return;
           }
+
+          if (event.key === "ArrowUp") {
+            event.preventDefault();
+            if (!open) openList();
+            else setNextActive(-1);
+            return;
+          }
+
+          if (event.key === "Home" && open) {
+            event.preventDefault();
+            setActiveIndex(findFirstEnabledIndex(options));
+            return;
+          }
+
+          if (event.key === "End" && open) {
+            event.preventDefault();
+            setActiveIndex(findLastEnabledIndex(options));
+            return;
+          }
+
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            if (open && activeIndex >= 0) commit(activeIndex);
+            else openList();
+            return;
+          }
+
+          if (event.key === "Escape" && open) {
+            event.preventDefault();
+            closeList();
+            return;
+          }
+
+          if (event.key === "Tab" && open) closeList();
         }}
         className={cn(
-          "flex w-full items-center justify-between border border-gray-200 bg-white shadow-sm hover:bg-violet-50 focus-visible:ring-2 focus-visible:ring-violet-400",
+          "flex w-full items-center justify-between border border-border bg-surface shadow-sm transition-colors",
+          "hover:bg-surface2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           sizing.shell,
           disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
-          "transition-colors",
         )}
         {...aria}
       >
-        {/* Left side: icon + text */}
         <span className="flex min-w-0 items-center gap-3">
           {leftAddon ? (
-            <span aria-hidden className="text-violet-500">
+            <span aria-hidden className="text-ink-secondary">
               {leftAddon}
             </span>
           ) : null}
@@ -204,24 +263,25 @@ const Select = <T extends V = string>({
             className={cn(
               "truncate font-medium",
               sizing.text,
-              isPlaceholder ? "text-gray-400" : "text-violet-600",
+              isPlaceholder ? "text-ink-tertiary" : "text-ink",
             )}
           >
             {label}
           </span>
         </span>
 
-        {/* Right side: (optional addon) + chevrons */}
         <span className="ml-3 flex items-center gap-2">
-          {rightAddon ? <span className="text-gray-400">{rightAddon}</span> : null}
-          <span className="-gap-y-1 grid">
-            <CaretUp size={sizing.chevron} className="text-violet-500" />
-            <CaretDown size={sizing.chevron} className="-mt-1 text-violet-500" />
-          </span>
+          {rightAddon ? <span className="text-ink-tertiary">{rightAddon}</span> : null}
+          <CaretDown
+            size={sizing.chevron}
+            className={cn(
+              "text-ink-secondary transition-transform",
+              open ? "rotate-180" : "rotate-0",
+            )}
+          />
         </span>
       </button>
 
-      {/* Listbox */}
       {open ? (
         <ul
           id={listboxId}
@@ -229,44 +289,49 @@ const Select = <T extends V = string>({
           role="listbox"
           aria-labelledby={triggerId}
           className={cn(
-            "absolute left-0 right-0 top-full z-50 max-h-60 overflow-auto border border-gray-200 bg-white shadow-lg",
+            "absolute left-0 right-0 top-full z-50 max-h-60 overflow-auto border border-border bg-surface shadow-lg",
             sizing.menu,
           )}
         >
           {options.length === 0 ? (
-            <span className={cn("px-3 py-3 text-sm text-gray-500")} aria-disabled="true">
+            <li role="presentation" className="px-3 py-3 text-sm text-ink-tertiary">
               No options
-            </span>
+            </li>
           ) : (
-            options.map((opt, i) => {
-              const active = i === activeIdx;
-              const selected = value === opt.value;
-              const commonCls = cn(
-                "flex cursor-pointer items-center gap-3",
-                sizing.item,
-                active ? "bg-violet-50" : "",
-                opt.disabled ? "cursor-not-allowed opacity-50" : "",
-              );
+            options.map((option, index) => {
+              const active = index === activeIndex;
+              const isSelected = value === option.value;
               return (
                 <li
-                  key={`${String(opt.value)}-${i}`}
-                  id={`${listboxId}-opt-${i}`}
+                  key={`${String(option.value)}-${index}`}
+                  id={`${listboxId}-opt-${index}`}
                   role="option"
-                  aria-selected={selected}
-                  aria-disabled={opt.disabled || undefined}
+                  aria-selected={isSelected}
+                  aria-disabled={option.disabled || undefined}
                   tabIndex={-1}
-                  className={commonCls}
-                  onMouseEnter={() => !opt.disabled && setActiveIdx(i)}
-                  onMouseDown={(e) => e.preventDefault()} // prevent blur before click
-                  onClick={() => !opt.disabled && commit(i)}
+                  className={cn(
+                    "flex items-center gap-3",
+                    sizing.item,
+                    active ? "bg-surface2" : "",
+                    option.disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
+                  )}
+                  onMouseEnter={() => {
+                    if (!option.disabled) setActiveIndex(index);
+                  }}
+                  onMouseDown={(event) => {
+                    event.preventDefault();
+                  }}
+                  onClick={() => {
+                    if (!option.disabled) commit(index);
+                  }}
                 >
                   {renderOption ? (
-                    renderOption(opt, { active, selected })
+                    renderOption(option, { active, selected: isSelected })
                   ) : (
                     <>
-                      {opt.left ? <span className="text-gray-700">{opt.left}</span> : null}
-                      <span className={cn(selected ? "text-violet-700" : "text-gray-800")}>
-                        {opt.label}
+                      {option.left ? <span className="text-ink-secondary">{option.left}</span> : null}
+                      <span className={cn(isSelected ? "text-brand-primary" : "text-ink")}>
+                        {option.label}
                       </span>
                     </>
                   )}
@@ -277,8 +342,7 @@ const Select = <T extends V = string>({
         </ul>
       ) : null}
 
-      {/* Optional: hidden input -> to pair with plain HTML forms */}
-      {name ? <input type="hidden" name={name} value={value ?? ""} /> : null}
+      {name ? <input type="hidden" name={name} value={value == null ? "" : String(value)} /> : null}
     </div>
   );
 };
