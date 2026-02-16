@@ -1,20 +1,21 @@
 "use client";
 
-import React, { useCallback, useId } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
+import React, { useId } from "react";
 
-import { cn } from "@/src/lib/cn";
+import { cn } from "@/lib/cn";
 
 type Size = "sm" | "md" | "lg";
-type V = string | number;
+type Value = string | number;
 
-export type SegmentOption<T extends V = string> = {
+export type SegmentOption<T extends Value = string> = {
   value: T;
   label: string;
-  icon?: React.ReactNode;
+  icon?: ReactNode;
   disabled?: boolean;
 };
 
-export type SegmentedControlProps<T extends V = string> = {
+export type SegmentedControlProps<T extends Value = string> = {
   id?: string;
   options: SegmentOption<T>[];
   value: T | null;
@@ -27,14 +28,40 @@ export type SegmentedControlProps<T extends V = string> = {
   "aria-labelledby"?: string;
 };
 
-// Dev Note: Padding might be fine-tuned in the future
 const SIZING: Record<Size, { itemPad: string; font: string; height: string }> = {
   sm: { itemPad: "px-3 py-0.5", font: "text-sm", height: "h-9" },
   md: { itemPad: "px-4 py-1", font: "text-base", height: "h-11" },
-  lg: { itemPad: "px-5 py-1.5", font: "text-lg", height: "h-13" },
+  lg: { itemPad: "px-5 py-1.5", font: "text-lg", height: "h-14" },
 };
 
-const SegmentedControl = <T extends V = string>({
+function findFirstEnabledIndex<T extends Value>(options: SegmentOption<T>[]) {
+  return options.findIndex((option) => !option.disabled);
+}
+
+function findLastEnabledIndex<T extends Value>(options: SegmentOption<T>[]) {
+  for (let i = options.length - 1; i >= 0; i--) {
+    if (!options[i]?.disabled) return i;
+  }
+  return -1;
+}
+
+function getNextEnabledIndex<T extends Value>(
+  options: SegmentOption<T>[],
+  currentIndex: number,
+  direction: 1 | -1,
+) {
+  if (options.length === 0) return -1;
+
+  let nextIndex = currentIndex;
+  for (let i = 0; i < options.length; i++) {
+    nextIndex = (nextIndex + direction + options.length) % options.length;
+    if (!options[nextIndex]?.disabled) return nextIndex;
+  }
+
+  return -1;
+}
+
+const SegmentedControl = <T extends Value = string>({
   id,
   options,
   value,
@@ -49,85 +76,111 @@ const SegmentedControl = <T extends V = string>({
   const groupId = id ?? `seg-${uid}`;
   const sizing = SIZING[size];
 
-  const currentIdx = Math.max(
-    0,
-    options.findIndex((o) => o.value === value),
-  );
+  const selectedIndex = options.findIndex((option) => option.value === value && !option.disabled);
+  const fallbackIndex = findFirstEnabledIndex(options);
+  const activeIndex = selectedIndex >= 0 ? selectedIndex : fallbackIndex;
 
-  const selectByIndex = useCallback(
-    (idx: number) => {
-      const opt = options[idx];
-      if (!opt || opt.disabled || disabled) return;
-      onChange(opt.value, opt);
-    },
-    [options, onChange, disabled],
-  );
+  const selectByIndex = (index: number) => {
+    const option = options[index];
+    if (!option || option.disabled || disabled) return;
+    onChange(option.value, option);
+  };
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (disabled) return;
-    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
+  const moveSelection = (
+    event: KeyboardEvent<HTMLButtonElement>,
+    currentIndex: number,
+    direction: 1 | -1,
+  ) => {
+    event.preventDefault();
+    const nextIndex = getNextEnabledIndex(options, currentIndex, direction);
+    if (nextIndex < 0) return;
 
-    e.preventDefault();
-    const max = options.length - 1;
-
-    if (e.key === "ArrowLeft") {
-      let i = currentIdx - 1;
-      while (i >= 0 && options[i].disabled) i--;
-      selectByIndex(Math.max(0, i));
-    } else if (e.key === "ArrowRight") {
-      let i = currentIdx + 1;
-      while (i <= max && options[i].disabled) i++;
-      selectByIndex(Math.min(max, i));
-    } else if (e.key === "Home") {
-      let i = 0;
-      while (i <= max && options[i].disabled) i++;
-      selectByIndex(i);
-    } else if (e.key === "End") {
-      let i = max;
-      while (i >= 0 && options[i].disabled) i--;
-      selectByIndex(i);
-    }
+    selectByIndex(nextIndex);
+    requestAnimationFrame(() => {
+      const nextButton = document.getElementById(`${groupId}-option-${nextIndex}`);
+      if (nextButton instanceof HTMLButtonElement) nextButton.focus();
+    });
   };
 
   return (
     <div
       id={groupId}
       role="radiogroup"
+      aria-orientation="horizontal"
       aria-disabled={disabled || undefined}
-      onKeyDown={onKeyDown}
       className={cn(
-        "relative inline-grid grid-flow-col items-center gap-2 rounded-2xl border border-gray-200 bg-white p-1 shadow-sm",
+        "relative inline-grid grid-flow-col items-center gap-2 rounded-2xl border border-border bg-surface2 p-1 shadow-sm",
         sizing.height,
         fullWidth ? "w-full" : "w-auto",
-        disabled && "cursor-not-allowed opacity-60",
+        disabled ? "opacity-60" : undefined,
         className,
       )}
       {...aria}
     >
-      {options.map((opt, idx) => {
-        const selected = value === opt.value;
+      {options.map((option, index) => {
+        const isSelected = value === option.value;
+        const isDisabled = disabled || option.disabled;
+
         return (
           <button
-            key={`${String(opt.value)}-${idx}`}
+            key={`${String(option.value)}-${index}`}
+            id={`${groupId}-option-${index}`}
             type="button"
             role="radio"
-            aria-checked={selected}
-            aria-disabled={opt.disabled || disabled || undefined}
-            tabIndex={selected ? 0 : -1} // roving tabindex
-            disabled={disabled || opt.disabled}
-            onClick={() => selectByIndex(idx)}
+            aria-checked={isSelected}
+            aria-disabled={isDisabled || undefined}
+            tabIndex={index === activeIndex ? 0 : -1}
+            disabled={isDisabled}
+            onClick={() => selectByIndex(index)}
+            onKeyDown={(event) => {
+              if (isDisabled) return;
+
+              if (event.key === "ArrowRight" || event.key === "ArrowDown") {
+                moveSelection(event, index, 1);
+                return;
+              }
+
+              if (event.key === "ArrowLeft" || event.key === "ArrowUp") {
+                moveSelection(event, index, -1);
+                return;
+              }
+
+              if (event.key === "Home") {
+                event.preventDefault();
+                const firstEnabled = findFirstEnabledIndex(options);
+                if (firstEnabled < 0) return;
+                selectByIndex(firstEnabled);
+                requestAnimationFrame(() => {
+                  const nextButton = document.getElementById(`${groupId}-option-${firstEnabled}`);
+                  if (nextButton instanceof HTMLButtonElement) nextButton.focus();
+                });
+                return;
+              }
+
+              if (event.key === "End") {
+                event.preventDefault();
+                const lastEnabled = findLastEnabledIndex(options);
+                if (lastEnabled < 0) return;
+                selectByIndex(lastEnabled);
+                requestAnimationFrame(() => {
+                  const nextButton = document.getElementById(`${groupId}-option-${lastEnabled}`);
+                  if (nextButton instanceof HTMLButtonElement) nextButton.focus();
+                });
+              }
+            }}
             className={cn(
-              "flex items-center justify-center rounded-xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400",
+              "flex min-w-[4rem] items-center justify-center rounded-xl transition-colors",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+              "disabled:cursor-not-allowed disabled:opacity-50",
               sizing.itemPad,
               sizing.font,
-              "min-w-[4rem]", // Dev Note: Items min-sizing; fine-tune later
-              selected
-                ? "bg-violet-500 text-white shadow"
-                : "bg-white text-gray-600 hover:bg-violet-50",
+              isSelected
+                ? "bg-surface text-brand-primary shadow-sm"
+                : "bg-surface text-ink-secondary hover:bg-surface2 hover:text-ink",
             )}
           >
-            {opt.icon ? <span className="mr-2">{opt.icon}</span> : null}
-            <span className="whitespace-nowrap">{opt.label}</span>
+            {option.icon ? <span className="mr-2 inline-flex">{option.icon}</span> : null}
+            <span className="whitespace-nowrap">{option.label}</span>
           </button>
         );
       })}

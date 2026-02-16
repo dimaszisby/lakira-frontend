@@ -1,113 +1,111 @@
 "use client";
 
+import type { ButtonHTMLAttributes } from "react";
 import React, { useCallback } from "react";
 
-import { cn } from "@/src/lib/cn";
+import { cn } from "@/lib/cn";
 
 type Size = "sm" | "md" | "lg";
 
-export type ToggleProps = {
-  id?: string;
+export type ToggleProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, "children" | "size"> & {
   checked: boolean;
   onCheckedChange: (next: boolean) => void;
-  onBlur?: () => void;
-  disabled?: boolean;
   size?: Size;
   onLabel?: string;
   offLabel?: string;
   wrapperClassName?: string;
-  "aria-label"?: string;
 };
 
-const SIZE = {
+const SIZE: Record<Size, { root: string; knob: string; shift: string; text: string }> = {
   sm: {
-    root: "w-10 h-6 p-0.5",
+    root: "h-6 w-10 p-0.5",
     knob: "h-5 w-5",
     shift: "translate-x-4",
     text: "text-[10px]",
   },
   md: {
-    root: "w-12 h-7 p-1",
+    root: "h-7 w-12 p-1",
     knob: "h-5 w-5",
     shift: "translate-x-5",
     text: "text-[11px]",
   },
   lg: {
-    root: "w-14 h-8 p-1.5",
+    root: "h-8 w-14 p-1",
     knob: "h-6 w-6",
     shift: "translate-x-6",
     text: "text-xs",
   },
-} as const;
-
-const Toggle = ({
-  id,
-  checked,
-  onCheckedChange,
-  onBlur,
-  disabled,
-  size = "md",
-  onLabel = "",
-  offLabel = "",
-  wrapperClassName,
-  ...aria
-}: ToggleProps) => {
-  const s = SIZE[size];
-
-  const handleClick = useCallback(() => {
-    if (!disabled) onCheckedChange(!checked);
-  }, [checked, disabled, onCheckedChange]);
-
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLButtonElement>) => {
-      if (disabled) return;
-      if (e.key === " " || e.key === "Enter") {
-        e.preventDefault();
-        onCheckedChange(!checked);
-      }
-    },
-    [checked, disabled, onCheckedChange],
-  );
-
-  return (
-    <div className={cn("inline-flex items-center gap-2", wrapperClassName)}>
-      {/* Optional labels for ON/OFF */}
-      {offLabel && !checked ? (
-        <span className={cn("text-gray-400", s.text)}>{offLabel}</span>
-      ) : null}
-
-      <button
-        id={id}
-        type="button"
-        role="switch"
-        aria-checked={checked}
-        aria-disabled={disabled || undefined}
-        disabled={disabled}
-        onClick={handleClick}
-        onKeyDown={handleKeyDown}
-        onBlur={onBlur}
-        className={cn(
-          "relative inline-flex shrink-0 cursor-pointer select-none items-center rounded-full outline-none transition-colors focus-visible:ring-2 focus-visible:ring-violet-400",
-          s.root,
-          checked ? "bg-violet-500" : "bg-gray-300",
-          disabled && "cursor-not-allowed opacity-50",
-        )}
-        {...aria}
-      >
-        {/* Knob */}
-        <span
-          aria-hidden="true"
-          className={cn(
-            "pointer-events-none inline-block rounded-full bg-white shadow transition-transform",
-            s.knob,
-            checked ? s.shift : "translate-x-0",
-          )}
-        />
-      </button>
-
-      {onLabel && checked ? <span className={cn("text-gray-700", s.text)}>{onLabel}</span> : null}
-    </div>
-  );
 };
+
+const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
+  (
+    {
+      checked,
+      onCheckedChange,
+      disabled,
+      size = "md",
+      onLabel = "",
+      offLabel = "",
+      wrapperClassName,
+      className,
+      onClick,
+      type = "button",
+      ...rest
+    },
+    ref,
+  ) => {
+    const sizing = SIZE[size];
+
+    const handleClick = useCallback(
+      (event: React.MouseEvent<HTMLButtonElement>) => {
+        onClick?.(event);
+        if (event.defaultPrevented || disabled) return;
+        onCheckedChange(!checked);
+      },
+      [checked, disabled, onCheckedChange, onClick],
+    );
+
+    return (
+      <div className={cn("inline-flex items-center gap-2", wrapperClassName)}>
+        {offLabel && !checked ? (
+          <span className={cn("text-ink-tertiary", sizing.text)}>{offLabel}</span>
+        ) : null}
+
+        <button
+          {...rest}
+          ref={ref}
+          type={type}
+          role="switch"
+          aria-checked={checked}
+          aria-disabled={disabled || undefined}
+          data-state={checked ? "checked" : "unchecked"}
+          disabled={disabled}
+          onClick={handleClick}
+          className={cn(
+            "relative inline-flex shrink-0 select-none items-center rounded-full border border-border transition-colors",
+            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+            "disabled:cursor-not-allowed disabled:opacity-50",
+            sizing.root,
+            checked ? "border-transparent bg-brand-primary" : "bg-surface2",
+            className,
+          )}
+        >
+          <span
+            aria-hidden="true"
+            className={cn(
+              "pointer-events-none inline-block rounded-full bg-surface shadow-sm transition-transform",
+              sizing.knob,
+              checked ? sizing.shift : "translate-x-0",
+            )}
+          />
+        </button>
+
+        {onLabel && checked ? <span className={cn("text-ink-secondary", sizing.text)}>{onLabel}</span> : null}
+      </div>
+    );
+  },
+);
+
+Toggle.displayName = "Toggle";
 
 export default Toggle;
