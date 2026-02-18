@@ -6,7 +6,7 @@
 - Test program roll-up (Layers 1–5).
 
 ## Current Snapshot
-Frontend CI has been expanded to a gated chain in `.github/workflows/test.yml` (`checks -> unit -> build -> e2e`) plus `security` and `secret-scan`. Staging backend is active at `https://lakira-backend-staging.onrender.com/api/v1`, while production URL/domain remain TBD. As of February 18, 2026, the P0 type/build and Jest-path blockers are resolved, but the full local gate is still blocked by lint/stylelint and local Cypress runtime issues.
+Frontend CI has been expanded to a gated chain in `.github/workflows/test.yml` (`checks -> unit -> build -> e2e`) plus `security` and `secret-scan`. Staging backend is active at `https://lakira-backend-staging.onrender.com/api/v1`, while production URL/domain remain TBD. As of February 18, 2026, P0 gate blockers are cleared and the full local gate commands run successfully.
 
 ## CI Test Program Roll-up (from tests-plans-and-logs)
 | Layer | Source Docs | Current CI Status | Readiness | Blocking Gaps | Next Action |
@@ -25,7 +25,7 @@ Frontend CI has been expanded to a gated chain in `.github/workflows/test.yml` (
 - [x] Fix Jest mock/module path blocker in `src/features/metric-categories/components/__tests__/MetricCategoryMobileCard.test.tsx:15` (removed stale mock for deleted `@/ui/OverlineLabel` module).
 - [x] Fix Jest mock/module path blocker in `src/components/ui/__tests__/DataLabel.test.tsx:5` (removed stale mock for deleted `@/components/ui/OverlineLabel` module and aligned assertions to current component output).
 - [x] Stabilize test typing consistency in test files so `npm run typecheck` is green with current include scope (isolated Cypress typing via `cypress/tsconfig.json`, excluded Cypress files from root `tsconfig.json`, and fixed strict typing in affected tests).
-- [ ] Rerun full local gate: `npm run lint`, `npm run lint:css`, `npm run typecheck`, `npm run test:unit:ci`, `npm run build`, `npm run test:e2e` (partial complete: `typecheck`, `test:unit:ci`, `build` passed on February 18, 2026).
+- [x] Rerun full local gate: `npm run lint`, `npm run lint:css`, `npm run typecheck`, `npm run test:unit:ci`, `npm run build`, `npm run test:e2e` (passed on February 18, 2026; local `test:e2e` stabilized by unsetting `ELECTRON_RUN_AS_NODE` in script).
 
 ### P1 — Lay Out Planned Test Foundations
 - [ ] Layer 1: define/restore static-checks checklist artifact in `documents/tests-plans-and-logs/1-static-checks/`.
@@ -50,9 +50,8 @@ Frontend CI has been expanded to a gated chain in `.github/workflows/test.yml` (
 - [ ] Ensure each TODO item references a concrete doc/code/workflow path.
 
 ## Known Blockers
-- Local `npm run lint` still fails on existing repo-wide lint errors unrelated to this P0 test-typing patch (for example `src/app/(app)/metrics/[metricId]/logs/_components/MetricLogsClient.tsx:52` and `src/types/dtos/user.dto.ts:3`).
-- Local `npm run lint:css` fails because `stylelint-config-prettier` is missing from dev dependencies.
-- Local `npm run test:e2e` currently fails to launch Cypress binary in this workstation environment (`Cypress.app ... bad option: --no-sandbox --smoke-test --ping`); CI execution behavior should be validated on GitHub Actions runners.
+- No active P0 gate blockers.
+- `npm run lint` currently reports non-blocking warnings (import order/class order/react-refresh/sonar/react-hooks guidance); warning cleanup remains a quality backlog item.
 
 ## FE/BE Handshake Checkpoints
 - [x] Staging backend confirmed active: `https://lakira-backend-staging.onrender.com/api/v1`.

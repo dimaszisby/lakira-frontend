@@ -4,15 +4,12 @@
     flex-direction: column;
     align-items: stretch;
     justify-content: flex-start;
-
     padding: var(--card-p-md);
     gap: var(--card-gap-md);
     border-radius: var(--card-radius-md);
-
-    background-color: hsl(var(--card-bg, var(--card-primary-bg)) / 1);
-    color: hsl(var(--card-fg) / 1);
-    border: 1px solid hsl(var(--card-border-color) / 0.7);
-
+    background-color: hsl(var(--card-bg, var(--card-primary-bg)) / 100%);
+    color: hsl(var(--card-fg) / 100%);
+    border: 1px solid hsl(var(--card-border-color) / 70%);
     box-shadow: var(--card-shadow-sm); /* default elevation, can be overridden */
   }
 
@@ -58,6 +55,7 @@
   .card[data-variant="outlined"] {
     --card-bg: var(--card-outlined-bg);
     --card-border-color: var(--border);
+
     /* shadow still controlled by elevation */
   }
 
@@ -101,13 +99,13 @@
     line-height: 1.4;
     font-weight: 600;
     letter-spacing: -0.01em;
-    color: hsl(var(--text) / 1);
+    color: hsl(var(--text) / 100%);
   }
 
   .card-description {
     font-size: 0.875rem; /* ~14px */
     line-height: 1.5;
-    color: hsl(var(--text-secondary) / 1);
+    color: hsl(var(--text-secondary) / 100%);
   }
 
   .card-content {

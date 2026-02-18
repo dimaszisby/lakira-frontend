@@ -31,6 +31,7 @@ Use this checklist when updating `.github/workflows/test.yml`.
 
 ## 5. Script Alignment (`package.json`)
 
+- [ ] `lint` behavior is documented (error-only vs warning-strict policy).
 - [ ] `typecheck` exists.
 - [ ] `test:unit:ci` exists.
 - [ ] `test:e2e` exists.

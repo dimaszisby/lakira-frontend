@@ -27,7 +27,6 @@
     --card-secondary-bg: var(--surface-2);
     --card-ghost-bg: var(--bg);
     --card-outlined-bg: var(--bg);
-
     --card-fg: var(--text);
     --card-border-color: var(--border);
   }
@@ -37,7 +36,6 @@
     --card-secondary-bg: var(--surface-2);
     --card-ghost-bg: var(--bg);
     --card-outlined-bg: var(--bg);
-
     --card-fg: var(--text);
     --card-border-color: var(--border);
   }

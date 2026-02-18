@@ -37,6 +37,10 @@ Steps:
 5. `npm run lint:css`
 6. `npm run typecheck`
 
+Lint behavior note:
+
+- `npm run lint` currently fails on ESLint errors (warnings are reported but non-blocking).
+
 Typing scope note:
 
 - Root `tsconfig.json` excludes Cypress files to keep Jest/unit matcher typing stable.
@@ -81,6 +85,10 @@ Steps:
 6. Wait for `http://127.0.0.1:3000`
 7. `npm run test:e2e`
 8. Upload Cypress videos/screenshots artifacts
+
+Script behavior note:
+
+- `test:e2e` unsets `ELECTRON_RUN_AS_NODE` before Cypress run to avoid shell-level Electron launch conflicts in local environments.
 
 ### 4.5 `security`
 

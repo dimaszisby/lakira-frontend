@@ -95,8 +95,9 @@ TypeScript project split used by tooling:
 
 Current local validation snapshot (February 18, 2026):
 
-- Passed: `npm run typecheck`, `npm run test:unit:ci`, `npm run build`.
-- Failing: `npm run lint` (existing repo lint errors), `npm run lint:css` (missing `stylelint-config-prettier`), `npm run test:e2e` (local Cypress binary launch issue).
+- Passed: `npm run lint`, `npm run lint:css`, `npm run typecheck`, `npm run test:unit:ci`, `npm run build`, `npm run test:e2e`.
+- Note: `lint` currently fails on ESLint errors only; warning cleanup is tracked separately.
+- Note: `test:e2e` unsets `ELECTRON_RUN_AS_NODE` in script to avoid local Electron/Cypress launch conflicts.
 
 ## 6. Secrets And Env Vars
 

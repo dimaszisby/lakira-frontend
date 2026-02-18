@@ -3,7 +3,7 @@
   :root {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
+    text-rendering: optimizelegibility;
   }
 
   /* Number alignment for UI */
@@ -15,18 +15,23 @@
   h1 {
     @apply text-h1 font-display font-bold text-ink;
   }
+
   h2 {
     @apply text-h2 font-display font-bold text-ink;
   }
+
   h3 {
     @apply text-h3 font-display font-bold text-ink;
   }
+
   h4 {
     @apply text-h4 font-display font-bold text-ink;
   }
+
   h5 {
     @apply text-h5 font-display font-semibold text-ink-emphasis;
   }
+
   h6 {
     @apply text-h6 font-display font-semibold text-ink-emphasis;
   }
@@ -43,6 +48,7 @@
 /* Design System text styles */
 @layer components {
   /* Headings (Quicksand) */
+
   /* .text-h1 {
     @apply font-display font-bold text-ink;
   }
@@ -66,6 +72,7 @@
   .text-body1 {
     @apply font-ui font-normal text-ink;
   }
+
   .text-body2 {
     @apply font-ui font-normal text-ink-secondary;
   }
@@ -74,12 +81,15 @@
   .text-caption {
     @apply font-ui font-normal text-ink-tertiary;
   }
+
   .text-overline {
     @apply font-ui font-bold text-ink-tertiary uppercase /* tracking-overline */;
   }
+
   .text-footer {
     @apply font-ui font-normal text-ink-tertiary;
   }
+
   .text-tooltip {
     @apply font-ui font-normal text-ink-tertiary;
   }
@@ -88,21 +98,27 @@
   .text-button {
     @apply font-display font-bold text-ink-emphasis;
   }
+
   .text-button-sm {
     @apply font-display font-bold text-ink-emphasis;
   }
+
   .text-input-label {
     @apply font-ui font-semibold text-ink;
   }
+
   .text-nav-item {
     @apply font-display font-semibold text-ink;
   }
+
   .text-badge {
     @apply font-ui font-medium text-ink-tertiary uppercase;
   }
+
   .text-link {
     @apply font-ui font-normal text-status-info underline underline-offset-2;
   }
+
   .text-alert {
     @apply font-display font-bold text-status-error;
   }

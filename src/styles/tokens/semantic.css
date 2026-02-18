@@ -7,7 +7,6 @@
     --bg: var(--gray-200);
     --surface: var(--gray-50);
     --surface-2: var(--gray-100);
-
     --text: var(--gray-900);
     --text-secondary: var(--gray-700);
     --text-tertiary: var(--gray-600);
@@ -22,15 +21,12 @@
     --status-error-bg: var(--accent-vividcoral-100);
     --status-error: var(--accent-vividcoral-500);
     --status-error-emphasis: var(--accent-vividcoral-700);
-
     --status-success-bg: var(--primary-matchagreen-100);
     --status-success: var(--primary-matchagreen-500);
     --status-success-emphasis: var(--primary-matchagreen-700);
-
     --status-warning-bg: var(--accent-goldenyellow-100);
     --status-warning: var(--accent-goldenyellow-500);
     --status-warning-emphasis: var(--accent-goldenyellow-700);
-
     --status-info-bg: var(--info-100);
     --status-info: var(--info-500);
     --status-info-emphasis: var(--info-700);
@@ -44,13 +40,11 @@
     --bg: var(--gray-900);
     --surface: var(--gray-800);
     --surface-2: var(--gray-700);
-
     --text: var(--gray-100);
     --text-secondary: var(--gray-300);
     --text-tertiary: var(--gray-400);
     --text-inverted: var(--gray-800);
     --text-error: var(--accent-vividcoral-100);
-
     --border: var(--gray-700);
     --ring: var(--secondary-origamiblue-500);
 

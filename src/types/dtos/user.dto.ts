@@ -1,10 +1,10 @@
-import { UserAtom } from "@/src/services/state/atoms";
-import {
+import type { z } from "zod";
+
+import type {
   createUserSchema,
   loginUserSchema,
   updateUserSchema,
 } from "@/types/api/zod-user.schema";
-import { z } from "zod";
 
 /**
  * @file src/types/dtos/user.dto.ts
@@ -70,7 +70,7 @@ export interface UserResponseDTO {
 // TODO: Add documentation
 export interface AuthResponseDTO {
   token?: string;
-  user?: UserAtom;
+  user?: UserResponseDTO;
 }
 
 // * Request DTOs

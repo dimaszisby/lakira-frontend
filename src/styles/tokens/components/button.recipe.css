@@ -9,22 +9,24 @@
     border-radius: var(--radius-md);
     font-weight: var(--btn-weight);
     box-shadow: var(--btn-shadow);
-    border: 1px solid hsl(var(--button-border, var(--border)) / 1);
-    background-color: hsl(var(--button-bg, var(--surface)) / 1);
-    color: hsl(var(--button-fg, var(--text)) / 1);
+    border: 1px solid hsl(var(--button-border, var(--border)) / 100%);
+    background-color: hsl(var(--button-bg, var(--surface)) / 100%);
+    color: hsl(var(--button-fg, var(--text)) / 100%);
     transition: var(--btn-transition);
   }
 
   .button:hover {
-    background-color: hsl(var(--button-hover-bg, var(--button-bg)) / 1);
+    background-color: hsl(var(--button-hover-bg, var(--button-bg)) / 100%);
   }
+
   .button:active {
-    background-color: hsl(var(--button-active-bg, var(--button-bg)) / 1);
+    background-color: hsl(var(--button-active-bg, var(--button-bg)) / 100%);
   }
+
   .button:disabled,
   .button[aria-disabled="true"] {
-    background-color: hsl(var(--button-disabled-bg, var(--button-bg)) / 1);
-    color: hsl(var(--button-disabled-fg, var(--button-fg)) / 1);
+    background-color: hsl(var(--button-disabled-bg, var(--button-bg)) / 100%);
+    color: hsl(var(--button-disabled-fg, var(--button-fg)) / 100%);
     opacity: 0.7;
     cursor: not-allowed;
   }
@@ -42,10 +44,10 @@
 
   /* Variant mapping */
   .button[data-variant="secondary"] {
-    --button-bg: hsl(var(--button-secondary-bg) / 0);
+    --button-bg: hsl(var(--button-secondary-bg) / 0%);
     --button-fg: var(--button-secondary-fg);
     --button-border: var(--button-secondary-border);
-    --button-hover-bg: hsl(var(--button-secondary-hover-bg) / 0.5);
+    --button-hover-bg: hsl(var(--button-secondary-hover-bg) / 50%);
     --button-active-bg: var(--button-secondary-active-bg);
     --button-disabled-bg: var(--button-secondary-disabled-bg);
     --button-disabled-fg: var(--button-secondary-disabled-fg);
@@ -76,12 +78,14 @@
     gap: var(--btn-gap-sm);
     border-radius: var(--radius-sm);
   }
+
   .button[data-size="md"] {
     height: var(--btn-h-md);
     padding-inline: var(--btn-px-md);
     gap: var(--btn-gap-md);
     border-radius: var(--radius-md);
   }
+
   .button[data-size="lg"] {
     height: var(--btn-h-lg);
     padding-inline: var(--btn-px-lg);
