@@ -24,7 +24,10 @@ Decision references:
 - `renderWithProviders` target: `src/test-utils/renderWithProviders.tsx`
 - MSW targets: `src/test-utils/msw/server.ts`, `src/test-utils/msw/handlers.ts`
 - Integration Jest setup target: `jest.integration.setup.ts`
-- Baseline integration spec: `src/features/auth/components/__tests__/LoginForm.int.test.tsx`
+- Baseline integration specs:
+  - `src/features/auth/components/__tests__/LoginForm.int.test.tsx`
+  - `src/features/metric-categories/components/__tests__/MetricCategoryForm.int.test.tsx`
+  - `src/features/metric-logs/components/__tests__/LogForm.int.test.tsx`
 
 ---
 

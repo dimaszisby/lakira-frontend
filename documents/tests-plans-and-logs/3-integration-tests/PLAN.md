@@ -68,7 +68,10 @@ Current decision (2026-02-18):
   - `src/test-utils/msw/handlers.ts`
   - `jest.integration.setup.ts`
   - `jest.integration.config.ts`
-- First real integration spec is implemented at `src/features/auth/components/__tests__/LoginForm.int.test.tsx`.
+- Current baseline integration specs:
+  - `src/features/auth/components/__tests__/LoginForm.int.test.tsx`
+  - `src/features/metric-categories/components/__tests__/MetricCategoryForm.int.test.tsx`
+  - `src/features/metric-logs/components/__tests__/LogForm.int.test.tsx`
 
 ---
 

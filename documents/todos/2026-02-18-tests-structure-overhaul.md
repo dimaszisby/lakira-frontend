@@ -57,7 +57,7 @@
 
 ### P2 Guardrails and Coverage Backfill
 - [x] Add CI-safe discovery checks in docs/runbook.
-- [ ] Continue integration coverage expansion after boundary hardening.
+- [ ] Continue integration coverage expansion after boundary hardening (progress: added `LogForm.int.test.tsx` baseline on 2026-02-18).
 
 ### P3 Optional Future Reorg
 - [ ] Evaluate explicit unit/integration subfolders only if readability degrades.

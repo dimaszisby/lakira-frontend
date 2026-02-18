@@ -86,6 +86,7 @@ Current note:
 - Implemented integration baseline coverage:
   - `src/features/auth/components/__tests__/LoginForm.int.test.tsx`
   - `src/features/metric-categories/components/__tests__/MetricCategoryForm.int.test.tsx`
+  - `src/features/metric-logs/components/__tests__/LogForm.int.test.tsx`
 
 ### 4.4 `build` (needs `integration`)
 
