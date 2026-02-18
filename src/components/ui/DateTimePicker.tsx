@@ -3,26 +3,22 @@
 import { CalendarBlank, CaretLeft, CaretRight, Clock } from "phosphor-react";
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 
-import { cn } from "@/src/lib/cn";
+import { cn } from "@/lib/cn";
 
 type Mode = "date" | "datetime";
 
 export type DateTimePickerProps = {
   id?: string;
   mode?: Mode;
-  value: Date | null; // controlled (Date object)
+  value: Date | null;
   onChange: (next: Date | null) => void;
-
   min?: Date;
   max?: Date;
-  minuteStep?: number; // for time mode, default 5
+  minuteStep?: number;
   disabled?: boolean;
   className?: string;
-
-  // display formatting (Intl options)
   dateFormat?: Intl.DateTimeFormatOptions;
   timeFormat?: Intl.DateTimeFormatOptions;
-
   "aria-label"?: string;
 };
 
@@ -39,103 +35,149 @@ const DateTimePicker = ({
   disabled,
   className,
   dateFormat = { day: "2-digit", month: "short", year: "numeric" },
-  timeFormat = { hour: "numeric", minute: "2-digit" }, // 12h/24h decided by locale
+  timeFormat = { hour: "numeric", minute: "2-digit" },
   ...aria
 }: DateTimePickerProps) => {
   const uid = useId();
   const triggerId = id ?? `dtp-${uid}`;
-  const popId = `${triggerId}-popover`;
+  const popoverId = `${triggerId}-popover`;
+  const headingId = `${triggerId}-heading`;
 
   const [open, setOpen] = useState(false);
   const [viewYear, setViewYear] = useState<number>(() => (value ?? new Date()).getFullYear());
   const [viewMonth, setViewMonth] = useState<number>(() => (value ?? new Date()).getMonth());
-  const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // click outside
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const dayRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
   useEffect(() => {
     if (!open) return;
-    const onDoc = (e: MouseEvent) => {
-      const t = e.target as Node;
-      if (!wrapperRef.current?.contains(t)) setOpen(false);
+
+    const onPointerDown = (event: PointerEvent) => {
+      const target = event.target as Node;
+      if (wrapperRef.current?.contains(target)) return;
+      setOpen(false);
+      requestAnimationFrame(() => triggerRef.current?.focus());
     };
-    const onEsc = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
-    document.addEventListener("mousedown", onDoc);
-    document.addEventListener("keydown", onEsc);
+
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setOpen(false);
+      requestAnimationFrame(() => triggerRef.current?.focus());
+    };
+
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onEscape);
+
     return () => {
-      document.removeEventListener("mousedown", onDoc);
-      document.removeEventListener("keydown", onEsc);
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onEscape);
     };
   }, [open]);
 
-  // keep calendar view in sync with selected value
-  useEffect(() => {
-    if (value) {
-      setViewYear(value.getFullYear());
-      setViewMonth(value.getMonth());
-    }
-  }, [value]);
-
   const displayedDate = useMemo(() => {
-    const d = value ?? null;
-    const dateStr = d ? new Intl.DateTimeFormat(undefined, dateFormat).format(d) : "Select date";
+    const nextDate = value ?? null;
+    const dateStr = nextDate
+      ? new Intl.DateTimeFormat(undefined, dateFormat).format(nextDate)
+      : "Select date";
     const timeStr =
-      mode === "datetime" && d ? new Intl.DateTimeFormat(undefined, timeFormat).format(d) : null;
+      mode === "datetime" && nextDate
+        ? new Intl.DateTimeFormat(undefined, timeFormat).format(nextDate)
+        : null;
+
     return { dateStr, timeStr };
   }, [value, mode, dateFormat, timeFormat]);
 
-  // calendar helpers
   const firstOfMonth = new Date(viewYear, viewMonth, 1);
-  const startDay = firstOfMonth.getDay(); // 0..6
+  const startDay = firstOfMonth.getDay();
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
   const prevMonthDays = new Date(viewYear, viewMonth, 0).getDate();
 
   const cells = useMemo(() => {
-    // 6 weeks grid = 42 cells
-    const out: {
-      date: Date;
-      currentMonth: boolean;
-      disabled: boolean;
-    }[] = [];
+    const output: Array<{ date: Date; currentMonth: boolean; disabled: boolean; key: string }> = [];
+
     for (let i = 0; i < 42; i++) {
-      const dayNum = i - startDay + 1; // can be <=0 or > daysInMonth
-      let d: Date;
+      const dayNum = i - startDay + 1;
+      let nextDate: Date;
       let currentMonth = true;
+
       if (dayNum <= 0) {
-        d = new Date(viewYear, viewMonth - 1, prevMonthDays + dayNum);
+        nextDate = new Date(viewYear, viewMonth - 1, prevMonthDays + dayNum);
         currentMonth = false;
       } else if (dayNum > daysInMonth) {
-        d = new Date(viewYear, viewMonth + 1, dayNum - daysInMonth);
+        nextDate = new Date(viewYear, viewMonth + 1, dayNum - daysInMonth);
         currentMonth = false;
       } else {
-        d = new Date(viewYear, viewMonth, dayNum);
+        nextDate = new Date(viewYear, viewMonth, dayNum);
       }
-      const isBeforeMin = min ? stripTime(d) < stripTime(min) : false;
-      const isAfterMax = max ? stripTime(d) > stripTime(max) : false;
-      out.push({ date: d, currentMonth, disabled: isBeforeMin || isAfterMax });
-    }
-    return out;
-  }, [startDay, daysInMonth, prevMonthDays, viewYear, viewMonth, min, max]);
 
-  const commitDate = (d: Date) => {
+      const isBeforeMin = min ? stripTime(nextDate) < stripTime(min) : false;
+      const isAfterMax = max ? stripTime(nextDate) > stripTime(max) : false;
+
+      output.push({
+        date: nextDate,
+        currentMonth,
+        disabled: isBeforeMin || isAfterMax,
+        key: toDateKey(nextDate),
+      });
+    }
+
+    return output;
+  }, [daysInMonth, max, min, prevMonthDays, startDay, viewMonth, viewYear]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const selectedInView =
+      value && value.getFullYear() === viewYear && value.getMonth() === viewMonth ? value : null;
+
+    const firstFocusableCell =
+      cells.find((cell) => selectedInView && sameDate(cell.date, selectedInView) && !cell.disabled) ??
+      cells.find((cell) => cell.currentMonth && !cell.disabled);
+
+    if (!firstFocusableCell) return;
+
+    requestAnimationFrame(() => {
+      dayRefs.current[firstFocusableCell.key]?.focus();
+    });
+  }, [cells, open, value, viewMonth, viewYear]);
+
+  const closePopover = () => {
+    setOpen(false);
+    requestAnimationFrame(() => triggerRef.current?.focus());
+  };
+
+  const commitDate = (nextDate: Date) => {
+    setViewYear(nextDate.getFullYear());
+    setViewMonth(nextDate.getMonth());
+
     if (mode === "date") {
-      // preserve no time (set to 00:00 local)
-      const nd = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
-      onChange(nd);
-      setOpen(false);
-    } else {
-      // preserve existing time if present
-      const base = value ?? new Date();
-      const nd = new Date(
-        d.getFullYear(),
-        d.getMonth(),
-        d.getDate(),
-        base.getHours(),
-        base.getMinutes(),
+      const normalized = new Date(
+        nextDate.getFullYear(),
+        nextDate.getMonth(),
+        nextDate.getDate(),
+        0,
+        0,
         0,
         0,
       );
-      onChange(nd);
+      onChange(normalized);
+      closePopover();
+      return;
     }
+
+    const base = value ?? new Date();
+    const normalized = new Date(
+      nextDate.getFullYear(),
+      nextDate.getMonth(),
+      nextDate.getDate(),
+      base.getHours(),
+      base.getMinutes(),
+      0,
+      0,
+    );
+    onChange(normalized);
   };
 
   const shiftMonth = (delta: number) => {
@@ -144,140 +186,154 @@ const DateTimePicker = ({
     setViewMonth(dt.getMonth());
   };
 
-  const handleKeyCalendar = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleCalendarKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (!open) return;
-    // Basic a11y: PgUp/PgDn switch month; Shift+PgUp/PgDn switch year
-    if (e.key === "PageUp") {
-      e.preventDefault();
-      shiftMonth(e.shiftKey ? -12 : -1);
-    } else if (e.key === "PageDown") {
-      e.preventDefault();
-      shiftMonth(e.shiftKey ? 12 : 1);
+
+    if (event.key === "PageUp") {
+      event.preventDefault();
+      shiftMonth(event.shiftKey ? -12 : -1);
+      return;
+    }
+
+    if (event.key === "PageDown") {
+      event.preventDefault();
+      shiftMonth(event.shiftKey ? 12 : 1);
     }
   };
 
-  // time controls (for datetime)
   const hours = value?.getHours() ?? 12;
   const minutes = value?.getMinutes() ?? 0;
   const isPM = hours >= 12;
-  const hour12 = ((hours + 11) % 12) + 1; // 1..12
+  const hour12 = ((hours + 11) % 12) + 1;
 
-  const setTime = (h12: number, pm: boolean, m: number) => {
-    const d = value ?? new Date();
-    let h24 = h12 % 12;
-    if (pm) h24 += 12;
-    const nd = new Date(d);
-    nd.setHours(h24, m, 0, 0);
-    onChange(nd);
+  const setTime = (hour: number, pm: boolean, minute: number) => {
+    const nextDate = value ?? new Date();
+    const hour24 = hour % 12 + (pm ? 12 : 0);
+    const normalized = new Date(nextDate);
+    normalized.setHours(hour24, minute, 0, 0);
+    onChange(normalized);
   };
 
+  const normalizedStep = Math.max(1, Math.min(60, Math.floor(minuteStep)));
   const minuteChoices = useMemo(() => {
-    const arr: number[] = [];
-    for (let m = 0; m < 60; m += Math.max(1, Math.min(60, minuteStep))) arr.push(m);
-    return arr;
-  }, [minuteStep]);
+    const output: number[] = [];
+    for (let minute = 0; minute < 60; minute += normalizedStep) output.push(minute);
+    return output;
+  }, [normalizedStep]);
+
+  const monthLabel = new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" }).format(
+    new Date(viewYear, viewMonth, 1),
+  );
 
   return (
-    <div ref={wrapperRef} className={cn("relative", className)} onKeyDown={handleKeyCalendar}>
-      {/* Trigger */}
+    <div ref={wrapperRef} className={cn("relative", className)} onKeyDown={handleCalendarKeyDown}>
       <button
         id={triggerId}
+        ref={triggerRef}
         type="button"
-        role="combobox"
+        aria-haspopup="dialog"
         aria-expanded={open}
-        aria-controls={popId}
-        aria-label={
-          aria["aria-label"] ?? (mode === "date" ? "Choose date" : "Choose date and time")
-        }
-        onClick={() => !disabled && setOpen((s) => !s)}
+        aria-controls={popoverId}
+        aria-label={aria["aria-label"] ?? (mode === "date" ? "Choose date" : "Choose date and time")}
+        onClick={() => {
+          if (disabled) return;
+          setOpen((prev) => {
+            if (prev) return false;
+            if (value) {
+              setViewYear(value.getFullYear());
+              setViewMonth(value.getMonth());
+            }
+            return true;
+          });
+        }}
         disabled={disabled}
         className={cn(
-          "flex w-full items-center justify-between rounded-2xl border border-gray-200 bg-gray-50 px-5 py-3 shadow-sm",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400",
-          "hover:bg-violet-50",
+          "flex w-full items-center justify-between rounded-2xl border border-border bg-surface px-5 py-3 shadow-sm",
+          "hover:bg-surface2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
           disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer",
         )}
       >
         <span className="flex min-w-0 items-center gap-3">
-          <span className="truncate text-base font-medium text-gray-900">
-            {displayedDate.dateStr}
-          </span>
+          <span className="truncate text-base font-medium text-ink">{displayedDate.dateStr}</span>
           {mode === "datetime" && displayedDate.timeStr ? (
             <>
-              <span className="h-2 w-2 rounded-full bg-violet-300" aria-hidden />
-              <span className="truncate text-base font-medium text-gray-900">
-                {displayedDate.timeStr}
-              </span>
+              <span className="h-2 w-2 rounded-full bg-brand-primary/35" aria-hidden />
+              <span className="truncate text-base font-medium text-ink">{displayedDate.timeStr}</span>
             </>
           ) : null}
         </span>
-        <CalendarBlank size={22} className="text-violet-500" />
+        <CalendarBlank size={22} className="text-brand-primary" />
       </button>
 
-      {/* Popover */}
       {open ? (
         <div
-          id={popId}
+          id={popoverId}
           role="dialog"
-          aria-modal="true"
-          className="absolute z-50 mt-2 w-[22rem] rounded-2xl border border-gray-200 bg-white p-3 shadow-xl"
+          aria-modal="false"
+          aria-labelledby={headingId}
+          className="absolute z-50 mt-2 w-[22rem] rounded-2xl border border-border bg-surface p-3 shadow-xl"
         >
-          {/* Header */}
           <div className="mb-2 flex items-center justify-between">
             <button
               type="button"
               onClick={() => shiftMonth(-1)}
-              className="rounded-md p-2 hover:bg-violet-50 focus-visible:ring-2 focus-visible:ring-violet-400"
+              className="rounded-md p-2 hover:bg-surface2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="Previous month"
             >
               <CaretLeft size={18} />
             </button>
-            <div className="text-sm font-semibold text-gray-700">
-              {new Intl.DateTimeFormat(undefined, { month: "long", year: "numeric" }).format(
-                new Date(viewYear, viewMonth, 1),
-              )}
-            </div>
+            <h2 id={headingId} className="text-sm font-semibold text-ink-secondary">
+              {monthLabel}
+            </h2>
             <button
               type="button"
               onClick={() => shiftMonth(1)}
-              className="rounded-md p-2 hover:bg-violet-50 focus-visible:ring-2 focus-visible:ring-violet-400"
+              className="rounded-md p-2 hover:bg-surface2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
               aria-label="Next month"
             >
               <CaretRight size={18} />
             </button>
           </div>
 
-          {/* Weekday header */}
-          <div className="grid grid-cols-7 gap-1 px-1 pb-1 text-center text-[11px] text-gray-400">
-            {WEEKDAY_SHORT.map((d) => (
-              <div key={d}>{d}</div>
+          <div className="grid grid-cols-7 gap-1 px-1 pb-1 text-center text-[11px] text-ink-tertiary">
+            {WEEKDAY_SHORT.map((weekday) => (
+              <div key={weekday}>{weekday}</div>
             ))}
           </div>
 
-          {/* Grid */}
-          <div className="grid grid-cols-7 gap-1">
-            {cells.map(({ date, currentMonth, disabled: cellDisabled }, i) => {
+          <div role="group" aria-label={`Calendar dates for ${monthLabel}`} className="grid grid-cols-7 gap-1">
+            {cells.map(({ date, currentMonth, disabled: cellDisabled, key }) => {
               const isSelected = !!value && sameDate(date, value) && currentMonth;
+              const isToday = sameDate(date, new Date());
+
               return (
                 <button
-                  key={i}
+                  key={key}
+                  ref={(node) => {
+                    dayRefs.current[key] = node;
+                  }}
                   type="button"
-                  role="gridcell"
-                  aria-selected={isSelected}
-                  aria-haspopup="dialog"
-                  aria-expanded={open}
-                  aria-controls={popId}
+                  data-date={key}
+                  data-current-month={currentMonth ? "true" : "false"}
+                  aria-label={new Intl.DateTimeFormat(undefined, {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  }).format(date)}
+                  aria-pressed={isSelected}
+                  aria-current={isToday ? "date" : undefined}
                   disabled={cellDisabled}
                   onClick={() => {
                     if (!cellDisabled) commitDate(date);
                   }}
                   className={cn(
-                    "h-9 rounded-lg text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400",
+                    "h-9 rounded-lg text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
                     isSelected
-                      ? "bg-violet-500 font-semibold text-white"
+                      ? "bg-brand-primary font-semibold text-ink-inverted"
                       : currentMonth
-                        ? "text-gray-800 hover:bg-violet-50"
-                        : "text-gray-400 hover:bg-violet-50",
+                        ? "text-ink hover:bg-surface2"
+                        : "text-ink-tertiary hover:bg-surface2",
                     cellDisabled && "cursor-not-allowed opacity-40",
                   )}
                 >
@@ -287,42 +343,41 @@ const DateTimePicker = ({
             })}
           </div>
 
-          {/* Time section */}
-          {mode === "datetime" && (
+          {mode === "datetime" ? (
             <>
-              <div className="my-3 h-px w-full bg-gray-100" />
+              <div className="my-3 h-px w-full bg-border" />
               <div className="flex items-center gap-3">
-                <Clock className="text-violet-500" size={18} />
-                {/* Hour */}
+                <Clock className="text-brand-primary" size={18} />
                 <select
+                  aria-label="Select hour"
                   value={hour12}
-                  onChange={(e) => setTime(parseInt(e.target.value, 10), isPM, minutes)}
-                  className="rounded-lg border border-gray-200 bg-white px-2 py-1 text-sm"
+                  onChange={(event) => setTime(parseInt(event.target.value, 10), isPM, minutes)}
+                  className="rounded-lg border border-border bg-surface px-2 py-1 text-sm text-ink"
                 >
-                  {Array.from({ length: 12 }, (_, i) => i + 1).map((h) => (
-                    <option key={h} value={h}>
-                      {h}
+                  {Array.from({ length: 12 }, (_, i) => i + 1).map((hour) => (
+                    <option key={hour} value={hour}>
+                      {hour}
                     </option>
                   ))}
                 </select>
-                <span className="text-gray-400">:</span>
-                {/* Minute */}
+                <span className="text-ink-tertiary">:</span>
                 <select
+                  aria-label="Select minute"
                   value={closestStep(minutes, minuteChoices)}
-                  onChange={(e) => setTime(hour12, isPM, parseInt(e.target.value, 10))}
-                  className="rounded-lg border border-gray-200 bg-white px-2 py-1 text-sm"
+                  onChange={(event) => setTime(hour12, isPM, parseInt(event.target.value, 10))}
+                  className="rounded-lg border border-border bg-surface px-2 py-1 text-sm text-ink"
                 >
-                  {minuteChoices.map((m) => (
-                    <option key={m} value={m}>
-                      {String(m).padStart(2, "0")}
+                  {minuteChoices.map((minute) => (
+                    <option key={minute} value={minute}>
+                      {String(minute).padStart(2, "0")}
                     </option>
                   ))}
                 </select>
-                {/* AM/PM */}
                 <select
+                  aria-label="Select meridiem"
                   value={isPM ? "PM" : "AM"}
-                  onChange={(e) => setTime(hour12, e.target.value === "PM", minutes)}
-                  className="rounded-lg border border-gray-200 bg-white px-2 py-1 text-sm"
+                  onChange={(event) => setTime(hour12, event.target.value === "PM", minutes)}
+                  className="rounded-lg border border-border bg-surface px-2 py-1 text-sm text-ink"
                 >
                   <option value="AM">AM</option>
                   <option value="PM">PM</option>
@@ -330,15 +385,15 @@ const DateTimePicker = ({
                 <div className="ml-auto">
                   <button
                     type="button"
-                    className="rounded-lg bg-violet-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-violet-700"
-                    onClick={() => setOpen(false)}
+                    className="rounded-lg bg-brand-primary px-3 py-1.5 text-sm font-medium text-ink-inverted hover:bg-brand-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    onClick={closePopover}
                   >
                     Done
                   </button>
                 </div>
               </div>
             </>
-          )}
+          ) : null}
         </div>
       ) : null}
     </div>
@@ -347,8 +402,6 @@ const DateTimePicker = ({
 
 export default DateTimePicker;
 
-/* ---------- utils ---------- */
-
 function sameDate(a: Date, b: Date) {
   return (
     a.getFullYear() === b.getFullYear() &&
@@ -356,18 +409,29 @@ function sameDate(a: Date, b: Date) {
     a.getDate() === b.getDate()
   );
 }
-function stripTime(d: Date) {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+
+function stripTime(date: Date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
 }
-function closestStep(v: number, steps: number[]) {
-  let best = steps[0],
-    diff = Math.abs(v - steps[0]);
-  for (const s of steps) {
-    const d = Math.abs(v - s);
-    if (d < diff) {
-      best = s;
-      diff = d;
+
+function toDateKey(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function closestStep(value: number, steps: number[]) {
+  let best = steps[0] ?? 0;
+  let diff = Math.abs(value - best);
+
+  for (const step of steps) {
+    const nextDiff = Math.abs(value - step);
+    if (nextDiff < diff) {
+      best = step;
+      diff = nextDiff;
     }
   }
+
   return best;
 }
