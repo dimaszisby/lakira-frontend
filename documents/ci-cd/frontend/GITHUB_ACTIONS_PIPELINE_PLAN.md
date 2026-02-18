@@ -88,6 +88,7 @@ Current note:
   - `src/features/metric-categories/components/__tests__/MetricCategoryForm.int.test.tsx`
   - `src/features/metric-logs/components/__tests__/LogForm.int.test.tsx`
   - `src/features/metrics/components/__tests__/MetricForm.int.test.tsx`
+  - `src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx`
 
 ### 4.4 `build` (needs `integration`)
 
