@@ -63,6 +63,11 @@ Steps:
 5. Upload `coverage/lcov.info` to Codecov
 6. Upload `coverage/` artifact
 
+Current note:
+
+- `test:unit:ci` runs Jest with `jest.unit.config.ts`.
+- Unit discovery includes `*.test.ts(x)` / `*.spec.ts(x)` and excludes `*.int.test.ts(x)`.
+
 ### 4.3 `integration` (needs `unit`)
 
 Goal: run real integration tests as a PR-required gate.
@@ -78,7 +83,9 @@ Current note:
 
 - `test:integration` runs Jest with `jest.integration.config.ts` and discovers `*.int.test.ts(x)` files.
 - Global MSW lifecycle wiring is enabled in `jest.integration.setup.ts`.
-- First implemented integration coverage: `src/features/auth/components/__tests__/LoginForm.int.test.tsx`.
+- Implemented integration baseline coverage:
+  - `src/features/auth/components/__tests__/LoginForm.int.test.tsx`
+  - `src/features/metric-categories/components/__tests__/MetricCategoryForm.int.test.tsx`
 
 ### 4.4 `build` (needs `integration`)
 
@@ -167,6 +174,12 @@ From `package.json`:
 - `perf:bundle-size`
 - `perf:lighthouse`
 - `perf:web-vitals`
+
+Naming contract:
+
+- Unit/interaction: `*.test.ts(x)` and `*.spec.ts(x)` -> unit runner.
+- Integration: `*.int.test.ts(x)` -> integration runner.
+- E2E: `*.cy.ts`.
 
 ## 7. Secrets Required
 

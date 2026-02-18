@@ -157,8 +157,8 @@ These tests are closer to how the user interacts with the page but still run in 
 **Location**
 
 - Typically colocated near pages/components being tested, e.g.:
-  - `src/features/metric-categories/components/MetricCategoryForm.test.tsx`
-  - `src/app/(app)/metrics/page.test.tsx`
+  - `src/features/metric-categories/components/MetricCategoryForm.int.test.tsx`
+  - `src/features/auth/components/LoginForm.int.test.tsx`
 
 **Docs**
 
@@ -327,9 +327,15 @@ Security-related checks are included in:
 
 ### 5.1 Naming
 
-- Unit tests: `*.test.ts` / `*.test.tsx` near the logic they test.
-- Integration tests: `*.test.tsx` near the page/component.
+- Unit/interaction tests: `*.test.ts`, `*.test.tsx`, `*.spec.ts`, `*.spec.tsx`.
+- Integration tests: `*.int.test.ts`, `*.int.test.tsx`.
 - E2E tests: `*.cy.ts` in `cypress/e2e/`.
+
+Runner contract:
+
+- Unit scripts (`test:unit`, `test:unit:watch`, `test:unit:ci`) run with `jest.unit.config.ts`.
+- Integration scripts (`test:integration`) run with `jest.integration.config.ts`.
+- Unit discovery must exclude `*.int.test.ts(x)`; integration discovery must only include `*.int.test.ts(x)`.
 
 ### 5.2 Choosing the right layer
 
@@ -361,6 +367,25 @@ _Note: concrete script names may differ; this is the intended structure._
   npm run lint        # ESLint
   npm run lint:css    # Stylelint
   npm run typecheck   # tsc --noEmit
+  ```
+
+- Unit / interaction tests
+
+  ```bash
+  npm run test:unit
+  npm run test:unit:ci
+  ```
+
+- Integration tests
+
+  ```bash
+  npm run test:integration
+  ```
+
+- E2E tests
+
+  ```bash
+  npm run test:e2e
   ```
 
 ## 9. Related Documents

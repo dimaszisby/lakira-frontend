@@ -53,7 +53,7 @@ Jobs:
 
 2. `unit` (needs `checks`)
 - `npm ci`
-- `npm run test:unit:ci`
+- `npm run test:unit:ci` (Jest unit suite via `jest.unit.config.ts`, excludes `*.int.test.ts(x)`)
 - Uploads coverage to Codecov (`CODECOV_TOKEN`)
 - Uploads coverage artifact
 
@@ -124,6 +124,9 @@ TypeScript project split used by tooling:
 
 - Root `tsconfig.json` is used by `npm run typecheck` for app + Jest/unit test code.
 - Cypress TypeScript context is isolated in `cypress/tsconfig.json` to prevent Cypress Chai globals from leaking into Jest matcher typing.
+- Jest test layer boundary:
+  - `jest.unit.config.ts` discovers `*.test.ts(x)` / `*.spec.ts(x)` and excludes `*.int.test.ts(x)`.
+  - `jest.integration.config.ts` discovers only `*.int.test.ts(x)`.
 
 Current local validation snapshot (February 18, 2026):
 
@@ -131,7 +134,9 @@ Current local validation snapshot (February 18, 2026):
 - Note: `lint` currently fails on ESLint errors only; warning cleanup is tracked separately.
 - Note: `test:e2e` unsets `ELECTRON_RUN_AS_NODE` in script to avoid local Electron/Cypress launch conflicts.
 - Note: integration helpers/MSW scaffolding and global Jest wiring are active in `src/test-utils/`, `jest.integration.config.ts`, and `jest.integration.setup.ts`.
-- Note: first real integration spec is in `src/features/auth/components/__tests__/LoginForm.int.test.tsx` (success + error flow coverage).
+- Note: current integration baseline specs are:
+  - `src/features/auth/components/__tests__/LoginForm.int.test.tsx`
+  - `src/features/metric-categories/components/__tests__/MetricCategoryForm.int.test.tsx`
 - Note: Web Vitals script currently summarizes lab audits from Lighthouse reports (RUM instrumentation remains planned).
 
 ## 6. Secrets And Env Vars
