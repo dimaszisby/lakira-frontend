@@ -3,7 +3,7 @@
 import * as React from "react";
 import type { UseFormRegisterReturn } from "react-hook-form";
 
-import { cn } from "@/src/lib/cn";
+import { cn } from "@/lib/cn";
 
 import InputChrome from "./InputChrome";
 
@@ -84,7 +84,7 @@ const TextArea = ({
       size={size}
       className={wrapperClassName}
     >
-      <div className="flex-col space-y-4">
+      <div className="flex flex-col space-y-4">
         <textarea
           id={id}
           ref={ref}

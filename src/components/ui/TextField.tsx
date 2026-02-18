@@ -4,7 +4,7 @@ import { Eye, EyeSlash, XCircle } from "phosphor-react";
 import * as React from "react";
 import type { UseFormRegisterReturn } from "react-hook-form";
 
-import { cn } from "@/src/lib/cn";
+import { cn } from "@/lib/cn";
 
 import InputChrome from "./InputChrome";
 
