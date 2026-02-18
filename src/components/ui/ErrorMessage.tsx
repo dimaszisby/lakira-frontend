@@ -4,19 +4,20 @@ import { WarningCircle } from "phosphor-react";
 import { useId } from "react";
 import type { FieldError } from "react-hook-form";
 
-import { cn } from "@/src/lib/cn";
+import { cn } from "@/lib/cn";
+import { sanitizeErrorMessage } from "@/lib/sanitizeErrorMessage";
 
 type Size = "sm" | "md" | "lg";
 type Variant = "plain" | "subtle" | "solid";
 
 type Props = {
-  id?: string; // useful to link via aria-describedby
-  message?: string | null; // explicit message (wins over fieldError)
-  fieldError?: FieldError; // RHF error
+  id?: string;
+  message?: string | null;
+  fieldError?: FieldError;
   size?: Size;
-  variant?: Variant; // visual treatment
+  variant?: Variant;
   fullWidth?: boolean;
-  reserveSpace?: boolean; // keep height when no message (prevents layout shift)
+  reserveSpace?: boolean;
   hideIcon?: boolean;
   className?: string;
   "aria-label"?: string;
@@ -28,14 +29,20 @@ const SIZE = {
   lg: { text: "text-base", icon: "h-5 w-5", minH: "min-h-[1.5rem]" },
 } as const;
 
+const STATUS_ERROR_TEXT = "text-status-error";
+
 const VARIANT = {
-  plain: { wrap: "", text: "text-red-700", icon: "text-red-600" },
+  plain: { wrap: "", text: STATUS_ERROR_TEXT, icon: STATUS_ERROR_TEXT },
   subtle: {
-    wrap: "rounded-md border border-red-200 bg-red-50 px-2 py-1",
-    text: "text-red-700",
-    icon: "text-red-600",
+    wrap: "rounded-md border border-status-error/30 bg-status-error/10 px-2 py-1",
+    text: STATUS_ERROR_TEXT,
+    icon: STATUS_ERROR_TEXT,
   },
-  solid: { wrap: "rounded-md bg-red-600 px-2 py-1", text: "text-white", icon: "text-white" },
+  solid: {
+    wrap: "rounded-md bg-status-error px-2 py-1",
+    text: "text-ink-inverted",
+    icon: "text-ink-inverted",
+  },
 } as const;
 
 const ErrorMessage = ({
@@ -53,7 +60,8 @@ const ErrorMessage = ({
   const uid = useId();
   const domId = id ?? `err-${uid}`;
 
-  const msg = message ?? fieldError?.message ?? null;
+  const rawMessage = message ?? fieldError?.message ?? null;
+  const msg = rawMessage ? sanitizeErrorMessage(rawMessage) : null;
   const show = Boolean(msg);
 
   const s = SIZE[size];
@@ -71,7 +79,6 @@ const ErrorMessage = ({
         v.wrap,
         className,
       )}
-      // A11y: live-region for errors; no role when empty (space reservation only)
       role={show ? "alert" : undefined}
       aria-live={show ? "assertive" : undefined}
       aria-atomic={show ? true : undefined}
@@ -80,7 +87,6 @@ const ErrorMessage = ({
       {show && !hideIcon ? (
         <WarningCircle aria-hidden className={cn(v.icon, s.icon, "mt-[1px] shrink-0")} />
       ) : null}
-      {/* Keep text color outside conditional so classes don’t jump */}
       <span className={cn(v.text, s.text)}>{show ? String(msg) : ""}</span>
     </div>
   );
