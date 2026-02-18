@@ -1,12 +1,12 @@
 import type { SortChipsColumns } from "@/components/ui/SortChipGroup";
-import type { MetricCategoryVM } from "@/src/features/metric-categories/view-models";
+import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
 
 // Shared types for both desktop and mobile tables
 export interface CategoryTableProps {
   categories: MetricCategoryVM[];
-  sortBy: string;
+  sortBy: keyof MetricCategoryVM;
   sortOrder: "ASC" | "DESC" | null;
-  onSort: (column: string) => void;
+  onSort: (column: keyof MetricCategoryVM) => void;
   onEdit?: (category: MetricCategoryVM) => void;
   onDelete?: (category: MetricCategoryVM) => void;
   onRowClick?: (metric: MetricCategoryVM) => void;

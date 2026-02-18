@@ -1,10 +1,17 @@
-import React, { memo } from "react";
+import { memo } from "react";
 
 import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
 import type { TableColumn } from "@/ui/Table";
 import { TableBase } from "@/ui/Table";
 
 import type { CategoryTableProps } from "./table-config";
+
+const formatTimestamp = (value?: string) => {
+  if (!value) return "N/A";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "N/A";
+  return parsed.toLocaleString();
+};
 
 const columns: TableColumn<MetricCategoryVM>[] = [
   {
@@ -23,11 +30,14 @@ const columns: TableColumn<MetricCategoryVM>[] = [
     width: "w-[60px]",
     responsiveWidth: { md: "w-[80px]" },
     renderCell: (cat) => (
-      <span
-        className="inline-block h-5 w-5 rounded-full"
-        style={{ backgroundColor: cat.color }}
-        aria-label={cat.color}
-      />
+      <span className="inline-flex items-center justify-center">
+        <span
+          className="inline-block h-5 w-5 rounded-full border border-border"
+          style={{ backgroundColor: cat.color }}
+          aria-hidden="true"
+        />
+        <span className="sr-only">{`Color ${cat.color}`}</span>
+      </span>
     ),
     sortable: false,
   },
@@ -53,10 +63,7 @@ const columns: TableColumn<MetricCategoryVM>[] = [
     align: "left",
     sortable: true,
     width: "w-[160px]",
-    renderCell: (cat) => {
-      if (!cat.updatedAt) return "N/A";
-      return new Date(cat.updatedAt).toLocaleString();
-    },
+    renderCell: (cat) => formatTimestamp(cat.updatedAt),
   },
   {
     key: "createdAt",
@@ -64,10 +71,7 @@ const columns: TableColumn<MetricCategoryVM>[] = [
     align: "left",
     sortable: true,
     width: "w-[160px]",
-    renderCell: (cat) => {
-      if (!cat.createdAt) return "N/A";
-      return new Date(cat.createdAt).toLocaleString();
-    },
+    renderCell: (cat) => formatTimestamp(cat.createdAt),
   },
 ];
 
@@ -79,18 +83,22 @@ export const MetricCategoryDesktopTableBase = ({
   onEdit,
   onDelete,
   onRowClick,
+  className,
 }: CategoryTableProps) => {
   return (
     <TableBase<MetricCategoryVM>
       data={categories}
       columns={columns}
-      sortBy={sortBy as keyof MetricCategoryVM}
+      sortBy={sortBy}
       sortOrder={sortOrder}
-      onSort={(col) => onSort(String(col))}
+      onSort={onSort}
       rowKey={(cat) => cat.id}
       onEdit={onEdit}
       onDelete={onDelete}
       onRowClick={onRowClick}
+      className={className}
+      ariaLabel="Metric categories table"
+      emptyMessage="No categories available"
       // Optionally: custom row component for editing/deleting per row
       // renderRow={(category) => <MetricCategoryTableRow key={category.id} category={category} />}
     />

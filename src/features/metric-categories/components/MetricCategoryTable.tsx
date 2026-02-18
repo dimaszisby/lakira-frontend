@@ -1,6 +1,4 @@
-import React, { memo } from "react";
-
-import type { MetricCategoryVM } from "@/src/features/metric-categories/view-models";
+import { memo } from "react";
 
 import MetricCategoryDesktopTable from "./MetricCategoryDesktopTable";
 import MetricCategoryMobileTable from "./MetricCategoryMobileTable";
@@ -20,25 +18,24 @@ export const MetricCategoryTableBase = ({
       {/* Desktop view */}
       <MetricCategoryDesktopTable
         categories={categories}
-        sortBy={sortBy as keyof MetricCategoryVM}
+        sortBy={sortBy}
         sortOrder={sortOrder}
         onSort={onSort}
         onEdit={onEdit}
         onDelete={onDelete}
         onRowClick={onRowClick}
-        className="space-y-4"
       />
 
       {/* Mobile view */}
       <MetricCategoryMobileTable
         categories={categories}
         rowKey={(cat) => cat.id}
-        sortBy={sortBy as keyof MetricCategoryVM}
+        sortBy={sortBy}
         sortOrder={sortOrder}
         onSort={onSort}
         onEdit={onEdit}
         onDelete={onDelete}
-        className="block sm:hidden"
+        onRowClick={onRowClick}
       />
     </>
   );

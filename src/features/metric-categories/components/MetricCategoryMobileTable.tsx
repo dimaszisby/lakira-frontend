@@ -1,6 +1,7 @@
-import React, { memo } from "react";
+import { memo } from "react";
 
-import type { MetricCategoryVM } from "@/src/features/metric-categories/view-models";
+import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
+import { cn } from "@/lib/cn";
 import SwipeableCard from "@/ui/SwipeableCard";
 
 import MetricCategoryMobileCard from "./MetricCategoryMobileCard";
@@ -15,33 +16,38 @@ export const MetricCategoryMobileTableBase = ({
   className = "",
 }: CategoryTableProps) => {
   return (
-    <div className={`block space-y-4 ${className}`}>
+    <section className={cn("space-y-4 sm:hidden", className)} aria-label="Metric categories mobile list">
       {categories.length > 0 ? (
-        categories.map((item) => (
-          <SwipeableCard
-            key={rowKey(item)}
-            actions={[
-              {
-                label: "Edit",
-                color: "bg-blue-500",
-                onClick: () => onEdit?.(item),
-                icon: <span>✏️</span>,
-              },
-              {
-                label: "Delete",
-                color: "bg-red-500",
-                onClick: () => onDelete?.(item),
-                icon: <span>🗑️</span>,
-              },
-            ]}
-          >
-            <MetricCategoryMobileCard category={item} onClick={onRowClick} />
-          </SwipeableCard>
-        ))
+        <ul role="list" className="space-y-4">
+          {categories.map((item) => (
+            <li key={rowKey(item)}>
+              <SwipeableCard
+                actions={[
+                  {
+                    label: "Edit",
+                    color: "bg-status-info",
+                    onClick: () => onEdit?.(item),
+                    icon: <span>✏️</span>,
+                  },
+                  {
+                    label: "Delete",
+                    color: "bg-status-error",
+                    onClick: () => onDelete?.(item),
+                    icon: <span>🗑️</span>,
+                  },
+                ]}
+              >
+                <MetricCategoryMobileCard category={item} onClick={onRowClick} />
+              </SwipeableCard>
+            </li>
+          ))}
+        </ul>
       ) : (
-        <p className="py-4 text-center text-sm text-gray-500">No data available</p>
+        <p className="py-4 text-center text-sm text-ink-secondary" role="status">
+          No categories available
+        </p>
       )}
-    </div>
+    </section>
   );
 };
 MetricCategoryMobileTableBase.displayName = "MetricCategoryMobileTable";
