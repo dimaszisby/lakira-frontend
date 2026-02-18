@@ -140,6 +140,7 @@ Current local validation snapshot (February 18, 2026):
   - `src/features/metric-logs/components/__tests__/LogForm.int.test.tsx`
   - `src/features/metrics/components/__tests__/MetricForm.int.test.tsx`
   - `src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx`
+  - `src/app/(app)/metrics/_components/__tests__/MetricsPageClient.int.test.tsx`
 - Note: Web Vitals script currently summarizes lab audits from Lighthouse reports (RUM instrumentation remains planned).
 
 ## 6. Secrets And Env Vars
