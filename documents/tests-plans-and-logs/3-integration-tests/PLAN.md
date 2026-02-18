@@ -75,6 +75,7 @@ Current decision (2026-02-18):
   - `src/features/metrics/components/__tests__/MetricForm.int.test.tsx`
   - `src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx`
   - `src/app/(app)/metrics/_components/__tests__/MetricsPageClient.int.test.tsx`
+  - `src/app/(app)/dashboard/_components/__tests__/DashboardContent.int.test.tsx`
 
 ---
 
