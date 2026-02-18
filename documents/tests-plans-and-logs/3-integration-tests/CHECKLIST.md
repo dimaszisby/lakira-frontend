@@ -28,6 +28,7 @@ Decision references:
   - `src/features/auth/components/__tests__/LoginForm.int.test.tsx`
   - `src/features/metric-categories/components/__tests__/MetricCategoryForm.int.test.tsx`
   - `src/features/metric-logs/components/__tests__/LogForm.int.test.tsx`
+  - `src/features/metrics/components/__tests__/MetricForm.int.test.tsx`
 
 ---
 

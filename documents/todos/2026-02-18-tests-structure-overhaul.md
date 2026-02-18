@@ -57,7 +57,7 @@
 
 ### P2 Guardrails and Coverage Backfill
 - [x] Add CI-safe discovery checks in docs/runbook.
-- [ ] Continue integration coverage expansion after boundary hardening (progress: added `LogForm.int.test.tsx` baseline on 2026-02-18).
+- [ ] Continue integration coverage expansion after boundary hardening (progress: added `LogForm.int.test.tsx` and `MetricForm.int.test.tsx` baselines on 2026-02-18).
 
 ### P3 Optional Future Reorg
 - [ ] Evaluate explicit unit/integration subfolders only if readability degrades.
@@ -84,10 +84,10 @@
 Validation snapshot (2026-02-18):
 
 - Unit discovery isolation: pass (no `*.int.test.ts(x)` listed under unit config).
-- Integration discovery isolation: pass (`LoginForm.int.test.tsx`, `MetricCategoryForm.int.test.tsx` only).
+- Integration discovery isolation: pass (`LoginForm.int.test.tsx`, `MetricCategoryForm.int.test.tsx`, `LogForm.int.test.tsx`, `MetricForm.int.test.tsx`).
 - `npm run test:unit`: pass (43 suites, 165 tests).
 - `npm run test:unit:ci`: pass (43 suites, 165 tests, coverage report generated).
-- `npm run test:integration`: pass (2 suites, 5 tests).
+- `npm run test:integration`: pass (4 suites, 11 tests).
 - `npm run typecheck`: pass.
 
 ## Risks and Mitigations
