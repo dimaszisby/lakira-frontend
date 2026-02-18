@@ -2,27 +2,31 @@
 
 ## 1. Purpose
 
-This document defines the implemented CI pipeline in this FE repo.
+This document defines the implemented GitHub Actions pipelines in this FE repo.
 
-Workflow file:
+Workflow files:
 
 - `.github/workflows/test.yml`
+- `.github/workflows/performance.yml`
 
 Workflow name:
 
 - `frontend-ci`
+- `frontend-performance`
 
 ## 2. Triggers
 
 - `push` to `main`, `dev`
 - `pull_request` targeting `main`, `dev`
+- `schedule` (performance workflow)
+- `workflow_dispatch` (performance workflow)
 
 ## 3. Concurrency
 
 - Enabled: `frontend-ci-${{ github.ref }}`
 - Behavior: cancel in-progress runs on newer commits to same ref.
 
-## 4. Jobs And Order
+## 4. Main CI Jobs And Order (`test.yml`)
 
 ### 4.1 `checks`
 
@@ -125,7 +129,28 @@ Steps:
 1. Full-history checkout (`fetch-depth: 0`)
 2. Run Gitleaks
 
-## 5. Scripts Required
+## 5. Performance Workflow (`performance.yml`)
+
+Job: `performance` (`Lighthouse and Bundle Metrics`)
+
+Steps:
+
+1. Checkout
+2. Setup Node 20 + npm cache
+3. `npm ci`
+4. `npm run build`
+5. `npm run perf:bundle-size`
+6. Start app (`next start` on `127.0.0.1:3000`)
+7. `npm run perf:lighthouse`
+8. `npm run perf:web-vitals`
+9. Upload `reports/performance` artifact
+
+Decision:
+
+- Performance checks are **scheduled/nightly** and manually triggerable.
+- Performance checks are **not PR-required gates** at this stage.
+
+## 6. Scripts Required
 
 From `package.json`:
 
@@ -137,12 +162,15 @@ From `package.json`:
 - `build`
 - `test:e2e`
 - `security:scan`
+- `perf:bundle-size`
+- `perf:lighthouse`
+- `perf:web-vitals`
 
-## 6. Secrets Required
+## 7. Secrets Required
 
 - `CODECOV_TOKEN`
 
-## 7. Notes
+## 8. Notes
 
 - Production deploy URL is not finalized yet.
 - Staging backend currently active: `https://lakira-backend-staging.onrender.com/api/v1`.

@@ -11,8 +11,9 @@ References:
 
 ## 1. Current Status
 
-- Real-user Web Vitals telemetry is not yet instrumented in this repo.
-- Performance checks currently rely on local/CI build validation and planned Lighthouse runs.
+- Real-user (RUM) Web Vitals telemetry is not yet instrumented in this repo.
+- Lab Web Vitals summary is now generated from Lighthouse reports using `npm run perf:web-vitals`.
+- Scheduled execution runs in `.github/workflows/performance.yml`.
 
 ---
 
@@ -41,6 +42,13 @@ Target implementation:
 - Emit metric payloads to a dedicated ingestion endpoint (planned) or approved analytics provider.
 - Include route/path context and environment marker (preview/staging/prod).
 
+Current bootstrap (implemented):
+
+- Script: `scripts/perf/web-vitals-lab-summary.mjs`
+- Input: `reports/performance/lighthouse/*.json`
+- Output: `reports/performance/web-vitals-lab-summary.json`
+- Thresholds: `scripts/perf/performance-thresholds.json` (`webVitals` section)
+
 Data contract (minimum fields):
 
 - metric name
@@ -66,8 +74,8 @@ Data contract (minimum fields):
 
 ## 5. Exit Criteria
 
-- [ ] Web Vitals emission path is implemented and tested.
+- [x] Lab Web Vitals summary script is implemented and CI-wired.
+- [ ] Real-user Web Vitals emission path is implemented and tested.
 - [ ] Data retention/reporting owner is assigned.
 - [ ] Thresholds and alert policy are documented.
 - [ ] Release checklist links to real telemetry evidence.
-

@@ -1,6 +1,6 @@
 # Lakira Frontend - GitHub Actions Checklist
 
-Use this checklist when updating `.github/workflows/test.yml`.
+Use this checklist when updating `.github/workflows/test.yml` or `.github/workflows/performance.yml`.
 
 ## 1. Workflow Baseline
 
@@ -9,6 +9,8 @@ Use this checklist when updating `.github/workflows/test.yml`.
 - [ ] `push` branches include `main`, `dev`.
 - [ ] `pull_request` branches include `main`, `dev`.
 - [ ] Concurrency cancel-in-progress is enabled.
+- [ ] Performance workflow exists at `.github/workflows/performance.yml`.
+- [ ] Performance workflow includes schedule + workflow_dispatch triggers.
 
 ## 2. Core Gated Chain
 
@@ -22,6 +24,7 @@ Use this checklist when updating `.github/workflows/test.yml`.
 
 - [ ] `security` runs `security:scan`.
 - [ ] `secret-scan` runs Gitleaks with full history checkout.
+- [ ] `performance` workflow runs bundle/lighthouse/web-vitals scripts and uploads reports.
 
 ## 4. Artifacts And Reporting
 
@@ -39,6 +42,9 @@ Use this checklist when updating `.github/workflows/test.yml`.
 - [ ] `test:e2e` exists.
 - [ ] `build` exists.
 - [ ] `security:scan` exists.
+- [ ] `perf:bundle-size` exists.
+- [ ] `perf:lighthouse` exists.
+- [ ] `perf:web-vitals` exists.
 - [ ] TS project configs remain aligned (`tsconfig.json` for app/unit, `cypress/tsconfig.json` for Cypress scope).
 
 ## 6. Environment And Secret Hygiene

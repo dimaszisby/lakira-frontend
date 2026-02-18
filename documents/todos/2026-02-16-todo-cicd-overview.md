@@ -6,7 +6,7 @@
 - Test program roll-up (Layers 1–5).
 
 ## Current Snapshot
-Frontend CI has been expanded to a gated chain in `.github/workflows/test.yml` (`checks -> unit -> integration -> build -> e2e`) plus `security` and `secret-scan`. Staging backend is active at `https://lakira-backend-staging.onrender.com/api/v1`, while production URL/domain remain TBD. As of February 18, 2026, P0 gate blockers are cleared and the full local gate commands run successfully.
+Frontend CI has been expanded to a gated chain in `.github/workflows/test.yml` (`checks -> unit -> integration -> build -> e2e`) plus `security` and `secret-scan`. Performance checks are now wired in `.github/workflows/performance.yml` as scheduled/manual jobs (`perf:bundle-size`, `perf:lighthouse`, `perf:web-vitals`). Staging backend is active at `https://lakira-backend-staging.onrender.com/api/v1`, while production URL/domain remain TBD. As of February 18, 2026, P0 gate blockers are cleared and the full local gate commands run successfully.
 
 ## CI Test Program Roll-up (from tests-plans-and-logs)
 | Layer | Source Docs | Current CI Status | Readiness | Blocking Gaps | Next Action |
@@ -15,7 +15,7 @@ Frontend CI has been expanded to a gated chain in `.github/workflows/test.yml` (
 | Layer 2 Unit | `documents/tests-plans-and-logs/2-unit-tests/PLAN.md`, `documents/tests-plans-and-logs/2-unit-tests/CHECKLIST.md` | `Gated` | Medium-High | No active blockers; checklist/run-log refresh still needed for latest evidence. | Update unit checklist/log entries with February 18, 2026 rerun results. |
 | Layer 3 Integration | `documents/tests-plans-and-logs/3-integration-tests/PLAN.md`, `documents/tests-plans-and-logs/3-integration-tests/CHECKLIST.md`, `documents/tests-plans-and-logs/3-integration-tests/a11y-testing-checklist.md` | `Partial` | Medium | CI track is wired (`test:integration`, currently pass-with-no-tests). Helper/MSW scaffolds exist, but real integration specs and global MSW lifecycle wiring are pending. | Add first `.int.test.tsx` specs and complete MSW lifecycle wiring when integration tests start using network handlers. |
 | Layer 4 E2E | `documents/tests-plans-and-logs/4-end-to-end-tests/PLAN.md`, `documents/tests-plans-and-logs/4-end-to-end-tests/CHECKLIST.md`, `documents/tests-plans-and-logs/4-end-to-end-tests/a11y-e2e-checklist.md` | `Partial` | Medium-High | Base URL and auth/token helper scaffolding are implemented; broader authenticated flows and reset hooks remain pending. | Expand from smoke to authenticated metric/category/log/settings coverage. |
-| Layer 5 Performance / Web Vitals | `documents/tests-plans-and-logs/5-performance-and-web-vitals-tests/lighthouse-plan.md`, `documents/tests-plans-and-logs/5-performance-and-web-vitals-tests/web-vitals-plan.md`, `documents/tests-plans-and-logs/5-performance-and-web-vitals-tests/bundle-size-checklist.md` | `Not Wired` | Low-Medium | Plan/checklists restored, but executable scripts/config and CI jobs are still missing. | Add runnable scripts/config and choose CI mode (PR gate vs scheduled). |
+| Layer 5 Performance / Web Vitals | `documents/tests-plans-and-logs/5-performance-and-web-vitals-tests/lighthouse-plan.md`, `documents/tests-plans-and-logs/5-performance-and-web-vitals-tests/web-vitals-plan.md`, `documents/tests-plans-and-logs/5-performance-and-web-vitals-tests/bundle-size-checklist.md` | `Partial` | Medium | Scripts/config and scheduled CI are wired, but real-user Web Vitals instrumentation is still pending. | Keep scheduled audits stable and implement RUM Web Vitals collection path. |
 | Cross-cutting A11y (Integration + E2E) | `documents/tests-plans-and-logs/3-integration-tests/a11y-testing-checklist.md`, `documents/tests-plans-and-logs/4-end-to-end-tests/a11y-e2e-checklist.md`, `documents/documentation/accessibility-guidelines.md` | `Planned` | Low | A11y checklists exist but are not enforced by dedicated CI a11y jobs yet. | Decide minimum automated a11y gate and wire to integration/E2E layers. |
 
 ## Priority Board
@@ -38,13 +38,13 @@ Frontend CI has been expanded to a gated chain in `.github/workflows/test.yml` (
 - [x] Layer 4: finalize data reset strategy decision.
 - [x] Layer 4: finalize token-expiry simulation path decision.
 - [x] Layer 4: implement Cypress auth/token helpers (`cypress/support/commands.ts`) and wire Cypress support file in config.
-- [ ] Layer 5: define executable scripts/config for Lighthouse, Web Vitals collection, and bundle-size checks.
+- [x] Layer 5: define executable scripts/config for Lighthouse, Web Vitals collection, and bundle-size checks.
 
 ### P2 — Wire Additional CI Tracks
 - [x] Keep current PR-gated chain: `checks`, `unit`, `integration`, `build`, `e2e` smoke, `security`, `secret-scan`.
 - [x] Add integration tests as PR-required gate (implemented via `test:integration`; currently `--passWithNoTests` until specs are added).
-- [ ] Add performance/web-vitals tests as either PR-required or scheduled/nightly gate.
-- [ ] Record the gating decision in CI/CD docs once chosen.
+- [x] Add performance/web-vitals tests as scheduled/nightly gate (`.github/workflows/performance.yml`).
+- [x] Record the gating decision in CI/CD docs.
 
 ### P3 — Documentation Hygiene
 - [x] Track typo/path cleanup for `documents/tests-plans-and-logs/3-integration-tests/CHEKLIST.md` naming consistency (canonical `CHECKLIST.md` added; legacy filename kept as compatibility pointer).
@@ -54,6 +54,7 @@ Frontend CI has been expanded to a gated chain in `.github/workflows/test.yml` (
 ## Known Blockers
 - No active P0 gate blockers.
 - `npm run lint` currently reports non-blocking warnings (import order/class order/react-refresh/sonar/react-hooks guidance); warning cleanup remains a quality backlog item.
+- Real-user Web Vitals telemetry path is not implemented yet (current Web Vitals checks are lab-derived from Lighthouse reports).
 
 ## FE/BE Handshake Checkpoints
 - [x] Staging backend confirmed active: `https://lakira-backend-staging.onrender.com/api/v1`.
@@ -82,6 +83,7 @@ Frontend CI has been expanded to a gated chain in `.github/workflows/test.yml` (
 - `documents/ci-cd/frontend/ENVIRONMENTS_MATRIX.md`
 - `documents/ci-cd/frontend/BACKEND_HANDOFF_FOR_FE_CICD.md`
 - `.github/workflows/test.yml`
+- `.github/workflows/performance.yml`
 - `documents/tests-plans-and-logs/TESTING_STRATEGY.md`
 - `documents/tests-plans-and-logs/2-unit-tests/PLAN.md`
 - `documents/tests-plans-and-logs/2-unit-tests/CHECKLIST.md`

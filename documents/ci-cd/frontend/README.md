@@ -4,7 +4,9 @@
 
 This folder documents the current CI/CD setup for the Lakira Frontend repository.
 
-- Workflow file: `.github/workflows/test.yml`
+- Workflow files:
+  - `.github/workflows/test.yml` (PR/push quality gates)
+  - `.github/workflows/performance.yml` (scheduled performance audits)
 - Deploy platform: Vercel (outside GitHub Actions deploy job)
 
 Related documents:
@@ -26,9 +28,11 @@ Related documents:
 - Production backend web-service URL is **not available yet**.
 - FE production domain is **not finalized yet**.
 
-## 4. GitHub Actions Workflow
+## 4. GitHub Actions Workflows
 
-Workflow: `.github/workflows/test.yml` (name: `frontend-ci`)
+### 4.1 Main CI (`.github/workflows/test.yml`)
+
+Workflow name: `frontend-ci`
 
 Triggers:
 
@@ -76,6 +80,26 @@ Jobs:
 - Full-history checkout
 - Gitleaks scan
 
+### 4.2 Performance CI (`.github/workflows/performance.yml`)
+
+Workflow name: `frontend-performance`
+
+Triggers:
+
+- `schedule` (nightly cron)
+- `workflow_dispatch` (manual run)
+
+Job:
+
+1. `performance`
+- `npm ci`
+- `npm run build`
+- `npm run perf:bundle-size`
+- start app on `127.0.0.1:3000`
+- `npm run perf:lighthouse`
+- `npm run perf:web-vitals`
+- upload `reports/performance` artifact
+
 ## 5. Script Alignment (`package.json`)
 
 CI-gated scripts now include:
@@ -88,6 +112,9 @@ CI-gated scripts now include:
 - `build`
 - `test:e2e`
 - `security:scan`
+- `perf:bundle-size`
+- `perf:lighthouse`
+- `perf:web-vitals`
 
 Also available:
 
@@ -100,10 +127,11 @@ TypeScript project split used by tooling:
 
 Current local validation snapshot (February 18, 2026):
 
-- Passed: `npm run lint`, `npm run lint:css`, `npm run typecheck`, `npm run test:unit:ci`, `npm run test:integration`, `npm run build`, `npm run test:e2e`.
+- Passed: `npm run lint`, `npm run lint:css`, `npm run typecheck`, `npm run test:unit:ci`, `npm run test:integration`, `npm run build`, `npm run test:e2e`, `npm run perf:bundle-size`, `npm run perf:lighthouse`, `npm run perf:web-vitals`.
 - Note: `lint` currently fails on ESLint errors only; warning cleanup is tracked separately.
 - Note: `test:e2e` unsets `ELECTRON_RUN_AS_NODE` in script to avoid local Electron/Cypress launch conflicts.
 - Note: integration helpers/MSW scaffolding exists in `src/test-utils/`; global MSW Jest setup will be enabled when integration specs start using network handlers.
+- Note: Web Vitals script currently summarizes lab audits from Lighthouse reports (RUM instrumentation remains planned).
 
 ## 6. Secrets And Env Vars
 

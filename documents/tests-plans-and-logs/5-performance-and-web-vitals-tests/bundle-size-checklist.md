@@ -40,13 +40,23 @@ npm run build
 
 3. Record notable deltas in PR notes if budget impact is meaningful.
 
+4. Run automated bundle report:
+
+```bash
+npm run perf:bundle-size
+```
+
+5. Review output report:
+
+- `reports/performance/bundle-size-report.json`
+
 ---
 
-## 3. CI Direction (Planned)
+## 3. CI Direction
 
-- [ ] Add automated bundle-size report script (planned, e.g. `scripts/bundle-size-report.mjs`).
-- [ ] Upload bundle report artifact in CI.
-- [ ] Define fail conditions for major regressions.
+- [x] Automated bundle-size report script added (`scripts/perf/bundle-size-report.mjs`).
+- [x] Bundle report uploaded in scheduled CI workflow (`.github/workflows/performance.yml`).
+- [x] Fail conditions defined via thresholds in `scripts/perf/performance-thresholds.json`.
 
 ---
 
@@ -57,4 +67,3 @@ Before release:
 - [ ] Build size changes are reviewed against performance budget.
 - [ ] Regressions have mitigation plan or documented exception.
 - [ ] Lighthouse and Web Vitals evidence is attached where applicable.
-

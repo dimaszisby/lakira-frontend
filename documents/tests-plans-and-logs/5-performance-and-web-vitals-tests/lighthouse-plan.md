@@ -12,17 +12,17 @@ References:
 
 ## 1. Current Status
 
-- Lighthouse is not yet wired into CI jobs.
-- Current CI quality gates remain: lint, typecheck, unit, build, e2e, security, secret-scan.
-- Lighthouse checks are currently manual/planned.
+- Lighthouse checks are wired via script + scheduled CI workflow.
+- Threshold source of truth: `scripts/perf/performance-thresholds.json`.
+- Scheduled runner: `.github/workflows/performance.yml` (nightly + manual dispatch).
 
 ---
 
 ## 2. Tooling Decision
 
-- Target tooling: Lighthouse CLI (`lighthouse`) with JSON + HTML artifacts.
-- Target config file: `lighthouserc.json` at repo root (planned).
-- CI mode decision (pending): PR gate vs scheduled/nightly run.
+- Tooling: Lighthouse CLI via `npx lighthouse` in `scripts/perf/run-lighthouse.mjs`.
+- Config + thresholds: `scripts/perf/performance-thresholds.json`.
+- CI mode decision: scheduled/nightly gate (`.github/workflows/performance.yml`), not PR-required.
 
 ---
 
@@ -42,33 +42,45 @@ Environment targets:
 
 ---
 
-## 4. Manual Run Procedure (Current)
+## 4. Run Procedure
 
-1. Build and start app:
+1. Build app:
 
 ```bash
 npm run build
+```
+
+2. Run bundle size report:
+
+```bash
+npm run perf:bundle-size
+```
+
+3. Start app:
+
+```bash
 npm run start -- --hostname 127.0.0.1 --port 3000
 ```
 
-2. Run Lighthouse per route (example):
+4. Run Lighthouse thresholds:
 
 ```bash
-npx lighthouse http://127.0.0.1:3000/dashboard \
-  --output html \
-  --output json \
-  --output-path ./reports/lighthouse-dashboard \
-  --chrome-flags="--headless"
+npm run perf:lighthouse
 ```
 
-3. Save artifacts in `reports/` and link results in release/perf logs.
+5. Build lab Web Vitals summary from Lighthouse reports:
+
+```bash
+npm run perf:web-vitals
+```
+
+Reports are written to `reports/performance/`.
 
 ---
 
-## 5. Exit Criteria for CI Wiring
+## 5. CI Wiring Status
 
-- [ ] Config file (`lighthouserc.json`) is added and reviewed.
-- [ ] Minimum score thresholds are aligned with `performance-budget.md`.
-- [ ] CI job uploads Lighthouse artifacts.
-- [ ] Ownership for threshold failures is defined.
-
+- [x] Executable script added: `scripts/perf/run-lighthouse.mjs`.
+- [x] Thresholds aligned to current baseline and tracked in `scripts/perf/performance-thresholds.json`.
+- [x] CI job uploads performance artifacts (`reports/performance`) in `.github/workflows/performance.yml`.
+- [ ] Ownership and escalation policy for persistent threshold failures documented.

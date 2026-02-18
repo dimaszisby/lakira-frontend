@@ -1,0 +1,19 @@
+{
+  "lighthouse": {
+    "routes": ["/", "/login", "/dashboard", "/metrics"],
+    "categories": {
+      "performance": 70,
+      "accessibility": 90,
+      "best-practices": 90
+    }
+  },
+  "webVitals": {
+    "lcpMs": 3600,
+    "cls": 0.15,
+    "inpMs": 300
+  },
+  "bundleSize": {
+    "maxTotalJsBytes": 3000000,
+    "maxLargestChunkBytes": 300000
+  }
+}

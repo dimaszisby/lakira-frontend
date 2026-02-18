@@ -1,0 +1,77 @@
+name: frontend-performance
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: frontend-performance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  performance:
+    name: Lighthouse and Bundle Metrics
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PERF_BASE_URL: http://127.0.0.1:3000
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build app
+        run: npm run build
+
+      - name: Check bundle size thresholds
+        run: npm run perf:bundle-size
+
+      - name: Start Next.js app
+        run: |
+          npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/next-perf.log 2>&1 &
+          echo $! > /tmp/next-perf.pid
+
+      - name: Wait for app readiness
+        run: |
+          for i in {1..60}; do
+            if curl -fsS "$PERF_BASE_URL" >/dev/null; then
+              echo "App is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "App failed to start in time"
+          tail -n 200 /tmp/next-perf.log || true
+          exit 1
+
+      - name: Run Lighthouse thresholds
+        run: npm run perf:lighthouse
+
+      - name: Derive lab Web Vitals summary
+        run: npm run perf:web-vitals
+
+      - name: Stop app
+        if: always()
+        run: |
+          if [ -f /tmp/next-perf.pid ]; then
+            kill "$(cat /tmp/next-perf.pid)" || true
+            rm -f /tmp/next-perf.pid
+          fi
+
+      - name: Upload performance reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-reports
+          path: reports/performance
+          if-no-files-found: warn
