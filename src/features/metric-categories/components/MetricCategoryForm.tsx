@@ -1,3 +1,5 @@
+"use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FloppyDisk, Folder, Trash } from "phosphor-react";
 import { useCallback, useEffect, useMemo } from "react";
@@ -8,12 +10,11 @@ import {
   useCreateMetricCategory,
   useDeleteMetricCategory,
   useUpdateMetricCategory,
-} from "@/features/metric-categories/hooks/index";
+} from "@/features/metric-categories/hooks";
 import type { MetricCategoryFormInput } from "@/features/metric-categories/types";
 import { metricCategoryFormSchema } from "@/features/metric-categories/types";
 import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
-import { cn } from "@/src/lib/cn";
-import type { CreateMetricCategoryRequestDTO } from "@/types/dtos/metric-category.dto";
+import { cn } from "@/lib/cn";
 import Button from "@/ui/Button";
 import ColorField from "@/ui/ColorField";
 import ErrorMessage from "@/ui/ErrorMessage";
@@ -29,9 +30,10 @@ interface Props {
 const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
   const isEditMode = !!initialCategory;
 
-  // * Form
+  const formTitle = isEditMode ? "Edit Category" : "Add Category";
+
   const makeDefaults = useCallback(
-    (m: MetricCategoryVM | null): CreateMetricCategoryRequestDTO => ({
+    (m: MetricCategoryVM | null): MetricCategoryFormInput => ({
       name: m?.name ?? "",
       color: m?.color ?? CATEGORY_DEFAULTS.color,
       icon: m?.icon ?? CATEGORY_DEFAULTS.icon,
@@ -47,7 +49,7 @@ const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
     reset,
     formState: { errors, isSubmitting, isValid },
     control,
-  } = useForm<CreateMetricCategoryRequestDTO>({
+  } = useForm<MetricCategoryFormInput>({
     resolver: zodResolver(metricCategoryFormSchema),
     mode: "onChange",
     defaultValues: defaults,
@@ -57,7 +59,6 @@ const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
     reset(defaults);
   }, [defaults, reset]);
 
-  // * Mutations
   const {
     createMetricCategory,
     isPending: isCreating,
@@ -78,10 +79,8 @@ const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
 
   const isBusyInputs = isSubmitting || isCreating || isUpdating || isDeleting;
 
-  // * Handlers
   const onValid = useCallback(
     async (data: MetricCategoryFormInput) => {
-      // TODO: Normalize DTO payload helper
       try {
         if (isEditMode && initialCategory) {
           await updateMetricCategory({ categoryId: initialCategory.id, category: data });
@@ -91,21 +90,14 @@ const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
 
         reset();
         onClose();
-      } catch (error) {
-        console.error("Error creating metric log:", error);
+      } catch {
+        // Mutation error state is handled by hook `error` values rendered below.
       }
     },
     [initialCategory, isEditMode, updateMetricCategory, createMetricCategory, reset, onClose],
   );
 
-  const onInvalid = useCallback((formErrors: typeof errors) => {
-    console.warn("Form has errors, preventing submission.", formErrors);
-  }, []);
-
-  const onSubmitForm = useMemo(
-    () => handleSubmit(onValid, onInvalid),
-    [handleSubmit, onValid, onInvalid],
-  );
+  const onSubmitForm = useMemo(() => handleSubmit(onValid), [handleSubmit, onValid]);
 
   const handleFormSubmit: React.FormEventHandler<HTMLFormElement> = useCallback(
     (e) => {
@@ -114,15 +106,14 @@ const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
     [onSubmitForm],
   );
 
-  // Delete
   const deleteCategoryAsync = useCallback(async () => {
     if (!initialCategory) return;
     try {
       await deleteMetricCategory(initialCategory.id);
       reset();
       onClose();
-    } catch (error) {
-      console.error("Error deleting metric log:", error);
+    } catch {
+      // Mutation error state is handled by hook `error` values rendered below.
     }
   }, [initialCategory, deleteMetricCategory, reset, onClose]);
 
@@ -130,34 +121,33 @@ const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
     void deleteCategoryAsync();
   }, [deleteCategoryAsync]);
 
-  // Close
   const handleCloseClick = useCallback(() => {
     onClose();
     reset();
   }, [onClose, reset]);
 
-  // Computed Values
   const errorMsg = createError?.message || updateError?.message || deleteError?.message || "";
 
-  // Styles
-  const inputBg = "bg-gray-50";
+  const inputBg = "bg-surface2";
 
   return (
-    <Modal isOpen onClose={handleCloseClick}>
-      <form noValidate className="mx-auto bg-white p-4 sm:p-4 lg:p-6" onSubmit={handleFormSubmit}>
-        <h2 className="mb-4 text-xl font-semibold">Manage Category</h2>
+    <Modal isOpen onClose={handleCloseClick} title={formTitle}>
+      <form
+        noValidate
+        className="mx-auto p-4 lg:p-6"
+        onSubmit={handleFormSubmit}
+        autoComplete="off"
+      >
+        <ErrorMessage message={errorMsg} className="mb-2" />
 
-        {/* Error Message */}
-        <ErrorMessage message={errorMsg}></ErrorMessage>
-
-        <ul className="flex flex-col gap-4 sm:gap-4 lg:gap-6">
+        <div className="flex flex-col gap-4 lg:gap-6">
           <FormField invalid={!!errors.name} error={errors.name?.message}>
             <FormField.Label>Category Name</FormField.Label>
             <FormField.Control>
               <TextField
                 placeholder="i.e Muscle Group Growth"
                 registration={register("name")}
-                leftAddon={<Folder weight="duotone" className="text-violet-500" />}
+                leftAddon={<Folder weight="duotone" className="text-ink-secondary" />}
                 hasError={!!errors.name}
                 disabled={isBusyInputs}
                 clearable
@@ -167,20 +157,17 @@ const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
             </FormField.Control>
           </FormField>
 
-          <span className="flex gap-4 sm:gap-4 lg:gap-6">
-            <FormField invalid={!!errors.icon} error={errors.icon?.message}>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:gap-6">
+            <FormField invalid={!!errors.icon} error={errors.icon?.message} className="min-w-0">
               <FormField.Label>Icon</FormField.Label>
               <FormField.Control>
                 <TextField
-                  placeholder="i.e Muscle Group Growth"
+                  placeholder="e.g. 💪"
                   registration={register("icon")}
-                  // leftAddon={<Folder weight="duotone" className="text-violet-500" />}
                   hasError={!!errors.icon}
                   disabled={isBusyInputs}
                   clearable
-                  minLength={1}
-                  maxLength={1}
-                  wrapperClassName={cn(inputBg, "flex-none w-full")}
+                  wrapperClassName={cn(inputBg, "w-full")}
                 />
               </FormField.Control>
             </FormField>
@@ -196,17 +183,16 @@ const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
                       value={field.value ?? CATEGORY_DEFAULTS.color}
                       onChange={field.onChange}
                       disabled={isBusyInputs}
-                      className={cn(inputBg, "flex-shrink")}
-                      aria-label="Chart color"
+                      className={cn(inputBg, "w-full")}
+                      aria-label="Category color"
                     />
                   </FormField.Control>
                 </FormField>
               )}
             />
-          </span>
-        </ul>
+          </div>
+        </div>
 
-        {/* Buttons */}
         <div className="mt-8 space-y-4">
           <Button
             type="submit"
@@ -215,20 +201,23 @@ const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
             disabled={isSubmitting || isCreating || isUpdating || !isValid}
             block
           >
-            {isSubmitting || isCreating || isUpdating ? "Saving..." : isEditMode ? "Save" : "Add"}
+            {isSubmitting || isCreating || isUpdating
+              ? "Saving..."
+              : isEditMode
+                ? "Save"
+                : "Add Category"}
           </Button>
 
-          {/* Delete button (edit mode only) */}
           {isEditMode ? (
             <Button
               type="button"
               variant="destructive"
               leftIcon={<Trash size={20} />}
               onClick={handleDeleteClick}
-              disabled={isSubmitting || isDeleting}
+              disabled={isBusyInputs}
               block
             >
-              {isDeleting ? "Deleting..." : "Delete Metric"}
+              {isDeleting ? "Deleting..." : "Delete Category"}
             </Button>
           ) : null}
         </div>
