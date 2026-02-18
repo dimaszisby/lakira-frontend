@@ -53,22 +53,26 @@ Jobs:
 - Uploads coverage to Codecov (`CODECOV_TOKEN`)
 - Uploads coverage artifact
 
-3. `build` (needs `unit`)
+3. `integration` (needs `unit`)
+- `npm ci`
+- `npm run test:integration` (`--passWithNoTests` until integration specs are added)
+
+4. `build` (needs `integration`)
 - `npm ci`
 - `npm run build`
 - Uploads `.next` artifact
 
-4. `e2e` (needs `build`)
+5. `e2e` (needs `build`)
 - Downloads `.next` artifact
 - Starts Next.js (`next start`)
 - Runs `npm run test:e2e` (Cypress headless)
 - Uploads Cypress videos/screenshots
 
-5. `security`
+6. `security`
 - `npm ci`
 - `npm run security:scan`
 
-6. `secret-scan`
+7. `secret-scan`
 - Full-history checkout
 - Gitleaks scan
 
@@ -80,6 +84,7 @@ CI-gated scripts now include:
 - `lint:css`
 - `typecheck`
 - `test:unit:ci`
+- `test:integration`
 - `build`
 - `test:e2e`
 - `security:scan`
@@ -95,9 +100,10 @@ TypeScript project split used by tooling:
 
 Current local validation snapshot (February 18, 2026):
 
-- Passed: `npm run lint`, `npm run lint:css`, `npm run typecheck`, `npm run test:unit:ci`, `npm run build`, `npm run test:e2e`.
+- Passed: `npm run lint`, `npm run lint:css`, `npm run typecheck`, `npm run test:unit:ci`, `npm run test:integration`, `npm run build`, `npm run test:e2e`.
 - Note: `lint` currently fails on ESLint errors only; warning cleanup is tracked separately.
 - Note: `test:e2e` unsets `ELECTRON_RUN_AS_NODE` in script to avoid local Electron/Cypress launch conflicts.
+- Note: integration helpers/MSW scaffolding exists in `src/test-utils/`; global MSW Jest setup will be enabled when integration specs start using network handlers.
 
 ## 6. Secrets And Env Vars
 

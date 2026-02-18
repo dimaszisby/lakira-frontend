@@ -14,7 +14,8 @@ Use this checklist when updating `.github/workflows/test.yml`.
 
 - [ ] `checks` runs lint + css lint + typecheck.
 - [ ] `unit` needs `checks` and runs `test:unit:ci`.
-- [ ] `build` needs `unit` and runs `build`.
+- [ ] `integration` needs `unit` and runs `test:integration`.
+- [ ] `build` needs `integration` and runs `build`.
 - [ ] `e2e` needs `build` and runs `test:e2e` against started app.
 
 ## 3. Additional Gates
@@ -34,6 +35,7 @@ Use this checklist when updating `.github/workflows/test.yml`.
 - [ ] `lint` behavior is documented (error-only vs warning-strict policy).
 - [ ] `typecheck` exists.
 - [ ] `test:unit:ci` exists.
+- [ ] `test:integration` exists.
 - [ ] `test:e2e` exists.
 - [ ] `build` exists.
 - [ ] `security:scan` exists.

@@ -1,55 +1,73 @@
----
+# Web Vitals Plan - Lakira Frontend
 
-### `web-vitals-plan.md`
+This document defines how Lakira will capture and use real-user Web Vitals data.
 
-```md
-# Web Vitals Plan – Lakira Frontend
+References:
 
-This document defines how Lakira tracks **Core Web Vitals in the real world** (RUM – Real User Monitoring) and how that data is used.
-
-It complements:
-
-- [Performance Budget](../../documentation/performance-budget.md)
-- [Lighthouse Plan](./lighthouse-plan.md)
-- [Performance Release Checklist](../../checklists/performance-release-checklist.md)
-
-Lighthouse is lab; **Web Vitals telemetry is field**.
+- `documents/documentation/performance-budget.md`
+- `documents/tests-plans-and-logs/5-performance-and-web-vitals-tests/lighthouse-plan.md`
 
 ---
 
-## 1. Goals
+## 1. Current Status
 
-Web Vitals telemetry for Lakira aims to:
-
-1. Measure real users’ experience for key metrics:
-   - LCP (Largest Contentful Paint)
-   - FID/INP (First Input Delay / Interaction to Next Paint)
-   - CLS (Cumulative Layout Shift)
-   - Optional: TTFB, FCP, custom metrics.
-2. Detect regressions in production that lab tests might miss.
-3. Provide actionable data to:
-   - prioritize performance work,
-   - validate the impact of performance improvements.
+- Real-user Web Vitals telemetry is not yet instrumented in this repo.
+- Performance checks currently rely on local/CI build validation and planned Lighthouse runs.
 
 ---
 
 ## 2. Metrics in Scope
 
-We track at minimum:
+Core metrics:
 
-- **LCP** – how quickly main content is visible.
-- **CLS** – how stable the layout is.
-- **FID/INP** – how responsive the page is to user input.
+- LCP
+- CLS
+- INP
 
-Optionally:
+Optional support metrics:
 
-- **FCP** – First Contentful Paint.
-- **TTFB** – Time to First Byte.
+- FCP
+- TTFB
 
-Thresholds (aligned with `performance-budget.md` and Core Web Vitals guidelines):
+Thresholds must follow `documents/documentation/performance-budget.md`.
 
-- LCP:
-  - Good ≤ 2.5s, Needs improvement 2.5–4.0s, Poor > 4.0s.
-- CLS:
-  - Good ≤ 0.1, Needs improvement 0.1–0.25, Poor > 0.25.
-- FID/INP:
+---
+
+## 3. Instrumentation Decision
+
+Target implementation:
+
+- Add `reportWebVitals` instrumentation in the Next.js app layer.
+- Emit metric payloads to a dedicated ingestion endpoint (planned) or approved analytics provider.
+- Include route/path context and environment marker (preview/staging/prod).
+
+Data contract (minimum fields):
+
+- metric name
+- metric value
+- page path
+- timestamp
+- environment
+
+---
+
+## 4. Rollout Phases
+
+1. Phase 1 - capture only:
+- Collect metrics without enforcing thresholds.
+
+2. Phase 2 - visibility:
+- Create dashboard/report for percentile tracking (p75 baseline).
+
+3. Phase 3 - enforcement:
+- Add alerting or CI/release checks for sustained regressions.
+
+---
+
+## 5. Exit Criteria
+
+- [ ] Web Vitals emission path is implemented and tested.
+- [ ] Data retention/reporting owner is assigned.
+- [ ] Thresholds and alert policy are documented.
+- [ ] Release checklist links to real telemetry evidence.
+

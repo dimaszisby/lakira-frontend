@@ -6,16 +6,16 @@
 - Test program roll-up (Layers 1–5).
 
 ## Current Snapshot
-Frontend CI has been expanded to a gated chain in `.github/workflows/test.yml` (`checks -> unit -> build -> e2e`) plus `security` and `secret-scan`. Staging backend is active at `https://lakira-backend-staging.onrender.com/api/v1`, while production URL/domain remain TBD. As of February 18, 2026, P0 gate blockers are cleared and the full local gate commands run successfully.
+Frontend CI has been expanded to a gated chain in `.github/workflows/test.yml` (`checks -> unit -> integration -> build -> e2e`) plus `security` and `secret-scan`. Staging backend is active at `https://lakira-backend-staging.onrender.com/api/v1`, while production URL/domain remain TBD. As of February 18, 2026, P0 gate blockers are cleared and the full local gate commands run successfully.
 
 ## CI Test Program Roll-up (from tests-plans-and-logs)
 | Layer | Source Docs | Current CI Status | Readiness | Blocking Gaps | Next Action |
 | --- | --- | --- | --- | --- | --- |
-| Layer 1 Static Checks | `documents/tests-plans-and-logs/TESTING_STRATEGY.md`, `documents/tests-plans-and-logs/1-static-checks/` | `Gated` | Medium | Layer folder exists but checklist artifact is missing in `1-static-checks/`. | Define/restore static-checks checklist artifact and map it to current CI checks. |
-| Layer 2 Unit | `documents/tests-plans-and-logs/2-unit-tests/PLAN.md`, `documents/tests-plans-and-logs/2-unit-tests/CHECKLIST.md` | `Gated` | Medium | Existing unit blockers prevent stable green state; log/checklist needs fresh run entries. | Fix blockers, rerun unit gate, update execution log with latest run evidence. |
-| Layer 3 Integration | `documents/tests-plans-and-logs/3-integration-tests/PLAN.md`, `documents/tests-plans-and-logs/3-integration-tests/CHEKLIST.md`, `documents/tests-plans-and-logs/3-integration-tests/a11y-testing-checklist.md` | `Planned` | Low | Placeholder decisions still open (`renderWithProviders`, MSW paths, naming convention, router-mock strategy). | Finalize integration harness decisions and create implementation checklist updates. |
-| Layer 4 E2E | `documents/tests-plans-and-logs/4-end-to-end-tests/PLAN.md`, `documents/tests-plans-and-logs/4-end-to-end-tests/CHECKLIST.md`, `documents/tests-plans-and-logs/4-end-to-end-tests/a11y-e2e-checklist.md` | `Partial` | Medium-Low | E2E job exists, but environment foundations are not fully laid out (stable base URL strategy, auth helper, data reset, token-expiry simulation). | Finalize foundational E2E decisions and expand beyond smoke-level coverage. |
-| Layer 5 Performance / Web Vitals | `documents/tests-plans-and-logs/5-performance-and-web-vitals-tests/lighthouse-plan.md`, `documents/tests-plans-and-logs/5-performance-and-web-vitals-tests/web-vitals-plan.md`, `documents/tests-plans-and-logs/5-performance-and-web-vitals-tests/bundle-size-checklist.md` | `Not Wired` | Low | No executable scripts/config and no CI wiring for Lighthouse/Web Vitals/bundle checks. | Define runnable scripts/config and decide CI mode (PR gate vs scheduled). |
+| Layer 1 Static Checks | `documents/tests-plans-and-logs/TESTING_STRATEGY.md`, `documents/tests-plans-and-logs/1-static-checks/CHECKLIST.md` | `Gated` | Medium-High | Checklist restored; warning cleanup stream is still open for long-term quality. | Keep static-check execution log current after each CI/pipeline policy change. |
+| Layer 2 Unit | `documents/tests-plans-and-logs/2-unit-tests/PLAN.md`, `documents/tests-plans-and-logs/2-unit-tests/CHECKLIST.md` | `Gated` | Medium-High | No active blockers; checklist/run-log refresh still needed for latest evidence. | Update unit checklist/log entries with February 18, 2026 rerun results. |
+| Layer 3 Integration | `documents/tests-plans-and-logs/3-integration-tests/PLAN.md`, `documents/tests-plans-and-logs/3-integration-tests/CHECKLIST.md`, `documents/tests-plans-and-logs/3-integration-tests/a11y-testing-checklist.md` | `Partial` | Medium | CI track is wired (`test:integration`, currently pass-with-no-tests). Helper/MSW scaffolds exist, but real integration specs and global MSW lifecycle wiring are pending. | Add first `.int.test.tsx` specs and complete MSW lifecycle wiring when integration tests start using network handlers. |
+| Layer 4 E2E | `documents/tests-plans-and-logs/4-end-to-end-tests/PLAN.md`, `documents/tests-plans-and-logs/4-end-to-end-tests/CHECKLIST.md`, `documents/tests-plans-and-logs/4-end-to-end-tests/a11y-e2e-checklist.md` | `Partial` | Medium-High | Base URL and auth/token helper scaffolding are implemented; broader authenticated flows and reset hooks remain pending. | Expand from smoke to authenticated metric/category/log/settings coverage. |
+| Layer 5 Performance / Web Vitals | `documents/tests-plans-and-logs/5-performance-and-web-vitals-tests/lighthouse-plan.md`, `documents/tests-plans-and-logs/5-performance-and-web-vitals-tests/web-vitals-plan.md`, `documents/tests-plans-and-logs/5-performance-and-web-vitals-tests/bundle-size-checklist.md` | `Not Wired` | Low-Medium | Plan/checklists restored, but executable scripts/config and CI jobs are still missing. | Add runnable scripts/config and choose CI mode (PR gate vs scheduled). |
 | Cross-cutting A11y (Integration + E2E) | `documents/tests-plans-and-logs/3-integration-tests/a11y-testing-checklist.md`, `documents/tests-plans-and-logs/4-end-to-end-tests/a11y-e2e-checklist.md`, `documents/documentation/accessibility-guidelines.md` | `Planned` | Low | A11y checklists exist but are not enforced by dedicated CI a11y jobs yet. | Decide minimum automated a11y gate and wire to integration/E2E layers. |
 
 ## Priority Board
@@ -28,24 +28,26 @@ Frontend CI has been expanded to a gated chain in `.github/workflows/test.yml` (
 - [x] Rerun full local gate: `npm run lint`, `npm run lint:css`, `npm run typecheck`, `npm run test:unit:ci`, `npm run build`, `npm run test:e2e` (passed on February 18, 2026; local `test:e2e` stabilized by unsetting `ELECTRON_RUN_AS_NODE` in script).
 
 ### P1 — Lay Out Planned Test Foundations
-- [ ] Layer 1: define/restore static-checks checklist artifact in `documents/tests-plans-and-logs/1-static-checks/`.
-- [ ] Layer 3: finalize `renderWithProviders` path/signature decision.
-- [ ] Layer 3: finalize MSW handler location decision.
-- [ ] Layer 3: finalize naming conventions and routing mock strategy.
-- [ ] Layer 4: finalize stable base URL decision.
-- [ ] Layer 4: finalize auth helper decision.
-- [ ] Layer 4: finalize data reset strategy decision.
-- [ ] Layer 4: finalize token-expiry simulation path decision.
+- [x] Layer 1: define/restore static-checks checklist artifact in `documents/tests-plans-and-logs/1-static-checks/CHECKLIST.md`.
+- [x] Layer 3: finalize `renderWithProviders` path/signature decision.
+- [x] Layer 3: finalize MSW handler location decision.
+- [x] Layer 3: finalize naming conventions and routing mock strategy.
+- [x] Layer 3: implement helper/MSW scaffolding (`src/test-utils/renderWithProviders.tsx`, `src/test-utils/msw/server.ts`, `src/test-utils/msw/handlers.ts`).
+- [x] Layer 4: finalize stable base URL decision.
+- [x] Layer 4: finalize auth helper decision.
+- [x] Layer 4: finalize data reset strategy decision.
+- [x] Layer 4: finalize token-expiry simulation path decision.
+- [x] Layer 4: implement Cypress auth/token helpers (`cypress/support/commands.ts`) and wire Cypress support file in config.
 - [ ] Layer 5: define executable scripts/config for Lighthouse, Web Vitals collection, and bundle-size checks.
 
 ### P2 — Wire Additional CI Tracks
-- [ ] Keep current PR-gated chain: `checks`, `unit`, `build`, `e2e` smoke, `security`, `secret-scan`.
-- [ ] Add integration tests as either PR-required or scheduled/nightly gate.
+- [x] Keep current PR-gated chain: `checks`, `unit`, `integration`, `build`, `e2e` smoke, `security`, `secret-scan`.
+- [x] Add integration tests as PR-required gate (implemented via `test:integration`; currently `--passWithNoTests` until specs are added).
 - [ ] Add performance/web-vitals tests as either PR-required or scheduled/nightly gate.
 - [ ] Record the gating decision in CI/CD docs once chosen.
 
 ### P3 — Documentation Hygiene
-- [ ] Track typo/path cleanup for `documents/tests-plans-and-logs/3-integration-tests/CHEKLIST.md` naming consistency.
+- [x] Track typo/path cleanup for `documents/tests-plans-and-logs/3-integration-tests/CHEKLIST.md` naming consistency (canonical `CHECKLIST.md` added; legacy filename kept as compatibility pointer).
 - [ ] Keep overview lean and link out to detail docs (single-source principle from `documents/documentation/dev-documentation-guidelines.md`).
 - [ ] Ensure each TODO item references a concrete doc/code/workflow path.
 
@@ -84,7 +86,7 @@ Frontend CI has been expanded to a gated chain in `.github/workflows/test.yml` (
 - `documents/tests-plans-and-logs/2-unit-tests/PLAN.md`
 - `documents/tests-plans-and-logs/2-unit-tests/CHECKLIST.md`
 - `documents/tests-plans-and-logs/3-integration-tests/PLAN.md`
-- `documents/tests-plans-and-logs/3-integration-tests/CHEKLIST.md`
+- `documents/tests-plans-and-logs/3-integration-tests/CHECKLIST.md`
 - `documents/tests-plans-and-logs/3-integration-tests/a11y-testing-checklist.md`
 - `documents/tests-plans-and-logs/4-end-to-end-tests/PLAN.md`
 - `documents/tests-plans-and-logs/4-end-to-end-tests/CHECKLIST.md`

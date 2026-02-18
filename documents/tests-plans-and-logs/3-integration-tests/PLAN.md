@@ -40,7 +40,7 @@ Unit tests are for **pure functions**; E2E tests are for **real browser flows**.
 
 ## 3. Tooling & Test Harness
 
-- **Test runner**: Vitest or Jest
+- **Test runner**: Jest
 - **DOM utilities**: React Testing Library (`@testing-library/react`, `@testing-library/user-event`)
 - **Network mocking**: MSW (Mock Service Worker) with typed handlers
 - **Accessibility checks** (for selected tests): `jest-axe`
@@ -58,8 +58,12 @@ All integration tests should use a shared helper, e.g. `renderWithProviders`, th
   - initial query cache / preloaded state
   - test-friendly configuration for React Query (e.g. `retry: false`)
 
-<!-- SPECIAL NOTE: Document the actual location and signature of `renderWithProviders` once it exists.
-     Example: `src/test-utils/renderWithProviders.tsx` and its available options (initialRouterState, initialQueryData, etc.). -->
+Current decision (2026-02-18):
+
+- Canonical helper path: `src/test-utils/renderWithProviders.tsx`.
+- Minimum helper options: `{ route?: string; queryClient?: QueryClient; initialQueryData?: { queryKey: QueryKey; data: unknown }[] }`.
+- Helper is implemented with React Query + Jotai providers and optional route/query-cache seeding.
+- MSW server/handlers scaffolding exists in `src/test-utils/msw/`, but global Jest setup wiring is intentionally deferred until integration specs are added.
 
 ---
 
@@ -125,7 +129,12 @@ This section defines **which features** must have integration tests and what sce
   - Inputs associated with labels.
   - Error messages reachable via `aria-describedby` or similar.
 
-<!-- SPECIAL NOTE: List actual route files + component names for auth pages, e.g. `src/app/(auth)/login/page.tsx`. -->
+Current routes/components in scope:
+
+- `src/app/(auth)/login/page.tsx`
+- `src/app/(auth)/register/page.tsx`
+- `src/features/auth/components/LoginForm.tsx`
+- `src/features/auth/components/RegisterForm.tsx`
 
 ---
 
@@ -265,7 +274,10 @@ Detailed steps and which components/pages to include are defined in:
 
   This makes it clear they are **integration** tests (not unit tests).
 
-<!-- SPECIAL NOTE: Decide and document the exact naming convention (`*.int.test.tsx` or directory-based) based on existing test files. -->
+Current naming decision (2026-02-18):
+
+- Existing tests use `*.test.tsx` under colocated `__tests__` folders.
+- New integration tests should use `*.int.test.tsx` to separate intent from pure unit tests while remaining Jest-discoverable.
 
 - Group tests by **feature**, not by technical concern:
   - Prefer `MetricCategoryForm.int.test.tsx` over `FormValidation.int.test.tsx`.
@@ -280,7 +292,11 @@ Detailed steps and which components/pages to include are defined in:
 
 - MSW handlers should be **typed** using generated OpenAPI/TS types, ensuring contract correctness.
 
-<!-- SPECIAL NOTE: Document actual fixture + handler locations once created, e.g. `src/tests/fixtures/*`, `src/tests/msw/handlers/*`. -->
+Current fixture/MSW location decision (2026-02-18):
+
+- Shared fixtures target path: `src/test-utils/fixtures/*`.
+- MSW target paths: `src/test-utils/msw/handlers.ts` and `src/test-utils/msw/server.ts`.
+- If a feature requires local-only fixtures, colocate under `src/<feature>/__tests__/fixtures/*` and keep names feature-scoped.
 
 ---
 

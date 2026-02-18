@@ -1,66 +1,60 @@
-# Bundle Size Checklist – Lakira Frontend
+# Bundle Size Checklist - Lakira Frontend
 
-This checklist defines how we **monitor and control bundle size** for the Lakira frontend.
+Use this checklist to control bundle growth during feature work.
 
-It is used when:
+References:
 
-- Introducing new dependencies or heavy features.
-- Running CI checks for production builds.
-- Reviewing performance before a release (and is referenced by the Performance Release Checklist).
-
-For overall performance gates, see:
-
-- [Performance Budget](../../documentation/performance-budget.md)
-- [Performance Release Checklist](../../checklists/performance-release-checklist.md)
+- `documents/documentation/performance-budget.md`
+- `documents/tests-plans-and-logs/5-performance-and-web-vitals-tests/lighthouse-plan.md`
 
 ---
 
 ## 0. Preconditions
 
-Before you rely on this checklist:
-
-- [ ] The app can produce a **production build** (`next build` or equivalent).
-- [ ] There is a way to inspect bundles:
-  - [ ] Next.js build output (`.next` stats, terminal summary), or
-  - [ ] Bundle analyzer (e.g. `@next/bundle-analyzer`).
-
-<!-- SPECIAL NOTE: Once you configure an analyzer, document the script here, e.g.:
-     - `npm run analyze` → opens a bundle report
-     - or link to CI artifact with stats.json. -->
+- [ ] Production build runs successfully (`npm run build`).
+- [ ] Build output is reviewed for route/chunk size deltas.
+- [ ] Any large dependency addition includes explicit rationale.
 
 ---
 
-## 1. When You Add or Change a Dependency
+## 1. Dependency Review
 
-Whenever you add a new library—or significantly change how an existing one is used:
+When adding or changing a dependency:
 
-- [ ] Ask “Do we really need this?”:
-  - [ ] No native/standard alternative exists.
-  - [ ] Library is actively maintained and not absurdly heavy for what it does.
-
-- [ ] Check if the library supports:
-  - [ ] **Tree-shaking** (ES modules).
-  - [ ] Importing only what’s needed (e.g. `import { X } from "lib/x"` not `import * as lib from "lib"`).
-
-- [ ] Avoid full-library imports when unnecessary:
-  - [ ] ✅ `import { Line } from "react-chartjs-2";`
-  - [ ] ❌ `import * as ChartJS from "react-chartjs-2";`
-
-- [ ] For UI/icon libraries:
-  - [ ] Import individual icons/components instead of the entire pack.
-
-If a library is heavy but necessary:
-
-- [ ] Plan to **lazy-load** the feature or page where it’s used (`next/dynamic` or route-level code splitting).
+- [ ] Confirm no lighter native/existing alternative is suitable.
+- [ ] Prefer tree-shakeable imports.
+- [ ] Avoid namespace imports when selective imports are possible.
+- [ ] For heavy UI/chart packages, evaluate lazy loading.
 
 ---
 
-## 2. Build & Check Bundle Sizes (Local / Dev)
+## 2. Build Review Procedure
 
-Before merging a PR that might impact size:
+1. Run build:
 
-1. **Run a production build**:
+```bash
+npm run build
+```
 
-   ```bash
-   npm run build
-   ```
+2. Review route table and any significant chunk growth.
+
+3. Record notable deltas in PR notes if budget impact is meaningful.
+
+---
+
+## 3. CI Direction (Planned)
+
+- [ ] Add automated bundle-size report script (planned, e.g. `scripts/bundle-size-report.mjs`).
+- [ ] Upload bundle report artifact in CI.
+- [ ] Define fail conditions for major regressions.
+
+---
+
+## 4. Release Sign-off
+
+Before release:
+
+- [ ] Build size changes are reviewed against performance budget.
+- [ ] Regressions have mitigation plan or documented exception.
+- [ ] Lighthouse and Web Vitals evidence is attached where applicable.
+

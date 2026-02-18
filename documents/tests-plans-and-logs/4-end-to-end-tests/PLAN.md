@@ -35,7 +35,12 @@ E2E tests should run against a dedicated **test environment**:
   - Express/Sequelize backend with a **test database**.
 - OR a local `docker-compose` environment started as part of the test run.
 
-<!-- SPECIAL NOTE: Document the actual base URL and how the test environment is started (e.g. `npm run dev:e2e`, `docker-compose -f docker-compose.e2e.yml up`, etc.). -->
+Current environment decision (2026-02-18):
+
+- Local and CI base URL: `http://127.0.0.1:3000`.
+- CI source of truth: `.github/workflows/test.yml` via `CYPRESS_BASE_URL`.
+- Cypress fallback: `cypress.config.ts` uses `CYPRESS_BASE_URL || "http://127.0.0.1:3000"`.
+- Local run pattern: start app (`npm run start -- --hostname 127.0.0.1 --port 3000`), then run `npm run test:e2e`.
 
 ### 2.3 Test data strategy
 
@@ -48,10 +53,10 @@ We need **predictable, repeatable data**:
   - `test_user_basic` – freshly created, no metrics.
   - `test_user_with_metrics` – has metrics, categories, and logs pre-seeded.
 
-<!-- SPECIAL NOTE: Once you have real seeders/users, document:
-     - usernames/emails
-     - how to reset or recreate their data
-     - which tests rely on which seed user. -->
+Current data strategy decision (2026-02-18):
+
+- Until dedicated seed/reset automation is available, E2E scope is limited to stateless smoke coverage.
+- Stateful multi-user scenarios remain planned and should be enabled only after backend reset or seed hooks are available.
 
 ---
 
@@ -69,9 +74,14 @@ We will follow this pattern:
 
 This keeps tests accurate but fast.
 
-<!-- SPECIAL NOTE: Document the actual auth mechanism:
-     - where JWT is stored (cookie, localStorage, etc.),
-     - helper function path, e.g. `cypress/support/commands.ts` → `cy.loginAsTestUser()`. -->
+Current auth decision (2026-02-18):
+
+- Auth session is maintained via HttpOnly cookie `lakira_token` (`/api/auth/session` route).
+- Canonical helper path: `cypress/support/commands.ts`.
+- Implemented helpers:
+  - `cy.loginAsTestUser(args?)` for API-backed login.
+  - `cy.setInvalidAuthToken(token?)` for token-expiry/invalid-session scenarios.
+- Additional role-specific helper variants remain planned.
 
 ---
 
@@ -242,7 +252,10 @@ For each, we define required scenarios below.
      - either redirect to login or clear auth state + show error,
      - no stale data rendered as if user were logged in.
 
-<!-- SPECIAL NOTE: Document how you simulate token expiry/invalid state in Cypress helpers. -->
+Current token-expiry simulation decision (2026-02-18):
+
+- Add helper that writes an invalid/expired auth cookie token and attempts protected route navigation.
+- Expected assertion: redirect to `/login` or auth state cleared with a recoverable error UI.
 
 ---
 

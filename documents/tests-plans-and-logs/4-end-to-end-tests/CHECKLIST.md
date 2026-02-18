@@ -13,20 +13,20 @@ This complements the detailed plan in `PLAN.md`.
 
 Before relying on E2E tests, ensure:
 
-- [ ] There is a **stable base URL** for the E2E environment.
-  - <!-- SPECIAL NOTE: Document it here, e.g. `https://lakira-test.example.com` or `http://localhost:3000`. -->
+- [x] There is a **stable base URL** for the E2E environment.
+  - Current value: `http://127.0.0.1:3000` (CI uses `CYPRESS_BASE_URL` in `.github/workflows/test.yml`).
 - [ ] Backend + DB test environment is reproducible:
   - [ ] Migrations/seed scripts can be run to reset state.
   - [ ] Or a “reset test data” endpoint/command exists.
 
-- [ ] Cypress/Playwright is configured to:
-  - [ ] Point to the correct base URL.
-  - [ ] Use TypeScript (if applicable).
-  - [ ] Load any required env variables (test users, tokens, etc.).
+- [x] Cypress/Playwright is configured to:
+  - [x] Point to the correct base URL.
+  - [x] Use TypeScript (if applicable).
+  - [x] Load any required env variables (test users, tokens, etc.).
 
-- [ ] There is a **login helper**:
+- [x] There is a **login helper**:
   - e.g. `cy.loginAsBasicUser()`, `cy.loginAsUserWithMetrics()`.
-  - <!-- SPECIAL NOTE: Document actual helper path, e.g. `cypress/support/commands.ts`. -->
+  - Canonical helper path: `cypress/support/commands.ts` (`cy.loginAsTestUser`, `cy.setInvalidAuthToken`).
 
 - [ ] There is a **data reset strategy**:
   - [ ] Either: DB reset/seed between test runs/specs, or
@@ -63,9 +63,10 @@ When a flow depends on authentication:
   - [ ] Calling the logout UI clears auth state.
   - [ ] After logout, attempting to access `/app/...` redirects to login.
 
-<!-- SPECIAL NOTE: Document actual auth mechanism & storage:
-     - JWT in cookie or localStorage,
-     - relevant keys or cookie names. -->
+Auth mechanism decision:
+
+- Session cookie name: `lakira_token` (HttpOnly; synced via `/api/auth/session` route).
+- E2E auth helper should use API-backed login and cookie state, not direct UI typing for every spec.
 
 ---
 
@@ -153,7 +154,10 @@ When a flow depends on authentication:
     - redirect to login or clear auth + error,
     - no stale authenticated UI visible.
 
-<!-- SPECIAL NOTE: Document how token invalid/expired scenarios are simulated in tests (e.g. special seed user, flagged token, or explicit backend route). -->
+Token invalid/expired simulation decision:
+
+- Use Cypress helper to set an invalid/expired auth token cookie before visiting a protected route.
+- Assert redirect to `/login` (or equivalent auth-clear behavior) and absence of stale protected UI.
 
 ---
 
@@ -197,7 +201,10 @@ See also:
 
 - [ ] Different specs do not assume data created by other specs unless that dependency is explicitly documented and stable.
 
-<!-- SPECIAL NOTE: Add concrete instructions once DB reset/seed strategy is defined (e.g. `npm run db:test:reset`, or `cy.task('db:reset')`). -->
+Current reset strategy decision (2026-02-18):
+
+- Keep E2E suite stateless while reset/seed automation is not available.
+- Introduce explicit DB reset hook (`npm run db:test:reset` or `cy.task("db:reset")`) before expanding to stateful flows.
 
 ---
 

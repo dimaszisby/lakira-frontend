@@ -59,7 +59,22 @@ Steps:
 5. Upload `coverage/lcov.info` to Codecov
 6. Upload `coverage/` artifact
 
-### 4.3 `build` (needs `unit`)
+### 4.3 `integration` (needs `unit`)
+
+Goal: run integration-test track (currently seeded, pass-with-no-tests baseline).
+
+Steps:
+
+1. Checkout
+2. Setup Node 20 + npm cache
+3. `npm ci`
+4. `npm run test:integration`
+
+Current note:
+
+- `test:integration` uses `--passWithNoTests` until `.int.test.tsx` coverage is introduced.
+
+### 4.4 `build` (needs `integration`)
 
 Goal: ensure production build is valid.
 
@@ -71,7 +86,7 @@ Steps:
 4. `npm run build`
 5. Upload `.next` artifact (`next-build`)
 
-### 4.4 `e2e` (needs `build`)
+### 4.5 `e2e` (needs `build`)
 
 Goal: run headless Cypress smoke tests against running app.
 
@@ -90,7 +105,7 @@ Script behavior note:
 
 - `test:e2e` unsets `ELECTRON_RUN_AS_NODE` before Cypress run to avoid shell-level Electron launch conflicts in local environments.
 
-### 4.5 `security`
+### 4.6 `security`
 
 Goal: lint + dependency audit gate.
 
@@ -101,7 +116,7 @@ Steps:
 3. `npm ci`
 4. `npm run security:scan`
 
-### 4.6 `secret-scan`
+### 4.7 `secret-scan`
 
 Goal: secret leak detection.
 
@@ -118,6 +133,7 @@ From `package.json`:
 - `lint:css`
 - `typecheck`
 - `test:unit:ci`
+- `test:integration`
 - `build`
 - `test:e2e`
 - `security:scan`

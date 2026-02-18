@@ -1,57 +1,74 @@
-# Lighthouse Plan – Lakira Frontend
+# Lighthouse Plan - Lakira Frontend
 
-This document defines **how** we run Lighthouse for Lakira and **what we enforce**.
+This document defines how Lighthouse is used in Lakira frontend quality checks.
 
-It supports:
+References:
 
-- [Performance Budget](../../documentation/performance-budget.md)
-- [Performance Release Checklist](../../checklists/performance-release-checklist.md)
-- [Bundle Size Checklist](./bundle-size-checklist.md)
-
-Lighthouse is used as a **lab tool** to measure performance and quality of key pages in a controlled environment.
+- `documents/documentation/performance-budget.md`
+- `documents/tests-plans-and-logs/5-performance-and-web-vitals-tests/bundle-size-checklist.md`
+- `documents/ci-cd/frontend/GITHUB_ACTIONS_PIPELINE_PLAN.md`
 
 ---
 
-## 1. Goals
+## 1. Current Status
 
-Lighthouse is used to:
-
-1. Track **Core Web Vitals proxies** (LCP, CLS, INP/FID) and performance scores.
-2. Detect regressions in:
-   - page load performance,
-   - accessibility,
-   - best practices.
-3. Provide a **repeatable, automatable** check in CI and pre-release.
-
-Lighthouse is **not** used as an exhaustive test of all pages, but as a guardrail on **representative key screens**.
+- Lighthouse is not yet wired into CI jobs.
+- Current CI quality gates remain: lint, typecheck, unit, build, e2e, security, secret-scan.
+- Lighthouse checks are currently manual/planned.
 
 ---
 
-## 2. Tools & Environment
+## 2. Tooling Decision
 
-### 2.1 Tooling
+- Target tooling: Lighthouse CLI (`lighthouse`) with JSON + HTML artifacts.
+- Target config file: `lighthouserc.json` at repo root (planned).
+- CI mode decision (pending): PR gate vs scheduled/nightly run.
 
-We use:
+---
 
-- Lighthouse CLI (via Node) or
-- Lighthouse CI (if configured)
+## 3. Run Targets
 
-<!-- SPECIAL NOTE: Once chosen, document the actual package + version and config file path, e.g.:
-     - `lighthouse` via `npm` in `devDependencies`
-     - `lighthouserc.json` or `lighthouse.config.cjs`. -->
+Primary pages to audit:
 
-### 2.2 Test Environment
+- `/`
+- `/login`
+- `/dashboard`
+- `/metrics`
 
-Lighthouse must run against a **production-like build**:
+Environment targets:
 
-- Staging or test deployment, built with:
-  - same Next.js config as production,
-  - minified and optimized bundles.
+- Local: `http://127.0.0.1:3000`
+- Staging: use FE preview/staging URL once finalized in env matrix docs.
 
-Typical base URL:
+---
 
-- <!-- SPECIAL NOTE: Fill in actual staging/test URL, e.g. `https://lakira-staging.example.com`. -->
+## 4. Manual Run Procedure (Current)
 
-For local runs, we can also use:
+1. Build and start app:
 
-- `next build && next start`
+```bash
+npm run build
+npm run start -- --hostname 127.0.0.1 --port 3000
+```
+
+2. Run Lighthouse per route (example):
+
+```bash
+npx lighthouse http://127.0.0.1:3000/dashboard \
+  --output html \
+  --output json \
+  --output-path ./reports/lighthouse-dashboard \
+  --chrome-flags="--headless"
+```
+
+3. Save artifacts in `reports/` and link results in release/perf logs.
+
+---
+
+## 5. Exit Criteria for CI Wiring
+
+- [ ] Config file (`lighthouserc.json`) is added and reviewed.
+- [ ] Minimum score thresholds are aligned with `performance-budget.md`.
+- [ ] CI job uploads Lighthouse artifacts.
+- [ ] Ownership for threshold failures is defined.
+
