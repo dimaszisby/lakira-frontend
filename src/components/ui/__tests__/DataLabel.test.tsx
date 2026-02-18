@@ -31,4 +31,10 @@ describe("DataLabel", () => {
     expect(screen.getByTestId("custom-value")).toHaveTextContent("Custom Content");
     expect(screen.queryByText("ignored")).not.toBeInTheDocument();
   });
+
+  it("formats boolean values to explicit labels", () => {
+    render(<DataLabelBase title="Visibility" value={false} />);
+
+    expect(screen.getByText("False")).toBeInTheDocument();
+  });
 });
