@@ -50,7 +50,7 @@ const config = [
       parserOptions: {
         sourceType: "module",
         ecmaVersion: "latest",
-        project: "./tsconfig.json",
+        project: ["./tsconfig.json", "./cypress/tsconfig.json"],
         tsconfigRootDir: __dirname,
       },
       globals: {

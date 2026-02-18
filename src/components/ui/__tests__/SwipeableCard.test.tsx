@@ -1,14 +1,25 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type * as React from "react";
 
 import SwipeableCard from "@/components/ui/SwipeableCard";
 
 const mockStart = jest.fn(() => Promise.resolve());
 
 jest.mock("framer-motion", () => {
-  const ReactRuntime = require("react");
+  const ReactRuntime = require("react") as typeof React;
 
-  const MotionDiv = ReactRuntime.forwardRef<HTMLDivElement, Record<string, unknown>>(
+  type MockMotionDivProps = React.HTMLAttributes<HTMLDivElement> & {
+    style?: React.CSSProperties & { x?: unknown };
+    drag?: unknown;
+    animate?: unknown;
+    transition?: unknown;
+    dragConstraints?: unknown;
+    dragDirectionLock?: unknown;
+    dragElastic?: unknown;
+  };
+
+  const MotionDiv = ReactRuntime.forwardRef<HTMLDivElement, MockMotionDivProps>(
     (
       {
         style,
@@ -22,8 +33,8 @@ jest.mock("framer-motion", () => {
       },
       ref,
     ) => {
-      const nextStyle = { ...(style as Record<string, unknown> | undefined) };
-      delete nextStyle?.x;
+      const nextStyle: React.CSSProperties & { x?: unknown } = { ...(style ?? {}) };
+      delete nextStyle.x;
       return <div ref={ref} style={nextStyle} {...rest} />;
     },
   );

@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type * as React from "react";
 
 import CategorySelect from "@/components/ui/CategorySelect";
 import { CATEGORY_DEFAULTS } from "@/features/metric-categories/constants";
@@ -19,18 +20,38 @@ jest.mock("@/features/metric-categories/hooks", () => ({
 }));
 
 jest.mock("@ariakit/react", () => {
-  const React = require("react");
+  const ReactRuntime = require("react") as typeof React;
 
-  const MockCombobox = React.forwardRef(
-    (props: Record<string, unknown>, ref: React.Ref<HTMLInputElement>) => {
+  type MockComboboxProps = React.InputHTMLAttributes<HTMLInputElement> & {
+    store?: unknown;
+  };
+
+  type MockComboboxListProps = React.HTMLAttributes<HTMLDivElement> & {
+    children?: React.ReactNode;
+  };
+
+  type MockComboboxPopoverProps = React.HTMLAttributes<HTMLDivElement> & {
+    children?: React.ReactNode;
+    sameWidth?: boolean;
+    gutter?: number;
+    store?: unknown;
+  };
+
+  type MockComboboxItemProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+    children?: React.ReactNode;
+    setValueOnClick?: boolean;
+  };
+
+  const MockCombobox = ReactRuntime.forwardRef<HTMLInputElement, MockComboboxProps>(
+    (props, ref) => {
       const { store: _store, ...rest } = props;
       return <input ref={ref} {...rest} />;
     },
   );
   MockCombobox.displayName = "MockCombobox";
 
-  const MockComboboxList = React.forwardRef(
-    ({ children, ...props }: Record<string, unknown>, ref: React.Ref<HTMLDivElement>) => (
+  const MockComboboxList = ReactRuntime.forwardRef<HTMLDivElement, MockComboboxListProps>(
+    ({ children, ...props }, ref) => (
       <div ref={ref} {...props}>
         {children}
       </div>
@@ -52,12 +73,12 @@ jest.mock("@ariakit/react", () => {
       setOpen: (next: boolean) => void;
     }) => ({ value, setValue, open, setOpen }),
     Combobox: MockCombobox,
-    ComboboxPopover: ({ children, ...props }: Record<string, unknown>) => {
+    ComboboxPopover: ({ children, ...props }: MockComboboxPopoverProps) => {
       const { sameWidth: _sameWidth, gutter: _gutter, store: _store, ...rest } = props;
       return <div {...rest}>{children}</div>;
     },
     ComboboxList: MockComboboxList,
-    ComboboxItem: ({ children, ...props }: Record<string, unknown>) => {
+    ComboboxItem: ({ children, ...props }: MockComboboxItemProps) => {
       const { setValueOnClick: _setValueOnClick, ...rest } = props;
       return (
         <button type="button" {...rest}>
