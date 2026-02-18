@@ -63,7 +63,12 @@ Current decision (2026-02-18):
 - Canonical helper path: `src/test-utils/renderWithProviders.tsx`.
 - Minimum helper options: `{ route?: string; queryClient?: QueryClient; initialQueryData?: { queryKey: QueryKey; data: unknown }[] }`.
 - Helper is implemented with React Query + Jotai providers and optional route/query-cache seeding.
-- MSW server/handlers scaffolding exists in `src/test-utils/msw/`, but global Jest setup wiring is intentionally deferred until integration specs are added.
+- MSW server/handlers + global Jest lifecycle wiring are active in:
+  - `src/test-utils/msw/server.ts`
+  - `src/test-utils/msw/handlers.ts`
+  - `jest.integration.setup.ts`
+  - `jest.integration.config.ts`
+- First real integration spec is implemented at `src/features/auth/components/__tests__/LoginForm.int.test.tsx`.
 
 ---
 

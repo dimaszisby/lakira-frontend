@@ -65,7 +65,7 @@ Steps:
 
 ### 4.3 `integration` (needs `unit`)
 
-Goal: run integration-test track (currently seeded, pass-with-no-tests baseline).
+Goal: run real integration tests as a PR-required gate.
 
 Steps:
 
@@ -76,7 +76,9 @@ Steps:
 
 Current note:
 
-- `test:integration` uses `--passWithNoTests` until `.int.test.tsx` coverage is introduced.
+- `test:integration` runs Jest with `jest.integration.config.ts` and discovers `*.int.test.ts(x)` files.
+- Global MSW lifecycle wiring is enabled in `jest.integration.setup.ts`.
+- First implemented integration coverage: `src/features/auth/components/__tests__/LoginForm.int.test.tsx`.
 
 ### 4.4 `build` (needs `integration`)
 

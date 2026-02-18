@@ -42,7 +42,11 @@ const LoginForm = () => {
 
   const onValid = useCallback(
     async (data: LoginRequestDTO) => {
-      await loginUser(data);
+      try {
+        await loginUser(data);
+      } catch {
+        // Error state is already surfaced via mutation `error` and `onError` callback.
+      }
     },
     [loginUser],
   );

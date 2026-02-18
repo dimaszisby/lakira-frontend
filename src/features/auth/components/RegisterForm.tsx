@@ -53,7 +53,11 @@ const RegisterForm = () => {
         ...data,
         isPublicProfile: true,
       };
-      await registerUser(finalData);
+      try {
+        await registerUser(finalData);
+      } catch {
+        // Error state is already surfaced via mutation `error` and `onError` callback.
+      }
     },
     [registerUser],
   );

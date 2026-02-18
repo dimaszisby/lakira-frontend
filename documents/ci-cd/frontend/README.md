@@ -59,7 +59,7 @@ Jobs:
 
 3. `integration` (needs `unit`)
 - `npm ci`
-- `npm run test:integration` (`--passWithNoTests` until integration specs are added)
+- `npm run test:integration` (Jest integration suite via `jest.integration.config.ts`)
 
 4. `build` (needs `integration`)
 - `npm ci`
@@ -130,7 +130,8 @@ Current local validation snapshot (February 18, 2026):
 - Passed: `npm run lint`, `npm run lint:css`, `npm run typecheck`, `npm run test:unit:ci`, `npm run test:integration`, `npm run build`, `npm run test:e2e`, `npm run perf:bundle-size`, `npm run perf:lighthouse`, `npm run perf:web-vitals`.
 - Note: `lint` currently fails on ESLint errors only; warning cleanup is tracked separately.
 - Note: `test:e2e` unsets `ELECTRON_RUN_AS_NODE` in script to avoid local Electron/Cypress launch conflicts.
-- Note: integration helpers/MSW scaffolding exists in `src/test-utils/`; global MSW Jest setup will be enabled when integration specs start using network handlers.
+- Note: integration helpers/MSW scaffolding and global Jest wiring are active in `src/test-utils/`, `jest.integration.config.ts`, and `jest.integration.setup.ts`.
+- Note: first real integration spec is in `src/features/auth/components/__tests__/LoginForm.int.test.tsx` (success + error flow coverage).
 - Note: Web Vitals script currently summarizes lab audits from Lighthouse reports (RUM instrumentation remains planned).
 
 ## 6. Secrets And Env Vars

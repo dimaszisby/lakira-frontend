@@ -14,14 +14,17 @@ This complements the detailed plan in `PLAN.md`.
 Before adding new integration tests, confirm the basics:
 
 - [x] A shared `renderWithProviders` helper exists and is used (React Query, Jotai/store, Theme, Router).
-- [ ] MSW is configured for tests:
-  - [ ] Global setup/teardown hooks start and stop the MSW server.
+- [x] MSW is configured for tests:
+  - [x] Global setup/teardown hooks start and stop the MSW server.
   - [x] Handlers scaffold exists for feature endpoint mocks.
+- [x] Integration Jest runner is configured (`jest.integration.config.ts`) and wired from `test:integration`.
 
 Decision references:
 
 - `renderWithProviders` target: `src/test-utils/renderWithProviders.tsx`
 - MSW targets: `src/test-utils/msw/server.ts`, `src/test-utils/msw/handlers.ts`
+- Integration Jest setup target: `jest.integration.setup.ts`
+- Baseline integration spec: `src/features/auth/components/__tests__/LoginForm.int.test.tsx`
 
 ---
 
