@@ -90,6 +90,7 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
         if (isEditMode && initialLog) {
           await updateMetricLog({
             logId: initialLog.id,
+            metricId,
             log: payloadUpdate,
           });
         } else {
@@ -101,7 +102,7 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
         console.error("Error creating metric log:", error);
       }
     },
-    [isEditMode, initialLog, updateMetricLog, createMetricLog, reset, onClose],
+    [isEditMode, initialLog, metricId, updateMetricLog, createMetricLog, reset, onClose],
   );
 
   const onInvalid = useCallback((formErrors: typeof errors) => {
@@ -124,13 +125,13 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
   const deleteLogAsync = useCallback(async () => {
     if (!initialLog) return;
     try {
-      await deleteMetricLog(initialLog.id);
+      await deleteMetricLog({ logId: initialLog.id, metricId });
       reset();
       onClose();
     } catch (error) {
       console.error("Error deleting metric log:", error);
     }
-  }, [initialLog, deleteMetricLog, reset, onClose]);
+  }, [initialLog, metricId, deleteMetricLog, reset, onClose]);
 
   const handleDeleteClick = useCallback(() => {
     void deleteLogAsync();
@@ -154,7 +155,7 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
   }
 
   return (
-    <Modal isOpen onClose={handleCloseClick}>
+    <Modal isOpen onClose={handleCloseClick} ariaLabel="Metric log form">
       <form
         noValidate
         className="w-full max-w-md bg-white p-2 sm:p-2 lg:p-6"

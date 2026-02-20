@@ -512,7 +512,7 @@ export const MetricSettingsForm = ({
     "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]  overflow-y-auto";
 
   return (
-    <Modal isOpen onClose={handleCloseClick}>
+    <Modal isOpen onClose={handleCloseClick} ariaLabel="Metric settings form">
       <form
         noValidate
         className={cn(

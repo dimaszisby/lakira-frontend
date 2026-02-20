@@ -1,6 +1,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { HttpResponse, http } from "msw";
+import { axe } from "jest-axe";
+import { http,HttpResponse } from "msw";
 
 import type { MetricFormInitial } from "@/features/metrics";
 import MetricForm from "@/features/metrics/components/MetricForm";
@@ -8,11 +9,13 @@ import { server } from "@/src/test-utils/msw/server";
 import { renderWithProviders } from "@/src/test-utils/renderWithProviders";
 
 const metricId = "metric-1";
+const defaultUnit = "kg";
+const fixedDate = "2026-02-18";
 
 const existingMetric: MetricFormInitial = {
   id: metricId,
   name: "W",
-  defaultUnit: "kg",
+  defaultUnit,
   description: "Old description",
   isPublic: false,
   originalMetricId: null,
@@ -51,13 +54,13 @@ describe("MetricForm integration", () => {
             id: "metric-new",
             name: "A",
             description: "",
-            defaultUnit: "kg",
+            defaultUnit,
             isPublic: false,
             userId: "user-1",
             categoryId: null,
             originalMetricId: null,
-            createdAt: "2026-02-18",
-            updatedAt: "2026-02-18",
+            createdAt: fixedDate,
+            updatedAt: fixedDate,
           },
         });
       }),
@@ -66,14 +69,14 @@ describe("MetricForm integration", () => {
     renderWithProviders(<MetricForm initialMetric={null} onClose={onClose} />);
 
     await user.type(screen.getByLabelText(/metric name/i), "A");
-    await user.type(screen.getByLabelText(/default unit/i), "kg");
+    await user.type(screen.getByLabelText(/default unit/i), defaultUnit);
     await user.click(screen.getByRole("button", { name: /save metric/i }));
 
     await waitFor(() => {
       expect(createPayloadSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           name: "A",
-          defaultUnit: "kg",
+          defaultUnit,
           categoryId: null,
           isPublic: false,
         }),
@@ -103,13 +106,13 @@ describe("MetricForm integration", () => {
             id: metricId,
             name: "Q",
             description: "Old description",
-            defaultUnit: "kg",
+            defaultUnit,
             isPublic: false,
             userId: "user-1",
             categoryId: null,
             originalMetricId: null,
-            createdAt: "2026-02-18",
-            updatedAt: "2026-02-18",
+            createdAt: fixedDate,
+            updatedAt: fixedDate,
           },
         });
       }),
@@ -127,7 +130,7 @@ describe("MetricForm integration", () => {
         id: metricId,
         body: expect.objectContaining({
           name: "Q",
-          defaultUnit: "kg",
+          defaultUnit,
           categoryId: null,
         }),
       });
@@ -158,7 +161,7 @@ describe("MetricForm integration", () => {
       renderWithProviders(<MetricForm initialMetric={null} onClose={onClose} />);
 
       await user.type(screen.getByLabelText(/metric name/i), "A");
-      await user.type(screen.getByLabelText(/default unit/i), "kg");
+      await user.type(screen.getByLabelText(/default unit/i), defaultUnit);
       await user.click(screen.getByRole("button", { name: /save metric/i }));
 
       expect(await screen.findByRole("alert")).toBeInTheDocument();
@@ -166,5 +169,12 @@ describe("MetricForm integration", () => {
     } finally {
       consoleErrorSpy.mockRestore();
     }
+  });
+
+  it("has no critical accessibility violations on initial render", async () => {
+    server.use(mockCategoryTypeahead());
+    const { container } = renderWithProviders(<MetricForm initialMetric={null} onClose={jest.fn()} />);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

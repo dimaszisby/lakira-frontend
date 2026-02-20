@@ -87,7 +87,7 @@ Validation snapshot (2026-02-18):
 - Integration discovery isolation: pass (`LoginForm.int.test.tsx`, `MetricCategoryForm.int.test.tsx`, `LogForm.int.test.tsx`, `MetricForm.int.test.tsx`, `MetricSettingsForm.int.test.tsx`, `MetricsPageClient.int.test.tsx`, `DashboardContent.int.test.tsx`, `MetricDetailComposite.int.test.tsx`).
 - `npm run test:unit`: pass (43 suites, 165 tests).
 - `npm run test:unit:ci`: pass (43 suites, 165 tests, coverage report generated).
-- `npm run test:integration`: pass (8 suites, 25 tests).
+- `npm run test:integration`: pass (8 suites, 28 tests).
 - `npm run typecheck`: pass.
 
 ## Risks and Mitigations

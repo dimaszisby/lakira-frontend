@@ -27,6 +27,7 @@ function getFocusableElements(container: HTMLElement) {
 export interface ModalProps {
   title?: string;
   description?: string;
+  ariaLabel?: string;
   isOpen: boolean;
   onClose: () => void;
   children: ReactNode;
@@ -41,6 +42,7 @@ export interface ModalProps {
 const Modal = ({
   title,
   description,
+  ariaLabel,
   isOpen,
   onClose,
   children,
@@ -138,6 +140,7 @@ const Modal = ({
         role="dialog"
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
+        aria-label={!title ? ariaLabel : undefined}
         aria-describedby={description ? descriptionId : undefined}
         tabIndex={-1}
         variant={variant}

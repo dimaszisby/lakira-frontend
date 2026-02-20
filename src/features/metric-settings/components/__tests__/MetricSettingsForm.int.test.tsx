@@ -1,5 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { axe } from "jest-axe";
 import { http,HttpResponse } from "msw";
 
 import MetricSettingsForm from "@/features/metric-settings/components/MetricSettingsForm";
@@ -179,5 +180,13 @@ describe("MetricSettingsForm integration", () => {
     } finally {
       consoleErrorSpy.mockRestore();
     }
+  });
+
+  it("has no critical accessibility violations on initial render", async () => {
+    const { container } = renderWithProviders(
+      <MetricSettingsForm metricId={metricId} initialSettings={null} onClose={jest.fn()} />,
+    );
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

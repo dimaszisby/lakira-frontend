@@ -33,13 +33,13 @@ We don’t run `axe` on every tiny component to keep tests fast.
 We **do** add a11y checks for:
 
 - [x] Auth forms (login baseline implemented).
-- [ ] Primary data-entry forms (metric create/edit, log create, settings).
+- [x] Primary data-entry forms (metric create/edit, log create, settings baselines implemented).
 - [ ] Main layouts:
   - [x] Dashboard page.
   - [x] Metric detail page.
 - [ ] Reusable “shell” components:
   - [ ] Main navigation / sidebar.
-  - [ ] Modal / dialog components.
+  - [x] Modal / dialog components (covered via modal form integration specs with `jest-axe`).
 
 For smaller leaf components (buttons, icons, chips), we mainly rely on:
 

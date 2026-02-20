@@ -79,6 +79,9 @@ Current decision (2026-02-18):
   - `src/app/(app)/metrics/[metricId]/_components/__tests__/MetricDetailComposite.int.test.tsx`
 - Initial integration-level a11y assertions are now implemented in:
   - `src/features/auth/components/__tests__/LoginForm.int.test.tsx` (via `jest-axe`).
+  - `src/features/metric-logs/components/__tests__/LogForm.int.test.tsx` (via `jest-axe`).
+  - `src/features/metrics/components/__tests__/MetricForm.int.test.tsx` (via `jest-axe`).
+  - `src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx` (via `jest-axe`).
   - `src/app/(app)/dashboard/_components/__tests__/DashboardContent.int.test.tsx` (via `jest-axe`).
   - `src/app/(app)/metrics/[metricId]/_components/__tests__/MetricDetailComposite.int.test.tsx` (via `jest-axe`).
 

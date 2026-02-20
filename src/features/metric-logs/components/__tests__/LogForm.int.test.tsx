@@ -1,5 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { axe } from "jest-axe";
 import { http, HttpResponse } from "msw";
 
 import MetricLogForm from "@/features/metric-logs/components/LogForm";
@@ -140,5 +141,11 @@ describe("MetricLogForm integration", () => {
     } finally {
       consoleErrorSpy.mockRestore();
     }
+  });
+
+  it("has no critical accessibility violations on initial render", async () => {
+    const { container } = renderWithProviders(<MetricLogForm metricId={metricId} onClose={jest.fn()} />);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });
