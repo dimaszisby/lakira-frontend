@@ -1,5 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { axe } from "jest-axe";
 import { http, HttpResponse } from "msw";
 
 import LoginForm from "@/features/auth/components/LoginForm";
@@ -102,5 +103,11 @@ describe("LoginForm integration", () => {
     } finally {
       consoleErrorSpy.mockRestore();
     }
+  });
+
+  it("has no critical accessibility violations on initial render", async () => {
+    const { container } = renderWithProviders(<LoginForm />);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

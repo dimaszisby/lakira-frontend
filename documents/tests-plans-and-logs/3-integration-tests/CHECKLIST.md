@@ -32,6 +32,9 @@ Decision references:
   - `src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx`
   - `src/app/(app)/metrics/_components/__tests__/MetricsPageClient.int.test.tsx`
   - `src/app/(app)/dashboard/_components/__tests__/DashboardContent.int.test.tsx`
+  - `src/app/(app)/metrics/[metricId]/_components/__tests__/MetricDetailComposite.int.test.tsx`
+- Baseline integration a11y assertion currently implemented in:
+  - `src/features/auth/components/__tests__/LoginForm.int.test.tsx` (`jest-axe`).
 
 ---
 

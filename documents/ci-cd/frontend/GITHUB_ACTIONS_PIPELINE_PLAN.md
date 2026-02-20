@@ -91,6 +91,9 @@ Current note:
   - `src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx`
   - `src/app/(app)/metrics/_components/__tests__/MetricsPageClient.int.test.tsx`
   - `src/app/(app)/dashboard/_components/__tests__/DashboardContent.int.test.tsx`
+  - `src/app/(app)/metrics/[metricId]/_components/__tests__/MetricDetailComposite.int.test.tsx`
+- Integration a11y baseline:
+  - `src/features/auth/components/__tests__/LoginForm.int.test.tsx` includes `jest-axe` assertion.
 
 ### 4.4 `build` (needs `integration`)
 
