@@ -1,5 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { axe } from "jest-axe";
 import { http,HttpResponse } from "msw";
 
 import MetricsPageClient from "@/app/(app)/metrics/_components/MetricsPageClient";
@@ -111,5 +112,16 @@ describe("MetricsPageClient integration", () => {
     await user.click(screen.getByRole("button", { name: /create metric/i }));
 
     expect(mockPush).toHaveBeenCalledWith("/metrics/new");
+  });
+
+  it("has no critical accessibility violations in empty-state view", async () => {
+    server.use(mockMetricsListResponse([], 0));
+
+    const { container } = renderWithProviders(<MetricsPageClient initialParams={initialParams} />);
+
+    await screen.findByRole("heading", { name: /no data available/i });
+
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

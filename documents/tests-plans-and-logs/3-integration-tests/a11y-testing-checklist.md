@@ -34,11 +34,12 @@ We **do** add a11y checks for:
 
 - [x] Auth forms (login baseline implemented).
 - [x] Primary data-entry forms (metric create/edit, log create, settings baselines implemented).
-- [ ] Main layouts:
+- [x] Main layouts:
+  - [x] Metrics list page.
   - [x] Dashboard page.
   - [x] Metric detail page.
-- [ ] Reusable “shell” components:
-  - [ ] Main navigation / sidebar.
+- [x] Reusable “shell” components:
+  - [x] Main navigation baseline (`BottomNavigationBar`) implemented.
   - [x] Modal / dialog components (covered via modal form integration specs with `jest-axe`).
 
 For smaller leaf components (buttons, icons, chips), we mainly rely on:
