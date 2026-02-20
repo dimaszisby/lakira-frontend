@@ -143,7 +143,7 @@ Current local validation snapshot (February 18, 2026):
   - `src/app/(app)/metrics/_components/__tests__/MetricsPageClient.int.test.tsx`
   - `src/app/(app)/dashboard/_components/__tests__/DashboardContent.int.test.tsx`
   - `src/app/(app)/metrics/[metricId]/_components/__tests__/MetricDetailComposite.int.test.tsx`
-- Note: integration-level accessibility assertions are now partially active (`jest-axe` baseline in `src/features/auth/components/__tests__/LoginForm.int.test.tsx`).
+- Note: integration-level accessibility assertions are now partially active (`jest-axe` baselines in `src/features/auth/components/__tests__/LoginForm.int.test.tsx`, `src/app/(app)/dashboard/_components/__tests__/DashboardContent.int.test.tsx`, and `src/app/(app)/metrics/[metricId]/_components/__tests__/MetricDetailComposite.int.test.tsx`).
 - Note: Web Vitals script currently summarizes lab audits from Lighthouse reports (RUM instrumentation remains planned).
 
 ## 6. Secrets And Env Vars

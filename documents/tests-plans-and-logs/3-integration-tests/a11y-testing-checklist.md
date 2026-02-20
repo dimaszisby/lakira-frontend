@@ -16,9 +16,9 @@ Use it when:
 
 Before adding a11y assertions:
 
-- [ ] `jest-axe` (or equivalent) is installed and configured.
-- [ ] There is a shared test utility to:
-  - [ ] render components with providers (`renderWithProviders`), and
+- [x] `jest-axe` (or equivalent) is installed and configured.
+- [x] There is a shared test utility to:
+  - [x] render components with providers (`renderWithProviders`), and
   - [ ] optionally wrap `axe` invocation.
 
 <!-- SPECIAL NOTE: Add actual helper paths once they exist, e.g.:
@@ -32,11 +32,11 @@ Before adding a11y assertions:
 We don’t run `axe` on every tiny component to keep tests fast.  
 We **do** add a11y checks for:
 
-- [ ] Auth forms (login, registration).
+- [x] Auth forms (login baseline implemented).
 - [ ] Primary data-entry forms (metric create/edit, log create, settings).
 - [ ] Main layouts:
-  - [ ] Dashboard page.
-  - [ ] Metric detail page.
+  - [x] Dashboard page.
+  - [x] Metric detail page.
 - [ ] Reusable “shell” components:
   - [ ] Main navigation / sidebar.
   - [ ] Modal / dialog components.

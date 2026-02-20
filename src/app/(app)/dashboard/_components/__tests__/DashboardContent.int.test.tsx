@@ -1,5 +1,6 @@
 import { screen } from "@testing-library/react";
-import { http,HttpResponse } from "msw";
+import { axe } from "jest-axe";
+import { http, HttpResponse } from "msw";
 
 import DashboardContent from "@/app/(app)/dashboard/_components/DashboardContent";
 import { server } from "@/src/test-utils/msw/server";
@@ -8,6 +9,7 @@ import { renderWithProviders } from "@/src/test-utils/renderWithProviders";
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
 const DASHBOARD_ENDPOINT = "/api/proxy/analytics/dashboard";
+const DASHBOARD_FETCHED_MESSAGE = "Dashboard fetched";
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -61,7 +63,7 @@ describe("DashboardContent integration", () => {
         await new Promise((resolve) => setTimeout(resolve, 120));
         return HttpResponse.json({
           status: "success",
-          message: "Dashboard fetched",
+          message: DASHBOARD_FETCHED_MESSAGE,
           data: {
             items: [dashboardItem],
             meta: dashboardMeta,
@@ -85,7 +87,7 @@ describe("DashboardContent integration", () => {
       http.get(DASHBOARD_ENDPOINT, () =>
         HttpResponse.json({
           status: "success",
-          message: "Dashboard fetched",
+          message: DASHBOARD_FETCHED_MESSAGE,
           data: {
             items: [],
             meta: {
@@ -130,5 +132,29 @@ describe("DashboardContent integration", () => {
     } finally {
       consoleErrorSpy.mockRestore();
     }
+  });
+
+  it("has no critical accessibility violations on empty dashboard state", async () => {
+    server.use(
+      http.get(DASHBOARD_ENDPOINT, () =>
+        HttpResponse.json({
+          status: "success",
+          message: DASHBOARD_FETCHED_MESSAGE,
+          data: {
+            items: [],
+            meta: {
+              ...dashboardMeta,
+              count: 0,
+            },
+          },
+        }),
+      ),
+    );
+
+    const { container } = renderWithProviders(<DashboardContent />);
+    await screen.findByText(/no dashboard metrics yet/i);
+
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

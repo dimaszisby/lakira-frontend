@@ -1,5 +1,7 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { axe } from "jest-axe";
+import type { ReactNode } from "react";
 
 import Breadcrumbs from "@/app/(app)/metrics/[metricId]/_components/Breadcrumbs";
 import { MetricDetailProvider } from "@/app/(app)/metrics/[metricId]/_components/MetricDetailContext";
@@ -12,6 +14,26 @@ import { renderWithProviders } from "@/src/test-utils/renderWithProviders";
 
 const mockPush = jest.fn();
 let mockPathname = "/metrics/metric-1";
+
+jest.mock("next/link", () => ({
+  __esModule: true,
+  default: ({
+    href,
+    children,
+    ...props
+  }: {
+    href: string | { pathname?: string };
+    children: ReactNode;
+    [key: string]: unknown;
+  }) => {
+    const resolvedHref = typeof href === "string" ? href : (href?.pathname ?? "");
+    return (
+      <a href={resolvedHref} {...props}>
+        {children}
+      </a>
+    );
+  },
+}));
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -113,5 +135,11 @@ describe("Metric detail composite integration", () => {
 
     await user.click(screen.getByRole("button", { name: /edit metric settings/i }));
     expect(mockPush).toHaveBeenCalledWith(`/metrics/${metricId}/settings/edit`);
+  });
+
+  it("has no critical accessibility violations on metric detail composite", async () => {
+    const { container } = renderMetricDetailComposite(`/metrics/${metricId}`);
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });
