@@ -87,6 +87,7 @@ Current note:
   - `src/features/auth/components/__tests__/LoginForm.int.test.tsx`
   - `src/features/metric-categories/components/__tests__/MetricCategoryForm.int.test.tsx`
   - `src/features/metric-logs/components/__tests__/LogForm.int.test.tsx`
+  - `src/app/(app)/metrics/[metricId]/logs/_components/__tests__/MetricLogsClient.int.test.tsx`
   - `src/features/metrics/components/__tests__/MetricForm.int.test.tsx`
   - `src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx`
   - `src/app/(app)/metrics/_components/__tests__/MetricsPageClient.int.test.tsx`
@@ -99,6 +100,7 @@ Current note:
   - `src/features/auth/components/__tests__/LoginForm.int.test.tsx` includes `jest-axe` assertion.
   - `src/features/metric-categories/components/__tests__/MetricCategoryForm.int.test.tsx` includes `jest-axe` assertion.
   - `src/features/metric-logs/components/__tests__/LogForm.int.test.tsx` includes `jest-axe` assertion.
+  - `src/app/(app)/metrics/[metricId]/logs/_components/__tests__/MetricLogsClient.int.test.tsx` includes `jest-axe` assertion.
   - `src/features/metrics/components/__tests__/MetricForm.int.test.tsx` includes `jest-axe` assertion.
   - `src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx` includes `jest-axe` assertion.
   - `src/app/(app)/metrics/_components/__tests__/MetricsPageClient.int.test.tsx` includes `jest-axe` assertion.

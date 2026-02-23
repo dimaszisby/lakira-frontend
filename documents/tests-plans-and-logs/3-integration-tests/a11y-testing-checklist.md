@@ -36,6 +36,7 @@ We **do** add a11y checks for:
 - [x] Primary data-entry forms (metric category/metric/log/settings baselines implemented).
 - [x] Main layouts:
   - [x] Metrics list page.
+  - [x] Metric logs page.
   - [x] Dashboard page.
   - [x] Metric detail page.
   - [x] App shell layout.
