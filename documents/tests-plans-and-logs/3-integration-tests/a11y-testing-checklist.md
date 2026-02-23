@@ -35,6 +35,7 @@ We **do** add a11y checks for:
 - [x] Auth forms (login baseline implemented).
 - [x] Primary data-entry forms (metric category/metric/log/settings baselines implemented).
 - [x] Main layouts:
+  - [x] Metric categories list page.
   - [x] Metrics list page.
   - [x] Metric logs page.
   - [x] Dashboard page.

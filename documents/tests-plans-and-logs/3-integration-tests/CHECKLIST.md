@@ -27,6 +27,7 @@ Decision references:
 - Baseline integration specs:
   - `src/features/auth/components/__tests__/LoginForm.int.test.tsx`
   - `src/features/metric-categories/components/__tests__/MetricCategoryForm.int.test.tsx`
+  - `src/app/(app)/metric-categories/_components/__tests__/MetricCategoriesPageClient.int.test.tsx`
   - `src/features/metric-logs/components/__tests__/LogForm.int.test.tsx`
   - `src/app/(app)/metrics/[metricId]/logs/_components/__tests__/MetricLogsClient.int.test.tsx`
   - `src/features/metrics/components/__tests__/MetricForm.int.test.tsx`
@@ -40,6 +41,7 @@ Decision references:
 - Baseline integration a11y assertions currently implemented in:
   - `src/features/auth/components/__tests__/LoginForm.int.test.tsx` (`jest-axe`).
   - `src/features/metric-categories/components/__tests__/MetricCategoryForm.int.test.tsx` (`jest-axe`).
+  - `src/app/(app)/metric-categories/_components/__tests__/MetricCategoriesPageClient.int.test.tsx` (`jest-axe`).
   - `src/features/metric-logs/components/__tests__/LogForm.int.test.tsx` (`jest-axe`).
   - `src/app/(app)/metrics/[metricId]/logs/_components/__tests__/MetricLogsClient.int.test.tsx` (`jest-axe`).
   - `src/features/metrics/components/__tests__/MetricForm.int.test.tsx` (`jest-axe`).

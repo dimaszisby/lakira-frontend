@@ -71,6 +71,7 @@ Current decision (2026-02-18):
 - Current baseline integration specs:
   - `src/features/auth/components/__tests__/LoginForm.int.test.tsx`
   - `src/features/metric-categories/components/__tests__/MetricCategoryForm.int.test.tsx`
+  - `src/app/(app)/metric-categories/_components/__tests__/MetricCategoriesPageClient.int.test.tsx`
   - `src/features/metric-logs/components/__tests__/LogForm.int.test.tsx`
   - `src/app/(app)/metrics/[metricId]/logs/_components/__tests__/MetricLogsClient.int.test.tsx`
   - `src/features/metrics/components/__tests__/MetricForm.int.test.tsx`
@@ -84,6 +85,7 @@ Current decision (2026-02-18):
 - Initial integration-level a11y assertions are now implemented in:
   - `src/features/auth/components/__tests__/LoginForm.int.test.tsx` (via `jest-axe`).
   - `src/features/metric-categories/components/__tests__/MetricCategoryForm.int.test.tsx` (via `jest-axe`).
+  - `src/app/(app)/metric-categories/_components/__tests__/MetricCategoriesPageClient.int.test.tsx` (via `jest-axe`).
   - `src/features/metric-logs/components/__tests__/LogForm.int.test.tsx` (via `jest-axe`).
   - `src/app/(app)/metrics/[metricId]/logs/_components/__tests__/MetricLogsClient.int.test.tsx` (via `jest-axe`).
   - `src/features/metrics/components/__tests__/MetricForm.int.test.tsx` (via `jest-axe`).

@@ -84,10 +84,10 @@
 Validation snapshot (2026-02-18):
 
 - Unit discovery isolation: pass (no `*.int.test.ts(x)` listed under unit config).
-- Integration discovery isolation: pass (`LoginForm.int.test.tsx`, `MetricCategoryForm.int.test.tsx`, `LogForm.int.test.tsx`, `MetricLogsClient.int.test.tsx`, `MetricForm.int.test.tsx`, `MetricSettingsForm.int.test.tsx`, `MetricsPageClient.int.test.tsx`, `DashboardContent.int.test.tsx`, `MetricDetailComposite.int.test.tsx`, `BottomNavigationBar.int.test.tsx`, `Sidebar.int.test.tsx`, `Layout.int.test.tsx`).
+- Integration discovery isolation: pass (`LoginForm.int.test.tsx`, `MetricCategoryForm.int.test.tsx`, `MetricCategoriesPageClient.int.test.tsx`, `LogForm.int.test.tsx`, `MetricLogsClient.int.test.tsx`, `MetricForm.int.test.tsx`, `MetricSettingsForm.int.test.tsx`, `MetricsPageClient.int.test.tsx`, `DashboardContent.int.test.tsx`, `MetricDetailComposite.int.test.tsx`, `BottomNavigationBar.int.test.tsx`, `Sidebar.int.test.tsx`, `Layout.int.test.tsx`).
 - `npm run test:unit`: pass (43 suites, 165 tests).
 - `npm run test:unit:ci`: pass (43 suites, 165 tests, coverage report generated).
-- `npm run test:integration`: pass (12 suites, 43 tests).
+- `npm run test:integration`: pass (13 suites, 47 tests).
 - `npm run typecheck`: pass.
 
 ## Risks and Mitigations

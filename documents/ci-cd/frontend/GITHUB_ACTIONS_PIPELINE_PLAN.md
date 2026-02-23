@@ -86,6 +86,7 @@ Current note:
 - Implemented integration baseline coverage:
   - `src/features/auth/components/__tests__/LoginForm.int.test.tsx`
   - `src/features/metric-categories/components/__tests__/MetricCategoryForm.int.test.tsx`
+  - `src/app/(app)/metric-categories/_components/__tests__/MetricCategoriesPageClient.int.test.tsx`
   - `src/features/metric-logs/components/__tests__/LogForm.int.test.tsx`
   - `src/app/(app)/metrics/[metricId]/logs/_components/__tests__/MetricLogsClient.int.test.tsx`
   - `src/features/metrics/components/__tests__/MetricForm.int.test.tsx`
@@ -99,6 +100,7 @@ Current note:
 - Integration a11y baseline:
   - `src/features/auth/components/__tests__/LoginForm.int.test.tsx` includes `jest-axe` assertion.
   - `src/features/metric-categories/components/__tests__/MetricCategoryForm.int.test.tsx` includes `jest-axe` assertion.
+  - `src/app/(app)/metric-categories/_components/__tests__/MetricCategoriesPageClient.int.test.tsx` includes `jest-axe` assertion.
   - `src/features/metric-logs/components/__tests__/LogForm.int.test.tsx` includes `jest-axe` assertion.
   - `src/app/(app)/metrics/[metricId]/logs/_components/__tests__/MetricLogsClient.int.test.tsx` includes `jest-axe` assertion.
   - `src/features/metrics/components/__tests__/MetricForm.int.test.tsx` includes `jest-axe` assertion.
