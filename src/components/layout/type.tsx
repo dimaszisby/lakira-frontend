@@ -1,5 +1,7 @@
 import { ChartBar, Folder, SquaresFour, UserCircle } from "phosphor-react";
 
+import { authRoutes, dashboardRoute, metricCategoryRoutes, metricRoutes } from "@/lib/routes";
+
 export interface NavItem {
   name: string;
   href: string;
@@ -7,10 +9,10 @@ export interface NavItem {
 }
 
 export const navItems: NavItem[] = [
-  { name: "Dashboard", href: "/dashboard", icon: SquaresFour },
-  { name: "Metrics", href: "/metrics", icon: ChartBar },
-  { name: "Category", href: "/metric-categories", icon: Folder },
-  { name: "Account", href: "/account", icon: UserCircle },
+  { name: "Dashboard", href: dashboardRoute(), icon: SquaresFour },
+  { name: "Metrics", href: metricRoutes.list(), icon: ChartBar },
+  { name: "Category", href: metricCategoryRoutes.list(), icon: Folder },
+  { name: "Account", href: authRoutes.account(), icon: UserCircle },
 ];
 
 export interface NavigationListProps {
@@ -18,6 +20,7 @@ export interface NavigationListProps {
   pathname: string;
   onLinkClick?: () => void;
   className?: string;
+  ariaLabel?: string;
 }
 
 export interface SidebarProps {

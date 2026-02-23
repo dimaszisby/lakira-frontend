@@ -9,9 +9,10 @@ const SideBarNavigationItems = ({
   pathname,
   onLinkClick,
   className,
+  ariaLabel,
 }: NavigationListProps) => {
   return (
-    <nav className={cn("flex flex-col", className)}>
+    <nav className={cn("flex flex-col", className)} aria-label={ariaLabel}>
       <ul className="space-y-3">
         {navItems.map((item) => (
           <li key={item.href}>

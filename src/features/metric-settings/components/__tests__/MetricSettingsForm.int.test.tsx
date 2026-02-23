@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { http,HttpResponse } from "msw";
@@ -35,6 +35,13 @@ const existingSettings: MetricSettingsExtendedVM = {
   updatedAt: fixedTimestamp,
 };
 
+async function settleAsyncUpdates() {
+  await act(async () => {
+    await Promise.resolve();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+}
+
 async function submitMetricSettingsForm(
   user: ReturnType<typeof userEvent.setup>,
   buttonName: RegExp,
@@ -55,6 +62,10 @@ async function submitMetricSettingsForm(
 }
 
 describe("MetricSettingsForm integration", () => {
+  afterEach(async () => {
+    await settleAsyncUpdates();
+  });
+
   it("creates settings and closes modal on success", async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();
@@ -186,6 +197,7 @@ describe("MetricSettingsForm integration", () => {
     const { container } = renderWithProviders(
       <MetricSettingsForm metricId={metricId} initialSettings={null} onClose={jest.fn()} />,
     );
+    await settleAsyncUpdates();
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });

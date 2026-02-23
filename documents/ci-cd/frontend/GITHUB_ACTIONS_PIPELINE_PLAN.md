@@ -93,6 +93,7 @@ Current note:
   - `src/app/(app)/dashboard/_components/__tests__/DashboardContent.int.test.tsx`
   - `src/app/(app)/metrics/[metricId]/_components/__tests__/MetricDetailComposite.int.test.tsx`
   - `src/components/layout/__tests__/BottomNavigationBar.int.test.tsx`
+  - `src/components/layout/__tests__/Sidebar.int.test.tsx`
 - Integration a11y baseline:
   - `src/features/auth/components/__tests__/LoginForm.int.test.tsx` includes `jest-axe` assertion.
   - `src/features/metric-logs/components/__tests__/LogForm.int.test.tsx` includes `jest-axe` assertion.
@@ -102,6 +103,7 @@ Current note:
   - `src/app/(app)/dashboard/_components/__tests__/DashboardContent.int.test.tsx` includes `jest-axe` assertion.
   - `src/app/(app)/metrics/[metricId]/_components/__tests__/MetricDetailComposite.int.test.tsx` includes `jest-axe` assertion.
   - `src/components/layout/__tests__/BottomNavigationBar.int.test.tsx` includes `jest-axe` assertion.
+  - `src/components/layout/__tests__/Sidebar.int.test.tsx` includes `jest-axe` assertion.
 
 ### 4.4 `build` (needs `integration`)
 

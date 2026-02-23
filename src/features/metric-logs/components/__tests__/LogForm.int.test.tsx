@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { http, HttpResponse } from "msw";
@@ -21,7 +21,18 @@ const existingLog: MetricLogVM = {
   updatedAt: loggedAtIso,
 };
 
+async function settleAsyncUpdates() {
+  await act(async () => {
+    await Promise.resolve();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+}
+
 describe("MetricLogForm integration", () => {
+  afterEach(async () => {
+    await settleAsyncUpdates();
+  });
+
   it("creates a metric log and closes modal on success", async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();
@@ -145,6 +156,7 @@ describe("MetricLogForm integration", () => {
 
   it("has no critical accessibility violations on initial render", async () => {
     const { container } = renderWithProviders(<MetricLogForm metricId={metricId} onClose={jest.fn()} />);
+    await settleAsyncUpdates();
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });

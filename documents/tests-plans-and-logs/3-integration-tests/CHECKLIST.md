@@ -34,6 +34,7 @@ Decision references:
   - `src/app/(app)/dashboard/_components/__tests__/DashboardContent.int.test.tsx`
   - `src/app/(app)/metrics/[metricId]/_components/__tests__/MetricDetailComposite.int.test.tsx`
   - `src/components/layout/__tests__/BottomNavigationBar.int.test.tsx`
+  - `src/components/layout/__tests__/Sidebar.int.test.tsx`
 - Baseline integration a11y assertions currently implemented in:
   - `src/features/auth/components/__tests__/LoginForm.int.test.tsx` (`jest-axe`).
   - `src/features/metric-logs/components/__tests__/LogForm.int.test.tsx` (`jest-axe`).
@@ -43,6 +44,7 @@ Decision references:
   - `src/app/(app)/dashboard/_components/__tests__/DashboardContent.int.test.tsx` (`jest-axe`).
   - `src/app/(app)/metrics/[metricId]/_components/__tests__/MetricDetailComposite.int.test.tsx` (`jest-axe`).
   - `src/components/layout/__tests__/BottomNavigationBar.int.test.tsx` (`jest-axe`).
+  - `src/components/layout/__tests__/Sidebar.int.test.tsx` (`jest-axe`).
 
 ---
 

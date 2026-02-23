@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { http,HttpResponse } from "msw";
@@ -35,7 +35,26 @@ function mockCategoryTypeahead() {
   );
 }
 
+async function settleAsyncUpdates() {
+  await act(async () => {
+    await Promise.resolve();
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+}
+
+async function waitForCategoryTypeaheadIdle() {
+  const categoryInput = await screen.findByRole("combobox");
+
+  await waitFor(() => {
+    expect(categoryInput).not.toHaveAttribute("aria-busy", "true");
+  });
+}
+
 describe("MetricForm integration", () => {
+  afterEach(async () => {
+    await settleAsyncUpdates();
+  });
+
   it("creates a metric and closes modal on success", async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();
@@ -67,6 +86,7 @@ describe("MetricForm integration", () => {
     );
 
     renderWithProviders(<MetricForm initialMetric={null} onClose={onClose} />);
+    await waitForCategoryTypeaheadIdle();
 
     await user.type(screen.getByLabelText(/metric name/i), "A");
     await user.type(screen.getByLabelText(/default unit/i), defaultUnit);
@@ -119,6 +139,7 @@ describe("MetricForm integration", () => {
     );
 
     renderWithProviders(<MetricForm initialMetric={existingMetric} onClose={onClose} />);
+    await waitForCategoryTypeaheadIdle();
 
     const metricNameInput = screen.getByLabelText(/metric name/i);
     await user.clear(metricNameInput);
@@ -159,6 +180,7 @@ describe("MetricForm integration", () => {
       );
 
       renderWithProviders(<MetricForm initialMetric={null} onClose={onClose} />);
+      await waitForCategoryTypeaheadIdle();
 
       await user.type(screen.getByLabelText(/metric name/i), "A");
       await user.type(screen.getByLabelText(/default unit/i), defaultUnit);
@@ -174,6 +196,8 @@ describe("MetricForm integration", () => {
   it("has no critical accessibility violations on initial render", async () => {
     server.use(mockCategoryTypeahead());
     const { container } = renderWithProviders(<MetricForm initialMetric={null} onClose={jest.fn()} />);
+    await waitForCategoryTypeaheadIdle();
+    await settleAsyncUpdates();
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });

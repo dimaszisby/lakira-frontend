@@ -39,7 +39,7 @@ We **do** add a11y checks for:
   - [x] Dashboard page.
   - [x] Metric detail page.
 - [x] Reusable “shell” components:
-  - [x] Main navigation baseline (`BottomNavigationBar`) implemented.
+  - [x] Main navigation baseline (`BottomNavigationBar` + `Sidebar`) implemented.
   - [x] Modal / dialog components (covered via modal form integration specs with `jest-axe`).
 
 For smaller leaf components (buttons, icons, chips), we mainly rely on:

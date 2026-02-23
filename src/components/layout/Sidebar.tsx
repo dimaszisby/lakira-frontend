@@ -9,6 +9,7 @@ import { useCallback, useState } from "react";
 import { toast } from "react-hot-toast";
 
 import { cn } from "@/lib/cn";
+import { authRoutes } from "@/lib/routes";
 import { logoutUser } from "@/services/api/auth.api";
 import { userAtom } from "@/services/state/atoms";
 import Button from "@/ui/Button";
@@ -58,7 +59,7 @@ const Sidebar = ({ navItems, pathname, onLinkClick, isMobileOpen, onClose }: Sid
       setUser(null);
       queryClient.setQueryData(["userProfile"], null);
       toast.success("Logged out successfully");
-      router.push("/auth/login");
+      router.push(authRoutes.login());
     },
     onError: (error) => {
       console.error("Logout failed:", error);
@@ -97,6 +98,7 @@ const Sidebar = ({ navItems, pathname, onLinkClick, isMobileOpen, onClose }: Sid
               pathname={pathname}
               onLinkClick={handleNavigationSelection}
               className="flex-1"
+              ariaLabel="Primary sidebar navigation"
             />
             {logoutButton}
           </SidebarContentWrapper>
@@ -128,6 +130,7 @@ const Sidebar = ({ navItems, pathname, onLinkClick, isMobileOpen, onClose }: Sid
                 pathname={pathname}
                 onLinkClick={handleNavigationSelection}
                 className="flex-1"
+                ariaLabel="Mobile sidebar navigation"
               />
               {logoutButton}
             </SidebarContentWrapper>
