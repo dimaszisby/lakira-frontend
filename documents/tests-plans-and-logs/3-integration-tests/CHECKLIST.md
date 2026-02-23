@@ -35,8 +35,10 @@ Decision references:
   - `src/app/(app)/metrics/[metricId]/_components/__tests__/MetricDetailComposite.int.test.tsx`
   - `src/components/layout/__tests__/BottomNavigationBar.int.test.tsx`
   - `src/components/layout/__tests__/Sidebar.int.test.tsx`
+  - `src/components/layout/__tests__/Layout.int.test.tsx`
 - Baseline integration a11y assertions currently implemented in:
   - `src/features/auth/components/__tests__/LoginForm.int.test.tsx` (`jest-axe`).
+  - `src/features/metric-categories/components/__tests__/MetricCategoryForm.int.test.tsx` (`jest-axe`).
   - `src/features/metric-logs/components/__tests__/LogForm.int.test.tsx` (`jest-axe`).
   - `src/features/metrics/components/__tests__/MetricForm.int.test.tsx` (`jest-axe`).
   - `src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx` (`jest-axe`).
@@ -45,6 +47,7 @@ Decision references:
   - `src/app/(app)/metrics/[metricId]/_components/__tests__/MetricDetailComposite.int.test.tsx` (`jest-axe`).
   - `src/components/layout/__tests__/BottomNavigationBar.int.test.tsx` (`jest-axe`).
   - `src/components/layout/__tests__/Sidebar.int.test.tsx` (`jest-axe`).
+  - `src/components/layout/__tests__/Layout.int.test.tsx` (`jest-axe`).
 
 ---
 

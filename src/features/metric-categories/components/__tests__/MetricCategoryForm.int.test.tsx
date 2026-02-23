@@ -1,5 +1,6 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { axe } from "jest-axe";
 import { http,HttpResponse } from "msw";
 
 import MetricCategoryForm from "@/features/metric-categories/components/MetricCategoryForm";
@@ -136,5 +137,14 @@ describe("MetricCategoryForm integration", () => {
     } finally {
       consoleErrorSpy.mockRestore();
     }
+  });
+
+  it("has no critical accessibility violations on initial render", async () => {
+    const { container } = renderWithProviders(
+      <MetricCategoryForm onClose={jest.fn()} initialCategory={null} />,
+    );
+
+    const results = await axe(container);
+    expect(results).toHaveNoViolations();
   });
 });

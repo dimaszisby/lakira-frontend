@@ -79,8 +79,10 @@ Current decision (2026-02-18):
   - `src/app/(app)/metrics/[metricId]/_components/__tests__/MetricDetailComposite.int.test.tsx`
   - `src/components/layout/__tests__/BottomNavigationBar.int.test.tsx`
   - `src/components/layout/__tests__/Sidebar.int.test.tsx`
+  - `src/components/layout/__tests__/Layout.int.test.tsx`
 - Initial integration-level a11y assertions are now implemented in:
   - `src/features/auth/components/__tests__/LoginForm.int.test.tsx` (via `jest-axe`).
+  - `src/features/metric-categories/components/__tests__/MetricCategoryForm.int.test.tsx` (via `jest-axe`).
   - `src/features/metric-logs/components/__tests__/LogForm.int.test.tsx` (via `jest-axe`).
   - `src/features/metrics/components/__tests__/MetricForm.int.test.tsx` (via `jest-axe`).
   - `src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx` (via `jest-axe`).
@@ -89,6 +91,7 @@ Current decision (2026-02-18):
   - `src/app/(app)/metrics/[metricId]/_components/__tests__/MetricDetailComposite.int.test.tsx` (via `jest-axe`).
   - `src/components/layout/__tests__/BottomNavigationBar.int.test.tsx` (via `jest-axe`).
   - `src/components/layout/__tests__/Sidebar.int.test.tsx` (via `jest-axe`).
+  - `src/components/layout/__tests__/Layout.int.test.tsx` (via `jest-axe`).
 
 ---
 
