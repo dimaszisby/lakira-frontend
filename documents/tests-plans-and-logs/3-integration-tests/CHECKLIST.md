@@ -26,6 +26,7 @@ Decision references:
 - Integration Jest setup target: `jest.integration.setup.ts`
 - Baseline integration specs:
   - `src/features/auth/components/__tests__/LoginForm.int.test.tsx`
+  - `src/features/auth/components/__tests__/RegisterForm.int.test.tsx`
   - `src/features/metric-categories/components/__tests__/MetricCategoryForm.int.test.tsx`
   - `src/app/(app)/metric-categories/_components/__tests__/MetricCategoriesPageClient.int.test.tsx`
   - `src/app/(app)/metric-categories/[categoryId]/_components/__tests__/MetricCategoryHeaderSection.int.test.tsx`
@@ -41,6 +42,7 @@ Decision references:
   - `src/components/layout/__tests__/Layout.int.test.tsx`
 - Baseline integration a11y assertions currently implemented in:
   - `src/features/auth/components/__tests__/LoginForm.int.test.tsx` (`jest-axe`).
+  - `src/features/auth/components/__tests__/RegisterForm.int.test.tsx` (`jest-axe`).
   - `src/features/metric-categories/components/__tests__/MetricCategoryForm.int.test.tsx` (`jest-axe`).
   - `src/app/(app)/metric-categories/_components/__tests__/MetricCategoriesPageClient.int.test.tsx` (`jest-axe`).
   - `src/app/(app)/metric-categories/[categoryId]/_components/__tests__/MetricCategoryHeaderSection.int.test.tsx` (`jest-axe`).

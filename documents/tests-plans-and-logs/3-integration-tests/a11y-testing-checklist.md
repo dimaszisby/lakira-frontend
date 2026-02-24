@@ -32,7 +32,7 @@ Before adding a11y assertions:
 We don’t run `axe` on every tiny component to keep tests fast.  
 We **do** add a11y checks for:
 
-- [x] Auth forms (login baseline implemented).
+- [x] Auth forms (login/register baselines implemented).
 - [x] Primary data-entry forms (metric category/metric/log/settings baselines implemented).
 - [x] Main layouts:
   - [x] Metric categories list page.
