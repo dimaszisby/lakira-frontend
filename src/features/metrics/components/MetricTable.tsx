@@ -1,7 +1,6 @@
 import { memo } from "react";
 
-import type { MetricPreviewVM } from "@/src/features/metrics";
-import { cn } from "@/src/lib/cn";
+import { cn } from "@/lib/cn";
 
 import MetricDesktopTable from "./MetricDesktopTable";
 import MetricMobileTable from "./MetricMobileTable";
@@ -15,6 +14,7 @@ export const MetricTableBase = ({
   onEdit,
   onDelete,
   onRowClick,
+  onRowHover,
   className,
   variant = "both",
 }: MetricTableProps) => {
@@ -26,12 +26,13 @@ export const MetricTableBase = ({
       {showDesktop ? (
         <MetricDesktopTable
           metrics={metrics}
-          sortBy={sortBy as keyof MetricPreviewVM}
+          sortBy={sortBy}
           sortOrder={sortOrder}
           onSort={onSort}
           onEdit={onEdit}
           onDelete={onDelete}
           onRowClick={onRowClick}
+          onRowHover={onRowHover}
         />
       ) : null}
 
@@ -39,12 +40,14 @@ export const MetricTableBase = ({
         <MetricMobileTable
           metrics={metrics}
           rowKey={(met) => met.id}
-          sortBy={sortBy as keyof MetricPreviewVM}
+          sortBy={sortBy}
           sortOrder={sortOrder}
           onSort={onSort}
           onEdit={onEdit}
           onDelete={onDelete}
+          onRowClick={onRowClick}
           className={cn(variant === "mobile" ? "block" : "block sm:hidden", className)}
+          onRowHover={onRowHover}
         />
       ) : null}
     </>

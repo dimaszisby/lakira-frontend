@@ -2,7 +2,7 @@ import { Eye, EyeSlash } from "phosphor-react";
 
 import CategoryChip from "@/features/metric-categories/components/CategoryChip";
 import { toCategoryUI } from "@/features/metric-categories/presenters/toCategoryUI";
-import { SERVER_SORTABLE_COLUMNS } from "@/features/metrics/sort";
+import { METRIC_SORT_KEYS } from "@/features/metrics/sort";
 import type { MetricPreviewVM } from "@/features/metrics/view-models";
 import IconLabel from "@/ui/IconLabel";
 import type { SortChipsColumns } from "@/ui/SortChipGroup";
@@ -12,12 +12,13 @@ import type { TableColumn } from "@/ui/Table";
 // TODO: Create a generic for shared between Metric, MetricCategory, and Logs
 export interface MetricTableProps {
   metrics: MetricPreviewVM[];
-  sortBy: string;
+  sortBy: keyof MetricPreviewVM;
   sortOrder: "ASC" | "DESC" | null;
-  onSort: (column: string) => void;
+  onSort: (column: keyof MetricPreviewVM) => void;
   onEdit?: (metric: MetricPreviewVM) => void;
   onDelete?: (metric: MetricPreviewVM) => void;
   onRowClick?: (metric: MetricPreviewVM) => void;
+  onRowHover?: (metric: MetricPreviewVM) => void;
   rowKey?: (item: MetricPreviewVM) => string; // Mobile, Optional for SwipeableCard
   className?: string;
   variant?: "desktop" | "mobile" | "both";
@@ -56,7 +57,7 @@ export const mobileColumns: SortChipsColumns<MetricPreviewVM>[] = [
   },
 ];
 
-const canSort = new Set<string>(SERVER_SORTABLE_COLUMNS);
+const canSort = new Set<string>(METRIC_SORT_KEYS);
 export const desktopColumns: TableColumn<MetricPreviewVM>[] = [
   {
     key: "category",
@@ -64,7 +65,7 @@ export const desktopColumns: TableColumn<MetricPreviewVM>[] = [
     align: "center",
     width: "w-[50px]",
     responsiveWidth: { md: "w-[60px]" }, // Slightly wider on medium+
-    sortable: true,
+    sortable: false,
     renderCell: (row /* , value */) => {
       const category = toCategoryUI(row.category);
       return <CategoryChip category={category} />;
@@ -87,9 +88,9 @@ export const desktopColumns: TableColumn<MetricPreviewVM>[] = [
     responsiveWidth: { md: "w-1/3" },
     renderCell: (row /* , value */) => {
       return row.description ? (
-        <label>{row.description}</label>
+        <span>{row.description}</span>
       ) : (
-        <label className="font-light text-gray-400">No Description</label>
+        <span className="font-light text-ink-tertiary">No Description</span>
       );
     },
   },
