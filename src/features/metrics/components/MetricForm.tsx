@@ -1,9 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Trash } from "phosphor-react";
+import { FloppyDisk, Trash } from "phosphor-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDebounce } from "react-use";
 
 import type { MetricFormInitial, MetricFormInputs } from "@/features/metrics";
@@ -13,8 +13,8 @@ import {
   useDeleteMetric,
   useMetricsListViaOffset,
   useUpdateMetric,
-} from "@/features/metrics/hooks/index";
-import { cn } from "@/src/lib/cn";
+} from "@/features/metrics/hooks";
+import { cn } from "@/lib/cn";
 import Button from "@/ui/Button";
 import CategorySelect from "@/ui/CategorySelect";
 import ErrorMessage from "@/ui/ErrorMessage";
@@ -30,19 +30,21 @@ interface Props {
 
 export const MetricForm = ({ onClose, initialMetric }: Props) => {
   const isEditMode = !!initialMetric;
+  const formTitle = isEditMode ? "Edit Metric" : "Add Metric";
 
-  // * Form
-  // TODO: refactor
-  const makeDefaults = (m?: MetricFormInitial | null): MetricFormInputs => ({
-    categoryId: m?.category?.id ?? undefined,
-    originalMetricId: m?.originalMetricId ?? undefined,
-    name: m?.name ?? "",
-    description: m?.description ?? "",
-    defaultUnit: m?.defaultUnit ?? "",
-    isPublic: m?.isPublic ?? false,
-  });
+  const makeDefaults = useCallback(
+    (m: MetricFormInitial | null): MetricFormInputs => ({
+      categoryId: m?.category?.id ?? undefined,
+      originalMetricId: m?.originalMetricId ?? undefined,
+      name: m?.name ?? "",
+      description: m?.description ?? "",
+      defaultUnit: m?.defaultUnit ?? "",
+      isPublic: m?.isPublic ?? false,
+    }),
+    [],
+  );
 
-  const defaults = useMemo(() => makeDefaults(initialMetric), [initialMetric]);
+  const defaults = useMemo(() => makeDefaults(initialMetric), [initialMetric, makeDefaults]);
 
   const {
     register,
@@ -51,7 +53,6 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
     formState: { errors, isSubmitting, isValid },
     setError,
     clearErrors,
-    watch,
     control,
   } = useForm<MetricFormInputs>({
     resolver: zodResolver(metricFormSchema),
@@ -63,9 +64,7 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
     reset(defaults);
   }, [defaults, reset]);
 
-  // * Duplicate Name Check
-  // Debounce the name input to prevent excessive API calls
-  const nameValue = watch("name") ?? "";
+  const nameValue = useWatch({ control, name: "name" }) ?? "";
   const [debouncedName, setDebouncedName] = useState(nameValue);
   useDebounce(() => setDebouncedName(nameValue.trim()), 400, [nameValue]);
 
@@ -78,16 +77,14 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
     [debouncedName],
   );
 
-  // Only fetch when modal is open and user typed 2+ chars
+  // Only fetch when user typed 2+ chars
   const shouldCheckDup = debouncedName.length >= 2;
   const { metrics: dupCandidates = [] } = useMetricsListViaOffset(duplicateCheckParams, {
     enabled: shouldCheckDup,
     staleTime: 5_000,
   });
 
-  // derive current “has conflict” + current error state
   const hasValidateError = !!errors.name && errors.name.type === "validate";
-  // Reconcile dup result with current mode (ignore same record on edit)
   const hasConflict = useMemo(
     () =>
       shouldCheckDup &&
@@ -111,19 +108,8 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
     } else if (!hasConflict && hasValidateError) {
       clearErrors("name");
     }
-  }, [
-    hasConflict,
-    shouldCheckDup,
-    dupCandidates,
-    debouncedName,
-    isEditMode,
-    initialMetric?.id,
-    hasValidateError,
-    setError,
-    clearErrors,
-  ]);
+  }, [hasConflict, shouldCheckDup, hasValidateError, setError, clearErrors]);
 
-  // * Mutations
   const { createMetric, isPending: isCreating, error: createError } = useCreateMetric();
 
   const { updateMetric, isPending: isUpdating, error: updateError } = useUpdateMetric();
@@ -132,14 +118,12 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
 
   const isBusyInputs = isSubmitting || isCreating || isUpdating || isDeleting;
 
-  // * Handlers
   const onValid = useCallback(
     async (data: MetricFormInputs) => {
       try {
-        // TODO: Normalize DTO payload helper
         const payload = {
-          ...data,
-          categoryId: data.categoryId ?? null, // send null when cleared
+          ...data, // TODO: Normalize DTO payload helper
+          categoryId: data.categoryId ?? null,
         };
 
         if (isEditMode && initialMetric?.id) {
@@ -150,21 +134,14 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
 
         reset();
         onClose();
-      } catch (error) {
-        console.error("Error creating metric log:", error);
+      } catch {
+        // Mutation error state is handled by hook `error` values rendered below.
       }
     },
     [isEditMode, initialMetric, updateMetric, createMetric, reset, onClose],
   );
 
-  const onInvalid = useCallback((formErrors: typeof errors) => {
-    console.warn("Form has errors, preventing submission.", formErrors);
-  }, []);
-
-  const onSubmitForm = useMemo(
-    () => handleSubmit(onValid, onInvalid),
-    [handleSubmit, onValid, onInvalid],
-  );
+  const onSubmitForm = useMemo(() => handleSubmit(onValid), [handleSubmit, onValid]);
 
   const handleFormSubmit: React.FormEventHandler<HTMLFormElement> = useCallback(
     (e) => {
@@ -173,51 +150,52 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
     [onSubmitForm],
   );
 
-  // Delete
   const deleteMetricAsync = useCallback(async () => {
-    if (!initialMetric?.id) return;
+    const metricId = initialMetric?.id;
+    if (!metricId) return;
     try {
-      await deleteMetric(initialMetric.id);
+      await deleteMetric(metricId);
       reset();
       onClose();
-    } catch (error) {
-      console.error("Error deleting metric log:", error);
+    } catch {
+      // Mutation error state is handled by hook `error` values rendered below.
     }
-  }, [initialMetric?.id, deleteMetric, reset, onClose]);
+  }, [initialMetric, deleteMetric, reset, onClose]);
 
   const handleDeleteClick = useCallback(() => {
     void deleteMetricAsync();
   }, [deleteMetricAsync]);
 
-  // Close
   const handleCloseClick = useCallback(() => {
     onClose();
     reset();
   }, [onClose, reset]);
 
-  // Computed values
   const errorMsg = createError?.message || updateError?.message || deleteError?.message || "";
-
-  // Styles
-  const inputBg = "bg-gray-50";
+  const inputBg = "bg-surface2";
 
   return (
-    <Modal title="Manage Metric" isOpen onClose={handleCloseClick}>
-      <form noValidate className="mx-auto w-full min-w-96 max-w-md" onSubmit={handleFormSubmit}>
-        {errorMsg ? <ErrorMessage message={errorMsg} className="mb-2" /> : null}
+    <Modal title={formTitle} isOpen onClose={handleCloseClick}>
+      <form
+        noValidate
+        className="mx-auto p-4 lg:p-6"
+        onSubmit={handleFormSubmit}
+        autoComplete="off"
+      >
+        <ErrorMessage message={errorMsg} className="mb-2" />
 
-        <section className="flex flex-col gap-8">
+        <section className="flex flex-col gap-4 lg:gap-6">
           <FormField invalid={!!errors.name} error={errors.name?.message}>
             <FormField.Label>Metric Name</FormField.Label>
             <FormField.Control>
               <TextField
-                placeholder="e.g., 10000"
+                placeholder="e.g., Daily Steps"
                 registration={register("name")}
                 hasError={!!errors.name}
                 disabled={isBusyInputs}
                 clearable
                 required
-                wrapperClassName={inputBg}
+                wrapperClassName={cn(inputBg, "w-full")}
               />
             </FormField.Control>
           </FormField>
@@ -232,7 +210,7 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
                 disabled={isBusyInputs}
                 clearable
                 required
-                wrapperClassName={inputBg}
+                wrapperClassName={cn(inputBg, "w-full")}
               />
             </FormField.Control>
           </FormField>
@@ -259,16 +237,19 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
             <FormField.Label>Description</FormField.Label>
             <FormField.Control>
               <TextArea
-                placeholder="i.e., Metric to calculate muscle growth over time"
+                placeholder="e.g., Track muscle growth over time"
                 registration={register("description")}
                 hasError={!!errors.description}
                 disabled={isBusyInputs}
                 rows={5}
                 maxLength={255}
                 wrapperClassName={cn(
-                  "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]  overflow-y-auto",
                   inputBg,
+                  "overflow-y-auto",
                   "max-h-96",
+                  "[&::-webkit-scrollbar]:hidden",
+                  "[-ms-overflow-style:none]",
+                  "[scrollbar-width:none]",
                 )}
                 showCount
               />
@@ -281,21 +262,25 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
           <Button
             type="submit"
             variant="primary"
-            disabled={isSubmitting || isCreating || isUpdating || !isValid}
+            leftIcon={<FloppyDisk size={20} />}
+            disabled={isBusyInputs || !isValid}
             block
             aria-label="Save Metric"
           >
-            {isSubmitting || isCreating || isUpdating ? "Saving..." : isEditMode ? "Save" : "Add"}
+            {isSubmitting || isCreating || isUpdating
+              ? "Saving..."
+              : isEditMode
+                ? "Save"
+                : "Add Metric"}
           </Button>
 
-          {/* Delete button (edit mode only) */}
           {isEditMode ? (
             <Button
               type="button"
               variant="destructive"
               leftIcon={<Trash size={20} />}
               onClick={handleDeleteClick}
-              disabled={isSubmitting || isDeleting}
+              disabled={isBusyInputs}
               block
               aria-label="Delete Metric"
             >
