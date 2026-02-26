@@ -794,3 +794,66 @@ Consequences:
 - Metrics form behavior now aligns with the established feature-form baseline.
 - Duplicate-check logic avoids compiler warning paths and remains functionally equivalent.
 - Dialog close behavior is now covered by targeted regression tests (`+1` suite, `+2` tests).
+
+## ADR-031 - TimeRangePicker State and Validation Hardening (Accepted 2026-02-26)
+
+Context:
+
+`TimeRangePicker` still held duplicated local mode state, had brittle relative input handling for invalid/partial values, and lacked dedicated unit regression coverage for mode transitions and absolute date updates.
+
+Decision:
+
+1. Remove duplicated local mode state and treat range mode as controlled by `value.mode`.
+2. Keep relative input free-typing UX, but harden emitted values:
+   - normalize (`trim` + lowercase) before emit
+   - emit only when matching `RelativeLast` contract
+   - reset invalid draft on blur to current/fallback valid value
+3. Standardize mode switching behavior:
+   - relative->absolute emits a default rolling 30-day absolute range
+   - absolute->relative emits validated relative fallback (`30d`)
+4. Add safe datetime-local conversion helpers for absolute start/end updates.
+5. Add dedicated component tests for relative validation, mode transitions, and absolute field updates.
+
+Options considered:
+
+1. Keep current implementation and only clean class/style markup.
+2. Harden interaction/state contract and cover behavior with dedicated tests in one slice.
+
+Consequences:
+
+- Time range picker behavior is now deterministic across mode and input transitions.
+- Relative/absolute conversion paths are easier to reason about and less error-prone.
+- Feature-level component coverage improves (`+1` suite, `+6` tests).
+
+## ADR-032 - MetricSettings Form Contract and Dialog Hardening (Accepted 2026-02-26)
+
+Context:
+
+`MetricSettingsForm` still carried legacy alias imports, compiler warnings caused by render-time `watch(...)` usage, and console side effects in mutation catch paths. Its shell styling also drifted from the tokenized form baseline. `MetricSettingsFormDialog` lacked dedicated unit coverage for close navigation behavior.
+
+Decision:
+
+1. Standardize `MetricSettingsForm` imports and baseline contract:
+   - canonical utility/hooks imports (`@/lib/cn`, `@/features/metric-settings/hooks`)
+   - dynamic modal title by mode (`Add Metric Settings` / `Edit Metric Settings`)
+2. Replace render-time `watch(...)` checks with `useWatch(...)` values for conditional sections:
+   - `goalEnabled`
+   - `timeFrameEnabled`
+   - `alertEnabled`
+   - `displayOptions.showOnDashboard`
+3. Remove console logging in submit catch paths and keep hook-driven error UI as source of truth.
+4. Align form shell and subsection styling to token classes and responsive modal layout constraints.
+5. Harden dialog close callback and add dedicated unit tests for:
+   - prop passthrough
+   - `back()` + deferred `refresh()` behavior
+
+Options considered:
+
+1. Patch only compiler warning hotspots and keep existing form/dialog structure.
+2. Align settings form/dialog with the same standards used across the overhauled feature forms.
+
+Consequences:
+
+- Metric settings form behavior is clearer and avoids compiler warning paths from render-time watchers.
+- Styling and modal layout align better with the current tokenized component baseline.
+- Feature-level component coverage improves (`+1` new suite, `+2` tests).

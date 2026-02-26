@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FloppyDisk, Tag, TrendUp } from "phosphor-react";
 import { useCallback, useEffect, useMemo } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { CATEGORY_DEFAULTS } from "@/features/metric-categories/constants";
 import type { MetricSettingsFormInputs } from "@/features/metric-settings/form";
@@ -11,9 +11,9 @@ import { metricSettingsFormSchema } from "@/features/metric-settings/form";
 import {
   useCreateMetricSettings,
   useUpdateMetricSettings,
-} from "@/features/metric-settings/hooks/index";
+} from "@/features/metric-settings/hooks";
 import type { MetricSettingsExtendedVM } from "@/features/metric-settings/view-models";
-import { cn } from "@/src/lib/cn";
+import { cn } from "@/lib/cn";
 import Button from "@/ui/Button";
 import ColorField from "@/ui/ColorField";
 import DateTimePicker from "@/ui/DateTimePicker";
@@ -41,12 +41,11 @@ interface Props {
 export const MetricSettingsForm = ({
   onClose,
   metricId,
-  initialSettings: initialSettings,
+  initialSettings,
 }: Props) => {
   const isEditMode = !!initialSettings;
+  const formTitle = isEditMode ? "Edit Metric Settings" : "Add Metric Settings";
 
-  // * Form
-  // TODO: Refactor
   const makeDefaults = (
     set?: MetricSettingsExtendedVM | null,
     metricIdProp?: string | null,
@@ -78,7 +77,6 @@ export const MetricSettingsForm = ({
     handleSubmit,
     reset,
     formState: { errors, isSubmitting, isValid },
-    watch,
     control,
   } = useForm<MetricSettingsFormInputs>({
     resolver: zodResolver(metricSettingsFormSchema),
@@ -91,12 +89,16 @@ export const MetricSettingsForm = ({
     reset(defaults);
   }, [defaults, reset]);
 
+  const goalEnabled = useWatch({ control, name: "goalEnabled" });
+  const timeFrameEnabled = useWatch({ control, name: "timeFrameEnabled" });
+  const alertEnabled = useWatch({ control, name: "alertEnabled" });
+  const showOnDashboard = useWatch({ control, name: "displayOptions.showOnDashboard" });
+
   // Options
   const chartOptions: SelectOption<ChartType>[] = CHART_OPT;
   const goalTypeOptions: SegmentOption<GoalType>[] = GOAL_TYPE_OPT;
   const priorityOptions: SegmentOption<number>[] = PRIORITY_OPT;
 
-  // * Mutations
   const {
     createMetricSettings,
     isPending: isCreating,
@@ -111,18 +113,11 @@ export const MetricSettingsForm = ({
 
   const isBusyInputs = isSubmitting || isCreating || isUpdating;
 
-  // * Handlers
   const onValid = useCallback(
     async (data: MetricSettingsFormInputs) => {
-      if (!metricId) {
-        console.error("Metric ID is required for settings.");
-        return;
-      }
-
       try {
-        // TODO: Normalize DTO payload helper
         const payloadCreate = {
-          ...data,
+          ...data, // TODO: Normalize DTO payload helper
           metricId: data.metricId,
         };
 
@@ -137,8 +132,8 @@ export const MetricSettingsForm = ({
         }
         reset();
         onClose();
-      } catch (error) {
-        console.error("Error saving metric settings:", error);
+      } catch {
+        // Mutation error state is handled by hook `error` values rendered below.
       }
     },
     [
@@ -152,14 +147,7 @@ export const MetricSettingsForm = ({
     ],
   );
 
-  const onInvalid = useCallback((formErrors: typeof errors) => {
-    console.warn("Form has errors, preventing submission.", formErrors);
-  }, []);
-
-  const onSubmitForm = useMemo(
-    () => handleSubmit(onValid, onInvalid),
-    [handleSubmit, onValid, onInvalid],
-  );
+  const onSubmitForm = useMemo(() => handleSubmit(onValid), [handleSubmit, onValid]);
 
   const handleFormSubmit: React.FormEventHandler<HTMLFormElement> = useCallback(
     (e) => {
@@ -168,18 +156,15 @@ export const MetricSettingsForm = ({
     [onSubmitForm],
   );
 
-  // Close
   const handleCloseClick = useCallback(() => {
     onClose();
     reset();
   }, [onClose, reset]);
 
-  // Computed Values
   const errorMsg = createError?.message || updateError?.message || "";
 
-  // * UI: Subsections
   const subSectionContainerClass =
-    "flex flex-col gap-6 rounded rounded-xl bg-white p-4 border border-gray-100 transition";
+    "flex flex-col gap-6 rounded-xl border border-border bg-surface2 p-4 transition";
   const subsectionHeaderClass = "flex items-center justify-between gap-2";
 
   const timeFrameSubSection = (
@@ -212,7 +197,7 @@ export const MetricSettingsForm = ({
         />
       </div>
 
-      {watch("timeFrameEnabled") && (
+      {timeFrameEnabled ? (
         <>
           <Controller
             name="startDate" // string in your form DTO
@@ -253,7 +238,7 @@ export const MetricSettingsForm = ({
             )}
           />
         </>
-      )}
+      ) : null}
     </div>
   );
 
@@ -287,7 +272,7 @@ export const MetricSettingsForm = ({
         />
       </div>
 
-      {watch("alertEnabled") && (
+      {alertEnabled ? (
         <Controller
           name="alertThresholds"
           control={control}
@@ -313,13 +298,12 @@ export const MetricSettingsForm = ({
             </FormField>
           )}
         />
-      )}
+      ) : null}
     </div>
   );
 
-  // * UI: Sections
   const sectionContainerClass =
-    "flex flex-col gap-6 rounded-lg border border-gray-100 bg-gray-50 p-6 transition";
+    "flex flex-col gap-6 rounded-lg border border-border bg-surface2 p-6 transition";
 
   const goalSections = (
     <div className={sectionContainerClass}>
@@ -349,7 +333,7 @@ export const MetricSettingsForm = ({
         )}
       />
 
-      {watch("goalEnabled") && (
+      {goalEnabled ? (
         <>
           <Controller
             name="goalType"
@@ -362,9 +346,7 @@ export const MetricSettingsForm = ({
                     options={goalTypeOptions}
                     // value={field.value ?? null}
                     value={
-                      watch("goalEnabled") === true && field.value !== null && field.value
-                        ? field.value
-                        : "incremental"
+                      goalEnabled && field.value !== null && field.value ? field.value : "incremental"
                     }
                     onChange={(v) => field.onChange(v)}
                     size="md"
@@ -385,7 +367,7 @@ export const MetricSettingsForm = ({
                   valueAsNumber: true,
                   setValueAs: (v) => (v === "" || v === null ? undefined : Number(v)),
                 })}
-                leftAddon={<Tag weight="duotone" className="text-violet-500" />}
+                leftAddon={<Tag weight="duotone" className="text-ink-secondary" />}
                 hasError={!!errors.goalValue}
                 clearable
               />
@@ -396,7 +378,7 @@ export const MetricSettingsForm = ({
 
           {alertSubSection}
         </>
-      )}
+      ) : null}
     </div>
   );
 
@@ -444,9 +426,7 @@ export const MetricSettingsForm = ({
                 options={priorityOptions}
                 // value={field.value ?? null}
                 value={
-                  watch("displayOptions.showOnDashboard") === true &&
-                  field.value !== null &&
-                  field.value
+                  showOnDashboard && field.value !== null && field.value
                     ? field.value
                     : null
                 }
@@ -477,7 +457,7 @@ export const MetricSettingsForm = ({
                 placeholder="Select Chart Type"
                 leftAddon={<TrendUp size={22} weight="duotone" />}
                 // Example of "optional children on the most right"
-                rightAddon={<span className="text-xs text-gray-400">⌘K</span>}
+                rightAddon={<span className="text-xs text-ink-tertiary">⌘K</span>}
                 aria-label="Chart type"
               />
             </FormField.Control>
@@ -509,19 +489,17 @@ export const MetricSettingsForm = ({
   );
 
   const hideScrollbar =
-    "[&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]  overflow-y-auto";
+    "overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]";
 
   return (
-    <Modal isOpen onClose={handleCloseClick} ariaLabel="Metric settings form">
+    <Modal isOpen onClose={handleCloseClick} title={formTitle}>
       <form
         noValidate
-        className={cn(
-          "mx-auto flex max-h-[80vh] min-w-96 max-w-xl flex-col bg-white transition-transform",
-        )}
+        className={cn("mx-auto flex max-h-[80vh] w-full max-w-xl flex-col transition-transform")}
         onSubmit={handleFormSubmit}
+        autoComplete="off"
       >
-        <h2 className="mb-2 text-xl font-semibold">Metric Settings</h2>
-        <ErrorMessage message={errorMsg} className="mb-2"></ErrorMessage>
+        <ErrorMessage message={errorMsg} className="mb-2" />
 
         {/* Fields */}
         <div className={cn(hideScrollbar)}>

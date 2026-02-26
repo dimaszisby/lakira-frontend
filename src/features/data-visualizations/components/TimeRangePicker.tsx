@@ -1,67 +1,97 @@
 "use client";
 
 import { CaretDown, PencilSimple } from "phosphor-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
+
+import { cn } from "@/lib/cn";
 
 import type { RelativeLast, TimeRangeValue } from "../types";
 
-const RELATIVE_RE = /^\d+(h|d|w|m|y)$/;
+const DEFAULT_RELATIVE_LAST: RelativeLast = "30d";
+const THIRTY_DAYS_MS = 30 * 86_400_000;
+const RELATIVE_RE = /^\d+(h|d|w|m|y)$/i;
 
 type Props = {
   value: TimeRangeValue;
   onChange: (v: TimeRangeValue) => void;
+  className?: string;
 };
 
-const TimeRangePicker = ({ value, onChange }: Props) => {
-  const [mode, setMode] = useState<"relative" | "absolute">(value.mode);
+const TimeRangePicker = ({ value, onChange, className }: Props) => {
+  const isRelativeMode = value.mode === "relative";
+  const relativeInputRef = useRef<HTMLInputElement | null>(null);
 
-  // Local draft so users can type freely (e.g., "7" before "7d")
-  const [draftLast, setDraftLast] = useState<string>(
-    value.mode === "relative" ? value.last : "30d",
-  );
-
-  // Keep draft in sync with external value/mode
   useEffect(() => {
-    if (value.mode === "relative") setDraftLast(value.last);
+    if (value.mode !== "relative") return;
+    if (!relativeInputRef.current) return;
+    relativeInputRef.current.value = value.last;
   }, [value]);
 
+  const handleRangeModeChange = (nextMode: "relative" | "absolute") => {
+    if (nextMode === value.mode) return;
+
+    if (nextMode === "relative") {
+      const currentDraft = relativeInputRef.current?.value ?? DEFAULT_RELATIVE_LAST;
+      const next = normalizeRelativeLast(currentDraft) ?? DEFAULT_RELATIVE_LAST;
+      onChange({ mode: "relative", last: next });
+      return;
+    }
+
+    onChange({ mode: "absolute", ...toDefaultAbsoluteRange() });
+  };
+
+  const handleRelativeInputChange = (raw: string) => {
+    const normalized = normalizeRelativeLast(raw);
+    if (!normalized) return;
+    onChange({ mode: "relative", last: normalized });
+  };
+
+  const handleRelativeInputBlur = (event: React.FocusEvent<HTMLInputElement>) => {
+    const normalized = normalizeRelativeLast(event.target.value);
+    if (normalized) {
+      event.target.value = normalized;
+      return;
+    }
+    if (value.mode === "relative") {
+      event.target.value = value.last;
+      return;
+    }
+    event.target.value = DEFAULT_RELATIVE_LAST;
+  };
+
+  const handleAbsoluteStartChange = (localValue: string) => {
+    const currentAbsolute = value.mode === "absolute" ? value : toDefaultAbsoluteRange();
+    onChange({
+      mode: "absolute",
+      start: toIsoFromLocal(localValue),
+      end: currentAbsolute.end,
+    });
+  };
+
+  const handleAbsoluteEndChange = (localValue: string) => {
+    const currentAbsolute = value.mode === "absolute" ? value : toDefaultAbsoluteRange();
+    onChange({
+      mode: "absolute",
+      start: currentAbsolute.start,
+      end: toIsoFromLocal(localValue),
+    });
+  };
+
   return (
-    <div className="flex items-center gap-2">
+    <div className={cn("flex items-center gap-2", className)}>
       <div className="relative inline-flex items-center">
         <select
           aria-label="Range mode"
-          className="
-          /*
-          =
-          space for the chevron
-          */ w-full appearance-none rounded-xl border border-border bg-bg py-2 pl-3 pr-6
-          text-sm
-          outline-none ring-0 focus:border-brand-accent
-        "
-          value={mode}
-          onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
-            const m = e.target.value as "relative" | "absolute";
-            setMode(m);
-            if (m === "relative") {
-              const next: RelativeLast = isRelativeLast(draftLast) ? draftLast : "30d";
-              onChange({ mode: "relative", last: next });
-            } else {
-              const end = new Date().toISOString();
-              const start = new Date(Date.now() - 30 * 86400000).toISOString();
-              onChange({ mode: "absolute", start, end });
-            }
-          }}
+          className="w-full appearance-none rounded-xl border border-border bg-bg py-2 pl-3 pr-6 text-sm outline-none ring-0 focus:border-brand-accent"
+          value={value.mode}
+          onChange={(e) => handleRangeModeChange(e.target.value as "relative" | "absolute")}
         >
           <option value="relative">Last</option>
           <option value="absolute">Custom</option>
         </select>
 
         <span
-          className="
-          pointer-events-none
-          absolute inset-y-0 right-2
-          flex items-center 
-        "
+          className="pointer-events-none absolute inset-y-0 right-2 flex items-center"
           aria-hidden="true"
         >
           <CaretDown size={14} className="text-brand-accent" />
@@ -69,7 +99,7 @@ const TimeRangePicker = ({ value, onChange }: Props) => {
       </div>
 
       <div className="flex flex-row items-center gap-2">
-        {mode === "relative" ? (
+        {isRelativeMode ? (
           <div className="relative flex h-9 w-28 flex-row items-center overflow-clip rounded-xl border-border bg-bg">
             <input
               aria-label="Last"
@@ -77,24 +107,13 @@ const TimeRangePicker = ({ value, onChange }: Props) => {
               placeholder="e.g. 7d"
               pattern={RELATIVE_RE.source}
               title="Format: number + unit (h,d,w,m,y). Example: 7d"
-              value={draftLast}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                const raw = e.target.value;
-                setDraftLast(raw);
-                if (isRelativeLast(raw)) {
-                  onChange({ mode: "relative", last: raw });
-                }
-              }}
+              defaultValue={value.mode === "relative" ? value.last : DEFAULT_RELATIVE_LAST}
+              ref={relativeInputRef}
+              onChange={(e) => handleRelativeInputChange(e.target.value)}
+              onBlur={handleRelativeInputBlur}
             />
 
-            <span
-              className="
-          pointer-events-none
-          absolute inset-y-0 right-2
-          flex items-center
-        "
-              aria-hidden="true"
-            >
+            <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center" aria-hidden="true">
               <PencilSimple size={16} className="text-brand-accent" />
             </span>
           </div>
@@ -105,28 +124,14 @@ const TimeRangePicker = ({ value, onChange }: Props) => {
               className="rounded-xl border px-2 py-1 outline-none ring-0 focus:border-brand-accent"
               aria-label="Start"
               value={value.mode === "absolute" ? toLocal(value.start) : ""}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                const v = e.target.value ? new Date(e.target.value).toISOString() : "";
-                const cur =
-                  value.mode === "absolute"
-                    ? value
-                    : { mode: "absolute", start: "", end: "" as string };
-                onChange({ mode: "absolute", start: v, end: cur.end });
-              }}
+              onChange={(e) => handleAbsoluteStartChange(e.target.value)}
             />
             <input
               type="datetime-local"
               className="rounded-xl border px-2 py-1 outline-none ring-0 focus:border-brand-accent"
               aria-label="End"
               value={value.mode === "absolute" ? toLocal(value.end) : ""}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                const v = e.target.value ? new Date(e.target.value).toISOString() : "";
-                const cur =
-                  value.mode === "absolute"
-                    ? value
-                    : { mode: "absolute", start: "", end: "" as string };
-                onChange({ mode: "absolute", start: cur.start, end: v });
-              }}
+              onChange={(e) => handleAbsoluteEndChange(e.target.value)}
             />
           </>
         )}
@@ -145,6 +150,24 @@ function toLocal(iso: string) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(
     d.getHours(),
   )}:${pad(d.getMinutes())}`;
+}
+
+function toIsoFromLocal(localValue: string) {
+  if (!localValue) return "";
+  const parsed = new Date(localValue);
+  if (!Number.isFinite(parsed.getTime())) return "";
+  return parsed.toISOString();
+}
+
+function toDefaultAbsoluteRange() {
+  const end = new Date().toISOString();
+  const start = new Date(Date.now() - THIRTY_DAYS_MS).toISOString();
+  return { start, end };
+}
+
+function normalizeRelativeLast(value: string): RelativeLast | null {
+  const normalized = value.trim().toLowerCase();
+  return isRelativeLast(normalized) ? normalized : null;
 }
 
 function isRelativeLast(s: string): s is RelativeLast {

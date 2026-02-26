@@ -282,8 +282,90 @@ Status:
 
 - `Done`
 
+## Entry 2026-02-26 - TimeRangePicker
+
+Component:
+
+- `src/features/data-visualizations/components/TimeRangePicker.tsx`
+
+Why this slice:
+
+- The component still carried duplicated local mode state and noisy legacy markup that increased drift risk.
+- Relative input behavior needed safer normalization/reset behavior for partial or invalid values.
+- There was no dedicated unit coverage for mode switching, absolute field updates, and relative input validation flow.
+
+Changes applied:
+
+1. Simplified mode handling:
+   - removed duplicated local mode state
+   - made select fully controlled by `value.mode`
+2. Hardened relative input behavior:
+   - normalized relative values (`trim` + lowercase) before emitting
+   - kept free typing behavior with local draft via input ref
+   - reset invalid draft to current/fallback value on blur
+3. Hardened mode-switch behavior:
+   - relative->absolute now emits a consistent default 30-day ISO range
+   - absolute->relative falls back to valid relative value (`30d` fallback)
+4. Added absolute datetime update helpers to avoid invalid-date emission and preserve untouched field values.
+5. Added dedicated unit tests for:
+   - relative valid/invalid input behavior
+   - mode switch callbacks
+   - absolute start/end update wiring
+
+Validation:
+
+1. `npx eslint src/features/data-visualizations/components/TimeRangePicker.tsx src/features/data-visualizations/components/__tests__/TimeRangePicker.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/features/data-visualizations/components/__tests__/TimeRangePicker.test.tsx`
+
+Status:
+
+- `Done`
+
+## Entry 2026-02-26 - MetricSettingsForm and MetricSettingsFormDialog
+
+Components:
+
+- `src/features/metric-settings/components/MetricSettingsForm.tsx`
+- `src/features/metric-settings/components/MetricSettingsFormDialog.tsx`
+- `src/features/metric-settings/components/__tests__/MetricSettingsFormDialog.test.tsx`
+
+Why this slice:
+
+- `MetricSettingsForm` still had legacy alias imports, compiler warnings from `watch(...)` usage inside render, and console-logging side effects in submit error paths.
+- Form shell and subsection styling still relied on hard-coded surface classes that drifted from the current token baseline.
+- `MetricSettingsFormDialog` had no dedicated regression coverage for close navigation behavior.
+
+Changes applied:
+
+1. Standardized form imports/contracts:
+   - canonical imports (`@/lib/cn`, `@/features/metric-settings/hooks`)
+   - simplified prop destructuring and dynamic modal title (`Add Metric Settings` / `Edit Metric Settings`)
+2. Replaced render-time `watch(...)` with `useWatch(...)` fields:
+   - `goalEnabled`, `timeFrameEnabled`, `alertEnabled`, `showOnDashboard`
+   - removed compiler warning path and kept conditional field behavior equivalent
+3. Hardened submit/error flow:
+   - removed console logging side effects in submit catch paths
+   - simplified `handleSubmit` wiring and preserved hook-driven error banner behavior
+4. Aligned form shell styling to token baseline:
+   - tokenized section/subsection surfaces and borders
+   - removed rigid form min-width and kept responsive modal layout
+   - cleaned fallback text colors/addons to semantic token classes
+5. Hardened dialog close handler and added dedicated unit test:
+   - stable callback for `back()` + deferred `refresh()`
+   - test coverage for prop passthrough and close navigation behavior
+
+Validation:
+
+1. `npx eslint src/features/metric-settings/components/MetricSettingsForm.tsx src/features/metric-settings/components/MetricSettingsFormDialog.tsx src/features/metric-settings/components/__tests__/MetricSettingsFormDialog.test.tsx src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/features/metric-settings/components/__tests__/MetricSettingsFormDialog.test.tsx`
+3. `npx jest --config jest.integration.config.ts src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/features/data-visualizations/components/TimeRangePicker.tsx`
-2. `src/features/metric-settings/components/MetricSettingsForm.tsx`
-3. `src/features/metric-logs/components/LogForm.tsx`
+1. `src/features/metric-logs/components/LogForm.tsx`
+2. `src/features/data-visualizations/components/GranularityPicker.tsx`
+3. `src/features/data-visualizations/components/MetricChart.tsx`
