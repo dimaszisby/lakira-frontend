@@ -857,3 +857,58 @@ Consequences:
 - Metric settings form behavior is clearer and avoids compiler warning paths from render-time watchers.
 - Styling and modal layout align better with the current tokenized component baseline.
 - Feature-level component coverage improves (`+1` new suite, `+2` tests).
+
+## ADR-033 - MetricLog Form and Dialog Baseline Alignment (Accepted 2026-02-26)
+
+Context:
+
+`LogForm` still had mixed import conventions (`@/components/ui` + `@/ui`), hard-coded styling drift, and console side effects in submit/delete catch blocks. `MetricLogFormDialog` did not yet have dedicated regression tests for close navigation behavior.
+
+Decision:
+
+1. Standardize `LogForm` imports to canonical paths:
+   - UI primitives from `@/ui/...`
+   - hooks from `@/features/metric-logs/hooks`
+2. Align form behavior with the established form baseline:
+   - tokenized field shell styling
+   - modal title via modal contract (remove duplicated heading)
+   - remove redundant invalid-state banner text
+   - fix destructive CTA copy to `Delete Log`
+3. Remove console side effects in mutation catch paths and rely on hook-level error state for user-facing feedback.
+4. Stabilize `MetricLogFormDialog` close callback (`back()` then deferred `refresh()`).
+5. Add dedicated dialog unit tests for prop passthrough and close navigation behavior.
+
+Options considered:
+
+1. Keep `LogForm` as-is and only patch copy/import drift.
+2. Align the full form/dialog slice to the same quality baseline as other overhauled feature forms.
+
+Consequences:
+
+- Metric log form behavior and styling now match the feature-form baseline.
+- Error handling path is cleaner and easier to reason about.
+- Feature-level component coverage improves (`+1` new suite, `+2` tests).
+
+## ADR-034 - GranularityPicker Prop Contract and Coverage Hardening (Accepted 2026-02-26)
+
+Context:
+
+`GranularityPicker` is used by visualization controls but had no dedicated unit coverage. Its prop spread behavior also allowed `className` overrides to replace core styles unexpectedly.
+
+Decision:
+
+1. Keep the existing public contract (`value`, `onChange`, native select props), but explicitly handle:
+   - `className` through `cn(...)` merge
+   - `aria-label` with a stable default (`Granularity`)
+2. Preserve native prop pass-through (`disabled`, `data-*`, etc.) without style contract regressions.
+3. Add dedicated unit tests for options, change callbacks, label/class handling, and native prop passthrough.
+
+Options considered:
+
+1. Leave component unchanged and rely on visualization-level tests.
+2. Harden the component contract directly and add focused component-level tests.
+
+Consequences:
+
+- Granularity control styling and accessibility behavior are more predictable.
+- Regression coverage is now component-local (`+1` suite, `+4` tests).

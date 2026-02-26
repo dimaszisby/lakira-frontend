@@ -2,25 +2,26 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FloppyDisk, Lightning, Trash } from "phosphor-react";
-import React, { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 
-import Button from "@/components/ui/Button";
-import DateTimePicker from "@/components/ui/DateTimePicker";
-import ErrorMessage from "@/components/ui/ErrorMessage";
-import { FormField } from "@/components/ui/FormField";
 import {
   useCreateMetricLog,
   useDeleteMetricLog,
   useUpdateMetricLog,
-} from "@/features/metric-logs/hooks/index";
+} from "@/features/metric-logs/hooks";
 import type { LogFormInputs } from "@/features/metric-logs/types";
 import { logFormSchema } from "@/features/metric-logs/types";
 import type { MetricLogVM } from "@/features/metric-logs/view-models";
+import { cn } from "@/lib/cn";
 import type {
   CreateMetricLogRequestDTO,
   UpdateMetricLogRequestDTO,
 } from "@/types/dtos/metric-log.dto";
+import Button from "@/ui/Button";
+import DateTimePicker from "@/ui/DateTimePicker";
+import ErrorMessage from "@/ui/ErrorMessage";
+import { FormField } from "@/ui/FormField";
 import Modal from "@/ui/Modal";
 import TextField from "@/ui/TextField";
 import { parseDate, toISOWithOffset, toISOZ } from "@/utils/date-io";
@@ -33,8 +34,8 @@ interface Props {
 
 const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
   const isEditMode = !!initialLog;
+  const formTitle = isEditMode ? "Edit Log Entry" : "Add Log Entry";
 
-  // * Form
   const makeDefaults = useCallback(
     (m?: MetricLogVM | null): LogFormInputs => ({
       metricId,
@@ -63,7 +64,6 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
     reset(defaults);
   }, [defaults, reset]);
 
-  // * Mutations
   const { createMetricLog, isPending: isCreating, error: createError } = useCreateMetricLog();
 
   const { updateMetricLog, isPending: isUpdating, error: updateError } = useUpdateMetricLog();
@@ -72,13 +72,11 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
 
   const isBusyInputs = isSubmitting || isCreating || isUpdating || isDeleting;
 
-  // * Handlers
   const onValid = useCallback(
     async (data: LogFormInputs) => {
       try {
-        // TODO: Normalize DTO payload helper
         const payloadCreate = {
-          ...data,
+          ...data, // TODO: Normalize DTO payload helper
           loggedAt: toISOZ(data.loggedAt),
         } satisfies CreateMetricLogRequestDTO;
 
@@ -98,21 +96,14 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
         }
         reset();
         onClose();
-      } catch (error) {
-        console.error("Error creating metric log:", error);
+      } catch {
+        // Mutation error state is handled by hook `error` values rendered below.
       }
     },
     [isEditMode, initialLog, metricId, updateMetricLog, createMetricLog, reset, onClose],
   );
 
-  const onInvalid = useCallback((formErrors: typeof errors) => {
-    console.warn("Form has errors, preventing submission.", formErrors);
-  }, []);
-
-  const onSubmitForm = useMemo(
-    () => handleSubmit(onValid, onInvalid),
-    [handleSubmit, onValid, onInvalid],
-  );
+  const onSubmitForm = useMemo(() => handleSubmit(onValid), [handleSubmit, onValid]);
 
   const handleFormSubmit: React.FormEventHandler<HTMLFormElement> = useCallback(
     (e) => {
@@ -121,15 +112,14 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
     [onSubmitForm],
   );
 
-  // Delete
   const deleteLogAsync = useCallback(async () => {
     if (!initialLog) return;
     try {
       await deleteMetricLog({ logId: initialLog.id, metricId });
       reset();
       onClose();
-    } catch (error) {
-      console.error("Error deleting metric log:", error);
+    } catch {
+      // Mutation error state is handled by hook `error` values rendered below.
     }
   }, [initialLog, metricId, deleteMetricLog, reset, onClose]);
 
@@ -137,44 +127,31 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
     void deleteLogAsync();
   }, [deleteLogAsync]);
 
-  // Close
   const handleCloseClick = useCallback(() => {
     onClose();
     reset();
   }, [onClose, reset]);
 
-  // Computed Values
   const errorMsg = createError?.message || updateError?.message || deleteError?.message || "";
+  const inputBg = "bg-surface2";
 
-  // Styles
-  const inputBg = "bg-gray-50";
-
-  // Guard: ensure log ownership by existing metric
   if (!metricId) {
-    return <p className="mb-4 mt-4 text-xs text-red-500">Metric ID is required to add a log.</p>;
+    return <p className="mb-4 mt-4 text-xs text-status-error">Metric ID is required to add a log.</p>;
   }
 
   return (
-    <Modal isOpen onClose={handleCloseClick} ariaLabel="Metric log form">
+    <Modal isOpen onClose={handleCloseClick} title={formTitle}>
       <form
         noValidate
-        className="w-full max-w-md bg-white p-2 sm:p-2 lg:p-6"
+        className="mx-auto w-full p-4 lg:p-6"
         onSubmit={handleFormSubmit}
         autoComplete="off"
       >
-        {/* Title */}
-        <h2 className="mb-2 text-xl font-bold">
-          {isEditMode ? "Edit Log Entry" : "Add Log Entry"}
-        </h2>
+        <ErrorMessage message={errorMsg} className="mb-2" />
 
-        {/* Error Message */}
-        <ErrorMessage message={errorMsg} className="mb-2"></ErrorMessage>
-
-        <div className="flex flex-col gap-8">
-          {/* Hidden metricId field */}
+        <div className="flex flex-col gap-4 lg:gap-6">
           <input type="hidden" {...register("metricId")} value={metricId} />
 
-          {/* Value Field */}
           <FormField invalid={!!errors.logValue} error={errors.logValue?.message}>
             <FormField.Label>Log Value</FormField.Label>
             <FormField.Control>
@@ -182,17 +159,16 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
                 type="number"
                 registration={register("logValue", { valueAsNumber: true })}
                 placeholder="e.g., 10000"
-                leftAddon={<Lightning weight="duotone" className="text-violet-500" />}
+                leftAddon={<Lightning weight="duotone" className="text-ink-secondary" />}
                 hasError={!!errors.logValue}
                 disabled={isBusyInputs}
                 clearable
                 required
-                wrapperClassName={inputBg}
+                wrapperClassName={cn(inputBg, "w-full")}
               />
             </FormField.Control>
           </FormField>
 
-          {/* Logged At Field */}
           <Controller
             name="loggedAt"
             control={control}
@@ -214,35 +190,27 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
           />
         </div>
 
-        <div className="inline-block">
-          {!isValid && (
-            <ErrorMessage message="All Fields Are required" className="mb-2"></ErrorMessage>
-          )}
-        </div>
-
-        {/* Buttons */}
         <div className="mt-8 space-y-4">
           <Button
             type="submit"
             variant="primary"
             leftIcon={<FloppyDisk size={20} />}
-            disabled={isSubmitting || isCreating || isUpdating || !isValid}
+            disabled={isBusyInputs || !isValid}
             block
           >
             {isSubmitting || isCreating || isUpdating ? "Saving..." : isEditMode ? "Save" : "Add"}
           </Button>
 
-          {/* Delete button (edit mode only) */}
           {isEditMode ? (
             <Button
               type="button"
               variant="destructive"
               leftIcon={<Trash size={20} />}
               onClick={handleDeleteClick}
-              disabled={isSubmitting || isDeleting}
+              disabled={isBusyInputs}
               block
             >
-              {isDeleting ? "Deleting..." : "Delete Metric"}
+              {isDeleting ? "Deleting..." : "Delete Log"}
             </Button>
           ) : null}
         </div>

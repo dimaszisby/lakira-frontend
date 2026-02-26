@@ -364,8 +364,85 @@ Status:
 
 - `Done`
 
+## Entry 2026-02-26 - LogForm and MetricLogFormDialog
+
+Components:
+
+- `src/features/metric-logs/components/LogForm.tsx`
+- `src/features/metric-logs/components/MetricLogFormDialog.tsx`
+- `src/features/metric-logs/components/__tests__/MetricLogFormDialog.test.tsx`
+
+Why this slice:
+
+- `LogForm` still used mixed/legacy UI import paths and hard-coded styling tokens that drifted from the current form baseline.
+- Submit/delete handlers still contained console side effects in catch branches.
+- `MetricLogFormDialog` had no dedicated unit coverage for modal close navigation behavior.
+
+Changes applied:
+
+1. Standardized `LogForm` imports and styling:
+   - canonical UI imports (`@/ui/...`) and hooks barrel import
+   - tokenized form field shell usage (`bg-surface2`, semantic icon tone)
+2. Hardened submit/delete flow:
+   - removed console side effects from mutation catch branches
+   - simplified submit wiring to `handleSubmit(onValid)`
+   - standardized busy-state button disable conditions
+3. Improved semantics and copy:
+   - modal uses title prop directly (`Add Log Entry` / `Edit Log Entry`)
+   - removed duplicate heading and redundant invalid-banner copy
+   - corrected destructive CTA label to `Delete Log`
+4. Hardened `MetricLogFormDialog` close handler with stable callback (`back()` + deferred `refresh()`).
+5. Added dedicated dialog unit tests for:
+   - prop passthrough
+   - close navigation behavior
+6. Updated integration failure test to suppress noisy API error logs while asserting user-facing error behavior.
+
+Validation:
+
+1. `npx eslint src/features/metric-logs/components/LogForm.tsx src/features/metric-logs/components/MetricLogFormDialog.tsx src/features/metric-logs/components/__tests__/LogForm.int.test.tsx src/features/metric-logs/components/__tests__/MetricLogFormDialog.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/features/metric-logs/components/__tests__/MetricLogFormDialog.test.tsx`
+3. `npx jest --config jest.integration.config.ts src/features/metric-logs/components/__tests__/LogForm.int.test.tsx`
+
+Status:
+
+- `Done`
+
+## Entry 2026-02-26 - GranularityPicker
+
+Component:
+
+- `src/features/data-visualizations/components/GranularityPicker.tsx`
+
+Why this slice:
+
+- The component had no dedicated unit tests despite being part of the shared visualization controls.
+- `className` passthrough could override core select styling accidentally, creating fragile behavior.
+- Accessibility label customization relied on raw prop pass-through rather than explicit component contract.
+
+Changes applied:
+
+1. Hardened prop handling:
+   - explicit `className` + `aria-label` handling
+   - merged classes with `cn(...)` instead of allowing accidental full class override
+2. Kept existing API contract (`value`, `onChange`) while preserving native select prop pass-through.
+3. Cleaned legacy inline comment noise in control markup.
+4. Added dedicated unit tests for:
+   - option rendering
+   - change callback contract
+   - custom aria label and class merging
+   - native prop pass-through (`disabled`, `data-testid`)
+
+Validation:
+
+1. `npx eslint src/features/data-visualizations/components/GranularityPicker.tsx src/features/data-visualizations/components/__tests__/GranularityPicker.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/features/data-visualizations/components/__tests__/GranularityPicker.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/features/metric-logs/components/LogForm.tsx`
-2. `src/features/data-visualizations/components/GranularityPicker.tsx`
-3. `src/features/data-visualizations/components/MetricChart.tsx`
+1. `src/features/data-visualizations/components/MetricChart.tsx`
+2. `src/features/metrics/components/MetricForm.tsx` (polish pass)
+3. `src/features/metric-logs/components/LogForm.tsx` (polish pass)

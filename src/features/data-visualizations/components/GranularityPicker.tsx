@@ -3,7 +3,8 @@
 import { CaretDown } from "phosphor-react";
 import type { SelectHTMLAttributes } from "react";
 
-// import { CaretDown } from "@phosphor-icons/react"; // or any icon
+import { cn } from "@/lib/cn";
+
 import type { BucketAlias } from "../types";
 
 type Props = Omit<SelectHTMLAttributes<HTMLSelectElement>, "onChange"> & {
@@ -11,18 +12,21 @@ type Props = Omit<SelectHTMLAttributes<HTMLSelectElement>, "onChange"> & {
   onChange: (next: BucketAlias) => void;
 };
 
-const GranularityPicker = ({ value, onChange, ...rest }: Props) => {
+const GranularityPicker = ({
+  value,
+  onChange,
+  className,
+  "aria-label": ariaLabel,
+  ...rest
+}: Props) => {
   return (
     <div className="relative inline-flex items-center">
       <select
-        aria-label="Granularity"
-        className="
-          /*
-          =
-          space for the chevron
-          */ w-full appearance-none rounded-xl border border-border bg-bg py-2 pl-3 pr-6 text-sm outline-none ring-0
-          focus:border-brand-accent
-        "
+        aria-label={ariaLabel ?? "Granularity"}
+        className={cn(
+          "w-full appearance-none rounded-xl border border-border bg-bg py-2 pl-3 pr-6 text-sm outline-none ring-0 focus:border-brand-accent",
+          className,
+        )}
         value={value}
         onChange={(e) => onChange(e.target.value as BucketAlias)}
         {...rest}
@@ -34,14 +38,8 @@ const GranularityPicker = ({ value, onChange, ...rest }: Props) => {
         <option value="1y">Yearly</option>
       </select>
 
-      {/* Custom caret */}
       <span
-        className="
-          pointer-events-none
-          absolute inset-y-0 right-2
-          flex items-center
-          
-        "
+        className="pointer-events-none absolute inset-y-0 right-2 flex items-center"
         aria-hidden="true"
       >
         <CaretDown size={14} className="text-brand-accent" />
