@@ -16,7 +16,7 @@ import {
 import { memo, useMemo } from "react";
 import { Line } from "react-chartjs-2";
 
-import { cn } from "@/src/lib/cn";
+import { cn } from "@/lib/cn";
 
 import type { VizResponse } from "../types";
 import { isAllMissing, seriesToXY, toTimeUnit } from "../viz-helpers";
@@ -32,10 +32,12 @@ type Props = {
   data: VizResponse;
   goalValue?: number | null;
   height?: number;
+  className?: string;
 };
 
-const MetricChart = ({ data, goalValue, height = 260 }: Props) => {
+const MetricChart = ({ data, goalValue, height = 260, className }: Props) => {
   const xy = useMemo(() => seriesToXY(data.series), [data.series]);
+  const hasGoal = Number.isFinite(goalValue ?? Number.NaN);
 
   if (isAllMissing(xy)) {
     return (
@@ -43,8 +45,11 @@ const MetricChart = ({ data, goalValue, height = 260 }: Props) => {
         className={cn(
           "bg-surface2",
           "flex h-full items-center justify-center rounded-xl",
-          "text-sm text-muted-foreground",
+          "text-sm text-ink-secondary",
+          className,
         )}
+        role="status"
+        aria-live="polite"
         style={{ height }}
       >
         No data
@@ -52,27 +57,24 @@ const MetricChart = ({ data, goalValue, height = 260 }: Props) => {
     );
   }
 
-  // Dataset with {x,y} pairs. Keep parsing=true (default) so time scale works.
-  const datasets: ChartData<"line", (number | ScatterDataPoint | null)[]>["datasets"] = [
+  const metricSeries = xy as ScatterDataPoint[];
+  const datasets: ChartData<"line", ScatterDataPoint[]>["datasets"] = [
     {
       label: data.meta.unit ?? "Value",
-      data: xy as unknown as (number | ScatterDataPoint | null)[],
+      data: metricSeries,
       borderWidth: 2,
       pointRadius: 0,
       tension: 0.25,
-      spanGaps: false, // NaN -> holes
+      spanGaps: false,
       fill: false,
     },
   ];
 
-  if (goalValue != null) {
+  if (hasGoal) {
+    const goal = goalValue as number;
     datasets.push({
       label: "Goal",
-      data: xy.map((p) => ({ x: p.x, y: goalValue })) as unknown as (
-        | number
-        | ScatterDataPoint
-        | null
-      )[],
+      data: metricSeries.map((p) => ({ x: p.x, y: goal })),
       borderDash: [6, 6],
       borderWidth: 1,
       pointRadius: 0,
@@ -86,7 +88,7 @@ const MetricChart = ({ data, goalValue, height = 260 }: Props) => {
     animation: false,
     normalized: true,
     plugins: {
-      legend: { display: goalValue != null },
+      legend: { display: hasGoal },
       tooltip: {
         intersect: false,
         mode: "nearest",
@@ -99,7 +101,7 @@ const MetricChart = ({ data, goalValue, height = 260 }: Props) => {
           },
         },
       },
-      decimation: { enabled: false }, // DevNote: buckets limited (<=400)
+      decimation: { enabled: false },
     },
     scales: {
       x: {
@@ -112,7 +114,12 @@ const MetricChart = ({ data, goalValue, height = 260 }: Props) => {
   };
 
   return (
-    <div role="img" aria-label={`Metric chart for ${data.meta.metricId}`} style={{ height }}>
+    <div
+      role="img"
+      aria-label={`Metric chart for ${data.meta.metricId}`}
+      className={className}
+      style={{ height }}
+    >
       <Line data={{ datasets }} options={options} />
     </div>
   );

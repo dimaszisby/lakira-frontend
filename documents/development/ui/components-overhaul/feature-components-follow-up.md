@@ -441,8 +441,47 @@ Status:
 
 - `Done`
 
+## Entry 2026-02-26 - MetricChart
+
+Component:
+
+- `src/features/data-visualizations/components/MetricChart.tsx`
+
+Why this slice:
+
+- The component still used a legacy utility import path and had no dedicated component-level regression tests.
+- Dataset typing used repeated unsafe casts that made chart behavior harder to reason about.
+- Empty-state semantics and goal-line handling needed explicit guardrails for predictable rendering.
+
+Changes applied:
+
+1. Standardized imports and optional className support:
+   - switched to canonical `@/lib/cn`
+   - added optional `className` passthrough for wrapper/empty-state
+2. Hardened rendering semantics:
+   - empty state now uses semantic `role="status"` + `aria-live="polite"`
+   - tokenized empty text style (`text-ink-secondary`)
+3. Hardened dataset behavior:
+   - reduced unsafe casts by using `ScatterDataPoint[]` for metric and goal datasets
+   - goal line only renders for finite goal values
+   - legend visibility follows goal-line presence
+4. Added dedicated unit tests for:
+   - empty-state rendering
+   - base metric dataset/options wiring
+   - goal dataset behavior
+   - tooltip label formatting for valid/missing values
+
+Validation:
+
+1. `npx eslint src/features/data-visualizations/components/MetricChart.tsx src/features/data-visualizations/components/__tests__/MetricChart.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/features/data-visualizations/components/__tests__/MetricChart.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/features/data-visualizations/components/MetricChart.tsx`
-2. `src/features/metrics/components/MetricForm.tsx` (polish pass)
-3. `src/features/metric-logs/components/LogForm.tsx` (polish pass)
+1. `src/features/metrics/components/MetricForm.tsx` (polish pass)
+2. `src/features/metric-logs/components/LogForm.tsx` (polish pass)
+3. `src/components/ui/Visualization.tsx` (final polish + coverage sync)

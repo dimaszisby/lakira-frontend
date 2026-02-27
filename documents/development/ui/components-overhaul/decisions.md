@@ -912,3 +912,33 @@ Consequences:
 
 - Granularity control styling and accessibility behavior are more predictable.
 - Regression coverage is now component-local (`+1` suite, `+4` tests).
+
+## ADR-035 - MetricChart Typing and Empty-State Hardening (Accepted 2026-02-26)
+
+Context:
+
+`MetricChart` still used a legacy utility import path and lacked dedicated component-level tests. Dataset typing relied on repeated unsafe casts, and goal rendering behavior was loosely guarded (`goalValue != null` rather than finite checks).
+
+Decision:
+
+1. Standardize utility imports and wrapper contract:
+   - use canonical `@/lib/cn`
+   - support optional `className` passthrough
+2. Improve empty-state semantics:
+   - render empty chart state with `role="status"` + `aria-live="polite"`
+   - align empty-state text style with semantic token classes
+3. Tighten dataset behavior:
+   - use `ScatterDataPoint[]` for metric/goal dataset construction
+   - render goal dataset only when goal value is finite
+   - tie legend visibility to actual goal dataset presence
+4. Add dedicated `MetricChart` unit tests for empty state, dataset wiring, goal behavior, and tooltip formatting.
+
+Options considered:
+
+1. Keep current component and rely on `Visualization` integration tests only.
+2. Harden `MetricChart` directly and add isolated tests for predictable chart contract behavior.
+
+Consequences:
+
+- Chart behavior is more explicit and safer around missing/invalid goal values.
+- Component-level coverage improves (`+1` suite, `+5` tests).
