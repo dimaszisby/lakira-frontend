@@ -1,7 +1,7 @@
 import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import { http,HttpResponse } from "msw";
+import { http, HttpResponse } from "msw";
 
 import type { MetricFormInitial } from "@/features/metrics";
 import MetricForm from "@/features/metrics/components/MetricForm";
@@ -11,6 +11,9 @@ import { renderWithProviders } from "@/src/test-utils/renderWithProviders";
 const metricId = "metric-1";
 const defaultUnit = "kg";
 const fixedDate = "2026-02-18";
+const fixedDateTime = "2026-02-18T00:00:00.000Z";
+const metricsEndpoint = "/api/proxy/metrics";
+const duplicateMetricName = "Dup Metric";
 
 const existingMetric: MetricFormInitial = {
   id: metricId,
@@ -35,10 +38,42 @@ function mockCategoryTypeahead() {
   );
 }
 
+function mockDuplicateMetricLookup() {
+  return http.get(metricsEndpoint, ({ request }) => {
+    const url = new URL(request.url);
+    const name = url.searchParams.get("name")?.trim().toLowerCase();
+    const isDuplicate = name === "dup metric";
+
+    return HttpResponse.json({
+      status: "success",
+      message: "ok",
+      data: {
+        metrics: isDuplicate
+          ? [
+              {
+                id: "metric-dup",
+                name: duplicateMetricName,
+                defaultUnit: "kg",
+                description: null,
+                isPublic: false,
+                category: null,
+                goalType: null,
+                logCount: 0,
+                createdAt: fixedDateTime,
+                updatedAt: fixedDateTime,
+              },
+            ]
+          : [],
+        total: isDuplicate ? 1 : 0,
+      },
+    });
+  });
+}
+
 async function settleAsyncUpdates() {
   await act(async () => {
     await Promise.resolve();
-    await new Promise((resolve) => setTimeout(resolve, 0));
+    await new Promise((resolve) => setTimeout(resolve, 300));
   });
 }
 
@@ -62,7 +97,7 @@ describe("MetricForm integration", () => {
 
     server.use(
       mockCategoryTypeahead(),
-      http.post("/api/proxy/metrics", async ({ request }) => {
+      http.post(metricsEndpoint, async ({ request }) => {
         const body = await request.json();
         createPayloadSpy(body);
 
@@ -167,7 +202,7 @@ describe("MetricForm integration", () => {
     try {
       server.use(
         mockCategoryTypeahead(),
-        http.post("/api/proxy/metrics", () =>
+        http.post(metricsEndpoint, () =>
           HttpResponse.json(
             {
               status: "error",
@@ -191,6 +226,54 @@ describe("MetricForm integration", () => {
     } finally {
       consoleErrorSpy.mockRestore();
     }
+  });
+
+  it("shows duplicate-name validation and prevents submit", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const createPayloadSpy = jest.fn();
+
+    server.use(
+      mockCategoryTypeahead(),
+      mockDuplicateMetricLookup(),
+      http.post(metricsEndpoint, async ({ request }) => {
+        const body = await request.json();
+        createPayloadSpy(body);
+        return HttpResponse.json({
+          status: "success",
+          message: "Metric created",
+          data: {
+            id: "metric-new",
+            name: duplicateMetricName,
+            description: "",
+            defaultUnit,
+            isPublic: false,
+            userId: "user-1",
+            categoryId: null,
+            originalMetricId: null,
+            createdAt: fixedDate,
+            updatedAt: fixedDate,
+          },
+        });
+      }),
+    );
+
+    renderWithProviders(<MetricForm initialMetric={null} onClose={onClose} />);
+    await waitForCategoryTypeaheadIdle();
+
+    await user.type(screen.getByLabelText(/metric name/i), duplicateMetricName);
+    await user.type(screen.getByLabelText(/default unit/i), defaultUnit);
+
+    await waitFor(() => {
+      expect(screen.getByText("Metric name already exists")).toBeInTheDocument();
+    });
+
+    const saveButton = screen.getByRole("button", { name: /save metric/i });
+    expect(saveButton).toBeDisabled();
+    await user.click(saveButton);
+
+    expect(createPayloadSpy).not.toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
   });
 
   it("has no critical accessibility violations on initial render", async () => {

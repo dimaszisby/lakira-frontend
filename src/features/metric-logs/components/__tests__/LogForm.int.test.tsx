@@ -121,6 +121,42 @@ describe("MetricLogForm integration", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it("deletes an existing metric log and closes modal on success", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const deletePayloadSpy = jest.fn();
+
+    server.use(
+      http.delete("/api/proxy/metric-logs/:id", async ({ params, request }) => {
+        const requestUrl = new URL(request.url);
+        deletePayloadSpy({
+          id: params.id,
+          metricIdFromQuery: requestUrl.searchParams.get("metricId"),
+        });
+
+        return HttpResponse.json({
+          status: "success",
+          message: "Log deleted",
+          data: existingLog,
+        });
+      }),
+    );
+
+    renderWithProviders(
+      <MetricLogForm metricId={metricId} initialLog={existingLog} onClose={onClose} />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /^delete log$/i }));
+
+    await waitFor(() => {
+      expect(deletePayloadSpy).toHaveBeenCalledWith({
+        id: existingLog.id,
+        metricIdFromQuery: null,
+      });
+    });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it("shows an error message and stays open when create fails", async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();

@@ -480,8 +480,66 @@ Status:
 
 - `Done`
 
+## Entry 2026-02-26 - MetricForm (Polish Pass)
+
+Component:
+
+- `src/features/metrics/components/MetricForm.tsx`
+
+Why this slice:
+
+- The component-level behavior was already hardened, but the integration suite still lacked explicit regression coverage for duplicate-name validation flow.
+- Duplicate-name checks are asynchronous/debounced and easy to regress silently without focused test coverage.
+
+Changes applied:
+
+1. Added a focused integration test in `MetricForm.int.test.tsx` to verify:
+   - duplicate-name server lookup path is triggered
+   - validation message (`Metric name already exists`) appears
+   - submit remains blocked and create mutation is not called
+2. Improved test hygiene for async/debounced flows:
+   - centralized `/api/proxy/metrics` test endpoint constant
+   - stable duplicate-name fixture constant
+   - expanded async settle window to absorb debounce updates and avoid act warnings
+
+Validation:
+
+1. `npx eslint src/features/metrics/components/__tests__/MetricForm.int.test.tsx`
+2. `npx jest --config jest.integration.config.ts src/features/metrics/components/__tests__/MetricForm.int.test.tsx`
+
+Status:
+
+- `Done`
+
+## Entry 2026-02-26 - LogForm (Polish Pass)
+
+Component:
+
+- `src/features/metric-logs/components/LogForm.tsx`
+
+Why this slice:
+
+- Core behavior was aligned in the previous pass, but integration coverage still missed the edit-mode delete flow.
+- Deletion behavior is a high-impact path and should be explicitly protected by regression tests.
+
+Changes applied:
+
+1. Added dedicated integration coverage for delete behavior in `LogForm.int.test.tsx`:
+   - verifies delete endpoint invocation for the selected log id
+   - verifies modal close callback fires on successful deletion
+2. Preserved existing create/update/error/a11y integration coverage.
+
+Validation:
+
+1. `npx eslint src/features/metric-logs/components/__tests__/LogForm.int.test.tsx src/features/metric-logs/components/LogForm.tsx`
+2. `npx jest --config jest.integration.config.ts src/features/metric-logs/components/__tests__/LogForm.int.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/features/metrics/components/MetricForm.tsx` (polish pass)
-2. `src/features/metric-logs/components/LogForm.tsx` (polish pass)
-3. `src/components/ui/Visualization.tsx` (final polish + coverage sync)
+1. `src/components/ui/Visualization.tsx` (final polish + coverage sync)
+2. `src/features/data-visualizations/components/TimeRangePicker.tsx` (test polish pass)
+3. `src/features/data-visualizations/components/MetricChart.tsx` (test polish pass)

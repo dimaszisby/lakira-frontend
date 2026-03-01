@@ -942,3 +942,51 @@ Consequences:
 
 - Chart behavior is more explicit and safer around missing/invalid goal values.
 - Component-level coverage improves (`+1` suite, `+5` tests).
+
+## ADR-036 - MetricForm Duplicate-Name Regression Coverage (Accepted 2026-02-26)
+
+Context:
+
+`MetricForm` duplicate-name validation depends on a debounced async lookup path. Core behavior was hardened previously, but test coverage did not explicitly prove that duplicate-name conflicts block submission end-to-end.
+
+Decision:
+
+1. Add a dedicated integration test for duplicate-name flow:
+   - mock `/metrics` duplicate lookup response
+   - assert conflict message is rendered
+   - assert submit stays blocked and create mutation is not called
+2. Stabilize async settling in the integration suite to absorb debounce-driven updates and avoid act warnings.
+3. Keep component runtime behavior unchanged; this slice is a coverage hardening pass.
+
+Options considered:
+
+1. Leave coverage as-is and rely on unit-level duplicate-check assumptions.
+2. Add explicit integration regression coverage for the debounce + async lookup behavior.
+
+Consequences:
+
+- Duplicate-name protection in metric creation is now protected by integration-level regression tests.
+- Future refactors around debounce/query wiring have a direct safety net.
+
+## ADR-037 - MetricLogForm Delete-Flow Regression Coverage (Accepted 2026-02-26)
+
+Context:
+
+`LogForm` integration coverage already validated create/update/error flows, but did not explicitly protect the edit-mode delete path.
+
+Decision:
+
+1. Add an integration test for delete flow in `LogForm.int.test.tsx` to assert:
+   - delete endpoint is called with the expected log id
+   - form closes on successful deletion
+2. Keep runtime component behavior unchanged; this is a coverage-only polish pass.
+
+Options considered:
+
+1. Keep coverage focused on create/update only.
+2. Extend integration suite to include delete behavior as a first-class regression path.
+
+Consequences:
+
+- Delete behavior for metric logs is now protected by integration-level regression coverage.
+- Form flow quality gates are more balanced across create/update/delete paths.
