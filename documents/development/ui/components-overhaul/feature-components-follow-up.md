@@ -538,8 +538,37 @@ Status:
 
 - `Done`
 
+## Entry 2026-02-26 - Visualization (Final Coverage Sync)
+
+Component:
+
+- `src/components/ui/Visualization.tsx`
+
+Why this slice:
+
+- Runtime behavior was already stable, but test coverage still missed URL-fallback and query-cleanup edge cases.
+- High-value regression paths (invalid URL params, absolute->relative cleanup, no-data rendering) needed explicit safeguards.
+
+Changes applied:
+
+1. Extended `Visualization.test.tsx` with regression coverage for:
+   - invalid URL params fallback to default bucket/range
+   - absolute->relative range switch removes stale `start`/`end` params
+   - completed request with no data renders no-data state
+2. Applied test hygiene cleanup:
+   - normalized repeated literals into constants for maintainability and lint stability
+
+Validation:
+
+1. `npx eslint src/components/ui/__tests__/Visualization.test.tsx src/components/ui/Visualization.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/Visualization.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/components/ui/Visualization.tsx` (final polish + coverage sync)
-2. `src/features/data-visualizations/components/TimeRangePicker.tsx` (test polish pass)
-3. `src/features/data-visualizations/components/MetricChart.tsx` (test polish pass)
+1. `src/features/data-visualizations/components/TimeRangePicker.tsx` (test polish pass)
+2. `src/features/data-visualizations/components/MetricChart.tsx` (test polish pass)
+3. `src/features/metric-settings/components/MetricSettingsForm.tsx` (test polish pass)

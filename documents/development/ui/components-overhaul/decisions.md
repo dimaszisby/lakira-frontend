@@ -990,3 +990,28 @@ Consequences:
 
 - Delete behavior for metric logs is now protected by integration-level regression coverage.
 - Form flow quality gates are more balanced across create/update/delete paths.
+
+## ADR-038 - Visualization URL-State Regression Coverage Completion (Accepted 2026-02-26)
+
+Context:
+
+`Visualization` already had baseline unit coverage, but lacked explicit regression checks for invalid URL fallback behavior, stale absolute param cleanup when switching to relative mode, and no-data rendering after non-loading responses.
+
+Decision:
+
+1. Extend `Visualization` unit tests to validate:
+   - invalid URL query values fallback to default bucket/range state
+   - absolute->relative range transitions clear stale `start`/`end` params
+   - no-data state rendering when fetch completes without chart payload
+2. Apply minor test hygiene cleanup (shared constants) to reduce duplicate-string drift.
+3. Keep runtime component logic unchanged; this slice is a coverage-completion pass.
+
+Options considered:
+
+1. Leave existing coverage as-is and rely on integration-level behavior.
+2. Add focused unit regressions for URL-state edge cases inside `Visualization`.
+
+Consequences:
+
+- URL-state edge cases are now directly protected by component-level regression tests.
+- Visualization test suite now covers primary loading/data/no-data/fallback state transitions more completely.

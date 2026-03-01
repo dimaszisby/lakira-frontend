@@ -8,6 +8,10 @@ const mockReplace = jest.fn();
 let mockSearchParams = new URLSearchParams();
 const GRANULARITY_PICKER_TEST_ID = "granularity-picker";
 const TIME_RANGE_PICKER_REL_TEST_ID = "time-range-picker-rel";
+const ABSOLUTE_RANGE_SEARCH =
+  "view-bucket=1m&view-start=2026-01-01T00:00:00.000Z&view-end=2026-01-10T00:00:00.000Z";
+const DEFAULT_GRANULARITY_LABEL = "granularity-1d";
+const DEFAULT_RELATIVE_RANGE_LABEL = "range-relative-30d";
 
 jest.mock("next/navigation", () => ({
   useRouter: () => ({ replace: mockReplace }),
@@ -100,8 +104,12 @@ describe("Visualization", () => {
 
     expect(screen.getByText("Visualization")).toBeInTheDocument();
     expect(screen.getByRole("status", { name: /loading visualization/i })).toBeInTheDocument();
-    expect(screen.getByTestId(GRANULARITY_PICKER_TEST_ID)).toHaveTextContent("granularity-1d");
-    expect(screen.getByTestId(TIME_RANGE_PICKER_REL_TEST_ID)).toHaveTextContent("range-relative-30d");
+    expect(screen.getByTestId(GRANULARITY_PICKER_TEST_ID)).toHaveTextContent(
+      DEFAULT_GRANULARITY_LABEL,
+    );
+    expect(screen.getByTestId(TIME_RANGE_PICKER_REL_TEST_ID)).toHaveTextContent(
+      DEFAULT_RELATIVE_RANGE_LABEL,
+    );
   });
 
   it("renders chart with fetched data and goal fallback", () => {
@@ -142,9 +150,7 @@ describe("Visualization", () => {
 
   it("supports absolute range from URL and syncs absolute params", async () => {
     const user = userEvent.setup();
-    mockSearchParams = new URLSearchParams(
-      "view-bucket=1m&view-start=2026-01-01T00:00:00.000Z&view-end=2026-01-10T00:00:00.000Z",
-    );
+    mockSearchParams = new URLSearchParams(ABSOLUTE_RANGE_SEARCH);
     mockUseMetricVisualization.mockReturnValue({
       data: { points: [] },
       isLoading: false,
@@ -167,6 +173,54 @@ describe("Visualization", () => {
     );
   });
 
+  it("falls back to default bucket and range for invalid URL params", () => {
+    mockSearchParams = new URLSearchParams(
+      "view-bucket=invalid&view-range=oops&view-start=invalid&view-end=invalid",
+    );
+    mockUseMetricVisualization.mockReturnValue({
+      data: { points: [] },
+      isLoading: false,
+    });
+
+    render(<Visualization metricId="metric-6" />);
+
+    expect(screen.getByTestId(GRANULARITY_PICKER_TEST_ID)).toHaveTextContent(
+      DEFAULT_GRANULARITY_LABEL,
+    );
+    expect(screen.getByTestId(TIME_RANGE_PICKER_REL_TEST_ID)).toHaveTextContent(
+      DEFAULT_RELATIVE_RANGE_LABEL,
+    );
+  });
+
+  it("clears absolute params when switching from absolute to relative range", async () => {
+    const user = userEvent.setup();
+    mockSearchParams = new URLSearchParams(ABSOLUTE_RANGE_SEARCH);
+    mockUseMetricVisualization.mockReturnValue({
+      data: { points: [] },
+      isLoading: false,
+    });
+
+    render(<Visualization metricId="metric-7" />);
+
+    await user.click(screen.getByTestId(TIME_RANGE_PICKER_REL_TEST_ID));
+
+    const lastReplaceArg = mockReplace.mock.calls.at(-1)?.[0] as string;
+    expect(lastReplaceArg).toContain("view-range=90d");
+    expect(lastReplaceArg).not.toContain("view-start=");
+    expect(lastReplaceArg).not.toContain("view-end=");
+  });
+
+  it("shows no-data state when request completes without chart data", () => {
+    mockUseMetricVisualization.mockReturnValue({
+      data: null,
+      isLoading: false,
+    });
+
+    render(<Visualization metricId="metric-8" />);
+
+    expect(screen.getByText("No visualization data available.")).toBeInTheDocument();
+  });
+
   it("ignores unsupported bucket values", async () => {
     const user = userEvent.setup();
     mockUseMetricVisualization.mockReturnValue({
@@ -178,7 +232,9 @@ describe("Visualization", () => {
 
     await user.click(screen.getByTestId("granularity-picker-invalid"));
 
-    expect(screen.getByTestId(GRANULARITY_PICKER_TEST_ID)).toHaveTextContent("granularity-1d");
+    expect(screen.getByTestId(GRANULARITY_PICKER_TEST_ID)).toHaveTextContent(
+      DEFAULT_GRANULARITY_LABEL,
+    );
     expect(mockReplace).not.toHaveBeenCalled();
   });
 });
