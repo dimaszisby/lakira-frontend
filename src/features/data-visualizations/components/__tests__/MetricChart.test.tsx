@@ -6,6 +6,8 @@ import type { VizResponse } from "@/features/data-visualizations/types";
 const lineSpy = jest.fn();
 const BUCKET_1 = "2026-02-01T00:00:00.000Z";
 const BUCKET_2 = "2026-02-02T00:00:00.000Z";
+const ROOT_CLASS = "chart-root";
+const EMPTY_CLASS = "chart-empty";
 
 jest.mock("react-chartjs-2", () => ({
   __esModule: true,
@@ -46,6 +48,7 @@ describe("MetricChart", () => {
   it("renders empty state when all datapoints are missing", () => {
     render(
       <MetricChart
+        className={EMPTY_CLASS}
         data={{
           ...baseData,
           series: [
@@ -57,13 +60,15 @@ describe("MetricChart", () => {
     );
 
     expect(screen.getByRole("status")).toHaveTextContent("No data");
+    expect(screen.getByRole("status")).toHaveClass(EMPTY_CLASS);
     expect(screen.queryByTestId("metric-chart-line")).not.toBeInTheDocument();
   });
 
   it("renders chart with metric dataset and expected options", () => {
-    render(<MetricChart data={baseData} />);
+    render(<MetricChart data={baseData} className={ROOT_CLASS} />);
 
     expect(screen.getByRole("img", { name: /metric chart for metric-1/i })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /metric chart for metric-1/i })).toHaveClass(ROOT_CLASS);
     expect(screen.getByTestId("metric-chart-line")).toBeInTheDocument();
 
     const props = lineSpy.mock.calls[0]?.[0] as {
@@ -126,6 +131,29 @@ describe("MetricChart", () => {
 
     const label = props.options.plugins.tooltip.callbacks.label;
     expect(label({ raw: { y: 10 } })).toBe("10 kg");
+    expect(label({ raw: null })).toBe("No data");
     expect(label({ raw: Number.NaN })).toBe("No data");
+  });
+
+  it("falls back to default dataset label and trims unitless tooltip output", () => {
+    render(<MetricChart data={{ ...baseData, meta: { ...baseData.meta, unit: "   " } }} />);
+
+    const props = lineSpy.mock.calls[0]?.[0] as {
+      data: { datasets: Array<{ label: string }> };
+      options: {
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: (ctx: { raw: { y: number } | number | null }) => string;
+            };
+          };
+        };
+      };
+    };
+
+    expect(props.data.datasets[0]?.label).toBe("Value");
+
+    const label = props.options.plugins.tooltip.callbacks.label;
+    expect(label({ raw: { y: 8 } })).toBe("8");
   });
 });

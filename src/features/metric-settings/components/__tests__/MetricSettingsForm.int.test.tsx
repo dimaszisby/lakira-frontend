@@ -1,7 +1,7 @@
 import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import { http,HttpResponse } from "msw";
+import { http, HttpResponse } from "msw";
 
 import MetricSettingsForm from "@/features/metric-settings/components/MetricSettingsForm";
 import type { MetricSettingsExtendedVM } from "@/features/metric-settings/view-models";
@@ -11,6 +11,7 @@ import { renderWithProviders } from "@/src/test-utils/renderWithProviders";
 const metricId = "11111111-1111-4111-8111-111111111111";
 const settingsId = "22222222-2222-4222-8222-222222222222";
 const fixedTimestamp = "2026-02-18T08:00:00.000Z";
+const METRIC_SETTINGS_API = "/api/proxy/metric-settings";
 
 const existingSettings: MetricSettingsExtendedVM = {
   id: settingsId,
@@ -72,7 +73,7 @@ describe("MetricSettingsForm integration", () => {
     const createPayloadSpy = jest.fn();
 
     server.use(
-      http.post("/api/proxy/metric-settings", async ({ request }) => {
+      http.post(METRIC_SETTINGS_API, async ({ request }) => {
         const body = await request.json();
         createPayloadSpy(body);
 
@@ -168,7 +169,7 @@ describe("MetricSettingsForm integration", () => {
 
     try {
       server.use(
-        http.post("/api/proxy/metric-settings", () =>
+        http.post(METRIC_SETTINGS_API, () =>
           HttpResponse.json(
             {
               status: "error",
@@ -191,6 +192,58 @@ describe("MetricSettingsForm integration", () => {
     } finally {
       consoleErrorSpy.mockRestore();
     }
+  });
+
+  it("defaults goal type to incremental when goal is enabled and submitted", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const createPayloadSpy = jest.fn();
+
+    server.use(
+      http.post(METRIC_SETTINGS_API, async ({ request }) => {
+        const body = await request.json();
+        createPayloadSpy(body);
+
+        return HttpResponse.json({
+          status: "success",
+          message: "Metric settings created",
+          data: {
+            ...existingSettings,
+            id: "33333333-3333-4333-8333-333333333334",
+            goalEnabled: true,
+            goalType: "incremental",
+            goalValue: 42,
+          },
+        });
+      }),
+    );
+
+    renderWithProviders(
+      <MetricSettingsForm metricId={metricId} initialSettings={null} onClose={onClose} />,
+    );
+
+    const switches = screen.getAllByRole("switch");
+    await user.click(switches[0]!);
+
+    await user.type(screen.getByLabelText(/goal value/i), "42");
+    const submitButton = screen.getByRole("button", { name: /^add$/i });
+
+    await waitFor(() => {
+      expect(submitButton).toBeEnabled();
+    });
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(createPayloadSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          metricId,
+          goalEnabled: true,
+          goalType: "incremental",
+          goalValue: 42,
+        }),
+      );
+    });
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it("has no critical accessibility violations on initial render", async () => {

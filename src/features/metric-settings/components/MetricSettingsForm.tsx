@@ -76,6 +76,8 @@ export const MetricSettingsForm = ({
     register,
     handleSubmit,
     reset,
+    getValues,
+    setValue,
     formState: { errors, isSubmitting, isValid },
     control,
   } = useForm<MetricSettingsFormInputs>({
@@ -93,6 +95,12 @@ export const MetricSettingsForm = ({
   const timeFrameEnabled = useWatch({ control, name: "timeFrameEnabled" });
   const alertEnabled = useWatch({ control, name: "alertEnabled" });
   const showOnDashboard = useWatch({ control, name: "displayOptions.showOnDashboard" });
+
+  useEffect(() => {
+    if (!goalEnabled) return;
+    if (getValues("goalType") != null) return;
+    setValue("goalType", "incremental", { shouldValidate: true });
+  }, [goalEnabled, getValues, setValue]);
 
   // Options
   const chartOptions: SelectOption<ChartType>[] = CHART_OPT;

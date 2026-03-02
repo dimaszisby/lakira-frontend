@@ -599,8 +599,103 @@ Status:
 
 - `Done`
 
+## Entry 2026-03-02 - MetricChart (Polish Pass)
+
+Component:
+
+- `src/features/data-visualizations/components/MetricChart.tsx`
+
+Why this slice:
+
+- The previous hardening pass left a few unsafe cast paths in dataset and tooltip handling.
+- Component contract coverage still missed className passthrough checks and blank-unit fallback behavior.
+
+Changes applied:
+
+1. Removed remaining unsafe cast paths in chart data flow:
+   - added explicit scatter-point mapping helper for dataset input
+   - added dedicated tooltip raw-value parser helper
+2. Tightened goal-dataset guard:
+   - goal line now only builds when `goalValue` is both finite and numeric
+3. Hardened unit-label behavior:
+   - blank/whitespace `meta.unit` now falls back to dataset label `Value`
+   - tooltip output remains trimmed for unitless values
+4. Extended unit tests for:
+   - chart root className passthrough
+   - empty-state className passthrough
+   - tooltip `raw: null` fallback to `No data`
+   - blank-unit dataset label fallback and unitless tooltip formatting
+
+Validation:
+
+1. `npx eslint src/features/data-visualizations/components/MetricChart.tsx src/features/data-visualizations/components/__tests__/MetricChart.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/features/data-visualizations/components/__tests__/MetricChart.test.tsx`
+
+Status:
+
+- `Done`
+
+## Entry 2026-03-02 - MetricSettingsForm (Polish Pass)
+
+Component:
+
+- `src/features/metric-settings/components/MetricSettingsForm.tsx`
+
+Why this slice:
+
+- `Goal Type` could appear visually selected (`Incremental`) while still remaining `null` in form state after enabling goal mode.
+- This created a fragile validation UX path where the form looked complete but still failed schema requirements unless the user manually re-selected goal type.
+
+Changes applied:
+
+1. Hardened goal-mode default behavior in `MetricSettingsForm`:
+   - when `goalEnabled` becomes true and `goalType` is `null`, the form now sets `goalType` to `incremental` with validation enabled.
+2. Added integration regression coverage in `MetricSettingsForm.int.test.tsx`:
+   - verifies enabling goal mode + entering goal value can submit without manually re-selecting goal type
+   - verifies payload includes `goalType: "incremental"` and closes on success
+3. Applied test hygiene cleanup:
+   - extracted repeated metric-settings API path into a shared constant
+
+Validation:
+
+1. `npx eslint src/features/metric-settings/components/MetricSettingsForm.tsx src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx`
+2. `npx jest --config jest.integration.config.ts src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx`
+
+Status:
+
+- `Done`
+
+## Entry 2026-03-02 - MetricCategoryForm (Polish Pass)
+
+Component:
+
+- `src/features/metric-categories/components/MetricCategoryForm.tsx`
+
+Why this slice:
+
+- Existing tests covered create/update/delete success paths, but missed two regression-prone contract areas:
+  - prop-driven default resets when `initialCategory` changes
+  - failure behavior for destructive delete path (`onClose` should not fire)
+
+Changes applied:
+
+1. Extended `MetricCategoryForm.test.tsx` with reset behavior coverage:
+   - verifies form values reset to new defaults when `initialCategory` changes on rerender
+2. Extended delete failure regression coverage:
+   - verifies failed delete still calls mutation but does not close the modal
+3. Kept runtime component code unchanged; this is a targeted test-hardening pass.
+
+Validation:
+
+1. `npx eslint src/features/metric-categories/components/MetricCategoryForm.tsx src/features/metric-categories/components/__tests__/MetricCategoryForm.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/features/metric-categories/components/__tests__/MetricCategoryForm.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/features/data-visualizations/components/MetricChart.tsx` (test polish pass)
-2. `src/features/metric-settings/components/MetricSettingsForm.tsx` (test polish pass)
-3. `src/features/metric-categories/components/MetricCategoryForm.tsx` (test polish pass)
+1. `src/features/metric-logs/components/LogForm.tsx` (test polish pass)
+2. `src/features/metrics/components/MetricForm.tsx` (test polish pass)
+3. `src/features/data-visualizations/components/TimeRangePicker.tsx` (stability re-check)

@@ -2,7 +2,7 @@
 
 import "chartjs-adapter-date-fns";
 
-import type { ChartData, ChartOptions, ScatterDataPoint } from "chart.js";
+import type { ChartData, ChartOptions, ScatterDataPoint, TooltipItem } from "chart.js";
 import {
   Chart as ChartJS,
   Filler,
@@ -38,6 +38,8 @@ type Props = {
 const MetricChart = ({ data, goalValue, height = 260, className }: Props) => {
   const xy = useMemo(() => seriesToXY(data.series), [data.series]);
   const hasGoal = Number.isFinite(goalValue ?? Number.NaN);
+  const normalizedUnit = data.meta.unit.trim();
+  const metricLabel = normalizedUnit.length > 0 ? normalizedUnit : "Value";
 
   if (isAllMissing(xy)) {
     return (
@@ -57,10 +59,10 @@ const MetricChart = ({ data, goalValue, height = 260, className }: Props) => {
     );
   }
 
-  const metricSeries = xy as ScatterDataPoint[];
+  const metricSeries = toScatterDataPoints(xy);
   const datasets: ChartData<"line", ScatterDataPoint[]>["datasets"] = [
     {
-      label: data.meta.unit ?? "Value",
+      label: metricLabel,
       data: metricSeries,
       borderWidth: 2,
       pointRadius: 0,
@@ -70,8 +72,8 @@ const MetricChart = ({ data, goalValue, height = 260, className }: Props) => {
     },
   ];
 
-  if (hasGoal) {
-    const goal = goalValue as number;
+  if (hasGoal && typeof goalValue === "number") {
+    const goal = goalValue;
     datasets.push({
       label: "Goal",
       data: metricSeries.map((p) => ({ x: p.x, y: goal })),
@@ -93,11 +95,10 @@ const MetricChart = ({ data, goalValue, height = 260, className }: Props) => {
         intersect: false,
         mode: "nearest",
         callbacks: {
-          label: (ctx) => {
-            const raw = ctx.raw as ScatterDataPoint | number | null;
-            const v = typeof raw === "number" ? raw : (raw as ScatterDataPoint)?.y;
-            if (!Number.isFinite(v as number)) return "No data";
-            return `${v} ${data.meta.unit || ""}`.trim();
+          label: (ctx: TooltipItem<"line">) => {
+            const value = getTooltipValue(ctx.raw);
+            if (value === null) return "No data";
+            return formatTooltipLabel(value, data.meta.unit);
           },
         },
       },
@@ -126,3 +127,29 @@ const MetricChart = ({ data, goalValue, height = 260, className }: Props) => {
 };
 
 export default memo(MetricChart);
+
+function toScatterDataPoints(
+  points: ReturnType<typeof seriesToXY>,
+): ChartData<"line", ScatterDataPoint[]>["datasets"][number]["data"] {
+  return points.map((point) => ({
+    x: point.x,
+    y: typeof point.y === "number" ? point.y : Number.NaN,
+  }));
+}
+
+function getTooltipValue(raw: unknown): number | null {
+  if (typeof raw === "number") {
+    return Number.isFinite(raw) ? raw : null;
+  }
+
+  if (raw && typeof raw === "object" && "y" in raw) {
+    const pointValue = (raw as { y?: unknown }).y;
+    return typeof pointValue === "number" && Number.isFinite(pointValue) ? pointValue : null;
+  }
+
+  return null;
+}
+
+function formatTooltipLabel(value: number, unit?: string) {
+  return `${value} ${unit ?? ""}`.trim();
+}

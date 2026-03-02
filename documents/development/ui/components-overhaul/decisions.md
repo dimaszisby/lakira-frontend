@@ -1041,3 +1041,81 @@ Consequences:
 
 - TimeRangePicker now has more complete contract coverage around state-sync and no-op transitions.
 - Sync effect dependencies are more explicit, reducing accidental rerun drift.
+
+## ADR-040 - MetricChart Cast Removal and Contract Coverage Completion (Accepted 2026-03-02)
+
+Context:
+
+`MetricChart` was already functionally hardened, but still had a few unsafe cast paths in dataset and tooltip parsing. Coverage also did not explicitly protect className passthrough and blank-unit fallback behavior.
+
+Decision:
+
+1. Remove remaining unsafe casts in chart data flow:
+   - map chart points through an explicit scatter-point helper
+   - parse tooltip `raw` values through a dedicated finite-number guard
+2. Keep goal-line behavior guarded to valid numeric finite values only.
+3. Treat blank/whitespace unit values as unitless display:
+   - fallback dataset label to `Value`
+   - keep tooltip output trimmed when no unit is present
+4. Extend `MetricChart` unit tests for:
+   - chart root className passthrough
+   - empty-state className passthrough
+   - `raw: null` tooltip fallback
+   - blank-unit dataset label and tooltip formatting behavior
+
+Options considered:
+
+1. Keep existing tests and leave remaining cast paths in place.
+2. Complete the component contract hardening with explicit helpers and targeted regression tests.
+
+Consequences:
+
+- Dataset and tooltip value handling are easier to reason about and safer under refactors.
+- `MetricChart` contract coverage is now more complete for styling and unit-label edge cases.
+
+## ADR-041 - MetricSettingsForm Goal-Type Default State Hardening (Accepted 2026-03-02)
+
+Context:
+
+In `MetricSettingsForm`, enabling `goalEnabled` could render `Goal Type` as visually selected (`Incremental`) while the underlying form value still remained `null`. This made the form appear valid to users while schema validation still rejected submit until goal type was explicitly re-selected.
+
+Decision:
+
+1. Add explicit state sync in `MetricSettingsForm`:
+   - when `goalEnabled` becomes true and `goalType` is null, set `goalType` to `"incremental"` with validation.
+2. Add integration regression coverage to prove the contract:
+   - enabling goal + entering `goalValue` submits successfully without manual goal-type reselection
+   - payload includes `goalType: "incremental"`
+3. Apply small test hygiene cleanup by extracting repeated API endpoint literals into a shared constant.
+
+Options considered:
+
+1. Keep current behavior and require users to manually re-select goal type.
+2. Sync default goal type into form state to match visible UI selection and validate predictably.
+
+Consequences:
+
+- Goal settings UX and schema behavior are now aligned.
+- Regression coverage now protects this high-friction conditional validation path.
+
+## ADR-042 - MetricCategoryForm Reset/Delete Regression Coverage Completion (Accepted 2026-03-02)
+
+Context:
+
+`MetricCategoryForm` had baseline success-path coverage, but still lacked explicit regressions for two edge contracts: prop-driven default reset behavior and delete-failure modal behavior.
+
+Decision:
+
+1. Add a rerender regression test to confirm form defaults reset when `initialCategory` changes.
+2. Add delete-failure regression coverage to confirm modal close is not triggered when deletion rejects.
+3. Keep runtime component implementation unchanged; this slice is coverage completion.
+
+Options considered:
+
+1. Keep existing success-path-only coverage.
+2. Expand tests to cover prop-transition and destructive-error contracts explicitly.
+
+Consequences:
+
+- Category form behavior is now better protected against subtle state-sync and destructive-flow regressions.
+- Test coverage now reflects both optimistic and failure-path expectations for delete interactions.
