@@ -4,11 +4,13 @@ import TimeRangePicker from "@/features/data-visualizations/components/TimeRange
 import type { TimeRangeValue } from "@/features/data-visualizations/types";
 
 describe("TimeRangePicker", () => {
+  const rangeModeLabel = "Range mode";
+  const absoluteEndIso = "2026-02-10T12:00:00.000Z";
   const relativeValue: TimeRangeValue = { mode: "relative", last: "30d" };
   const absoluteValue: TimeRangeValue = {
     mode: "absolute",
     start: "2026-02-01T10:00:00.000Z",
-    end: "2026-02-10T12:00:00.000Z",
+    end: absoluteEndIso,
   };
 
   it("emits normalized relative value and normalizes input on blur", () => {
@@ -42,7 +44,7 @@ describe("TimeRangePicker", () => {
 
     render(<TimeRangePicker value={relativeValue} onChange={onChange} />);
 
-    fireEvent.change(screen.getByLabelText("Range mode"), {
+    fireEvent.change(screen.getByLabelText(rangeModeLabel), {
       target: { value: "absolute" },
     });
 
@@ -59,7 +61,7 @@ describe("TimeRangePicker", () => {
     const onChange = jest.fn();
     render(<TimeRangePicker value={absoluteValue} onChange={onChange} />);
 
-    fireEvent.change(screen.getByLabelText("Range mode"), {
+    fireEvent.change(screen.getByLabelText(rangeModeLabel), {
       target: { value: "relative" },
     });
 
@@ -78,7 +80,7 @@ describe("TimeRangePicker", () => {
     expect(onChange).toHaveBeenCalledWith({
       mode: "absolute",
       start: new Date(nextStartLocal).toISOString(),
-      end: "2026-02-10T12:00:00.000Z",
+      end: absoluteEndIso,
     });
   });
 
@@ -95,6 +97,52 @@ describe("TimeRangePicker", () => {
       mode: "absolute",
       start: "2026-02-01T10:00:00.000Z",
       end: new Date(nextEndLocal).toISOString(),
+    });
+  });
+
+  it("does not emit when selecting current range mode", () => {
+    const onChange = jest.fn();
+    render(<TimeRangePicker value={relativeValue} onChange={onChange} />);
+
+    fireEvent.change(screen.getByLabelText(rangeModeLabel), {
+      target: { value: "relative" },
+    });
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("syncs relative input when parent value changes", () => {
+    const onChange = jest.fn();
+    const { rerender } = render(<TimeRangePicker value={relativeValue} onChange={onChange} />);
+
+    expect(screen.getByLabelText("Last")).toHaveValue("30d");
+
+    rerender(<TimeRangePicker value={{ mode: "relative", last: "14d" }} onChange={onChange} />);
+
+    expect(screen.getByLabelText("Last")).toHaveValue("14d");
+  });
+
+  it("passes through className to root container", () => {
+    const onChange = jest.fn();
+    const { container } = render(
+      <TimeRangePicker value={relativeValue} onChange={onChange} className="picker-custom" />,
+    );
+
+    expect(container.firstChild).toHaveClass("picker-custom");
+  });
+
+  it("emits empty absolute start when local datetime is invalid", () => {
+    const onChange = jest.fn();
+    render(<TimeRangePicker value={absoluteValue} onChange={onChange} />);
+
+    fireEvent.change(screen.getByLabelText("Start"), {
+      target: { value: "invalid-value" },
+    });
+
+    expect(onChange).toHaveBeenCalledWith({
+      mode: "absolute",
+      start: "",
+      end: absoluteEndIso,
     });
   });
 });

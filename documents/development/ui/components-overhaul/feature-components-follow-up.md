@@ -567,8 +567,40 @@ Status:
 
 - `Done`
 
+## Entry 2026-02-26 - TimeRangePicker (Polish Pass)
+
+Component:
+
+- `src/features/data-visualizations/components/TimeRangePicker.tsx`
+
+Why this slice:
+
+- The main interaction hardening was already complete, but test coverage still missed a few contract edge cases.
+- The component also had a broad effect dependency (`[value]`) that was less precise than needed.
+
+Changes applied:
+
+1. Tightened effect dependency in `TimeRangePicker.tsx`:
+   - from `[value]` to `[value.mode, value.last]` for more explicit sync behavior.
+2. Extended `TimeRangePicker.test.tsx` with additional regression cases:
+   - selecting the already active mode emits no change event
+   - relative input syncs when parent value updates
+   - `className` passthrough reaches root container
+   - invalid absolute start input emits empty `start` while preserving `end`
+3. Applied test hygiene cleanup:
+   - extracted repeated literals into constants to keep lint stable.
+
+Validation:
+
+1. `npx eslint src/features/data-visualizations/components/TimeRangePicker.tsx src/features/data-visualizations/components/__tests__/TimeRangePicker.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/features/data-visualizations/components/__tests__/TimeRangePicker.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/features/data-visualizations/components/TimeRangePicker.tsx` (test polish pass)
-2. `src/features/data-visualizations/components/MetricChart.tsx` (test polish pass)
-3. `src/features/metric-settings/components/MetricSettingsForm.tsx` (test polish pass)
+1. `src/features/data-visualizations/components/MetricChart.tsx` (test polish pass)
+2. `src/features/metric-settings/components/MetricSettingsForm.tsx` (test polish pass)
+3. `src/features/metric-categories/components/MetricCategoryForm.tsx` (test polish pass)

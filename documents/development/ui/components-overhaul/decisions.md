@@ -1015,3 +1015,29 @@ Consequences:
 
 - URL-state edge cases are now directly protected by component-level regression tests.
 - Visualization test suite now covers primary loading/data/no-data/fallback state transitions more completely.
+
+## ADR-039 - TimeRangePicker Edge-Case Coverage Completion (Accepted 2026-02-26)
+
+Context:
+
+`TimeRangePicker` had solid baseline coverage, but still lacked targeted tests for unchanged mode selection behavior, parent-driven relative input sync, className passthrough, and invalid absolute-start input handling.
+
+Decision:
+
+1. Add focused unit tests for:
+   - no-op when selecting current mode
+   - relative input sync after parent value change
+   - root className passthrough
+   - invalid absolute start input emitting empty start while preserving end
+2. Tighten effect dependency in component sync logic from `[value]` to `[value.mode, value.last]`.
+3. Keep runtime API unchanged; this slice is a polish + coverage completion pass.
+
+Options considered:
+
+1. Keep existing tests and accept partial edge-case coverage.
+2. Complete edge-case coverage now to protect future refactors around range sync behavior.
+
+Consequences:
+
+- TimeRangePicker now has more complete contract coverage around state-sync and no-op transitions.
+- Sync effect dependencies are more explicit, reducing accidental rerun drift.

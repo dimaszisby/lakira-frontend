@@ -25,7 +25,7 @@ const TimeRangePicker = ({ value, onChange, className }: Props) => {
     if (value.mode !== "relative") return;
     if (!relativeInputRef.current) return;
     relativeInputRef.current.value = value.last;
-  }, [value]);
+  }, [value.mode, value.last]);
 
   const handleRangeModeChange = (nextMode: "relative" | "absolute") => {
     if (nextMode === value.mode) return;
