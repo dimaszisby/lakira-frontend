@@ -1119,3 +1119,79 @@ Consequences:
 
 - Category form behavior is now better protected against subtle state-sync and destructive-flow regressions.
 - Test coverage now reflects both optimistic and failure-path expectations for delete interactions.
+
+## ADR-043 - LogForm Guardrail Coverage Completion (Accepted 2026-03-02)
+
+Context:
+
+`LogForm` already had integration coverage for create/update/delete success and create failure, but still lacked explicit guardrail tests for missing `metricId` rendering and delete-failure modal behavior.
+
+Decision:
+
+1. Extend `LogForm` integration tests to verify no-`metricId` guard behavior:
+   - guard message renders
+   - submit CTA does not render
+2. Extend delete failure coverage to verify:
+   - error alert is shown on failed delete request
+   - `onClose` is not called (modal stays open)
+3. Improve test hygiene by centralizing repeated log endpoint literals into a shared constant.
+
+Options considered:
+
+1. Keep current coverage and rely on existing success-path assertions.
+2. Add explicit guardrail regressions for early-return and destructive error paths.
+
+Consequences:
+
+- Log form behavior is now better protected on non-happy paths.
+- Integration suite coverage is more balanced across success, validation guard, and destructive failure flows.
+
+## ADR-044 - MetricForm Delete-Flow Integration Coverage Completion (Accepted 2026-03-02)
+
+Context:
+
+`MetricForm` integration tests already covered create/update success and create failure, but lacked explicit edit-mode delete success/failure regression checks.
+
+Decision:
+
+1. Add delete success integration coverage in `MetricForm.int.test.tsx` to verify:
+   - delete endpoint receives the expected metric id
+   - modal closes on successful deletion
+2. Add delete failure integration coverage to verify:
+   - error alert is rendered when delete fails
+   - modal does not close (`onClose` remains uncalled)
+3. Keep runtime component behavior unchanged; this slice focuses on test-hardening symmetry across destructive flows.
+
+Options considered:
+
+1. Keep existing coverage and rely on hook-level assumptions for delete behavior.
+2. Add explicit component-integration regressions for delete success and failure.
+
+Consequences:
+
+- Edit-mode destructive flow is now protected by integration-level regression tests.
+- Metric form coverage is more balanced across create, update, and delete contracts.
+
+## ADR-045 - TimeRangePicker Invalid-ISO Rendering Guard (Accepted 2026-03-02)
+
+Context:
+
+`TimeRangePicker` absolute mode converts ISO strings into `datetime-local` values through `toLocal(...)`. Invalid upstream ISO strings could produce `NaN-NaN-...` output, resulting in unstable input rendering.
+
+Decision:
+
+1. Harden `toLocal(...)` with explicit invalid-date guard:
+   - return empty string when parsed date is not finite.
+2. Add dedicated regression coverage for invalid absolute ISO input values:
+   - both `Start` and `End` render as empty strings when values are invalid.
+3. Keep external component API unchanged; this is a stability hardening pass.
+
+Options considered:
+
+1. Keep current conversion behavior and rely on parent normalization only.
+2. Make `TimeRangePicker` resilient to malformed parent input values.
+
+Consequences:
+
+- Absolute datetime-local inputs now fail-safe on malformed upstream ISO values.
+- Rendering contract is more robust under partial/migrating state or API inconsistency.

@@ -145,4 +145,17 @@ describe("TimeRangePicker", () => {
       end: absoluteEndIso,
     });
   });
+
+  it("renders empty datetime-local values when absolute iso values are invalid", () => {
+    const onChange = jest.fn();
+    render(
+      <TimeRangePicker
+        value={{ mode: "absolute", start: "invalid-start", end: "invalid-end" }}
+        onChange={onChange}
+      />,
+    );
+
+    expect(screen.getByLabelText("Start")).toHaveValue("");
+    expect(screen.getByLabelText("End")).toHaveValue("");
+  });
 });

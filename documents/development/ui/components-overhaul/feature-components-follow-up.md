@@ -694,8 +694,101 @@ Status:
 
 - `Done`
 
+## Entry 2026-03-02 - LogForm (Polish Pass 2)
+
+Component:
+
+- `src/features/metric-logs/components/LogForm.tsx`
+
+Why this slice:
+
+- Existing integration coverage still missed two guardrail paths:
+  - no-`metricId` early return contract
+  - delete-failure behavior should keep modal open
+- Test file also had repeated endpoint literals.
+
+Changes applied:
+
+1. Extended `LogForm.int.test.tsx` to cover missing metric id guard:
+   - verifies guard text renders
+   - verifies submit CTA is not rendered
+2. Extended delete failure coverage:
+   - verifies modal remains open (`onClose` not called) when delete returns 500
+   - verifies alert error state is rendered
+   - suppressed expected test-path API error console noise
+3. Applied test hygiene cleanup:
+   - extracted repeated endpoint path to `METRIC_LOGS_API` constant
+   - reused constant across create/update/delete handlers
+
+Validation:
+
+1. `npx eslint src/features/metric-logs/components/LogForm.tsx src/features/metric-logs/components/__tests__/LogForm.int.test.tsx`
+2. `npx jest --config jest.integration.config.ts src/features/metric-logs/components/__tests__/LogForm.int.test.tsx`
+
+Status:
+
+- `Done`
+
+## Entry 2026-03-02 - MetricForm (Polish Pass 2)
+
+Component:
+
+- `src/features/metrics/components/MetricForm.tsx`
+
+Why this slice:
+
+- Existing integration coverage missed delete-mode behavior, leaving create/update with stronger safety nets than destructive flows.
+- Delete success and delete failure are high-impact contracts for edit mode and needed explicit regression protection.
+
+Changes applied:
+
+1. Extended `MetricForm.int.test.tsx` with delete success coverage:
+   - verifies DELETE endpoint receives the current metric id
+   - verifies successful delete closes modal (`onClose`)
+2. Extended `MetricForm.int.test.tsx` with delete failure coverage:
+   - verifies error alert is rendered on failed delete
+   - verifies modal remains open (`onClose` not called)
+   - suppresses expected API error console noise in failure path
+3. Kept runtime component logic unchanged; this is a targeted integration coverage completion pass.
+
+Validation:
+
+1. `npx eslint src/features/metrics/components/MetricForm.tsx src/features/metrics/components/__tests__/MetricForm.int.test.tsx`
+2. `npx jest --config jest.integration.config.ts src/features/metrics/components/__tests__/MetricForm.int.test.tsx`
+
+Status:
+
+- `Done`
+
+## Entry 2026-03-02 - TimeRangePicker (Stability Re-check)
+
+Component:
+
+- `src/features/data-visualizations/components/TimeRangePicker.tsx`
+
+Why this slice:
+
+- Absolute mode still had a rendering edge case when parent-provided ISO values were invalid.
+- `toLocal(...)` could produce `NaN-NaN-...` formatted strings, creating unstable datetime-local input values.
+
+Changes applied:
+
+1. Hardened `toLocal(...)` invalid-date guard:
+   - returns empty string when ISO parsing fails (`!Number.isFinite(getTime())`)
+2. Added unit regression coverage in `TimeRangePicker.test.tsx`:
+   - invalid `start`/`end` ISO values render empty datetime-local input values
+
+Validation:
+
+1. `npx eslint src/features/data-visualizations/components/TimeRangePicker.tsx src/features/data-visualizations/components/__tests__/TimeRangePicker.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/features/data-visualizations/components/__tests__/TimeRangePicker.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/features/metric-logs/components/LogForm.tsx` (test polish pass)
-2. `src/features/metrics/components/MetricForm.tsx` (test polish pass)
-3. `src/features/data-visualizations/components/TimeRangePicker.tsx` (stability re-check)
+1. `src/features/metric-settings/components/MetricSettingsForm.tsx` (stability re-check)
+2. `src/features/data-visualizations/components/MetricChart.tsx` (stability re-check)
+3. `src/features/metrics/components/MetricForm.tsx` (stability re-check)
