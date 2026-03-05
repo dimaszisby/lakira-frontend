@@ -194,6 +194,42 @@ describe("MetricSettingsForm integration", () => {
     }
   });
 
+  it("shows error message and stays open when update fails", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      server.use(
+        http.put("/api/proxy/metric-settings/:id", () =>
+          HttpResponse.json(
+            {
+              status: "error",
+              message: "Internal server error",
+              data: null,
+            },
+            { status: 500 },
+          ),
+        ),
+      );
+
+      renderWithProviders(
+        <MetricSettingsForm
+          metricId={metricId}
+          initialSettings={existingSettings}
+          onClose={onClose}
+        />,
+      );
+
+      await submitMetricSettingsForm(user, /^save$/i);
+
+      expect(await screen.findByRole("alert")).toBeInTheDocument();
+      expect(onClose).not.toHaveBeenCalled();
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
+
   it("defaults goal type to incremental when goal is enabled and submitted", async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();
@@ -244,6 +280,39 @@ describe("MetricSettingsForm integration", () => {
       );
     });
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("resets displayed defaults when initialSettings prop changes", async () => {
+    const onClose = jest.fn();
+    const { rerender } = renderWithProviders(
+      <MetricSettingsForm
+        metricId={metricId}
+        initialSettings={existingSettings}
+        onClose={onClose}
+      />,
+    );
+
+    const nextSettings: MetricSettingsExtendedVM = {
+      ...existingSettings,
+      id: "33333333-3333-4333-8333-333333333335",
+      goalEnabled: true,
+      goalType: "cumulative",
+      goalValue: 99,
+      alertEnabled: true,
+      alertThresholds: 75,
+      updatedAt: "2026-02-19T08:00:00.000Z",
+    };
+
+    rerender(
+      <MetricSettingsForm
+        metricId={metricId}
+        initialSettings={nextSettings}
+        onClose={onClose}
+      />,
+    );
+
+    expect(await screen.findByDisplayValue("99")).toBeInTheDocument();
+    expect(await screen.findByText("75%")).toBeInTheDocument();
   });
 
   it("has no critical accessibility violations on initial render", async () => {

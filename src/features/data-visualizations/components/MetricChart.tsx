@@ -38,7 +38,7 @@ type Props = {
 const MetricChart = ({ data, goalValue, height = 260, className }: Props) => {
   const xy = useMemo(() => seriesToXY(data.series), [data.series]);
   const hasGoal = Number.isFinite(goalValue ?? Number.NaN);
-  const normalizedUnit = data.meta.unit.trim();
+  const normalizedUnit = normalizeUnit(data.meta.unit);
   const metricLabel = normalizedUnit.length > 0 ? normalizedUnit : "Value";
 
   if (isAllMissing(xy)) {
@@ -98,7 +98,7 @@ const MetricChart = ({ data, goalValue, height = 260, className }: Props) => {
           label: (ctx: TooltipItem<"line">) => {
             const value = getTooltipValue(ctx.raw);
             if (value === null) return "No data";
-            return formatTooltipLabel(value, data.meta.unit);
+            return formatTooltipLabel(value, normalizedUnit);
           },
         },
       },
@@ -133,7 +133,7 @@ function toScatterDataPoints(
 ): ChartData<"line", ScatterDataPoint[]>["datasets"][number]["data"] {
   return points.map((point) => ({
     x: point.x,
-    y: typeof point.y === "number" ? point.y : Number.NaN,
+    y: typeof point.y === "number" && Number.isFinite(point.y) ? point.y : Number.NaN,
   }));
 }
 
@@ -152,4 +152,8 @@ function getTooltipValue(raw: unknown): number | null {
 
 function formatTooltipLabel(value: number, unit?: string) {
   return `${value} ${unit ?? ""}`.trim();
+}
+
+function normalizeUnit(unit: unknown): string {
+  return typeof unit === "string" ? unit.trim() : "";
 }

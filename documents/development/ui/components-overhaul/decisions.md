@@ -1195,3 +1195,57 @@ Consequences:
 
 - Absolute datetime-local inputs now fail-safe on malformed upstream ISO values.
 - Rendering contract is more robust under partial/migrating state or API inconsistency.
+
+## ADR-046 - MetricSettingsForm Update-Failure and Prop-Reset Regression Coverage (Accepted 2026-03-02)
+
+Context:
+
+`MetricSettingsForm` had baseline integration coverage for create/update success and create failure, but lacked explicit checks for update failure behavior and prop-transition reset stability when `initialSettings` changes.
+
+Decision:
+
+1. Extend integration coverage to assert update failure contract:
+   - error alert is rendered
+   - modal remains open (`onClose` is not called)
+2. Extend integration coverage to assert prop-reset contract:
+   - rerender with new `initialSettings` updates rendered default values (`goalValue`, `alertThresholds`)
+3. Keep runtime component behavior unchanged; this is a stability regression coverage pass.
+
+Options considered:
+
+1. Keep existing coverage and rely on create-failure behavior as proxy.
+2. Add explicit update-failure and rerender-reset regressions.
+
+Consequences:
+
+- Metric settings form now has stronger integration safety around non-happy update flows.
+- Prop-transition form-state reset behavior is explicitly protected from regressions.
+
+## ADR-047 - MetricChart Runtime-Safety Normalization (Accepted 2026-03-02)
+
+Context:
+
+`MetricChart` already had strong baseline coverage, but two runtime-safety edges remained:
+
+1. non-finite datapoints (`Infinity`) could flow into chart datasets directly
+2. unit formatting assumed `meta.unit` is always a string at runtime
+
+Decision:
+
+1. Sanitize scatter datapoint y-values before render:
+   - non-finite numbers normalize to `NaN`
+2. Normalize unit handling with a defensive runtime helper:
+   - non-string unit values resolve to empty string
+   - dataset label fallback remains `Value`
+   - tooltip formatting uses normalized unit
+3. Extend unit tests to cover both non-finite datapoint and non-string unit scenarios.
+
+Options considered:
+
+1. Keep prior typing-only assumptions and rely on upstream API correctness.
+2. Add component-level runtime normalization for resilience against malformed payloads.
+
+Consequences:
+
+- Chart rendering contract is more resilient to malformed payload data.
+- Tooltip and dataset label behavior are now safer under runtime type drift.

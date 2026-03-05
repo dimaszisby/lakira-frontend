@@ -156,4 +156,57 @@ describe("MetricChart", () => {
     const label = props.options.plugins.tooltip.callbacks.label;
     expect(label({ raw: { y: 8 } })).toBe("8");
   });
+
+  it("sanitizes non-finite datapoints to NaN in dataset", () => {
+    render(
+      <MetricChart
+        data={{
+          ...baseData,
+          series: [
+            { bucketStartISO: BUCKET_1, value: 12 },
+            { bucketStartISO: BUCKET_2, value: Number.POSITIVE_INFINITY },
+          ],
+        }}
+      />,
+    );
+
+    const props = lineSpy.mock.calls[0]?.[0] as {
+      data: { datasets: Array<{ data: Array<{ x: string; y: number }> }> };
+    };
+
+    expect(props.data.datasets[0]?.data).toEqual([
+      { x: BUCKET_1, y: 12 },
+      { x: BUCKET_2, y: Number.NaN },
+    ]);
+  });
+
+  it("falls back safely when unit is not a string at runtime", () => {
+    render(
+      <MetricChart
+        data={{
+          ...baseData,
+          meta: {
+            ...baseData.meta,
+            unit: null as unknown as string,
+          },
+        }}
+      />,
+    );
+
+    const props = lineSpy.mock.calls[0]?.[0] as {
+      data: { datasets: Array<{ label: string }> };
+      options: {
+        plugins: {
+          tooltip: {
+            callbacks: {
+              label: (ctx: { raw: { y: number } | number | null }) => string;
+            };
+          };
+        };
+      };
+    };
+
+    expect(props.data.datasets[0]?.label).toBe("Value");
+    expect(props.options.plugins.tooltip.callbacks.label({ raw: { y: 5 } })).toBe("5");
+  });
 });

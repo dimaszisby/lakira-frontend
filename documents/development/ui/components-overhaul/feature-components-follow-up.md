@@ -787,8 +787,67 @@ Status:
 
 - `Done`
 
+## Entry 2026-03-02 - MetricSettingsForm (Stability Re-check)
+
+Component:
+
+- `src/features/metric-settings/components/MetricSettingsForm.tsx`
+
+Why this slice:
+
+- Integration coverage did not yet include update-failure behavior.
+- Prop-transition stability for `initialSettings` rerender defaults needed explicit regression protection.
+
+Changes applied:
+
+1. Extended `MetricSettingsForm.int.test.tsx` with update-failure coverage:
+   - failed update renders error alert
+   - modal remains open (`onClose` not called)
+2. Extended `MetricSettingsForm.int.test.tsx` with prop-transition reset coverage:
+   - rerender with new `initialSettings` updates rendered defaults (`goalValue`, `alertThresholds`)
+
+Validation:
+
+1. `npx eslint src/features/metric-settings/components/MetricSettingsForm.tsx src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx`
+2. `npx jest --config jest.integration.config.ts src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx`
+
+Status:
+
+- `Done`
+
+## Entry 2026-03-02 - MetricChart (Stability Re-check)
+
+Component:
+
+- `src/features/data-visualizations/components/MetricChart.tsx`
+
+Why this slice:
+
+- Chart rendering still accepted unexpected non-finite y-values (`Infinity`) into datasets.
+- Unit formatting paths could become brittle if runtime payloads violate the declared `string` unit contract.
+
+Changes applied:
+
+1. Hardened dataset point sanitation:
+   - non-finite y-values now normalize to `NaN` before chart render
+2. Hardened unit normalization:
+   - normalized unit handling now safely accepts unknown runtime values
+   - tooltip formatting now uses normalized unit value
+3. Extended `MetricChart.test.tsx` coverage:
+   - verifies non-finite datapoints are sanitized
+   - verifies non-string unit fallback still renders safe dataset label and tooltip output
+
+Validation:
+
+1. `npx eslint src/features/data-visualizations/components/MetricChart.tsx src/features/data-visualizations/components/__tests__/MetricChart.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/features/data-visualizations/components/__tests__/MetricChart.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/features/metric-settings/components/MetricSettingsForm.tsx` (stability re-check)
-2. `src/features/data-visualizations/components/MetricChart.tsx` (stability re-check)
-3. `src/features/metrics/components/MetricForm.tsx` (stability re-check)
+1. `src/features/metrics/components/MetricForm.tsx` (stability re-check)
+2. `src/features/metric-logs/components/LogForm.tsx` (stability re-check)
+3. `src/features/data-visualizations/components/TimeRangePicker.tsx` (stability spot-check)
