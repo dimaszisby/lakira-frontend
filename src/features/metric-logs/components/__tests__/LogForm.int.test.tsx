@@ -10,6 +10,7 @@ import { renderWithProviders } from "@/src/test-utils/renderWithProviders";
 
 const metricId = "11111111-1111-4111-8111-111111111111";
 const loggedAtIso = "2026-02-18T08:00:00.000Z";
+const METRIC_LOGS_API = "/api/proxy/metric-logs";
 
 const existingLog: MetricLogVM = {
   id: "log-1",
@@ -39,7 +40,7 @@ describe("MetricLogForm integration", () => {
     const createPayloadSpy = jest.fn();
 
     server.use(
-      http.post("/api/proxy/metric-logs", async ({ request }) => {
+      http.post(METRIC_LOGS_API, async ({ request }) => {
         const body = await request.json();
         createPayloadSpy(body);
 
@@ -81,7 +82,7 @@ describe("MetricLogForm integration", () => {
     const updatePayloadSpy = jest.fn();
 
     server.use(
-      http.put("/api/proxy/metric-logs/:id", async ({ params, request }) => {
+      http.put(`${METRIC_LOGS_API}/:id`, async ({ params, request }) => {
         const body = await request.json();
         updatePayloadSpy({
           id: params.id,
@@ -121,13 +122,45 @@ describe("MetricLogForm integration", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it("shows an error message and stays open when update fails", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      server.use(
+        http.put(`${METRIC_LOGS_API}/:id`, () =>
+          HttpResponse.json(
+            {
+              status: "error",
+              message: "Internal server error",
+              data: null,
+            },
+            { status: 500 },
+          ),
+        ),
+      );
+
+      renderWithProviders(
+        <MetricLogForm metricId={metricId} initialLog={existingLog} onClose={onClose} />,
+      );
+
+      await user.click(screen.getByRole("button", { name: /^save$/i }));
+
+      expect(await screen.findByRole("alert")).toBeInTheDocument();
+      expect(onClose).not.toHaveBeenCalled();
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
+
   it("deletes an existing metric log and closes modal on success", async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();
     const deletePayloadSpy = jest.fn();
 
     server.use(
-      http.delete("/api/proxy/metric-logs/:id", async ({ params, request }) => {
+      http.delete(`${METRIC_LOGS_API}/:id`, async ({ params, request }) => {
         const requestUrl = new URL(request.url);
         deletePayloadSpy({
           id: params.id,
@@ -164,7 +197,7 @@ describe("MetricLogForm integration", () => {
 
     try {
       server.use(
-        http.post("/api/proxy/metric-logs", () =>
+        http.post(METRIC_LOGS_API, () =>
           HttpResponse.json(
             {
               status: "error",
@@ -195,5 +228,65 @@ describe("MetricLogForm integration", () => {
     await settleAsyncUpdates();
     const results = await axe(container);
     expect(results).toHaveNoViolations();
+  });
+
+  it("shows metric-id guard message and does not render form controls when metricId is empty", () => {
+    renderWithProviders(<MetricLogForm metricId="" onClose={jest.fn()} />);
+
+    expect(screen.getByText(/metric id is required to add a log/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^add$/i })).not.toBeInTheDocument();
+  });
+
+  it("stays open when delete fails", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      server.use(
+        http.delete(`${METRIC_LOGS_API}/:id`, () =>
+          HttpResponse.json(
+            {
+              status: "error",
+              message: "Delete failed",
+              data: null,
+            },
+            { status: 500 },
+          ),
+        ),
+      );
+
+      renderWithProviders(
+        <MetricLogForm metricId={metricId} initialLog={existingLog} onClose={onClose} />,
+      );
+
+      await user.click(screen.getByRole("button", { name: /^delete log$/i }));
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(/request failed with status code 500/i);
+      expect(onClose).not.toHaveBeenCalled();
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
+
+  it("resets displayed defaults when initialLog prop changes", async () => {
+    const onClose = jest.fn();
+    const { rerender } = renderWithProviders(
+      <MetricLogForm metricId={metricId} initialLog={existingLog} onClose={onClose} />,
+    );
+
+    const nextLog: MetricLogVM = {
+      ...existingLog,
+      id: "log-2",
+      logValue: 315,
+      loggedAt: "2026-02-19T11:00:00.000Z",
+      updatedAt: "2026-02-19T11:00:00.000Z",
+    };
+
+    rerender(<MetricLogForm metricId={metricId} initialLog={nextLog} onClose={onClose} />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/log value/i)).toHaveValue(315);
+    });
   });
 });

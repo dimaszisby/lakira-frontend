@@ -1249,3 +1249,53 @@ Consequences:
 
 - Chart rendering contract is more resilient to malformed payload data.
 - Tooltip and dataset label behavior are now safer under runtime type drift.
+
+## ADR-048 - MetricForm Update-Failure and Prop-Reset Stability Coverage (Accepted 2026-03-02)
+
+Context:
+
+`MetricForm` integration coverage already protected create/update/delete success plus create/delete failures, but did not yet include update-failure handling or prop-transition reset behavior when `initialMetric` changes during rerender.
+
+Decision:
+
+1. Add update-failure regression coverage in `MetricForm.int.test.tsx`:
+   - failed update renders alert
+   - modal remains open (`onClose` not called)
+2. Add prop-reset regression coverage:
+   - rerender with a different `initialMetric` updates displayed defaults (`name`, `defaultUnit`, `description`)
+3. Keep runtime component logic unchanged; this is a stability/coverage completion pass.
+
+Options considered:
+
+1. Keep existing integration coverage and rely on create/delete failure as proxy for update behavior.
+2. Add explicit update-failure and rerender-reset regressions.
+
+Consequences:
+
+- Metric form edit-mode failure handling now has direct regression protection.
+- Prop-driven reset behavior is explicitly protected against stale state regressions.
+
+## ADR-049 - LogForm Update-Failure and Prop-Reset Stability Coverage (Accepted 2026-03-02)
+
+Context:
+
+`LogForm` integration coverage already included create/update/delete success plus create/delete failures, but lacked update-failure coverage and explicit rerender reset protection when `initialLog` changes.
+
+Decision:
+
+1. Add update-failure regression coverage in `LogForm.int.test.tsx`:
+   - failed update renders alert
+   - modal remains open (`onClose` not called)
+2. Add prop-reset regression coverage:
+   - rerender with a different `initialLog` updates displayed `logValue` default
+3. Keep runtime component logic unchanged; this is a stability/coverage completion pass.
+
+Options considered:
+
+1. Keep existing coverage and infer update-failure behavior from other failure tests.
+2. Add dedicated update-failure and rerender-reset regressions for log edit mode.
+
+Consequences:
+
+- Log form update failure path now has direct integration-level regression safety.
+- Rerender-state synchronization behavior is explicitly protected in tests.

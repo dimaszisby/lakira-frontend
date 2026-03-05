@@ -147,7 +147,7 @@ describe("MetricForm integration", () => {
 
     server.use(
       mockCategoryTypeahead(),
-      http.put("/api/proxy/metrics/:id", async ({ params, request }) => {
+      http.put(`${metricsEndpoint}/:id`, async ({ params, request }) => {
         const body = await request.json();
         updatePayloadSpy({
           id: params.id,
@@ -194,6 +194,82 @@ describe("MetricForm integration", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it("shows an error message and stays open when update fails", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      server.use(
+        mockCategoryTypeahead(),
+        http.put(`${metricsEndpoint}/:id`, () =>
+          HttpResponse.json(
+            {
+              status: "error",
+              message: "Internal server error",
+              data: null,
+            },
+            { status: 500 },
+          ),
+        ),
+      );
+
+      renderWithProviders(<MetricForm initialMetric={existingMetric} onClose={onClose} />);
+      await waitForCategoryTypeaheadIdle();
+
+      await user.click(screen.getByRole("button", { name: /save metric/i }));
+
+      expect(await screen.findByRole("alert")).toBeInTheDocument();
+      expect(onClose).not.toHaveBeenCalled();
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
+
+  it("deletes an existing metric and closes modal on success", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const deletePayloadSpy = jest.fn();
+
+    server.use(
+      mockCategoryTypeahead(),
+      http.delete(`${metricsEndpoint}/:id`, async ({ params }) => {
+        deletePayloadSpy({
+          id: params.id,
+        });
+
+        return HttpResponse.json({
+          status: "success",
+          message: "Metric deleted",
+          data: {
+            id: metricId,
+            name: existingMetric.name,
+            description: existingMetric.description,
+            defaultUnit: existingMetric.defaultUnit,
+            isPublic: existingMetric.isPublic,
+            userId: "user-1",
+            categoryId: null,
+            originalMetricId: null,
+            createdAt: fixedDate,
+            updatedAt: fixedDate,
+          },
+        });
+      }),
+    );
+
+    renderWithProviders(<MetricForm initialMetric={existingMetric} onClose={onClose} />);
+    await waitForCategoryTypeaheadIdle();
+
+    await user.click(screen.getByRole("button", { name: /delete metric/i }));
+
+    await waitFor(() => {
+      expect(deletePayloadSpy).toHaveBeenCalledWith({
+        id: metricId,
+      });
+    });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it("shows an error message and stays open when create fails", async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();
@@ -220,6 +296,38 @@ describe("MetricForm integration", () => {
       await user.type(screen.getByLabelText(/metric name/i), "A");
       await user.type(screen.getByLabelText(/default unit/i), defaultUnit);
       await user.click(screen.getByRole("button", { name: /save metric/i }));
+
+      expect(await screen.findByRole("alert")).toBeInTheDocument();
+      expect(onClose).not.toHaveBeenCalled();
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
+
+  it("shows an error message and stays open when delete fails", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      server.use(
+        mockCategoryTypeahead(),
+        http.delete(`${metricsEndpoint}/:id`, () =>
+          HttpResponse.json(
+            {
+              status: "error",
+              message: "Internal server error",
+              data: null,
+            },
+            { status: 500 },
+          ),
+        ),
+      );
+
+      renderWithProviders(<MetricForm initialMetric={existingMetric} onClose={onClose} />);
+      await waitForCategoryTypeaheadIdle();
+
+      await user.click(screen.getByRole("button", { name: /delete metric/i }));
 
       expect(await screen.findByRole("alert")).toBeInTheDocument();
       expect(onClose).not.toHaveBeenCalled();
@@ -283,5 +391,31 @@ describe("MetricForm integration", () => {
     await settleAsyncUpdates();
     const results = await axe(container);
     expect(results).toHaveNoViolations();
+  });
+
+  it("resets displayed defaults when initialMetric prop changes", async () => {
+    server.use(mockCategoryTypeahead());
+    const onClose = jest.fn();
+    const { rerender } = renderWithProviders(
+      <MetricForm initialMetric={existingMetric} onClose={onClose} />,
+    );
+    await waitForCategoryTypeaheadIdle();
+
+    const nextMetric: MetricFormInitial = {
+      id: "metric-2",
+      name: "Z",
+      defaultUnit: "minutes",
+      description: "Updated description",
+      isPublic: false,
+      originalMetricId: null,
+    };
+
+    rerender(<MetricForm initialMetric={nextMetric} onClose={onClose} />);
+
+    await waitFor(() => {
+      expect(screen.getByLabelText(/metric name/i)).toHaveValue("Z");
+      expect(screen.getByLabelText(/default unit/i)).toHaveValue("minutes");
+      expect(screen.getByLabelText(/description/i)).toHaveValue("Updated description");
+    });
   });
 });

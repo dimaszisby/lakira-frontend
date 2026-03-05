@@ -846,8 +846,66 @@ Status:
 
 - `Done`
 
+## Entry 2026-03-02 - MetricForm (Stability Re-check)
+
+Component:
+
+- `src/features/metrics/components/MetricForm.tsx`
+
+Why this slice:
+
+- Integration coverage still lacked update-failure behavior validation.
+- Prop-transition reset behavior for `initialMetric` rerenders was not yet explicitly guarded.
+
+Changes applied:
+
+1. Extended `MetricForm.int.test.tsx` with update-failure coverage:
+   - failed update renders error alert
+   - modal remains open (`onClose` not called)
+2. Extended `MetricForm.int.test.tsx` with prop-transition reset coverage:
+   - rerender with a different `initialMetric` updates rendered default values (`name`, `defaultUnit`, `description`)
+3. Applied test-hygiene cleanup:
+   - normalized update endpoint test handler to reuse `metricsEndpoint` constant
+
+Validation:
+
+1. `npx eslint src/features/metrics/components/MetricForm.tsx src/features/metrics/components/__tests__/MetricForm.int.test.tsx`
+2. `npx jest --config jest.integration.config.ts src/features/metrics/components/__tests__/MetricForm.int.test.tsx`
+
+Status:
+
+- `Done`
+
+## Entry 2026-03-02 - LogForm (Stability Re-check)
+
+Component:
+
+- `src/features/metric-logs/components/LogForm.tsx`
+
+Why this slice:
+
+- Integration coverage still lacked update-failure behavior validation.
+- Prop-transition reset behavior for `initialLog` rerenders needed explicit regression protection.
+
+Changes applied:
+
+1. Extended `LogForm.int.test.tsx` with update-failure coverage:
+   - failed update renders error alert
+   - modal remains open (`onClose` not called)
+2. Extended `LogForm.int.test.tsx` with prop-transition reset coverage:
+   - rerender with different `initialLog` updates rendered `logValue` default
+
+Validation:
+
+1. `npx eslint src/features/metric-logs/components/LogForm.tsx src/features/metric-logs/components/__tests__/LogForm.int.test.tsx`
+2. `npx jest --config jest.integration.config.ts src/features/metric-logs/components/__tests__/LogForm.int.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/features/metrics/components/MetricForm.tsx` (stability re-check)
-2. `src/features/metric-logs/components/LogForm.tsx` (stability re-check)
-3. `src/features/data-visualizations/components/TimeRangePicker.tsx` (stability spot-check)
+1. `src/features/data-visualizations/components/TimeRangePicker.tsx` (stability spot-check)
+2. `src/features/metric-settings/components/MetricSettingsForm.tsx` (stability spot-check)
+3. `src/features/data-visualizations/components/MetricChart.tsx` (stability spot-check)
