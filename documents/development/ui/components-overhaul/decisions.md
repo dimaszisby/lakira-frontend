@@ -1299,3 +1299,53 @@ Consequences:
 
 - Log form update failure path now has direct integration-level regression safety.
 - Rerender-state synchronization behavior is explicitly protected in tests.
+
+## ADR-050 - TimeRangePicker Absolute-End Invalid Input Regression Symmetry (Accepted 2026-03-02)
+
+Context:
+
+`TimeRangePicker` already had regression coverage for invalid absolute-start input handling, but did not yet explicitly protect the equivalent invalid absolute-end input path.
+
+Decision:
+
+1. Add dedicated unit regression for invalid absolute-end local datetime input:
+   - emitted value normalizes to `end: ""`
+   - existing absolute `start` value remains preserved
+2. Keep component runtime behavior unchanged; this is a coverage-symmetry completion pass.
+3. Apply a minor test-hygiene improvement by centralizing repeated absolute-start ISO literal into a constant.
+
+Options considered:
+
+1. Keep current coverage focused on invalid-start behavior only.
+2. Add symmetric invalid-end coverage to fully protect absolute input normalization contract.
+
+Consequences:
+
+- Absolute-mode invalid-input behavior is now symmetrically covered for both start and end fields.
+- TimeRangePicker regression suite is more complete and less brittle.
+
+## ADR-051 - MetricSettingsForm Missing-MetricId Runtime Guard (Accepted 2026-03-02)
+
+Context:
+
+`MetricSettingsForm` accepted a required `metricId` prop at type level, but lacked runtime guard behavior when an empty id value is passed from route/context edge cases. Similar forms in the codebase already fail-safe on missing required parent identifiers.
+
+Decision:
+
+1. Add explicit runtime guard in `MetricSettingsForm`:
+   - if `metricId` is empty, render a clear status error message
+   - skip rendering form controls and submit actions
+2. Add integration regression coverage:
+   - guard message renders for empty `metricId`
+   - add/save submit controls are absent under guard path
+3. Keep normal create/edit flow unchanged for valid ids.
+
+Options considered:
+
+1. Keep current behavior and rely on route-level assumptions for non-empty ids.
+2. Add component-level defensive guard for fail-safe behavior.
+
+Consequences:
+
+- Metric settings form now fails safely under missing-id runtime edge cases.
+- Behavior is more consistent with other form components that depend on required parent entity ids.

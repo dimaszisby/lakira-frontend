@@ -904,8 +904,63 @@ Status:
 
 - `Done`
 
+## Entry 2026-03-02 - TimeRangePicker (Stability Spot-check)
+
+Component:
+
+- `src/features/data-visualizations/components/TimeRangePicker.tsx`
+
+Why this slice:
+
+- Invalid absolute-start behavior was covered, but invalid absolute-end behavior was not explicitly protected.
+- This was a symmetry gap in the absolute-mode invalid-input contract.
+
+Changes applied:
+
+1. Extended `TimeRangePicker.test.tsx` with invalid absolute-end regression coverage:
+   - invalid local end input emits `{ end: "" }` while preserving absolute start
+2. Applied test-hygiene cleanup:
+   - extracted repeated absolute start ISO literal into a shared test constant
+
+Validation:
+
+1. `npx eslint src/features/data-visualizations/components/TimeRangePicker.tsx src/features/data-visualizations/components/__tests__/TimeRangePicker.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/features/data-visualizations/components/__tests__/TimeRangePicker.test.tsx`
+
+Status:
+
+- `Done`
+
+## Entry 2026-03-02 - MetricSettingsForm (Stability Spot-check)
+
+Component:
+
+- `src/features/metric-settings/components/MetricSettingsForm.tsx`
+
+Why this slice:
+
+- Runtime guard behavior for missing `metricId` was not explicit in this form, unlike other edit/create forms in the codebase.
+- This can lead to invalid submissions if the route/context passes an empty id unexpectedly.
+
+Changes applied:
+
+1. Added runtime guard in `MetricSettingsForm`:
+   - when `metricId` is empty, form now renders an explicit status error message and skips rendering controls
+2. Extended `MetricSettingsForm.int.test.tsx`:
+   - verifies metric-id guard text renders
+   - verifies add/save submit controls are not rendered under empty-id guard path
+
+Validation:
+
+1. `npx eslint src/features/metric-settings/components/MetricSettingsForm.tsx src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx`
+2. `npx jest --config jest.integration.config.ts src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/features/data-visualizations/components/TimeRangePicker.tsx` (stability spot-check)
-2. `src/features/metric-settings/components/MetricSettingsForm.tsx` (stability spot-check)
-3. `src/features/data-visualizations/components/MetricChart.tsx` (stability spot-check)
+1. `src/features/data-visualizations/components/MetricChart.tsx` (stability spot-check)
+2. `src/components/ui/Visualization.tsx` (stability spot-check)
+3. `src/features/data-visualizations/components/TimeRangePicker.tsx` (regression parity review)

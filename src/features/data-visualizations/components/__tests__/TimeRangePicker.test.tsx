@@ -5,11 +5,12 @@ import type { TimeRangeValue } from "@/features/data-visualizations/types";
 
 describe("TimeRangePicker", () => {
   const rangeModeLabel = "Range mode";
+  const absoluteStartIso = "2026-02-01T10:00:00.000Z";
   const absoluteEndIso = "2026-02-10T12:00:00.000Z";
   const relativeValue: TimeRangeValue = { mode: "relative", last: "30d" };
   const absoluteValue: TimeRangeValue = {
     mode: "absolute",
-    start: "2026-02-01T10:00:00.000Z",
+    start: absoluteStartIso,
     end: absoluteEndIso,
   };
 
@@ -95,7 +96,7 @@ describe("TimeRangePicker", () => {
 
     expect(onChange).toHaveBeenCalledWith({
       mode: "absolute",
-      start: "2026-02-01T10:00:00.000Z",
+      start: absoluteStartIso,
       end: new Date(nextEndLocal).toISOString(),
     });
   });
@@ -143,6 +144,21 @@ describe("TimeRangePicker", () => {
       mode: "absolute",
       start: "",
       end: absoluteEndIso,
+    });
+  });
+
+  it("emits empty absolute end when local datetime is invalid", () => {
+    const onChange = jest.fn();
+    render(<TimeRangePicker value={absoluteValue} onChange={onChange} />);
+
+    fireEvent.change(screen.getByLabelText("End"), {
+      target: { value: "invalid-value" },
+    });
+
+    expect(onChange).toHaveBeenCalledWith({
+      mode: "absolute",
+      start: absoluteStartIso,
+      end: "",
     });
   });
 

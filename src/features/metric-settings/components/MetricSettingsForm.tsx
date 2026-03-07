@@ -499,6 +499,14 @@ export const MetricSettingsForm = ({
   const hideScrollbar =
     "overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]";
 
+  if (!metricId) {
+    return (
+      <p className="mb-4 mt-4 text-xs text-status-error">
+        Metric ID is required to manage metric settings.
+      </p>
+    );
+  }
+
   return (
     <Modal isOpen onClose={handleCloseClick} title={formTitle}>
       <form

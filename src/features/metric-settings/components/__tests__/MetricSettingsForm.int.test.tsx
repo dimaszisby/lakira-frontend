@@ -323,4 +323,14 @@ describe("MetricSettingsForm integration", () => {
     const results = await axe(container);
     expect(results).toHaveNoViolations();
   });
+
+  it("shows metric-id guard message and does not render submit controls when metricId is empty", () => {
+    renderWithProviders(
+      <MetricSettingsForm metricId="" initialSettings={null} onClose={jest.fn()} />,
+    );
+
+    expect(screen.getByText(/metric id is required to manage metric settings/i)).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^add$/i })).not.toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /^save$/i })).not.toBeInTheDocument();
+  });
 });
