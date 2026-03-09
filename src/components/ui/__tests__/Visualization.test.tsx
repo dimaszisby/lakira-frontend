@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 import Visualization from "@/components/ui/Visualization";
@@ -10,6 +10,7 @@ const GRANULARITY_PICKER_TEST_ID = "granularity-picker";
 const TIME_RANGE_PICKER_REL_TEST_ID = "time-range-picker-rel";
 const ABSOLUTE_RANGE_SEARCH =
   "view-bucket=1m&view-start=2026-01-01T00:00:00.000Z&view-end=2026-01-10T00:00:00.000Z";
+const RELATIVE_SYNC_SEARCH = "view-bucket=1w&view-range=7d";
 const DEFAULT_GRANULARITY_LABEL = "granularity-1d";
 const DEFAULT_RELATIVE_RANGE_LABEL = "range-relative-30d";
 
@@ -134,14 +135,12 @@ describe("Visualization", () => {
     render(<Visualization metricId="metric-3" />);
 
     await user.click(screen.getByTestId(GRANULARITY_PICKER_TEST_ID));
-    expect(screen.getByTestId(GRANULARITY_PICKER_TEST_ID)).toHaveTextContent("granularity-1w");
     expect(mockReplace).toHaveBeenCalledWith(
       expect.stringContaining("view-bucket=1w"),
       expect.objectContaining({ scroll: false }),
     );
 
     await user.click(screen.getByTestId(TIME_RANGE_PICKER_REL_TEST_ID));
-    expect(screen.getByTestId(TIME_RANGE_PICKER_REL_TEST_ID)).toHaveTextContent("range-relative-90d");
     expect(mockReplace).toHaveBeenCalledWith(
       expect.stringContaining("view-range=90d"),
       expect.objectContaining({ scroll: false }),
@@ -236,5 +235,29 @@ describe("Visualization", () => {
       DEFAULT_GRANULARITY_LABEL,
     );
     expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it("syncs controls when URL params change after initial render", async () => {
+    mockUseMetricVisualization.mockReturnValue({
+      data: { points: [] },
+      isLoading: false,
+    });
+
+    const { rerender } = render(<Visualization metricId="metric-9" />);
+
+    expect(screen.getByTestId(GRANULARITY_PICKER_TEST_ID)).toHaveTextContent(
+      DEFAULT_GRANULARITY_LABEL,
+    );
+    expect(screen.getByTestId(TIME_RANGE_PICKER_REL_TEST_ID)).toHaveTextContent(
+      DEFAULT_RELATIVE_RANGE_LABEL,
+    );
+
+    mockSearchParams = new URLSearchParams(RELATIVE_SYNC_SEARCH);
+    rerender(<Visualization metricId="metric-9" />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId(GRANULARITY_PICKER_TEST_ID)).toHaveTextContent("granularity-1w");
+      expect(screen.getByTestId(TIME_RANGE_PICKER_REL_TEST_ID)).toHaveTextContent("range-relative-7d");
+    });
   });
 });

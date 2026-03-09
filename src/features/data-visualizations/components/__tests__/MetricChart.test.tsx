@@ -209,4 +209,20 @@ describe("MetricChart", () => {
     expect(props.data.datasets[0]?.label).toBe("Value");
     expect(props.options.plugins.tooltip.callbacks.label({ raw: { y: 5 } })).toBe("5");
   });
+
+  it("falls back safely when metricId is not a string at runtime", () => {
+    render(
+      <MetricChart
+        data={{
+          ...baseData,
+          meta: {
+            ...baseData.meta,
+            metricId: null as unknown as string,
+          },
+        }}
+      />,
+    );
+
+    expect(screen.getByRole("img", { name: /metric chart for unknown metric/i })).toBeInTheDocument();
+  });
 });

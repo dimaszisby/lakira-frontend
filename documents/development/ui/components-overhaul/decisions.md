@@ -1349,3 +1349,50 @@ Consequences:
 
 - Metric settings form now fails safely under missing-id runtime edge cases.
 - Behavior is more consistent with other form components that depend on required parent entity ids.
+
+## ADR-052 - MetricChart MetricId Label Normalization (Accepted 2026-03-02)
+
+Context:
+
+`MetricChart` already normalized runtime unit and datapoint values, but chart `aria-label` still assumed `meta.metricId` is always a non-empty string.
+
+Decision:
+
+1. Normalize runtime `metricId` before composing `aria-label`.
+2. Fallback to `unknown metric` when `metricId` is empty/non-string.
+3. Add dedicated regression test for non-string `metricId` fallback behavior.
+
+Options considered:
+
+1. Keep typed assumption and rely on upstream payload integrity.
+2. Add defensive runtime normalization for accessibility label stability.
+
+Consequences:
+
+- Chart accessibility label now remains stable under malformed payload conditions.
+- Runtime-safety handling is more consistent across chart metadata fields.
+
+## ADR-053 - Visualization URL-Driven State Source (Accepted 2026-03-02)
+
+Context:
+
+`Visualization` controls used local state initialized from URL params, which could drift when query params changed externally after initial render.
+
+Decision:
+
+1. Use URL params as source-of-truth for control state:
+   - derive `bucket` and `range` directly from `useSearchParams`
+   - remove local state + sync-effect state path
+2. Keep picker interaction contract unchanged:
+   - picker changes still update query via `router.replace(...)`
+3. Add regression coverage for post-initial URL param changes.
+
+Options considered:
+
+1. Keep local state and synchronize from URL in effects.
+2. Make URL query the canonical visualization control state.
+
+Consequences:
+
+- Visualization control state now tracks navigation/query changes reliably.
+- Reduced local state complexity and removed effect-driven sync churn risk.

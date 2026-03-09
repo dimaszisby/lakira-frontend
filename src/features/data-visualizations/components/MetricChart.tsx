@@ -39,6 +39,7 @@ const MetricChart = ({ data, goalValue, height = 260, className }: Props) => {
   const xy = useMemo(() => seriesToXY(data.series), [data.series]);
   const hasGoal = Number.isFinite(goalValue ?? Number.NaN);
   const normalizedUnit = normalizeUnit(data.meta.unit);
+  const metricIdLabel = normalizeMetricId(data.meta.metricId);
   const metricLabel = normalizedUnit.length > 0 ? normalizedUnit : "Value";
 
   if (isAllMissing(xy)) {
@@ -117,7 +118,7 @@ const MetricChart = ({ data, goalValue, height = 260, className }: Props) => {
   return (
     <div
       role="img"
-      aria-label={`Metric chart for ${data.meta.metricId}`}
+      aria-label={`Metric chart for ${metricIdLabel}`}
       className={className}
       style={{ height }}
     >
@@ -156,4 +157,9 @@ function formatTooltipLabel(value: number, unit?: string) {
 
 function normalizeUnit(unit: unknown): string {
   return typeof unit === "string" ? unit.trim() : "";
+}
+
+function normalizeMetricId(metricId: unknown): string {
+  if (typeof metricId === "string" && metricId.trim().length > 0) return metricId.trim();
+  return "unknown metric";
 }

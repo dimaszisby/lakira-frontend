@@ -959,8 +959,68 @@ Status:
 
 - `Done`
 
+## Entry 2026-03-02 - MetricChart (Stability Spot-check)
+
+Component:
+
+- `src/features/data-visualizations/components/MetricChart.tsx`
+
+Why this slice:
+
+- Runtime unit hardening was already added, but aria-label handling still assumed a valid string `metricId`.
+- This could expose brittle accessibility labeling when runtime payloads are malformed.
+
+Changes applied:
+
+1. Hardened metric id labeling:
+   - normalized runtime `metricId` before composing chart `aria-label`
+   - fallback label uses `unknown metric` for invalid/non-string values
+2. Extended `MetricChart.test.tsx`:
+   - added regression test for non-string `metricId` fallback behavior
+
+Validation:
+
+1. `npx eslint src/features/data-visualizations/components/MetricChart.tsx src/features/data-visualizations/components/__tests__/MetricChart.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/features/data-visualizations/components/__tests__/MetricChart.test.tsx`
+
+Status:
+
+- `Done`
+
+## Entry 2026-03-02 - Visualization (Stability Spot-check)
+
+Component:
+
+- `src/components/ui/Visualization.tsx`
+
+Why this slice:
+
+- Control state was locally stored and only initialized from URL params on mount.
+- External URL changes after first render (navigation/history/query sync) would not reliably reflect in control state.
+
+Changes applied:
+
+1. Switched Visualization controls to URL-driven source-of-truth:
+   - derive `bucket` and `range` from `useSearchParams` each render via memoized parsers
+   - removed local `useState`/sync effect state path
+2. Kept existing update contract:
+   - picker changes still sync URL via `router.replace(...)`
+3. Extended `Visualization.test.tsx`:
+   - added regression for URL-param change after initial render (`rerender` with updated `useSearchParams` mock)
+4. Applied test-hygiene cleanup:
+   - aligned imports and removed state-change assertions that depended on local optimistic state.
+
+Validation:
+
+1. `npx eslint src/components/ui/Visualization.tsx src/components/ui/__tests__/Visualization.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/Visualization.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/features/data-visualizations/components/MetricChart.tsx` (stability spot-check)
-2. `src/components/ui/Visualization.tsx` (stability spot-check)
-3. `src/features/data-visualizations/components/TimeRangePicker.tsx` (regression parity review)
+1. `src/features/data-visualizations/components/TimeRangePicker.tsx` (regression parity review)
+2. `src/features/metric-settings/components/MetricSettingsForm.tsx` (regression parity review)
+3. `src/features/data-visualizations/components/MetricChart.tsx` (regression parity review)
