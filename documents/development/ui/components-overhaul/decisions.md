@@ -1543,3 +1543,28 @@ Consequences:
 - `DateTimePicker` now emits datetime values consistent with declared `min`/`max` constraints.
 - Consumer forms receive bounded values without extra sanitization glue.
 - Boundary behavior is covered by focused regression tests.
+
+## ADR-060 - Select Disabled-Selection Active Fallback (Accepted 2026-03-12)
+
+Context:
+
+`Select` initialized active index from selected value when opening. If the selected option later became disabled, keyboard commit could no-op because active state started on an unselectable option.
+
+Decision:
+
+1. Add `getInitialActiveIndex` helper that:
+   - keeps selected index only when selected option is enabled
+   - otherwise falls back to first enabled option
+2. Use helper in `openList` so first keyboard commit target is always selectable when possible.
+3. Add regression test for selected-disabled fallback behavior.
+
+Options considered:
+
+1. Keep active initialization tied directly to selected index.
+2. Resolve active index against option enabled state on open.
+
+Consequences:
+
+- Keyboard `Enter` flow remains functional when selected option availability changes.
+- Select interaction is more resilient to dynamic option-disable updates.
+- Behavior is covered by focused unit regression tests.

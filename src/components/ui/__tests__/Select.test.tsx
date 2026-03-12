@@ -126,4 +126,24 @@ describe("Select", () => {
 
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
   });
+
+  it("falls back to first enabled option when selected option becomes disabled", async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+
+    render(
+      <Select<OptionValue>
+        value="bar"
+        onChange={onChange}
+        options={chartOptions}
+        aria-label="Chart type"
+      />,
+    );
+
+    const trigger = screen.getByRole("button", { name: /chart type/i });
+    await user.click(trigger);
+    await user.keyboard("{Enter}");
+
+    expect(onChange).toHaveBeenCalledWith("line", expect.objectContaining({ label: "Line" }));
+  });
 });

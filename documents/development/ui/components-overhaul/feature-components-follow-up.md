@@ -1205,8 +1205,37 @@ Status:
 
 - `Done`
 
+## Entry 2026-03-12 - Select (Final Parity Spot-check)
+
+Component:
+
+- `src/components/ui/Select.tsx`
+
+Why this slice:
+
+- `Select` could initialize active option to a disabled selected value when options changed dynamically.
+- This created a keyboard parity gap where opening and pressing `Enter` would no-op instead of selecting a valid option.
+
+Changes applied:
+
+1. Added initial-active resolution helper:
+   - if selected option is enabled, keep it as active
+   - if selected option is disabled, fallback to first enabled option
+2. Applied helper in open-list flow so keyboard commit path starts from a valid option.
+3. Extended `Select.test.tsx`:
+   - regression test for selected-disabled fallback to first enabled option.
+
+Validation:
+
+1. `npx eslint src/components/ui/Select.tsx src/components/ui/__tests__/Select.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/Select.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/components/ui/Select.tsx` (final parity spot-check)
-2. `src/components/ui/Toggle.tsx` (final parity spot-check)
-3. `src/components/ui/Modal.tsx` (final parity spot-check)
+1. `src/components/ui/Toggle.tsx` (final parity spot-check)
+2. `src/components/ui/Modal.tsx` (final parity spot-check)
+3. `src/components/ui/SegmentedControl.tsx` (final parity spot-check)

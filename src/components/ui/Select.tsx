@@ -87,6 +87,14 @@ function getNextEnabledIndex<T extends Value>(
   return -1;
 }
 
+function getInitialActiveIndex<T extends Value>(
+  options: SelectOption<T>[],
+  selectedIndex: number,
+) {
+  if (selectedIndex >= 0 && !options[selectedIndex]?.disabled) return selectedIndex;
+  return findFirstEnabledIndex(options);
+}
+
 const Select = <T extends Value = string>({
   id,
   value,
@@ -125,7 +133,7 @@ const Select = <T extends Value = string>({
   const openList = useCallback(() => {
     if (disabled) return;
     setOpen(true);
-    setActiveIndex(selected.index >= 0 ? selected.index : findFirstEnabledIndex(options));
+    setActiveIndex(getInitialActiveIndex(options, selected.index));
   }, [disabled, options, selected.index]);
 
   const closeList = useCallback(() => {
