@@ -1264,8 +1264,38 @@ Status:
 
 - `Done`
 
+## Entry 2026-03-12 - Modal (Final Parity Spot-check)
+
+Component:
+
+- `src/components/ui/Modal.tsx`
+
+Why this slice:
+
+- Modal body scroll locking was instance-local.
+- In stacked/nested modal scenarios, closing one modal could restore body scroll even while another modal remained open.
+
+Changes applied:
+
+1. Added shared body-scroll lock coordination:
+   - introduced module-level lock counter and original-overflow tracking
+   - lock on open increments counter; unlock on close decrements counter
+   - body overflow restored only when the last open modal closes
+2. Kept existing focus and close contracts unchanged.
+3. Extended `Modal.test.tsx`:
+   - regression test ensures body scroll remains locked until all stacked modals close.
+
+Validation:
+
+1. `npx eslint src/components/ui/Modal.tsx src/components/ui/__tests__/Modal.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/Modal.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/components/ui/Modal.tsx` (final parity spot-check)
-2. `src/components/ui/SegmentedControl.tsx` (final parity spot-check)
-3. `src/components/ui/Table.tsx` (final parity spot-check)
+1. `src/components/ui/SegmentedControl.tsx` (final parity spot-check)
+2. `src/components/ui/Table.tsx` (final parity spot-check)
+3. `src/components/ui/SearchInput.tsx` (final parity spot-check)

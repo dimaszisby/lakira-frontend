@@ -169,4 +169,49 @@ describe("Modal", () => {
       expect(document.body.style.overflow).toBe("");
     });
   });
+
+  it("keeps body scroll locked until all stacked modals are closed", async () => {
+    const noop = () => {};
+
+    const { rerender } = render(
+      <>
+        <Modal isOpen onClose={noop} title="First modal">
+          <button type="button">First action</button>
+        </Modal>
+        <Modal isOpen onClose={noop} title="Second modal">
+          <button type="button">Second action</button>
+        </Modal>
+      </>,
+    );
+
+    expect(document.body.style.overflow).toBe("hidden");
+
+    rerender(
+      <>
+        <Modal isOpen={false} onClose={noop} title="First modal">
+          <button type="button">First action</button>
+        </Modal>
+        <Modal isOpen onClose={noop} title="Second modal">
+          <button type="button">Second action</button>
+        </Modal>
+      </>,
+    );
+
+    expect(document.body.style.overflow).toBe("hidden");
+
+    rerender(
+      <>
+        <Modal isOpen={false} onClose={noop} title="First modal">
+          <button type="button">First action</button>
+        </Modal>
+        <Modal isOpen={false} onClose={noop} title="Second modal">
+          <button type="button">Second action</button>
+        </Modal>
+      </>,
+    );
+
+    await waitFor(() => {
+      expect(document.body.style.overflow).toBe("");
+    });
+  });
 });

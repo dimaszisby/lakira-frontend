@@ -14,6 +14,8 @@ type Variant = CardVariant;
 
 const FOCUSABLE_SELECTOR =
   'a[href], area[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+let bodyScrollLockCount = 0;
+let bodyOverflowBeforeLock = "";
 
 function getFocusableElements(container: HTMLElement) {
   return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
@@ -22,6 +24,24 @@ function getFocusableElements(container: HTMLElement) {
       !element.hasAttribute("hidden") &&
       element.getAttribute("aria-hidden") !== "true",
   );
+}
+
+function lockBodyScroll() {
+  if (bodyScrollLockCount === 0) {
+    bodyOverflowBeforeLock = document.body.style.overflow;
+  }
+
+  bodyScrollLockCount += 1;
+  document.body.style.overflow = "hidden";
+}
+
+function unlockBodyScroll() {
+  if (bodyScrollLockCount === 0) return;
+
+  bodyScrollLockCount -= 1;
+  if (bodyScrollLockCount === 0) {
+    document.body.style.overflow = bodyOverflowBeforeLock;
+  }
 }
 
 export interface ModalProps {
@@ -65,8 +85,7 @@ const Modal = ({
     const activeElement = document.activeElement;
     previousFocusRef.current = activeElement instanceof HTMLElement ? activeElement : null;
 
-    const originalOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    lockBodyScroll();
 
     const dialog = dialogRef.current;
     if (dialog) {
@@ -81,7 +100,7 @@ const Modal = ({
     }
 
     return () => {
-      document.body.style.overflow = originalOverflow;
+      unlockBodyScroll();
       previousFocusRef.current?.focus();
     };
   }, [initialFocusRef, isOpen]);
