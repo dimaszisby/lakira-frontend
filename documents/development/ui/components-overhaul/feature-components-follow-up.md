@@ -1234,8 +1234,38 @@ Status:
 
 - `Done`
 
+## Entry 2026-03-12 - Toggle (Final Parity Spot-check)
+
+Component:
+
+- `src/components/ui/Toggle.tsx`
+
+Why this slice:
+
+- `Toggle` emitted next state using render-time `checked` prop only.
+- In rapid sequential interactions before parent rerender, this could emit duplicate values (`true`, `true`) instead of preserving user toggle intent (`true`, `false`).
+
+Changes applied:
+
+1. Added latest checked-intent ref:
+   - sync ref from controlled `checked` prop on updates
+   - compute next value from latest intent ref in click handler
+2. Preserved existing event contract:
+   - still honors `onClick` preventDefault and `disabled` guard before emitting
+3. Extended `Toggle.test.tsx`:
+   - regression test for rapid sequential clicks before rerender to ensure alternating emitted values.
+
+Validation:
+
+1. `npx eslint src/components/ui/Toggle.tsx src/components/ui/__tests__/Toggle.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/Toggle.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/components/ui/Toggle.tsx` (final parity spot-check)
-2. `src/components/ui/Modal.tsx` (final parity spot-check)
-3. `src/components/ui/SegmentedControl.tsx` (final parity spot-check)
+1. `src/components/ui/Modal.tsx` (final parity spot-check)
+2. `src/components/ui/SegmentedControl.tsx` (final parity spot-check)
+3. `src/components/ui/Table.tsx` (final parity spot-check)

@@ -1,7 +1,7 @@
 "use client";
 
 import type { ButtonHTMLAttributes } from "react";
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -55,14 +55,21 @@ const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
     ref,
   ) => {
     const sizing = SIZE[size];
+    const latestCheckedRef = useRef(checked);
+
+    useEffect(() => {
+      latestCheckedRef.current = checked;
+    }, [checked]);
 
     const handleClick = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
         onClick?.(event);
         if (event.defaultPrevented || disabled) return;
-        onCheckedChange(!checked);
+        const nextChecked = !latestCheckedRef.current;
+        latestCheckedRef.current = nextChecked;
+        onCheckedChange(nextChecked);
       },
-      [checked, disabled, onCheckedChange, onClick],
+      [disabled, onCheckedChange, onClick],
     );
 
     return (

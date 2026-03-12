@@ -1568,3 +1568,29 @@ Consequences:
 - Keyboard `Enter` flow remains functional when selected option availability changes.
 - Select interaction is more resilient to dynamic option-disable updates.
 - Behavior is covered by focused unit regression tests.
+
+## ADR-061 - Toggle Sequential Intent Continuity (Accepted 2026-03-12)
+
+Context:
+
+`Toggle` computed next state directly from render-time `checked` prop. Under rapid sequential interactions before parent rerender, consecutive clicks could emit duplicate next values instead of alternating intent.
+
+Decision:
+
+1. Track latest checked intent in a ref synchronized from controlled prop updates.
+2. Compute click-next state from latest intent ref and update the ref optimistically before emitting.
+3. Keep existing guard behavior:
+   - no emit when disabled
+   - no emit when caller prevents default in `onClick`
+4. Add regression test for rapid sequential clicks without parent rerender.
+
+Options considered:
+
+1. Keep `!checked` render-time next-state computation.
+2. Use intent ref to preserve sequential toggle behavior between rerenders.
+
+Consequences:
+
+- Toggle emits state transitions aligned with user click sequence under transient rerender latency.
+- Controlled usage remains backward compatible while improving interaction robustness.
+- Regression coverage now protects this edge case.

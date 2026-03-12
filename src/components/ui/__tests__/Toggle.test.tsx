@@ -60,4 +60,19 @@ describe("Toggle", () => {
     expect(screen.getByText("ON")).toBeInTheDocument();
     expect(screen.queryByText("OFF")).not.toBeInTheDocument();
   });
+
+  it("preserves toggle intent on rapid sequential clicks before parent rerender", async () => {
+    const user = userEvent.setup();
+    const onCheckedChange = jest.fn();
+
+    render(<Toggle checked={false} onCheckedChange={onCheckedChange} aria-label="Enable alerts" />);
+
+    const control = screen.getByRole("switch", { name: /enable alerts/i });
+    await user.click(control);
+    await user.click(control);
+
+    expect(onCheckedChange).toHaveBeenCalledTimes(2);
+    expect(onCheckedChange).toHaveBeenNthCalledWith(1, true);
+    expect(onCheckedChange).toHaveBeenNthCalledWith(2, false);
+  });
 });
