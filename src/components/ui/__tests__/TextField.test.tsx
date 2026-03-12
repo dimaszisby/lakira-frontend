@@ -69,4 +69,48 @@ describe("TextField", () => {
     await user.click(screen.getByRole("button", { name: /hide password/i }));
     expect(input).toHaveAttribute("type", "password");
   });
+
+  it("keeps clearable behavior when registration ref is provided", async () => {
+    const user = userEvent.setup();
+    const registrationRef = jest.fn();
+    const registrationOnChange = jest.fn();
+
+    render(
+      <TextField
+        aria-label="Search"
+        defaultValue="Hello"
+        clearable
+        registration={{
+          name: "search",
+          onBlur: jest.fn(),
+          onChange: registrationOnChange,
+          ref: registrationRef,
+        }}
+      />,
+    );
+
+    const input = screen.getByRole("textbox", { name: /search/i });
+    await user.click(screen.getByRole("button", { name: /clear input/i }));
+
+    expect(input).toHaveValue("");
+    expect(input).toHaveFocus();
+    expect(registrationRef).toHaveBeenCalledWith(expect.any(HTMLInputElement));
+    expect(registrationOnChange).toHaveBeenCalled();
+  });
+
+  it("disables utility controls when text field is disabled", () => {
+    render(
+      <TextField
+        aria-label="Password"
+        type="password"
+        revealToggle
+        defaultValue="secret"
+        clearable
+        disabled
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /clear input/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /show password/i })).toBeDisabled();
+  });
 });

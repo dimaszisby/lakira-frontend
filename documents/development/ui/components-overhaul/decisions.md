@@ -1396,3 +1396,124 @@ Consequences:
 
 - Visualization control state now tracks navigation/query changes reliably.
 - Reduced local state complexity and removed effect-driven sync churn risk.
+
+## ADR-054 - TimeRangePicker Relative-Range Restoration Parity (Accepted 2026-03-02)
+
+Context:
+
+`TimeRangePicker` absolute->relative transitions defaulted to `30d` when relative input was unmounted, even after users previously selected a valid relative value. This caused inconsistent range continuity across mode toggles.
+
+Decision:
+
+1. Track last valid relative value in a dedicated ref (`lastRelativeRef`).
+2. Update the ref when:
+   - controlled relative value changes from parent
+   - valid relative input edits/blur normalization occur
+3. Use tracked last valid value on absolute->relative transition before falling back to defaults.
+4. Add regression test for relative->absolute->relative restoration behavior.
+
+Options considered:
+
+1. Keep always-default-to-`30d` transition behavior.
+2. Restore last valid relative user choice across mode toggles.
+
+Consequences:
+
+- Mode toggles now preserve relative-range continuity more predictably.
+- TimeRangePicker transition behavior is more user-consistent and regression-protected.
+
+## ADR-055 - MetricSettingsForm Goal-Type Toggle Continuity (Accepted 2026-03-02)
+
+Context:
+
+`MetricSettingsForm` unregisters conditional goal fields when goal mode is toggled off. On re-enable, goal type defaulted to `incremental`, which could overwrite a user’s prior explicit selection (e.g. `cumulative`).
+
+Decision:
+
+1. Track last valid goal type in a dedicated ref.
+2. Restore tracked goal type when goal mode is re-enabled and form value is currently unset.
+3. Add integration regression coverage for goal off/on toggle continuity.
+4. Keep existing schema and submit contract unchanged.
+
+Options considered:
+
+1. Keep current re-enable behavior (always fallback to `incremental`).
+2. Preserve user-selected goal type across temporary section toggles.
+
+Consequences:
+
+- Goal-type selection now remains consistent across toggle cycles.
+- Metric settings UX becomes more predictable in conditional-field flows.
+
+## ADR-056 - MetricChart Tooltip Numeric-String Parsing Parity (Accepted 2026-03-02)
+
+Context:
+
+`MetricChart` tooltip extraction handled numeric types but treated numeric-string values as missing. In mixed-runtime payload scenarios, values may arrive as stringified numbers.
+
+Decision:
+
+1. Extend tooltip value extraction to parse numeric strings:
+   - support `raw` as numeric string
+   - support `raw.y` as numeric string
+2. Keep non-numeric strings mapped to `No data`.
+3. Add regression tests for numeric-string tooltip formatting.
+
+Options considered:
+
+1. Keep strict numeric-only tooltip parsing.
+2. Parse numeric strings defensively for runtime parity.
+
+Consequences:
+
+- Tooltip behavior is more resilient to runtime type drift.
+- Chart labeling remains user-friendly under stringified numeric values.
+
+## ADR-057 - Visualization Sequential URL-Sync Continuity (Accepted 2026-03-02)
+
+Context:
+
+After moving Visualization to URL-driven state, rapid sequential control changes (bucket then range) could emit stale bucket values before search params refreshed.
+
+Decision:
+
+1. Maintain latest picker intent in refs (`latestBucketRef`, `latestRangeRef`) between URL updates.
+2. Synchronize refs from parsed URL state in effect.
+3. Use latest refs in sync handlers to avoid stale counterpart values on rapid sequential updates.
+4. Add regression test asserting updated bucket is preserved in follow-up range sync calls.
+
+Options considered:
+
+1. Keep handlers bound to immediately parsed URL state only.
+2. Add lightweight intent refs to preserve sequential update continuity.
+
+Consequences:
+
+- Visualization URL updates now preserve the latest user selection across rapid control interactions.
+- Behavior is closer to previous optimistic local-state parity without reintroducing heavy local state sync.
+
+## ADR-058 - TextField Ref Composition and Disabled-Controls Parity (Accepted 2026-03-09)
+
+Context:
+
+`TextField` accepted `react-hook-form` `registration`, but `registration.ref` could override the component’s internal input ref. This risked breaking clear/focus behavior for clearable fields. Utility controls were also still interactive when the input was disabled.
+
+Decision:
+
+1. Compose internal input ref and `registration.ref` through a callback ref.
+2. Compose registration and external handlers explicitly:
+   - `registration.onChange` + external `onChange`
+   - `registration.onBlur` + external `onBlur`
+3. Make clear/reveal utility controls respect `disabled`.
+4. Add dedicated regression tests for registration-ref clearability and disabled utility controls.
+
+Options considered:
+
+1. Keep direct prop spread and rely on caller behavior.
+2. Explicitly compose refs/handlers and align utility controls with disabled semantics.
+
+Consequences:
+
+- Clearable `TextField` behavior remains stable with or without `registration`.
+- Integration with form libraries is safer and more predictable.
+- Disabled input state now consistently disables all direct field interactions.

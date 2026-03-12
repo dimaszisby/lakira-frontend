@@ -1019,8 +1019,163 @@ Status:
 
 - `Done`
 
+## Entry 2026-03-02 - TimeRangePicker (Regression Parity Review)
+
+Component:
+
+- `src/features/data-visualizations/components/TimeRangePicker.tsx`
+
+Why this slice:
+
+- Absolute->relative transition always defaulted to `30d` when the relative input was unmounted, even if the user previously selected a valid relative range.
+- This created a parity gap with expected “last valid relative range” restoration behavior.
+
+Changes applied:
+
+1. Added `lastRelativeRef` runtime tracking:
+   - stores last valid relative range selection
+   - updates on controlled relative value sync and valid relative edits
+2. Hardened absolute->relative switch behavior:
+   - now restores last valid relative value instead of always falling back to `30d`
+3. Extended `TimeRangePicker.test.tsx`:
+   - added regression test for restoring last valid relative value after relative->absolute->relative transitions.
+
+Validation:
+
+1. `npx eslint src/features/data-visualizations/components/TimeRangePicker.tsx src/features/data-visualizations/components/__tests__/TimeRangePicker.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/features/data-visualizations/components/__tests__/TimeRangePicker.test.tsx`
+
+Status:
+
+- `Done`
+
+## Entry 2026-03-02 - MetricSettingsForm (Regression Parity Review)
+
+Component:
+
+- `src/features/metric-settings/components/MetricSettingsForm.tsx`
+
+Why this slice:
+
+- Goal-type continuity was inconsistent across goal toggle off/on flows because `shouldUnregister` removed `goalType` and re-enable defaulted to `incremental`.
+- This could discard a user-selected goal type (e.g. `cumulative`) unexpectedly.
+
+Changes applied:
+
+1. Added last-selected goal type continuity:
+   - introduced `lastGoalTypeRef` to track last valid selected `goalType`
+   - restore tracked goal type when re-enabling goal section after unregister
+2. Extended `MetricSettingsForm.int.test.tsx`:
+   - added regression coverage for preserving selected goal type across off/on toggles
+3. Applied test-hygiene cleanup:
+   - extracted repeated API endpoint/message literals into constants for lint stability
+   - updated role query to target segmented control options as `radio`
+
+Validation:
+
+1. `npx eslint src/features/metric-settings/components/MetricSettingsForm.tsx src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx`
+2. `npx jest --config jest.integration.config.ts src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx`
+
+Status:
+
+- `Done`
+
+## Entry 2026-03-02 - MetricChart (Regression Parity Review)
+
+Component:
+
+- `src/features/data-visualizations/components/MetricChart.tsx`
+
+Why this slice:
+
+- Tooltip value extraction handled numeric values but still treated numeric strings as missing data.
+- Chart runtime payloads can contain stringified numeric values in loosely typed integrations.
+
+Changes applied:
+
+1. Hardened tooltip numeric parsing in `MetricChart`:
+   - supports numeric-string `raw` values
+   - supports numeric-string `raw.y` point values
+2. Extended `MetricChart.test.tsx`:
+   - verifies tooltip labels for string numeric inputs (`"11"`, `"12"`)
+
+Validation:
+
+1. `npx eslint src/features/data-visualizations/components/MetricChart.tsx src/features/data-visualizations/components/__tests__/MetricChart.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/features/data-visualizations/components/__tests__/MetricChart.test.tsx`
+
+Status:
+
+- `Done`
+
+## Entry 2026-03-02 - Visualization (Regression Parity Review)
+
+Component:
+
+- `src/components/ui/Visualization.tsx`
+
+Why this slice:
+
+- URL-driven control state introduced a parity regression for rapid sequential control changes.
+- A range change immediately after bucket change could emit stale bucket in URL sync when search params had not yet refreshed.
+
+Changes applied:
+
+1. Added latest-selection refs for sync continuity:
+   - `latestBucketRef` / `latestRangeRef` track current picker intent between URL updates
+   - refs are synchronized from parsed URL state in effect
+2. Hardened change handlers:
+   - bucket change sync uses latest range ref
+   - range change sync uses latest bucket ref
+3. Extended `Visualization.test.tsx`:
+   - verifies sequential picker changes keep updated bucket in subsequent URL sync calls
+
+Validation:
+
+1. `npx eslint src/components/ui/Visualization.tsx src/components/ui/__tests__/Visualization.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/Visualization.test.tsx`
+
+Status:
+
+- `Done`
+
+## Entry 2026-03-09 - TextField (Regression Parity Review)
+
+Component:
+
+- `src/components/ui/TextField.tsx`
+
+Why this slice:
+
+- `TextField` accepted `registration` from `react-hook-form`, but `registration.ref` could override the component’s internal input ref.
+- This created a clear/focus parity gap for clearable behavior when `registration` was provided.
+- Utility controls remained interactive in disabled state, which is inconsistent with expected disabled-input semantics.
+
+Changes applied:
+
+1. Hardened ref wiring in `TextField`:
+   - composed internal input ref with `registration.ref` via a callback ref
+   - retained internal ref ownership for clear/focus interactions while forwarding registration ref
+2. Hardened event handler composition:
+   - composed `registration.onChange` + external `onChange`
+   - composed `registration.onBlur` + external `onBlur` with lint-safe invocation
+3. Hardened disabled semantics:
+   - clear and password-reveal utility buttons now respect `disabled`
+4. Extended `TextField.test.tsx`:
+   - regression test for clearable behavior when `registration.ref` is present
+   - regression test for disabled utility controls
+
+Validation:
+
+1. `npx eslint src/components/ui/TextField.tsx src/components/ui/__tests__/TextField.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/TextField.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/features/data-visualizations/components/TimeRangePicker.tsx` (regression parity review)
-2. `src/features/metric-settings/components/MetricSettingsForm.tsx` (regression parity review)
-3. `src/features/data-visualizations/components/MetricChart.tsx` (regression parity review)
+1. `src/components/ui/DateTimePicker.tsx` (final parity spot-check)
+2. `src/components/ui/Select.tsx` (final parity spot-check)
+3. `src/components/ui/Toggle.tsx` (final parity spot-check)

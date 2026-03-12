@@ -42,11 +42,16 @@ const TextField = ({
   className,
   wrapperClassName,
   onChange,
+  onBlur,
   ...rest
 }: TextFieldProps) => {
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [showPwd, setShowPwd] = React.useState(false);
   const [hasValue, setHasValue] = React.useState<boolean>(Boolean(rest.defaultValue ?? rest.value));
+  const registrationRef = registration?.ref;
+  const registrationOnChange = registration?.onChange;
+  const registrationOnBlur = registration?.onBlur;
+  const registrationName = registration?.name;
 
   // keep hasValue in sync if parent controls the value
   React.useEffect(() => {
@@ -54,12 +59,32 @@ const TextField = ({
     if (el) setHasValue(el.value.length > 0);
   }, [rest.value]);
 
+  const handleInputRef = React.useCallback(
+    (node: HTMLInputElement | null) => {
+      inputRef.current = node;
+      if (!registrationRef) return;
+      if (typeof registrationRef === "function") {
+        registrationRef(node);
+        return;
+      }
+      registrationRef.current = node;
+    },
+    [registrationRef],
+  );
+
   const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     setHasValue(e.currentTarget.value.length > 0);
-    if (registration?.onChange) {
-      void registration.onChange(e);
+    if (registrationOnChange) {
+      void registrationOnChange(e);
     }
     onChange?.(e);
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    if (registrationOnBlur) {
+      void registrationOnBlur(e);
+    }
+    onBlur?.(e);
   };
 
   const clear = () => {
@@ -78,6 +103,7 @@ const TextField = ({
         <button
           type="button"
           onClick={clear}
+          disabled={disabled}
           className="rounded-md p-1 text-ink-tertiary hover:bg-surface2/60 hover:text-ink-emphasis focus-visible:ring-2 focus-visible:ring-ring"
           title="Clear"
           aria-label="Clear input"
@@ -89,6 +115,7 @@ const TextField = ({
         <button
           type="button"
           onClick={() => setShowPwd((s) => !s)}
+          disabled={disabled}
           className="rounded-md p-1 text-ink-tertiary hover:bg-surface2/60 hover:text-ink-emphasis focus-visible:ring-2 focus-visible:ring-ring"
           title={showPwd ? "Hide password" : "Show password"}
           aria-label={showPwd ? "Hide password" : "Show password"}
@@ -110,7 +137,7 @@ const TextField = ({
     >
       <input
         id={id}
-        ref={inputRef}
+        ref={handleInputRef}
         type={revealToggle && type === "password" ? (showPwd ? "text" : "password") : type}
         placeholder={placeholder}
         disabled={disabled}
@@ -119,8 +146,9 @@ const TextField = ({
           size === "sm" ? "text-sm" : size === "lg" ? "text-lg" : "text-base",
           className,
         )}
-        {...registration}
+        name={registrationName}
         {...rest}
+        onBlur={handleBlur}
         onChange={handleInput}
       />
     </InputChrome>
