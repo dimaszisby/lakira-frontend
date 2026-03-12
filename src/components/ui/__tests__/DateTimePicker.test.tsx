@@ -103,4 +103,54 @@ describe("DateTimePicker", () => {
 
     expect(values).toEqual(["0", "15", "30", "45"]);
   });
+
+  it("clamps datetime changes to min boundary", async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+
+    render(
+      <DateTimePicker
+        mode="datetime"
+        value={new Date(2026, 1, 16, 13, 45)}
+        onChange={onChange}
+        min={new Date(2026, 1, 16, 14, 0)}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /choose date and time/i }));
+    await user.selectOptions(screen.getByRole("combobox", { name: /select hour/i }), "12");
+
+    const picked = onChange.mock.calls.at(-1)?.[0] as Date;
+    expect(picked).toBeInstanceOf(Date);
+    expect(picked.getFullYear()).toBe(2026);
+    expect(picked.getMonth()).toBe(1);
+    expect(picked.getDate()).toBe(16);
+    expect(picked.getHours()).toBe(14);
+    expect(picked.getMinutes()).toBe(0);
+  });
+
+  it("clamps datetime changes to max boundary", async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+
+    render(
+      <DateTimePicker
+        mode="datetime"
+        value={new Date(2026, 1, 16, 15, 15)}
+        onChange={onChange}
+        max={new Date(2026, 1, 16, 16, 30)}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /choose date and time/i }));
+    await user.selectOptions(screen.getByRole("combobox", { name: /select hour/i }), "6");
+
+    const picked = onChange.mock.calls[0]?.[0] as Date;
+    expect(picked).toBeInstanceOf(Date);
+    expect(picked.getFullYear()).toBe(2026);
+    expect(picked.getMonth()).toBe(1);
+    expect(picked.getDate()).toBe(16);
+    expect(picked.getHours()).toBe(16);
+    expect(picked.getMinutes()).toBe(30);
+  });
 });

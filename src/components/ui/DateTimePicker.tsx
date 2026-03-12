@@ -177,7 +177,7 @@ const DateTimePicker = ({
       0,
       0,
     );
-    onChange(normalized);
+    onChange(clampDateTime(normalized, min, max));
   };
 
   const shiftMonth = (delta: number) => {
@@ -211,7 +211,7 @@ const DateTimePicker = ({
     const hour24 = hour % 12 + (pm ? 12 : 0);
     const normalized = new Date(nextDate);
     normalized.setHours(hour24, minute, 0, 0);
-    onChange(normalized);
+    onChange(clampDateTime(normalized, min, max));
   };
 
   const normalizedStep = Math.max(1, Math.min(60, Math.floor(minuteStep)));
@@ -434,4 +434,18 @@ function closestStep(value: number, steps: number[]) {
   }
 
   return best;
+}
+
+function clampDateTime(value: Date, min?: Date, max?: Date) {
+  const minTime = isValidDate(min) ? min.getTime() : null;
+  const maxTime = isValidDate(max) ? max.getTime() : null;
+  const current = value.getTime();
+
+  if (minTime != null && current < minTime) return new Date(minTime);
+  if (maxTime != null && current > maxTime) return new Date(maxTime);
+  return value;
+}
+
+function isValidDate(value?: Date): value is Date {
+  return Boolean(value && Number.isFinite(value.getTime()));
 }

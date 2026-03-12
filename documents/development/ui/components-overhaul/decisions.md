@@ -1517,3 +1517,29 @@ Consequences:
 - Clearable `TextField` behavior remains stable with or without `registration`.
 - Integration with form libraries is safer and more predictable.
 - Disabled input state now consistently disables all direct field interactions.
+
+## ADR-059 - DateTimePicker Datetime Boundary Clamp Parity (Accepted 2026-03-12)
+
+Context:
+
+`DateTimePicker` already constrained calendar day selection with `min`/`max`, but in `datetime` mode hour/minute controls could still emit out-of-range values on boundary days.
+
+Decision:
+
+1. Add `clampDateTime` helper to enforce datetime bounds before emitting values.
+2. Apply clamp in both datetime emission paths:
+   - calendar day commit (`commitDate`) in `datetime` mode
+   - time control updates (`setTime`)
+3. Ignore invalid bound values safely via date-validity checks.
+4. Add regression tests for min-boundary and max-boundary clamping.
+
+Options considered:
+
+1. Keep date-cell-only bounds and rely on consumers to sanitize emitted values.
+2. Enforce bounds at component level for all datetime emissions.
+
+Consequences:
+
+- `DateTimePicker` now emits datetime values consistent with declared `min`/`max` constraints.
+- Consumer forms receive bounded values without extra sanitization glue.
+- Boundary behavior is covered by focused regression tests.

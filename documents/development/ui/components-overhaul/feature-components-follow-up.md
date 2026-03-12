@@ -1174,8 +1174,39 @@ Status:
 
 - `Done`
 
+## Entry 2026-03-12 - DateTimePicker (Final Parity Spot-check)
+
+Component:
+
+- `src/components/ui/DateTimePicker.tsx`
+
+Why this slice:
+
+- `DateTimePicker` applied `min`/`max` for day-cell availability, but datetime time controls could still emit out-of-range values on boundary dates.
+- This created a parity gap between calendar constraints and emitted datetime values.
+
+Changes applied:
+
+1. Hardened datetime emission path:
+   - added boundary clamp helper for datetime values (`clampDateTime`)
+   - applied clamping in date-commit and time-change handlers for `mode="datetime"`
+2. Added runtime guard for invalid bounds:
+   - clamp logic ignores invalid `min`/`max` values safely
+3. Extended `DateTimePicker.test.tsx`:
+   - regression for clamping to `min` boundary
+   - regression for clamping to `max` boundary
+
+Validation:
+
+1. `npx eslint src/components/ui/DateTimePicker.tsx src/components/ui/__tests__/DateTimePicker.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/DateTimePicker.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/components/ui/DateTimePicker.tsx` (final parity spot-check)
-2. `src/components/ui/Select.tsx` (final parity spot-check)
-3. `src/components/ui/Toggle.tsx` (final parity spot-check)
+1. `src/components/ui/Select.tsx` (final parity spot-check)
+2. `src/components/ui/Toggle.tsx` (final parity spot-check)
+3. `src/components/ui/Modal.tsx` (final parity spot-check)
