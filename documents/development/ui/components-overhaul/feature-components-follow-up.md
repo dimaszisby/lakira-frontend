@@ -1294,8 +1294,36 @@ Status:
 
 - `Done`
 
+## Entry 2026-03-12 - SegmentedControl (Final Parity Spot-check)
+
+Component:
+
+- `src/components/ui/SegmentedControl.tsx`
+
+Why this slice:
+
+- `SegmentedControl` emitted `onChange` even when the selected value did not change.
+- This created noisy no-op updates on repeated clicks/selection of the already active option.
+
+Changes applied:
+
+1. Added selection no-op guard:
+   - skip `onChange` emit when selected option value equals current controlled `value`
+2. Kept keyboard/navigation semantics unchanged for actual value transitions.
+3. Extended `SegmentedControl.test.tsx`:
+   - regression test verifies no emit when selecting the already selected option.
+
+Validation:
+
+1. `npx eslint src/components/ui/SegmentedControl.tsx src/components/ui/__tests__/SegmentedControl.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/SegmentedControl.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/components/ui/SegmentedControl.tsx` (final parity spot-check)
-2. `src/components/ui/Table.tsx` (final parity spot-check)
-3. `src/components/ui/SearchInput.tsx` (final parity spot-check)
+1. `src/components/ui/Table.tsx` (final parity spot-check)
+2. `src/components/ui/SearchInput.tsx` (final parity spot-check)
+3. `src/components/ui/Pagination.tsx` (final parity spot-check)

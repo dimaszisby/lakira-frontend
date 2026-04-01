@@ -1620,3 +1620,27 @@ Consequences:
 - Body scroll lock now remains correct for stacked modal scenarios.
 - Existing modal API and focus behavior remain unchanged.
 - Regression tests guard against premature overflow restoration.
+
+## ADR-063 - SegmentedControl Same-Value No-Op Emission Guard (Accepted 2026-03-12)
+
+Context:
+
+`SegmentedControl` emitted `onChange` for already-selected values. Repeated clicks on the active option triggered unnecessary no-op updates.
+
+Decision:
+
+1. Add same-value guard in selection path:
+   - if selected option value equals current controlled `value`, do not emit `onChange`
+2. Keep existing navigation and selection behavior unchanged for actual value changes.
+3. Add regression test for active-option re-selection no-op behavior.
+
+Options considered:
+
+1. Keep always-emit behavior and rely on parent-level deduplication.
+2. Prevent no-op emissions in the component selection path.
+
+Consequences:
+
+- Reduced unnecessary state updates and handler churn in forms using segmented controls.
+- Component behavior remains predictable and controlled-value aligned.
+- Regression test protects against reintroducing no-op emissions.

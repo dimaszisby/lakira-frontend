@@ -107,4 +107,22 @@ describe("SegmentedControl", () => {
 
     expect(onChange).not.toHaveBeenCalled();
   });
+
+  it("does not call onChange when selecting the already selected option", async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+
+    render(
+      <SegmentedControl<SegmentValue>
+        value="incremental"
+        onChange={onChange}
+        options={options}
+        aria-label="Goal type"
+      />,
+    );
+
+    await user.click(screen.getByRole("radio", { name: /incremental/i }));
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });

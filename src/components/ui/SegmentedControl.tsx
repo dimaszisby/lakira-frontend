@@ -83,6 +83,7 @@ const SegmentedControl = <T extends Value = string>({
   const selectByIndex = (index: number) => {
     const option = options[index];
     if (!option || option.disabled || disabled) return;
+    if (option.value === value) return;
     onChange(option.value, option);
   };
 
