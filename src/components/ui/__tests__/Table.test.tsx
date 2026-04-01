@@ -92,6 +92,27 @@ describe("Table", () => {
     expect(onRowClick).not.toHaveBeenCalled();
   });
 
+  it("does not trigger row click from interactive cell keyboard events", async () => {
+    const user = userEvent.setup();
+    const onRowClick = jest.fn();
+
+    render(
+      <TableBase<Row>
+        data={rows}
+        columns={columns}
+        rowKey={(row) => row.id}
+        onRowClick={onRowClick}
+      />,
+    );
+
+    const interactiveButton = screen.getByRole("button", { name: "2" });
+    interactiveButton.focus();
+    await user.keyboard("{Enter}");
+    await user.keyboard(" ");
+
+    expect(onRowClick).not.toHaveBeenCalled();
+  });
+
   it("renders empty state message when no data is available", () => {
     render(
       <TableBase<Row>

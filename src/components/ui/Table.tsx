@@ -166,6 +166,8 @@ export const TableBase = <T,>({
                   }}
                   onKeyDown={(event) => {
                     if (!onRowClick) return;
+                    const target = event.target as HTMLElement;
+                    if (target.closest(INTERACTIVE_ELEMENT_SELECTOR)) return;
                     if (event.key === "Enter" || event.key === " ") {
                       event.preventDefault();
                       onRowClick(item);

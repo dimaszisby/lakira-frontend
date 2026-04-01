@@ -1322,8 +1322,36 @@ Status:
 
 - `Done`
 
+## Entry 2026-04-01 - Table (Final Parity Spot-check)
+
+Component:
+
+- `src/components/ui/Table.tsx`
+
+Why this slice:
+
+- Table row click handling already ignored interactive elements for pointer clicks.
+- Keyboard events (`Enter`/`Space`) originating from interactive controls inside cells could still bubble and trigger row-level `onRowClick`.
+
+Changes applied:
+
+1. Hardened row keyboard activation guard:
+   - row `onKeyDown` now ignores events when the source target is inside an interactive element
+2. Preserved existing row keyboard behavior for non-interactive row focus.
+3. Extended `Table.test.tsx`:
+   - regression test verifies keyboard events on interactive cell controls do not trigger row click.
+
+Validation:
+
+1. `npx eslint src/components/ui/Table.tsx src/components/ui/__tests__/Table.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/Table.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/components/ui/Table.tsx` (final parity spot-check)
-2. `src/components/ui/SearchInput.tsx` (final parity spot-check)
-3. `src/components/ui/Pagination.tsx` (final parity spot-check)
+1. `src/components/ui/SearchInput.tsx` (final parity spot-check)
+2. `src/components/ui/Pagination.tsx` (final parity spot-check)
+3. `src/components/ui/DateTimePicker.tsx` (post-spot-check regression scan)

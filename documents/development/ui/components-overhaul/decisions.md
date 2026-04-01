@@ -1644,3 +1644,27 @@ Consequences:
 - Reduced unnecessary state updates and handler churn in forms using segmented controls.
 - Component behavior remains predictable and controlled-value aligned.
 - Regression test protects against reintroducing no-op emissions.
+
+## ADR-064 - Table Interactive-Element Keyboard Propagation Guard (Accepted 2026-04-01)
+
+Context:
+
+`Table` row click logic already ignored pointer events originating from interactive controls inside cells. However, row-level keyboard activation still reacted to bubbled `Enter`/`Space` key events from those interactive controls.
+
+Decision:
+
+1. Add interactive-origin guard in row `onKeyDown` handler.
+2. Skip row activation when keyboard event target is inside an interactive element.
+3. Keep existing row keyboard activation behavior for direct row focus.
+4. Add regression test for interactive-cell keyboard events.
+
+Options considered:
+
+1. Keep current keyboard handling and require consumer-level event stopping.
+2. Guard interaction boundaries within the table primitive, matching pointer behavior.
+
+Consequences:
+
+- Row activation behavior is now consistent across pointer and keyboard interactions.
+- Embedded buttons/inputs inside cells no longer trigger unintended row navigation on keypress.
+- Regression test prevents reintroduction of this propagation issue.
