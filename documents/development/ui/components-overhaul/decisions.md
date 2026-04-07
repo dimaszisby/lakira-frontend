@@ -1668,3 +1668,29 @@ Consequences:
 - Row activation behavior is now consistent across pointer and keyboard interactions.
 - Embedded buttons/inputs inside cells no longer trigger unintended row navigation on keypress.
 - Regression test prevents reintroduction of this propagation issue.
+
+## ADR-065 - SearchInput Clear-Focus Continuity (Accepted 2026-04-01)
+
+Context:
+
+`SearchInput` clear actions could leave focus on the clear button (or lose focus after rerender), disrupting keyboard-first search refinement flows.
+
+Decision:
+
+1. Add internal input ref while preserving forwarded ref behavior.
+2. After clear actions, programmatically restore focus to the input.
+3. Keep clear contract unchanged:
+   - call `onClear()` when provided
+   - fallback to `onChange("")` when `onClear` is absent
+4. Add regression tests for focus restoration in both clear paths.
+
+Options considered:
+
+1. Keep current behavior and rely on parent-level focus management.
+2. Guarantee focus continuity within the component’s clear interaction path.
+
+Consequences:
+
+- Keyboard workflows remain continuous after clear interactions.
+- Ref forwarding compatibility is preserved for parent integrations.
+- Regression coverage protects both default clear and custom-clear callback paths.

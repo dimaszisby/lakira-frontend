@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 
@@ -55,6 +55,39 @@ describe("SearchInput", () => {
     await user.click(screen.getByRole("button", { name: /clear search/i }));
 
     expect(onChange).toHaveBeenCalledWith("");
+  });
+
+  it("returns focus to input after clear", async () => {
+    const user = userEvent.setup();
+
+    const Harness = () => {
+      const [value, setValue] = useState("metric");
+      return <SearchInput value={value} onChange={setValue} ariaLabel="Search metrics" />;
+    };
+
+    render(<Harness />);
+
+    await user.click(screen.getByRole("button", { name: /clear search/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("searchbox", { name: /search metrics/i })).toHaveFocus();
+    });
+  });
+
+  it("returns focus to input after onClear callback", async () => {
+    const user = userEvent.setup();
+    const onClear = jest.fn();
+
+    render(
+      <SearchInput value="metric" onChange={() => {}} onClear={onClear} ariaLabel="Search metrics" />,
+    );
+
+    await user.click(screen.getByRole("button", { name: /clear search/i }));
+
+    expect(onClear).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(screen.getByRole("searchbox", { name: /search metrics/i })).toHaveFocus();
+    });
   });
 
   it("supports Escape key to clear current value", async () => {

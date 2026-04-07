@@ -1350,8 +1350,38 @@ Status:
 
 - `Done`
 
+## Entry 2026-04-01 - SearchInput (Final Parity Spot-check)
+
+Component:
+
+- `src/components/ui/SearchInput.tsx`
+
+Why this slice:
+
+- Clearing search moved interaction focus to the clear button, and focus could be lost after clear.
+- This reduced keyboard continuity, especially in fast filter/search workflows.
+
+Changes applied:
+
+1. Hardened clear focus behavior:
+   - added internal input ref while preserving forwarded ref contract
+   - clear action now re-focuses the input after clear callback/value update
+2. Added defensive clear no-op when disabled.
+3. Extended `SearchInput.test.tsx`:
+   - regression test for focus return after default clear path (`onChange("")`)
+   - regression test for focus return after custom `onClear` callback path.
+
+Validation:
+
+1. `npx eslint src/components/ui/SearchInput.tsx src/components/ui/__tests__/SearchInput.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/SearchInput.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/components/ui/SearchInput.tsx` (final parity spot-check)
-2. `src/components/ui/Pagination.tsx` (final parity spot-check)
-3. `src/components/ui/DateTimePicker.tsx` (post-spot-check regression scan)
+1. `src/components/ui/Pagination.tsx` (final parity spot-check)
+2. `src/components/ui/DateTimePicker.tsx` (post-spot-check regression scan)
+3. `src/components/ui/Select.tsx` (post-spot-check regression scan)

@@ -1,6 +1,6 @@
 import type { ChangeEvent } from "react";
 import type { KeyboardEvent } from "react";
-import { forwardRef, memo, useCallback, useId } from "react";
+import { forwardRef, memo, useCallback, useId, useRef } from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -38,6 +38,20 @@ export const SearchInputBase = forwardRef<HTMLInputElement, Props>(function Sear
   ref,
 ) {
   const id = useId();
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  const setInputRef = useCallback(
+    (node: HTMLInputElement | null) => {
+      inputRef.current = node;
+      if (!ref) return;
+      if (typeof ref === "function") {
+        ref(node);
+        return;
+      }
+      ref.current = node;
+    },
+    [ref],
+  );
 
   const handleInput = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value),
@@ -45,12 +59,17 @@ export const SearchInputBase = forwardRef<HTMLInputElement, Props>(function Sear
   );
 
   const clear = useCallback(() => {
+    if (disabled) return;
     if (onClear) {
       onClear();
-      return;
+    } else {
+      onChange("");
     }
-    onChange("");
-  }, [onClear, onChange]);
+
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
+  }, [disabled, onClear, onChange]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
@@ -73,7 +92,7 @@ export const SearchInputBase = forwardRef<HTMLInputElement, Props>(function Sear
 
       <input
         id={id}
-        ref={ref}
+        ref={setInputRef}
         type="search"
         inputMode="search"
         autoComplete="off"
