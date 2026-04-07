@@ -1694,3 +1694,29 @@ Consequences:
 - Keyboard workflows remain continuous after clear interactions.
 - Ref forwarding compatibility is preserved for parent integrations.
 - Regression coverage protects both default clear and custom-clear callback paths.
+
+## ADR-066 - Pagination Known-Total Boundary-First Disable Rules (Accepted 2026-04-07)
+
+Context:
+
+`Pagination` allowed `canPrev/canNext` flags to override known-total page bounds, which could leave first/last boundary controls enabled while transitions were clamped away.
+
+Decision:
+
+1. In known-total mode, boundary disable rules always apply:
+   - disable previous on first page
+   - disable next on last page
+2. Preserve `canPrev/canNext` as additional constraints, not boundary overrides.
+3. Keep cursor-mode behavior unchanged for unknown-total pagination.
+4. Add regression test for known-total boundary controls with `canPrev/canNext=true`.
+
+Options considered:
+
+1. Keep current precedence where `canPrev/canNext` fully control disabled state.
+2. Make known-total boundaries authoritative and treat flags as secondary constraints.
+
+Consequences:
+
+- Pagination controls now match visible capability in known-total mode.
+- Boundary buttons no longer appear clickable when no transition is possible.
+- Behavior is locked by dedicated regression coverage.

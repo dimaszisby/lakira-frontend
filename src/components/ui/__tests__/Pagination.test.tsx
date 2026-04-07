@@ -66,4 +66,43 @@ describe("Pagination", () => {
 
     expect(onChange).not.toHaveBeenCalled();
   });
+
+  it("keeps known-total boundary controls disabled even when canPrev/canNext are true", async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+
+    const { rerender } = render(
+      <Pagination
+        page={1}
+        pageSize={10}
+        total={20}
+        canPrev
+        canNext
+        onChange={onChange}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /previous page/i })).toBeDisabled();
+
+    await user.click(screen.getByRole("button", { name: /next page/i }));
+    expect(onChange).toHaveBeenCalledWith(2);
+
+    onChange.mockClear();
+
+    rerender(
+      <Pagination
+        page={2}
+        pageSize={10}
+        total={20}
+        canPrev
+        canNext
+        onChange={onChange}
+      />,
+    );
+
+    expect(screen.getByRole("button", { name: /next page/i })).toBeDisabled();
+
+    await user.click(screen.getByRole("button", { name: /next page/i }));
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });

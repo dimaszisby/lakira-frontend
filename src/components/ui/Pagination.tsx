@@ -38,9 +38,18 @@ export const Pagination = ({
 
   const currentPage =
     totalPages === null ? Math.max(1, page) : clampPage(Math.max(1, page), 1, totalPages);
-  const prevDisabled = typeof canPrev === "boolean" ? !canPrev : currentPage <= 1;
+  const prevDisabled =
+    totalPages === null
+      ? typeof canPrev === "boolean"
+        ? !canPrev
+        : currentPage <= 1
+      : currentPage <= 1 || (typeof canPrev === "boolean" ? !canPrev : false);
   const nextDisabled =
-    typeof canNext === "boolean" ? !canNext : totalPages === null ? false : currentPage >= totalPages;
+    totalPages === null
+      ? typeof canNext === "boolean"
+        ? !canNext
+        : false
+      : currentPage >= totalPages || (typeof canNext === "boolean" ? !canNext : false);
 
   const goToPage = (targetPage: number) => {
     const nextPage =

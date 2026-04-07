@@ -1380,8 +1380,37 @@ Status:
 
 - `Done`
 
+## Entry 2026-04-07 - Pagination (Final Parity Spot-check)
+
+Component:
+
+- `src/components/ui/Pagination.tsx`
+
+Why this slice:
+
+- When `total` was known, `canPrev/canNext` could override natural page bounds and keep boundary controls enabled.
+- This created a UX parity gap where boundary buttons looked actionable but produced no page transition.
+
+Changes applied:
+
+1. Hardened disabled-state resolution for known-total mode:
+   - boundary guards (`currentPage <= 1` / `currentPage >= totalPages`) always apply
+   - `canPrev/canNext` can further restrict, but cannot bypass known bounds
+2. Kept cursor-mode behavior unchanged when `total` is unknown.
+3. Extended `Pagination.test.tsx`:
+   - regression test verifies known-total boundary controls remain disabled even when `canPrev/canNext` are true.
+
+Validation:
+
+1. `npx eslint src/components/ui/Pagination.tsx src/components/ui/__tests__/Pagination.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/Pagination.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/components/ui/Pagination.tsx` (final parity spot-check)
-2. `src/components/ui/DateTimePicker.tsx` (post-spot-check regression scan)
-3. `src/components/ui/Select.tsx` (post-spot-check regression scan)
+1. `src/components/ui/DateTimePicker.tsx` (post-spot-check regression scan)
+2. `src/components/ui/Select.tsx` (post-spot-check regression scan)
+3. `src/components/ui/Toggle.tsx` (post-spot-check regression scan)
