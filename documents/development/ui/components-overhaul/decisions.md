@@ -1850,3 +1850,52 @@ Consequences:
 - Row hover callbacks now align with interaction boundaries already enforced for row activation.
 - Embedded controls can receive focus without producing unintended row-hover side effects.
 - Regression tests protect this focus propagation edge case.
+
+## ADR-072 - Pagination Page-Size Runtime Normalization Guard (Accepted 2026-04-09)
+
+Context:
+
+`Pagination` assumed `pageSize` is always a valid positive number. Runtime invalid values such as `NaN` could corrupt known-total page math and produce unstable UI state.
+
+Decision:
+
+1. Add page-size normalizer to enforce positive integer values with fallback.
+2. Use normalized page-size for total-pages computation.
+3. Keep existing external API unchanged.
+4. Add regression test for invalid page-size input handling.
+
+Options considered:
+
+1. Keep strict typed assumption and rely on caller validation.
+2. Add defensive normalization at component boundary.
+
+Consequences:
+
+- Pagination remains stable under invalid runtime `pageSize` input.
+- Known-total state rendering and navigation behavior stay predictable.
+- Regression test protects this defensive boundary contract.
+
+## ADR-073 - SearchInput Escape-Clear Guard for IME Composition and Disabled State (Accepted 2026-04-09)
+
+Context:
+
+`SearchInput` supported Escape-to-clear behavior, but this should not fire during IME composition sessions and should be inert for disabled inputs under synthetic/integration-dispatched key events.
+
+Decision:
+
+1. Guard Escape clear handler when:
+   - input is disabled
+   - native key event is composing (`isComposing`)
+2. Keep existing Escape clear behavior unchanged for normal non-composing enabled state.
+3. Add regression tests for composition and disabled paths.
+
+Options considered:
+
+1. Keep generic Escape clear behavior without composition/disabled guards.
+2. Add defensive input-state and IME-awareness guards in key handler.
+
+Consequences:
+
+- Search clear behavior no longer conflicts with IME composition flows.
+- Disabled input behavior remains consistently inert even under synthetic key dispatch.
+- Regression tests protect these keyboard interaction boundaries.

@@ -1553,8 +1553,67 @@ Status:
 
 - `Done`
 
+## Entry 2026-04-09 - Pagination (Post-Spot-Check Regression Scan)
+
+Component:
+
+- `src/components/ui/Pagination.tsx`
+
+Why this slice:
+
+- `Pagination` assumed a valid numeric `pageSize`, and runtime invalid values (for example `NaN`) could break total-page math and known-total state rendering.
+- This is a defensive runtime stability gap for integration paths where page-size values are derived from external params/state.
+
+Changes applied:
+
+1. Hardened page-size normalization:
+   - added positive-integer normalizer with fallback
+   - known-total math now uses normalized page size
+2. Extended `Pagination.test.tsx`:
+   - regression test verifies invalid `pageSize` still produces stable known-total paging behavior.
+3. Applied test-hygiene cleanup:
+   - extracted repeated literals to constants to keep lint clean.
+
+Validation:
+
+1. `npx eslint src/components/ui/Pagination.tsx src/components/ui/__tests__/Pagination.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/Pagination.test.tsx`
+
+Status:
+
+- `Done`
+
+## Entry 2026-04-09 - SearchInput (Post-Spot-Check Regression Scan)
+
+Component:
+
+- `src/components/ui/SearchInput.tsx`
+
+Why this slice:
+
+- Escape-based clear interaction should not trigger while IME composition is active.
+- Disabled search input should also ignore Escape clear behavior even if key events are dispatched in tests/integration harnesses.
+
+Changes applied:
+
+1. Hardened Escape key guard:
+   - ignore clear when input is disabled
+   - ignore clear when native keyboard event is composing (IME)
+2. Extended `SearchInput.test.tsx`:
+   - regression test for Escape during IME composition
+   - regression test for Escape while disabled
+
+Validation:
+
+1. `npx eslint src/components/ui/SearchInput.tsx src/components/ui/__tests__/SearchInput.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/SearchInput.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/components/ui/Pagination.tsx` (post-spot-check regression scan)
-2. `src/components/ui/SearchInput.tsx` (post-spot-check regression scan)
-3. `src/components/ui/SegmentedControl.tsx` (post-spot-check regression scan)
+1. `src/components/ui/SegmentedControl.tsx` (post-spot-check regression scan)
+2. `src/components/ui/Modal.tsx` (post-spot-check regression scan)
+3. `src/components/ui/Table.tsx` (post-spot-check regression scan)

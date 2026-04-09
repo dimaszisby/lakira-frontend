@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 
@@ -99,6 +99,28 @@ describe("SearchInput", () => {
     await user.type(screen.getByRole("searchbox", { name: /search metrics/i }), "{Escape}");
 
     expect(onChange).toHaveBeenCalledWith("");
+  });
+
+  it("does not clear on Escape during IME composition", () => {
+    const onChange = jest.fn();
+
+    render(<SearchInput value="metric" onChange={onChange} ariaLabel="Search metrics" />);
+
+    const input = screen.getByRole("searchbox", { name: /search metrics/i });
+    fireEvent.keyDown(input, { key: "Escape", isComposing: true });
+
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it("does not clear on Escape when disabled", () => {
+    const onChange = jest.fn();
+
+    render(<SearchInput value="metric" onChange={onChange} ariaLabel="Search metrics" disabled />);
+
+    const input = screen.getByRole("searchbox", { name: /search metrics/i });
+    fireEvent.keyDown(input, { key: "Escape" });
+
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it("announces loading state", () => {

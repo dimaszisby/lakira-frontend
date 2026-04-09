@@ -73,12 +73,13 @@ export const SearchInputBase = forwardRef<HTMLInputElement, Props>(function Sear
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent<HTMLInputElement>) => {
+      if (disabled || e.nativeEvent.isComposing) return;
       if (e.key === "Escape" && value) {
         e.preventDefault();
         clear();
       }
     },
-    [value, clear],
+    [disabled, value, clear],
   );
 
   // Reserve space for trailing controls so content never overlaps spinner/clear button.
