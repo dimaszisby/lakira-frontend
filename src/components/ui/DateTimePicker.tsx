@@ -50,6 +50,11 @@ const DateTimePicker = ({
   const wrapperRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const dayRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const latestValueRef = useRef<Date | null>(value);
+
+  useEffect(() => {
+    latestValueRef.current = value;
+  }, [value]);
 
   useEffect(() => {
     if (!open) return;
@@ -162,12 +167,13 @@ const DateTimePicker = ({
         0,
         0,
       );
+      latestValueRef.current = normalized;
       onChange(normalized);
       closePopover();
       return;
     }
 
-    const base = value ?? new Date();
+    const base = latestValueRef.current ?? value ?? new Date();
     const normalized = new Date(
       nextDate.getFullYear(),
       nextDate.getMonth(),
@@ -177,7 +183,9 @@ const DateTimePicker = ({
       0,
       0,
     );
-    onChange(clampDateTime(normalized, min, max));
+    const clamped = clampDateTime(normalized, min, max);
+    latestValueRef.current = clamped;
+    onChange(clamped);
   };
 
   const shiftMonth = (delta: number) => {
@@ -207,11 +215,13 @@ const DateTimePicker = ({
   const hour12 = ((hours + 11) % 12) + 1;
 
   const setTime = (hour: number, pm: boolean, minute: number) => {
-    const nextDate = value ?? new Date();
+    const nextDate = latestValueRef.current ?? value ?? new Date();
     const hour24 = hour % 12 + (pm ? 12 : 0);
     const normalized = new Date(nextDate);
     normalized.setHours(hour24, minute, 0, 0);
-    onChange(clampDateTime(normalized, min, max));
+    const clamped = clampDateTime(normalized, min, max);
+    latestValueRef.current = clamped;
+    onChange(clamped);
   };
 
   const normalizedStep = Math.max(1, Math.min(60, Math.floor(minuteStep)));

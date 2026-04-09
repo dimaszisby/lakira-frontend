@@ -1720,3 +1720,29 @@ Consequences:
 - Pagination controls now match visible capability in known-total mode.
 - Boundary buttons no longer appear clickable when no transition is possible.
 - Behavior is locked by dedicated regression coverage.
+
+## ADR-067 - DateTimePicker Sequential Date-Time Continuity (Accepted 2026-04-07)
+
+Context:
+
+In `datetime` mode, `DateTimePicker` emitted date selection and time updates through controlled props. Immediate time edits before parent rerender could still derive from stale prior `value`, producing updates for the wrong date.
+
+Decision:
+
+1. Introduce internal latest-value continuity ref synchronized from controlled `value`.
+2. Use latest ref as source for sequential date/time mutation paths:
+   - update ref on datetime date commit
+   - update ref on time selector changes
+3. Keep external API and controlled contract unchanged.
+4. Add regression test for immediate time edit after date selection without parent rerender.
+
+Options considered:
+
+1. Keep purely prop-derived base date/time logic and rely on fast parent rerender.
+2. Preserve sequential picker intent locally between controlled updates.
+
+Consequences:
+
+- Date/time emissions remain coherent in rapid sequential interactions.
+- Component remains controlled-friendly while reducing transient stale-base risk.
+- Regression coverage protects this continuity path.

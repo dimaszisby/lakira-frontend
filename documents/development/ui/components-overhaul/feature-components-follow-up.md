@@ -1409,8 +1409,39 @@ Status:
 
 - `Done`
 
+## Entry 2026-04-07 - DateTimePicker (Post-Spot-Check Regression Scan)
+
+Component:
+
+- `src/components/ui/DateTimePicker.tsx`
+
+Why this slice:
+
+- In `datetime` mode, immediate follow-up time changes after selecting a new date could still use stale controlled `value` before parent rerender.
+- This could emit time updates for the previous date instead of the newly selected date.
+
+Changes applied:
+
+1. Added latest datetime continuity ref:
+   - sync internal latest-value ref from controlled `value` updates
+   - use latest ref as source for sequential date/time updates
+2. Hardened sequential datetime update path:
+   - date commit updates latest ref before emit
+   - time updates derive from latest ref and update it before emit
+3. Extended `DateTimePicker.test.tsx`:
+   - regression test verifies immediate time updates keep newly selected calendar date even before parent rerender.
+
+Validation:
+
+1. `npx eslint src/components/ui/DateTimePicker.tsx src/components/ui/__tests__/DateTimePicker.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/DateTimePicker.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/components/ui/DateTimePicker.tsx` (post-spot-check regression scan)
-2. `src/components/ui/Select.tsx` (post-spot-check regression scan)
-3. `src/components/ui/Toggle.tsx` (post-spot-check regression scan)
+1. `src/components/ui/Select.tsx` (post-spot-check regression scan)
+2. `src/components/ui/Toggle.tsx` (post-spot-check regression scan)
+3. `src/components/ui/Modal.tsx` (post-spot-check regression scan)
