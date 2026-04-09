@@ -1440,8 +1440,36 @@ Status:
 
 - `Done`
 
+## Entry 2026-04-09 - Select (Post-Spot-Check Regression Scan)
+
+Component:
+
+- `src/components/ui/Select.tsx`
+
+Why this slice:
+
+- `Select` still emitted `onChange` when the user re-selected the already active option.
+- This caused unnecessary no-op state updates in controlled consumers.
+
+Changes applied:
+
+1. Hardened commit path for same-value re-selection:
+   - when selected option value equals current value, close list and restore trigger focus without emitting `onChange`
+2. Kept existing behavior for actual value changes unchanged.
+3. Extended `Select.test.tsx`:
+   - regression test verifies no emit on same-value selection and ensures menu closes with trigger focus restore.
+
+Validation:
+
+1. `npx eslint src/components/ui/Select.tsx src/components/ui/__tests__/Select.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/Select.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/components/ui/Select.tsx` (post-spot-check regression scan)
-2. `src/components/ui/Toggle.tsx` (post-spot-check regression scan)
-3. `src/components/ui/Modal.tsx` (post-spot-check regression scan)
+1. `src/components/ui/Toggle.tsx` (post-spot-check regression scan)
+2. `src/components/ui/Modal.tsx` (post-spot-check regression scan)
+3. `src/components/ui/Table.tsx` (post-spot-check regression scan)

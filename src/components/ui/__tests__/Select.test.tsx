@@ -146,4 +146,26 @@ describe("Select", () => {
 
     expect(onChange).toHaveBeenCalledWith("line", expect.objectContaining({ label: "Line" }));
   });
+
+  it("does not emit onChange when selecting the already selected option", async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+
+    render(
+      <Select<OptionValue>
+        value="line"
+        onChange={onChange}
+        options={chartOptions}
+        aria-label="Chart type"
+      />,
+    );
+
+    const trigger = screen.getByRole("button", { name: /chart type/i });
+    await user.click(trigger);
+    await user.click(screen.getByRole("option", { name: /line/i }));
+
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+    expect(trigger).toHaveFocus();
+  });
 });

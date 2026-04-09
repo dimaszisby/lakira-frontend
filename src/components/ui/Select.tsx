@@ -145,11 +145,16 @@ const Select = <T extends Value = string>({
     (index: number) => {
       const option = options[index];
       if (!option || option.disabled) return;
+      if (option.value === value) {
+        closeList();
+        triggerRef.current?.focus();
+        return;
+      }
       onChange(option.value, option);
       closeList();
       triggerRef.current?.focus();
     },
-    [closeList, onChange, options],
+    [closeList, onChange, options, value],
   );
 
   useEffect(() => {

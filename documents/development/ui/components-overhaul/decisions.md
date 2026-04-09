@@ -1746,3 +1746,30 @@ Consequences:
 - Date/time emissions remain coherent in rapid sequential interactions.
 - Component remains controlled-friendly while reducing transient stale-base risk.
 - Regression coverage protects this continuity path.
+
+## ADR-068 - Select Same-Value Re-Selection No-Op Emit Guard (Accepted 2026-04-09)
+
+Context:
+
+`Select` emitted `onChange` even when the user selected the currently active value from the open list. This created unnecessary no-op updates in controlled forms.
+
+Decision:
+
+1. Add same-value guard in selection commit path.
+2. On same-value selection:
+   - close list
+   - restore focus to trigger
+   - do not emit `onChange`
+3. Keep all existing behavior unchanged for actual value transitions.
+4. Add regression coverage for no-op emit + close/focus continuity.
+
+Options considered:
+
+1. Keep current always-emit behavior and rely on parent deduplication.
+2. Prevent no-op emits directly in select commit logic.
+
+Consequences:
+
+- Controlled consumers avoid unnecessary state churn on same-value selections.
+- Menu close/focus behavior remains consistent for both no-op and real selections.
+- Regression test protects against reintroducing no-op emissions.
