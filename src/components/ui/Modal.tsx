@@ -165,7 +165,7 @@ const Modal = ({
           return;
         }
 
-        if (active === last) {
+        if (!active || !dialog.contains(active) || active === last) {
           event.preventDefault();
           first.focus();
         }

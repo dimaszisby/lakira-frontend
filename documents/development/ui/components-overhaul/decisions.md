@@ -1923,3 +1923,27 @@ Consequences:
 - Segmented control emits are more stable in rapid sequential interactions.
 - Controlled consumers avoid duplicate no-op updates under rerender latency.
 - Regression coverage protects this interaction continuity path.
+
+## ADR-075 - Modal Forward-Tab Re-Trap for Out-of-Dialog Focus (Accepted 2026-04-09)
+
+Context:
+
+Modal focus trapping already handled shift-tab fallback and last-element forward cycling. However, forward-tab behavior did not explicitly recover when focus started outside the dialog.
+
+Decision:
+
+1. Extend forward-tab trap guard:
+   - if active focus is outside the dialog, prevent default and focus first dialog control
+2. Keep existing shift-tab and boundary cycling behavior unchanged.
+3. Add regression test for out-of-dialog forward-tab re-trap.
+
+Options considered:
+
+1. Keep current boundary-only forward-tab behavior.
+2. Add explicit out-of-dialog forward recovery for stronger trap continuity.
+
+Consequences:
+
+- Focus trap is more resilient to transient out-of-dialog focus states.
+- Keyboard navigation remains constrained to modal controls while open.
+- Regression test protects this focus-containment path.

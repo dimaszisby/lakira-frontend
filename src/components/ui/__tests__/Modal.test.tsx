@@ -1,4 +1,4 @@
-import { render, screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 
@@ -249,5 +249,30 @@ describe("Modal", () => {
       const currentSecondClose = within(currentSecondDialog).getByRole("button", { name: /close modal/i });
       expect(currentSecondClose).toHaveFocus();
     });
+  });
+
+  it("re-traps forward tab when focus is outside the dialog", () => {
+    render(
+      <>
+        <button type="button">Outside</button>
+        <Modal isOpen onClose={() => {}} hideClose title="Focus trap">
+          <button type="button">First</button>
+          <button type="button">Second</button>
+        </Modal>
+      </>,
+    );
+
+    const outside = screen.getByRole("button", { name: /outside/i });
+    outside.focus();
+    expect(outside).toHaveFocus();
+
+    const dialog = screen.getByRole("dialog", { name: /focus trap/i });
+    const overlay = dialog.parentElement;
+    expect(overlay).not.toBeNull();
+    if (!overlay) return;
+
+    fireEvent.keyDown(overlay, { key: "Tab" });
+
+    expect(screen.getByRole("button", { name: /first/i })).toHaveFocus();
   });
 });

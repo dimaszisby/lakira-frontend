@@ -1641,8 +1641,35 @@ Status:
 
 - `Done`
 
+## Entry 2026-04-09 - Modal (Post-Spot-Check Regression Scan)
+
+Component:
+
+- `src/components/ui/Modal.tsx`
+
+Why this slice:
+
+- Modal focus trap handled forward-tab cycling from the last element and shift-tab fallback, but forward-tab from an out-of-dialog focus target was not explicitly re-trapped.
+- This could weaken trap continuity in edge cases where focus temporarily lands outside the dialog.
+
+Changes applied:
+
+1. Hardened forward-tab trap guard:
+   - on `Tab`, if active element is outside dialog, focus is moved to first focusable dialog control
+2. Extended `Modal.test.tsx`:
+   - regression test verifies forward tab is re-trapped when focus starts outside the dialog.
+
+Validation:
+
+1. `npx eslint src/components/ui/Modal.tsx src/components/ui/__tests__/Modal.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/Modal.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/components/ui/Modal.tsx` (post-spot-check regression scan)
-2. `src/components/ui/Table.tsx` (post-spot-check regression scan)
-3. `src/components/ui/Pagination.tsx` (post-spot-check regression scan)
+1. `src/components/ui/Table.tsx` (post-spot-check regression scan)
+2. `src/components/ui/Pagination.tsx` (post-spot-check regression scan)
+3. `src/components/ui/SearchInput.tsx` (post-spot-check regression scan)
