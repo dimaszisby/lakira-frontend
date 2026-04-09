@@ -1468,8 +1468,35 @@ Status:
 
 - `Done`
 
+## Entry 2026-04-09 - Toggle (Post-Spot-Check Regression Scan)
+
+Component:
+
+- `src/components/ui/Toggle.tsx`
+
+Why this slice:
+
+- Toggle had behavior guarantees (preventDefault guard and rapid sequential intent continuity) that were implemented but not fully regression-locked in tests.
+- Missing coverage here raises refactor risk for high-traffic settings toggles.
+
+Changes applied:
+
+1. Extended `Toggle.test.tsx` with regression coverage for:
+   - no emit when `onClick` prevents default
+   - rapid sequential keyboard activation continuity (`Space` twice before parent rerender)
+2. Kept component runtime behavior unchanged; this slice hardens verification of existing contracts.
+
+Validation:
+
+1. `npx eslint src/components/ui/Toggle.tsx src/components/ui/__tests__/Toggle.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/Toggle.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/components/ui/Toggle.tsx` (post-spot-check regression scan)
-2. `src/components/ui/Modal.tsx` (post-spot-check regression scan)
-3. `src/components/ui/Table.tsx` (post-spot-check regression scan)
+1. `src/components/ui/Modal.tsx` (post-spot-check regression scan)
+2. `src/components/ui/Table.tsx` (post-spot-check regression scan)
+3. `src/components/ui/Pagination.tsx` (post-spot-check regression scan)

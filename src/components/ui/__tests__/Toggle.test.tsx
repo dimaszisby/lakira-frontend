@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { MouseEvent } from "react";
 
 import Toggle from "@/components/ui/Toggle";
 
@@ -70,6 +71,45 @@ describe("Toggle", () => {
     const control = screen.getByRole("switch", { name: /enable alerts/i });
     await user.click(control);
     await user.click(control);
+
+    expect(onCheckedChange).toHaveBeenCalledTimes(2);
+    expect(onCheckedChange).toHaveBeenNthCalledWith(1, true);
+    expect(onCheckedChange).toHaveBeenNthCalledWith(2, false);
+  });
+
+  it("does not emit onCheckedChange when click default is prevented", async () => {
+    const user = userEvent.setup();
+    const onCheckedChange = jest.fn();
+    const onClick = jest.fn((event: MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+    });
+
+    render(
+      <Toggle
+        checked={false}
+        onCheckedChange={onCheckedChange}
+        onClick={onClick}
+        aria-label="Enable alerts"
+      />,
+    );
+
+    await user.click(screen.getByRole("switch", { name: /enable alerts/i }));
+
+    expect(onClick).toHaveBeenCalledTimes(1);
+    expect(onCheckedChange).not.toHaveBeenCalled();
+  });
+
+  it("preserves toggle intent on rapid sequential keyboard activation before parent rerender", async () => {
+    const user = userEvent.setup();
+    const onCheckedChange = jest.fn();
+
+    render(<Toggle checked={false} onCheckedChange={onCheckedChange} aria-label="Enable alerts" />);
+
+    const control = screen.getByRole("switch", { name: /enable alerts/i });
+    control.focus();
+
+    await user.keyboard(" ");
+    await user.keyboard(" ");
 
     expect(onCheckedChange).toHaveBeenCalledTimes(2);
     expect(onCheckedChange).toHaveBeenNthCalledWith(1, true);

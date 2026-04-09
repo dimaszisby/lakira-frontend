@@ -1773,3 +1773,30 @@ Consequences:
 - Controlled consumers avoid unnecessary state churn on same-value selections.
 - Menu close/focus behavior remains consistent for both no-op and real selections.
 - Regression test protects against reintroducing no-op emissions.
+
+## ADR-069 - Toggle Contract Coverage Hardening for PreventDefault and Keyboard Continuity (Accepted 2026-04-09)
+
+Context:
+
+`Toggle` already enforced two important interaction contracts:
+
+1. no state emit when `onClick` prevents default
+2. sequential intent continuity across rapid activations before parent rerender
+
+These were not fully covered by regression tests, increasing risk during future refactors.
+
+Decision:
+
+1. Add regression tests for preventDefault no-emit behavior.
+2. Add regression tests for rapid sequential keyboard activation continuity.
+3. Keep runtime implementation unchanged in this slice.
+
+Options considered:
+
+1. Keep existing partial coverage.
+2. Lock the interaction contracts with dedicated tests.
+
+Consequences:
+
+- Toggle interaction guarantees are now explicitly regression-protected.
+- Refactors can rely on test feedback for both pointer and keyboard activation paths.
