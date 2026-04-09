@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 
@@ -212,6 +212,42 @@ describe("Modal", () => {
 
     await waitFor(() => {
       expect(document.body.style.overflow).toBe("");
+    });
+  });
+
+  it("does not steal focus from remaining modal when another modal closes", async () => {
+    const noop = () => {};
+
+    const { rerender } = render(
+      <>
+        <Modal isOpen onClose={noop} title="First modal">
+          <button type="button">First action</button>
+        </Modal>
+        <Modal isOpen onClose={noop} title="Second modal">
+          <button type="button">Second action</button>
+        </Modal>
+      </>,
+    );
+
+    const secondDialog = screen.getByRole("dialog", { name: /second modal/i });
+    const secondClose = within(secondDialog).getByRole("button", { name: /close modal/i });
+    expect(secondClose).toHaveFocus();
+
+    rerender(
+      <>
+        <Modal isOpen={false} onClose={noop} title="First modal">
+          <button type="button">First action</button>
+        </Modal>
+        <Modal isOpen onClose={noop} title="Second modal">
+          <button type="button">Second action</button>
+        </Modal>
+      </>,
+    );
+
+    await waitFor(() => {
+      const currentSecondDialog = screen.getByRole("dialog", { name: /second modal/i });
+      const currentSecondClose = within(currentSecondDialog).getByRole("button", { name: /close modal/i });
+      expect(currentSecondClose).toHaveFocus();
     });
   });
 });

@@ -1800,3 +1800,29 @@ Consequences:
 
 - Toggle interaction guarantees are now explicitly regression-protected.
 - Refactors can rely on test feedback for both pointer and keyboard activation paths.
+
+## ADR-070 - Modal Focus-Restore Guard for Stacked Close Sequences (Accepted 2026-04-09)
+
+Context:
+
+When multiple modals were open, closing one modal could restore focus to a stale previous element outside the still-open modal, disrupting focus continuity and accessibility expectations.
+
+Decision:
+
+1. Add focus-restore guard logic:
+   - restore only when target is still connected
+   - restore when no modal is open, or when target is inside a currently open modal
+2. Evaluate restore guard in `requestAnimationFrame` to account for post-unmount DOM state.
+3. Keep existing API/interaction contract unchanged.
+4. Add regression test for stacked modal close without focus theft.
+
+Options considered:
+
+1. Keep unconditional focus restoration on cleanup.
+2. Gate restoration based on current open-modal context.
+
+Consequences:
+
+- Closing a modal no longer steals focus from another modal that remains open.
+- Focus behavior remains stable for both single-modal and stacked-modal scenarios.
+- Regression coverage protects this stacked-close accessibility path.

@@ -44,6 +44,18 @@ function unlockBodyScroll() {
   }
 }
 
+function shouldRestoreFocus(target: HTMLElement) {
+  if (!target.isConnected) return false;
+
+  const openDialogs = Array.from(
+    document.querySelectorAll<HTMLElement>('[role="dialog"][aria-modal="true"]'),
+  );
+
+  if (openDialogs.length === 0) return true;
+
+  return openDialogs.some((dialog) => dialog.contains(target));
+}
+
 export interface ModalProps {
   title?: string;
   description?: string;
@@ -101,7 +113,13 @@ const Modal = ({
 
     return () => {
       unlockBodyScroll();
-      previousFocusRef.current?.focus();
+      const previousFocus = previousFocusRef.current;
+      if (!previousFocus) return;
+
+      requestAnimationFrame(() => {
+        if (!shouldRestoreFocus(previousFocus)) return;
+        previousFocus.focus();
+      });
     };
   }, [initialFocusRef, isOpen]);
 

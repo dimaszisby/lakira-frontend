@@ -1495,8 +1495,38 @@ Status:
 
 - `Done`
 
+## Entry 2026-04-09 - Modal (Post-Spot-Check Regression Scan)
+
+Component:
+
+- `src/components/ui/Modal.tsx`
+
+Why this slice:
+
+- In stacked modal flows, closing one modal could restore focus to a stale previous element while another modal remained open.
+- This could pull focus out of the remaining open modal and weaken focus-trap continuity.
+
+Changes applied:
+
+1. Hardened focus restoration gating:
+   - restore focus only when target is still connected
+   - restore when no modal is open, or when target is inside an open modal
+   - moved restore check to next animation frame to evaluate post-unmount dialog state
+2. Kept existing close/scroll-lock contract unchanged.
+3. Extended `Modal.test.tsx`:
+   - regression test verifies closing one modal does not steal focus from a remaining open modal.
+
+Validation:
+
+1. `npx eslint src/components/ui/Modal.tsx src/components/ui/__tests__/Modal.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/Modal.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/components/ui/Modal.tsx` (post-spot-check regression scan)
-2. `src/components/ui/Table.tsx` (post-spot-check regression scan)
-3. `src/components/ui/Pagination.tsx` (post-spot-check regression scan)
+1. `src/components/ui/Table.tsx` (post-spot-check regression scan)
+2. `src/components/ui/Pagination.tsx` (post-spot-check regression scan)
+3. `src/components/ui/SearchInput.tsx` (post-spot-check regression scan)
