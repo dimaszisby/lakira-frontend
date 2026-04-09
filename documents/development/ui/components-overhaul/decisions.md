@@ -1947,3 +1947,30 @@ Consequences:
 - Focus trap is more resilient to transient out-of-dialog focus states.
 - Keyboard navigation remains constrained to modal controls while open.
 - Regression test protects this focus-containment path.
+
+## ADR-076 - Feature Components Dedicated-Test Coverage Closure for Remaining Gaps (Accepted 2026-04-09)
+
+Context:
+
+Direct component-to-test coverage scan identified three remaining uncovered feature component files:
+
+1. `metric-logs/components/LogTableRow.tsx`
+2. `metric-logs/components/table-config.tsx`
+3. `metrics/components/table-config.tsx`
+
+Decision:
+
+1. Add dedicated tests for each uncovered file:
+   - behavior-focused tests for `LogTableRow`
+   - export/contract-focused tests for both `table-config` modules
+2. Keep runtime implementation unchanged; this slice is coverage closure and regression hardening.
+
+Options considered:
+
+1. Leave coverage via indirect parent-component tests only.
+2. Add explicit direct tests per uncovered file.
+
+Consequences:
+
+- Remaining uncovered feature component file count for direct mapping dropped to zero.
+- Future refactors on row/config modules now have direct regression signals.

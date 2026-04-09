@@ -1668,6 +1668,38 @@ Status:
 
 - `Done`
 
+## Entry 2026-04-09 - Remaining Feature Component Coverage Closure
+
+Components:
+
+- `src/features/metric-logs/components/LogTableRow.tsx`
+- `src/features/metric-logs/components/table-config.tsx`
+- `src/features/metrics/components/table-config.tsx`
+
+Why this slice:
+
+- These three files were the only remaining feature components without dedicated test files in the direct component-to-test mapping.
+
+Changes applied:
+
+1. Added `LogTableRow.test.tsx`:
+   - row render contract (`aria-label`, formatted date, value/fallback)
+   - click and keyboard activation callbacks
+2. Added metric-logs `table-config.test.tsx`:
+   - mobile columns key/label/sortable contract
+3. Added metrics `table-config.test.tsx`:
+   - mobile/desktop column metadata contracts
+   - desktop render-cell behavior checks (category chip, description fallback, visibility label)
+
+Validation:
+
+1. `npx eslint src/features/metric-logs/components/LogTableRow.tsx src/features/metric-logs/components/__tests__/LogTableRow.test.tsx src/features/metric-logs/components/table-config.tsx src/features/metric-logs/components/__tests__/table-config.test.tsx src/features/metrics/components/table-config.tsx src/features/metrics/components/__tests__/table-config.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/features/metric-logs/components/__tests__/LogTableRow.test.tsx src/features/metric-logs/components/__tests__/table-config.test.tsx src/features/metrics/components/__tests__/table-config.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
 1. `src/components/ui/Table.tsx` (post-spot-check regression scan)
