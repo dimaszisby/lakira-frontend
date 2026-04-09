@@ -1826,3 +1826,27 @@ Consequences:
 - Closing a modal no longer steals focus from another modal that remains open.
 - Focus behavior remains stable for both single-modal and stacked-modal scenarios.
 - Regression coverage protects this stacked-close accessibility path.
+
+## ADR-071 - Table Hover-Focus Guard for Interactive Cell Targets (Accepted 2026-04-09)
+
+Context:
+
+`Table` row activation already ignored interactive-origin click/keyboard events, but row hover callbacks could still fire from focus events on interactive controls within cells.
+
+Decision:
+
+1. Add interactive-origin guard to row `onFocus` hover path.
+2. Skip `onRowHover` emission when focus target is inside an interactive element.
+3. Preserve `onRowHover` behavior for direct row focus.
+4. Add regression coverage for interactive-cell focus path.
+
+Options considered:
+
+1. Keep current focus behavior and rely on consumer-level filtering.
+2. Align row hover-focus behavior with existing row activation interaction guards.
+
+Consequences:
+
+- Row hover callbacks now align with interaction boundaries already enforced for row activation.
+- Embedded controls can receive focus without producing unintended row-hover side effects.
+- Regression tests protect this focus propagation edge case.

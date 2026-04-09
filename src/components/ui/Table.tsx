@@ -157,7 +157,12 @@ export const TableBase = <T,>({
                       onRowClick,
                   })}
                   onMouseEnter={() => onRowHover?.(item)}
-                  onFocus={() => onRowHover?.(item)}
+                  onFocus={(event) => {
+                    if (!onRowHover) return;
+                    const target = event.target as HTMLElement;
+                    if (target.closest(INTERACTIVE_ELEMENT_SELECTOR)) return;
+                    onRowHover(item);
+                  }}
                   onClick={(event) => {
                     if (!onRowClick) return;
                     const target = event.target as HTMLElement;

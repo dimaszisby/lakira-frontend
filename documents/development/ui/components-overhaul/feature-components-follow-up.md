@@ -1525,8 +1525,36 @@ Status:
 
 - `Done`
 
+## Entry 2026-04-09 - Table (Post-Spot-Check Regression Scan)
+
+Component:
+
+- `src/components/ui/Table.tsx`
+
+Why this slice:
+
+- `Table` already guarded row click activation from interactive child controls.
+- Row hover focus handling could still fire from focus events bubbling out of interactive controls inside cells.
+
+Changes applied:
+
+1. Hardened row focus-hover guard:
+   - row `onFocus` now ignores interactive-origin targets
+   - preserves row hover callback for direct row focus
+2. Extended `Table.test.tsx`:
+   - regression test verifies row hover is not emitted when focusing interactive cell controls.
+
+Validation:
+
+1. `npx eslint src/components/ui/Table.tsx src/components/ui/__tests__/Table.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/Table.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/components/ui/Table.tsx` (post-spot-check regression scan)
-2. `src/components/ui/Pagination.tsx` (post-spot-check regression scan)
-3. `src/components/ui/SearchInput.tsx` (post-spot-check regression scan)
+1. `src/components/ui/Pagination.tsx` (post-spot-check regression scan)
+2. `src/components/ui/SearchInput.tsx` (post-spot-check regression scan)
+3. `src/components/ui/SegmentedControl.tsx` (post-spot-check regression scan)

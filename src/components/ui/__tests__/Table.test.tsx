@@ -113,6 +113,32 @@ describe("Table", () => {
     expect(onRowClick).not.toHaveBeenCalled();
   });
 
+  it("does not trigger row hover from interactive cell focus", () => {
+    const onRowHover = jest.fn();
+
+    render(
+      <TableBase<Row>
+        data={rows}
+        columns={columns}
+        rowKey={(row) => row.id}
+        onRowClick={() => {}}
+        onRowHover={onRowHover}
+      />,
+    );
+
+    const firstRow = document.querySelector<HTMLTableRowElement>('tr[data-rowid="r1"]');
+    expect(firstRow).not.toBeNull();
+    if (!firstRow) return;
+
+    fireEvent.focus(firstRow);
+    expect(onRowHover).toHaveBeenCalledWith(rows[0]);
+
+    onRowHover.mockClear();
+
+    fireEvent.focus(screen.getByRole("button", { name: "2" }));
+    expect(onRowHover).not.toHaveBeenCalled();
+  });
+
   it("renders empty state message when no data is available", () => {
     render(
       <TableBase<Row>
