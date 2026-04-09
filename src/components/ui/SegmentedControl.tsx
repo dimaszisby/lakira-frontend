@@ -1,7 +1,7 @@
 "use client";
 
 import type { KeyboardEvent, ReactNode } from "react";
-import React, { useId } from "react";
+import React, { useEffect, useId, useRef } from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -75,6 +75,11 @@ const SegmentedControl = <T extends Value = string>({
   const uid = useId();
   const groupId = id ?? `seg-${uid}`;
   const sizing = SIZING[size];
+  const latestValueRef = useRef<T | null>(value);
+
+  useEffect(() => {
+    latestValueRef.current = value;
+  }, [value]);
 
   const selectedIndex = options.findIndex((option) => option.value === value && !option.disabled);
   const fallbackIndex = findFirstEnabledIndex(options);
@@ -83,7 +88,8 @@ const SegmentedControl = <T extends Value = string>({
   const selectByIndex = (index: number) => {
     const option = options[index];
     if (!option || option.disabled || disabled) return;
-    if (option.value === value) return;
+    if (option.value === latestValueRef.current) return;
+    latestValueRef.current = option.value;
     onChange(option.value, option);
   };
 

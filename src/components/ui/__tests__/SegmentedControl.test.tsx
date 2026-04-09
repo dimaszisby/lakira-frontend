@@ -125,4 +125,28 @@ describe("SegmentedControl", () => {
 
     expect(onChange).not.toHaveBeenCalled();
   });
+
+  it("does not emit duplicate onChange for repeated same-target clicks before parent rerender", async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+
+    render(
+      <SegmentedControl<SegmentValue>
+        value="incremental"
+        onChange={onChange}
+        options={options}
+        aria-label="Goal type"
+      />,
+    );
+
+    const maintain = screen.getByRole("radio", { name: /maintain/i });
+    await user.click(maintain);
+    await user.click(maintain);
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledWith(
+      "maintain",
+      expect.objectContaining({ value: "maintain", label: "Maintain" }),
+    );
+  });
 });

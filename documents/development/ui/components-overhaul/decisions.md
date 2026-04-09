@@ -1899,3 +1899,27 @@ Consequences:
 - Search clear behavior no longer conflicts with IME composition flows.
 - Disabled input behavior remains consistently inert even under synthetic key dispatch.
 - Regression tests protect these keyboard interaction boundaries.
+
+## ADR-074 - SegmentedControl Sequential Same-Target Emit Deduping (Accepted 2026-04-09)
+
+Context:
+
+`SegmentedControl` prevented no-op emits against current controlled `value`, but repeated same-target interactions before parent rerender could still emit duplicate `onChange` events.
+
+Decision:
+
+1. Add latest-value continuity ref synchronized from controlled `value`.
+2. Use latest ref in selection guard to dedupe same-target emits during transient pre-rerender windows.
+3. Keep API and normal selection transitions unchanged.
+4. Add regression test for repeated same-target clicks before parent rerender.
+
+Options considered:
+
+1. Keep guard based only on render-time `value`.
+2. Track latest emitted/controlled value locally to prevent transient duplicate emissions.
+
+Consequences:
+
+- Segmented control emits are more stable in rapid sequential interactions.
+- Controlled consumers avoid duplicate no-op updates under rerender latency.
+- Regression coverage protects this interaction continuity path.

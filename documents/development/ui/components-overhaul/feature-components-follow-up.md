@@ -1612,8 +1612,37 @@ Status:
 
 - `Done`
 
+## Entry 2026-04-09 - SegmentedControl (Post-Spot-Check Regression Scan)
+
+Component:
+
+- `src/components/ui/SegmentedControl.tsx`
+
+Why this slice:
+
+- Before parent rerender, repeated clicks on the same target option could emit duplicate `onChange` events.
+- This is a sequential controlled-state continuity gap for high-frequency interactions.
+
+Changes applied:
+
+1. Added latest-value continuity ref:
+   - sync from controlled `value`
+   - use ref guard in selection path to avoid duplicate same-target emits before rerender
+2. Kept external API and selection semantics unchanged for real value transitions.
+3. Extended `SegmentedControl.test.tsx`:
+   - regression test verifies duplicate same-target clicks do not emit duplicate `onChange`.
+
+Validation:
+
+1. `npx eslint src/components/ui/SegmentedControl.tsx src/components/ui/__tests__/SegmentedControl.test.tsx`
+2. `npx jest --config jest.unit.config.ts src/components/ui/__tests__/SegmentedControl.test.tsx`
+
+Status:
+
+- `Done`
+
 ## Next Candidates
 
-1. `src/components/ui/SegmentedControl.tsx` (post-spot-check regression scan)
-2. `src/components/ui/Modal.tsx` (post-spot-check regression scan)
-3. `src/components/ui/Table.tsx` (post-spot-check regression scan)
+1. `src/components/ui/Modal.tsx` (post-spot-check regression scan)
+2. `src/components/ui/Table.tsx` (post-spot-check regression scan)
+3. `src/components/ui/Pagination.tsx` (post-spot-check regression scan)
