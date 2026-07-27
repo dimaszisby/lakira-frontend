@@ -29,10 +29,15 @@ function normalizeParams(query: VizQuery & { limit?: number }) {
   };
 }
 
+type ApiRequestOptions = {
+  signal?: AbortSignal;
+  headers?: Record<string, string>;
+};
+
 export async function getMetricVisualization(
   metricId: string,
   query: VizQuery,
-  opts: { signal?: AbortSignal } = {},
+  opts: ApiRequestOptions = {},
 ): Promise<VizResponse> {
   return withApiErrorHandling(async () => {
     const params = normalizeParams(query);
@@ -46,7 +51,7 @@ export async function getMetricVisualization(
     const res = await api.get<ApiResponse<VizResponse>>(url, {
       params,
       signal: opts.signal,
-      headers,
+      headers: { ...headers, ...(opts.headers ?? {}) },
       validateStatus: (s) => (s >= 200 && s < 300) || s === 304,
     });
 
@@ -64,7 +69,10 @@ export async function getMetricVisualization(
   }, "fetchedSingularMetricAnalytics");
 }
 
-export async function getDashboardVisualizations(q: VizQuery & { limit?: number }) {
+export async function getDashboardVisualizations(
+  q: VizQuery & { limit?: number },
+  opts: ApiRequestOptions = {},
+) {
   return withApiErrorHandling(async () => {
     const params = normalizeParams(q);
     const url = `${BASE}/dashboard`;
@@ -76,7 +84,8 @@ export async function getDashboardVisualizations(q: VizQuery & { limit?: number 
 
     const res = await api.get<ApiResponse<DashboardVizResponse>>(url, {
       params,
-      headers,
+      signal: opts.signal,
+      headers: { ...headers, ...(opts.headers ?? {}) },
       validateStatus: (s) => (s >= 200 && s < 300) || s === 304,
     });
 

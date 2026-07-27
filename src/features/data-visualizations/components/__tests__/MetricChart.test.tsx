@@ -131,6 +131,8 @@ describe("MetricChart", () => {
 
     const label = props.options.plugins.tooltip.callbacks.label;
     expect(label({ raw: { y: 10 } })).toBe("10 kg");
+    expect(label({ raw: { y: "11" } as unknown as { y: number } })).toBe("11 kg");
+    expect(label({ raw: "12" as unknown as number })).toBe("12 kg");
     expect(label({ raw: null })).toBe("No data");
     expect(label({ raw: Number.NaN })).toBe("No data");
   });

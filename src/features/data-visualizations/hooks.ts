@@ -35,7 +35,7 @@ export function useDashboardVisualizations(
     ReturnType<typeof getDashboardVisualizations> extends Promise<infer R> ? R : never
   >({
     queryKey: vizKeys.dashboard(q),
-    queryFn: () => getDashboardVisualizations(q),
+    queryFn: ({ signal }) => getDashboardVisualizations(q, { signal }),
     enabled,
     staleTime,
     gcTime,

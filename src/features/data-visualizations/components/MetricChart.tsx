@@ -143,9 +143,18 @@ function getTooltipValue(raw: unknown): number | null {
     return Number.isFinite(raw) ? raw : null;
   }
 
+  if (typeof raw === "string") {
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+
   if (raw && typeof raw === "object" && "y" in raw) {
     const pointValue = (raw as { y?: unknown }).y;
-    return typeof pointValue === "number" && Number.isFinite(pointValue) ? pointValue : null;
+    if (typeof pointValue === "number") return Number.isFinite(pointValue) ? pointValue : null;
+    if (typeof pointValue === "string") {
+      const parsed = Number(pointValue);
+      return Number.isFinite(parsed) ? parsed : null;
+    }
   }
 
   return null;

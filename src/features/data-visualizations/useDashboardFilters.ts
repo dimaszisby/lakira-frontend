@@ -1,22 +1,23 @@
 "use client";
 
 import { useAtom } from "jotai";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo } from "react";
 
+import { useRouteSync } from "@/hooks/useRouteSync";
 import { dashboardRoute } from "@/lib/routes";
 
 import {
   encodeDashboardFilters,
   isTimeRangeEqual,
   parseDashboardFilters,
+  type DashboardFilters,
 } from "./dashboardFilters";
 import { globalBucketAtom, globalRangeAtom } from "./state";
 import type { BucketAlias, TimeRangeValue } from "./types";
 
 export const useDashboardFilters = () => {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const [bucketAtom, setBucketAtom] = useAtom(globalBucketAtom);
   const [rangeAtom, setRangeAtom] = useAtom(globalRangeAtom);
 
@@ -40,6 +41,11 @@ export const useDashboardFilters = () => {
     }
   }, [bucketAtom, parsed.bucket, parsed.range, rangeAtom, setBucketAtom, setRangeAtom]);
 
+  const syncDashboardFilters = useRouteSync<DashboardFilters>({
+    serialize: encodeDashboardFilters,
+    buildHref: dashboardRoute,
+  });
+
   const commit = useCallback(
     (next: { bucket?: BucketAlias; range?: TimeRangeValue }) => {
       const nextBucket = next.bucket ?? parsed.bucket;
@@ -48,10 +54,15 @@ export const useDashboardFilters = () => {
       setBucketAtom(nextBucket);
       setRangeAtom(nextRange);
 
-      const params = encodeDashboardFilters({ bucket: nextBucket, range: nextRange });
-      router.replace(dashboardRoute(params), { scroll: false });
+      syncDashboardFilters(
+        {
+          bucket: nextBucket,
+          range: nextRange,
+        },
+        { scroll: false },
+      );
     },
-    [parsed.bucket, parsed.range, router, setBucketAtom, setRangeAtom],
+    [parsed.bucket, parsed.range, setBucketAtom, setRangeAtom, syncDashboardFilters],
   );
 
   return {

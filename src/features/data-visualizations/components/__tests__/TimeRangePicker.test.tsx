@@ -69,6 +69,24 @@ describe("TimeRangePicker", () => {
     expect(onChange).toHaveBeenCalledWith({ mode: "relative", last: "30d" });
   });
 
+  it("restores the last valid relative value when switching back from absolute mode", () => {
+    const onChange = jest.fn();
+    const initialRelative: TimeRangeValue = { mode: "relative", last: "14d" };
+    const { rerender } = render(<TimeRangePicker value={initialRelative} onChange={onChange} />);
+
+    fireEvent.change(screen.getByLabelText(rangeModeLabel), {
+      target: { value: "absolute" },
+    });
+
+    rerender(<TimeRangePicker value={absoluteValue} onChange={onChange} />);
+
+    fireEvent.change(screen.getByLabelText(rangeModeLabel), {
+      target: { value: "relative" },
+    });
+
+    expect(onChange).toHaveBeenLastCalledWith({ mode: "relative", last: "14d" });
+  });
+
   it("updates absolute start while preserving end", () => {
     const onChange = jest.fn();
     render(<TimeRangePicker value={absoluteValue} onChange={onChange} />);

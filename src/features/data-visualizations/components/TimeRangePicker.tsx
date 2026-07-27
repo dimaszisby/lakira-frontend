@@ -20,9 +20,13 @@ type Props = {
 const TimeRangePicker = ({ value, onChange, className }: Props) => {
   const isRelativeMode = value.mode === "relative";
   const relativeInputRef = useRef<HTMLInputElement | null>(null);
+  const lastRelativeRef = useRef<RelativeLast>(
+    value.mode === "relative" ? value.last : DEFAULT_RELATIVE_LAST,
+  );
 
   useEffect(() => {
     if (value.mode !== "relative") return;
+    lastRelativeRef.current = value.last;
     if (!relativeInputRef.current) return;
     relativeInputRef.current.value = value.last;
   }, [value.mode, value.last]);
@@ -31,8 +35,9 @@ const TimeRangePicker = ({ value, onChange, className }: Props) => {
     if (nextMode === value.mode) return;
 
     if (nextMode === "relative") {
-      const currentDraft = relativeInputRef.current?.value ?? DEFAULT_RELATIVE_LAST;
-      const next = normalizeRelativeLast(currentDraft) ?? DEFAULT_RELATIVE_LAST;
+      const currentDraft = relativeInputRef.current?.value ?? lastRelativeRef.current;
+      const next = normalizeRelativeLast(currentDraft) ?? lastRelativeRef.current;
+      lastRelativeRef.current = next;
       onChange({ mode: "relative", last: next });
       return;
     }
@@ -43,19 +48,23 @@ const TimeRangePicker = ({ value, onChange, className }: Props) => {
   const handleRelativeInputChange = (raw: string) => {
     const normalized = normalizeRelativeLast(raw);
     if (!normalized) return;
+    lastRelativeRef.current = normalized;
     onChange({ mode: "relative", last: normalized });
   };
 
   const handleRelativeInputBlur = (event: React.FocusEvent<HTMLInputElement>) => {
     const normalized = normalizeRelativeLast(event.target.value);
     if (normalized) {
+      lastRelativeRef.current = normalized;
       event.target.value = normalized;
       return;
     }
     if (value.mode === "relative") {
+      lastRelativeRef.current = value.last;
       event.target.value = value.last;
       return;
     }
+    lastRelativeRef.current = DEFAULT_RELATIVE_LAST;
     event.target.value = DEFAULT_RELATIVE_LAST;
   };
 
