@@ -29,7 +29,7 @@ import Card, { CardHeader, CardTitle } from "@/ui/Card";
 import EmptyDataIndicator from "@/ui/EmptyDataIndicator";
 import { Pagination } from "@/ui/Pagination";
 import SearchInput from "@/ui/SearchInput";
-import SkeletonLoader from "@/ui/SekeletonLoader";
+import SkeletonLoader from "@/ui/SkeletonLoader";
 import SortChipGroup from "@/ui/SortChipGroup";
 
 import { useMetricDetail } from "../../_components/MetricDetailContext";

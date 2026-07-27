@@ -3,29 +3,31 @@
 import Link from "next/link";
 import { memo } from "react";
 
-import type { MetricDetailCompositeVM } from "@/features/metrics/view-models";
+import { metricCategoryRoutes, metricRoutes } from "@/lib/routes";
 import Card from "@/ui/Card";
 
-interface Props {
-  category: MetricDetailCompositeVM["header"]["category"];
-  metricName: string;
-}
+import { useMetricDetail } from "./MetricDetailContext";
 
-export const BreadcrumbsBase = ({ category, metricName }: Props) => {
+const BreadcrumbsBase = () => {
+  const { header } = useMetricDetail();
+  const category = header.category;
+
   return (
     <Card size="xs" className="w-full">
       <nav aria-label="Breadcrumb">
         <ol className="flex flex-row items-center text-caption text-ink-tertiary">
           <li>
-            <Link href="/metrics" className="hover:underline">
+            <Link href={metricRoutes.list()} className="hover:underline">
               Metric Library
             </Link>
             <span className="mx-2">/</span>
           </li>
 
-          {category !== null ? (
+          {category ? (
             <li>
-              <Link href={`/metric-categories/${category.id}`}>{category.name}</Link>
+              <Link href={metricCategoryRoutes.detail(category.id)} className="hover:underline">
+                {category.name}
+              </Link>
               <span className="mx-4">/</span>
             </li>
           ) : (
@@ -35,14 +37,15 @@ export const BreadcrumbsBase = ({ category, metricName }: Props) => {
             </li>
           )}
 
-          <li className="text-brand-primary">{metricName}</li>
+          <li className="text-brand-primary">{header.name}</li>
         </ol>
       </nav>
     </Card>
   );
 };
-BreadcrumbsBase.displayName = "Breadcrumbs";
+BreadcrumbsBase.displayName = "MetricBreadcrumbs";
 
 const Breadcrumbs = memo(BreadcrumbsBase);
-Breadcrumbs.displayName = "Breadcrumbs";
+Breadcrumbs.displayName = "MetricBreadcrumbs";
+
 export default Breadcrumbs;
