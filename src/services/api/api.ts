@@ -7,46 +7,44 @@ import axiosRetry, { isNetworkOrIdempotentRequestError } from "axios-retry";
  * Api Client using Axios
  */
 
+const API_PROXY_PATH = "/api/proxy";
+
+function normalizeBaseUrlCandidate(raw?: string | null) {
+  if (!raw) return null;
+  const trimmed = raw.trim();
+  if (!trimmed) return null;
+  return trimmed.startsWith("http://") || trimmed.startsWith("https://")
+    ? trimmed
+    : `https://${trimmed}`;
+}
+
+function resolveBaseUrl() {
+  if (typeof window !== "undefined") return API_PROXY_PATH;
+
+  const envOrigin =
+    normalizeBaseUrlCandidate(process.env.NEXT_PUBLIC_APP_URL) ??
+    normalizeBaseUrlCandidate(process.env.NEXT_PUBLIC_SITE_URL) ??
+    normalizeBaseUrlCandidate(process.env.NEXT_PUBLIC_VERCEL_URL) ??
+    normalizeBaseUrlCandidate(process.env.VERCEL_URL);
+
+  if (envOrigin) {
+    return new URL(API_PROXY_PATH, envOrigin).toString();
+  }
+
+  const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
+  const host = (process.env.HOST ?? "localhost").replace(/\/$/, "");
+  const portSegment = host.includes(":") ? "" : `:${process.env.PORT ?? "3000"}`;
+  const fallbackOrigin = `${protocol}://${host}${portSegment}`;
+  return new URL(API_PROXY_PATH, fallbackOrigin).toString();
+}
+
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8001/api/v1",
+  baseURL: resolveBaseUrl(),
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
-
-// Auth header (browser-only)
-api.interceptors.request.use(
-  (config) => {
-    const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
-
-// 401 handling (logout flow stays in callers / router)
-api.interceptors.response.use(
-  (res) => res,
-  (err) => Promise.reject(err),
-);
-
-// Add a response interceptor to handle 401 Unauthorized errors
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response && error.response.status === 401) {
-      // Clear the token from localStorage
-      if (typeof window !== "undefined") {
-        localStorage.removeItem("token");
-      }
-      // Re-throw the error so it can be caught by individual API calls (e.g., in withAuth)
-      return Promise.reject(error);
-    }
-    return Promise.reject(error);
-  },
-);
 
 // Retry policy
 axiosRetry(api, {

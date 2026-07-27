@@ -1,29 +1,19 @@
-// utils/auth.ts
+import type { AuthResponseDTO, CreateUserRequestDTO, LoginRequestDTO } from "@/types/dtos/user.dto";
+import type ApiResponse from "@/types/generics/ApiResponse";
 
+import type { UserAtom } from "../state/atoms.js";
 import api from "./api";
-import ApiResponse from "@/types/generics/ApiResponse";
 import { handleApiError } from "./handleApiError";
-import {
-  CreateUserRequestDTO,
-  LoginRequestDTO,
-  AuthResponseDTO,
-} from "@/types/dtos/user.dto";
-import { UserAtom } from "../state/atoms.js";
 
 /**
+ * * Register
  * Registers a new user with the provided data.
  * Uses a generic type to make this function reusable for different auth responses.
  * @returns An API response containing a token and user data.
  */
-export const registerUser = async (
-  userData: CreateUserRequestDTO
-): Promise<AuthResponseDTO> => {
+export const registerUser = async (userData: CreateUserRequestDTO): Promise<AuthResponseDTO> => {
   try {
-    const response = await api.post<ApiResponse<AuthResponseDTO>>(
-      "/auth/register",
-      userData
-    );
-    console.log("registerUser Triggered");
+    const response = await api.post<ApiResponse<AuthResponseDTO>>("/auth/register", userData);
 
     if (!response.data?.data) {
       throw new Error("Invalid register response"); // ✅ Prevent undefined responses
@@ -40,15 +30,10 @@ export const registerUser = async (
  * Logs in the user with the provided credentials.
  * @returns An API response containing a token and user data.
  */
-export const loginUser = async (
-  credentials: LoginRequestDTO
-): Promise<AuthResponseDTO> => {
+export const loginUser = async (credentials: LoginRequestDTO): Promise<AuthResponseDTO> => {
   try {
-    const response = await api.post<ApiResponse<AuthResponseDTO>>(
-      "/auth/login",
-      credentials
-    );
-    console.log("loginUser Triggered");
+    const response = await api.post<ApiResponse<AuthResponseDTO>>("/auth/login", credentials);
+
     if (!response.data?.data) {
       throw new Error("Invalid login response"); // ✅ Prevent undefined responses
     }
@@ -79,14 +64,9 @@ export const fetchUserProfile = async (): Promise<UserAtom | null> => {
  * Logs out the user.
  * @returns A confirmation message from the API.
  */
-export const logoutUser = async (): Promise<
-  ApiResponse<{ message: string }>
-> => {
+export const logoutUser = async (): Promise<ApiResponse<{ message: string }>> => {
   try {
-    const response = await api.post<ApiResponse<{ message: string }>>(
-      "/auth/logout"
-    );
-    localStorage.removeItem("token");
+    const response = await api.post<ApiResponse<{ message: string }>>("/auth/logout");
     return response.data;
   } catch (error) {
     console.error("API Error in logoutUser:", error);
