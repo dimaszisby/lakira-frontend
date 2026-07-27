@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FloppyDisk, Tag, TrendUp } from "phosphor-react";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { CATEGORY_DEFAULTS } from "@/features/metric-categories/constants";
@@ -92,14 +92,21 @@ export const MetricSettingsForm = ({
   }, [defaults, reset]);
 
   const goalEnabled = useWatch({ control, name: "goalEnabled" });
+  const goalType = useWatch({ control, name: "goalType" });
   const timeFrameEnabled = useWatch({ control, name: "timeFrameEnabled" });
   const alertEnabled = useWatch({ control, name: "alertEnabled" });
   const showOnDashboard = useWatch({ control, name: "displayOptions.showOnDashboard" });
+  const lastGoalTypeRef = useRef<GoalType>(initialSettings?.goalType ?? "incremental");
+
+  useEffect(() => {
+    if (!goalType) return;
+    lastGoalTypeRef.current = goalType;
+  }, [goalType]);
 
   useEffect(() => {
     if (!goalEnabled) return;
     if (getValues("goalType") != null) return;
-    setValue("goalType", "incremental", { shouldValidate: true });
+    setValue("goalType", lastGoalTypeRef.current, { shouldValidate: true });
   }, [goalEnabled, getValues, setValue]);
 
   // Options

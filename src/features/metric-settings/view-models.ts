@@ -1,5 +1,5 @@
 import type { CursorPageVM } from "@/generics/cursor/view-model";
-import type { ISODateTimeString } from "@/types/aliases";
+import type { ISODateTimeString } from "@/src/generics/date/aliases";
 import type { MetricSettingsResponseDTO } from "@/types/dtos/metric-settings.dto";
 
 import type { ChartType, GoalType } from "./constants";

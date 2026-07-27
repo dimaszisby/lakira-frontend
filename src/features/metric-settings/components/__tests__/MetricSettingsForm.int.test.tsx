@@ -12,6 +12,9 @@ const metricId = "11111111-1111-4111-8111-111111111111";
 const settingsId = "22222222-2222-4222-8222-222222222222";
 const fixedTimestamp = "2026-02-18T08:00:00.000Z";
 const METRIC_SETTINGS_API = "/api/proxy/metric-settings";
+const METRIC_SETTINGS_UPDATE_API = `${METRIC_SETTINGS_API}/:id`;
+const INTERNAL_SERVER_ERROR = "Internal server error";
+const METRIC_SETTINGS_CREATED_MESSAGE = "Metric settings created";
 
 const existingSettings: MetricSettingsExtendedVM = {
   id: settingsId,
@@ -79,7 +82,7 @@ describe("MetricSettingsForm integration", () => {
 
         return HttpResponse.json({
           status: "success",
-          message: "Metric settings created",
+          message: METRIC_SETTINGS_CREATED_MESSAGE,
           data: {
             ...existingSettings,
             id: "33333333-3333-4333-8333-333333333333",
@@ -116,7 +119,7 @@ describe("MetricSettingsForm integration", () => {
     const updatePayloadSpy = jest.fn();
 
     server.use(
-      http.put("/api/proxy/metric-settings/:id", async ({ params, request }) => {
+      http.put(METRIC_SETTINGS_UPDATE_API, async ({ params, request }) => {
         const body = await request.json();
         const requestUrl = new URL(request.url);
         updatePayloadSpy({
@@ -173,7 +176,7 @@ describe("MetricSettingsForm integration", () => {
           HttpResponse.json(
             {
               status: "error",
-              message: "Internal server error",
+              message: INTERNAL_SERVER_ERROR,
               data: null,
             },
             { status: 500 },
@@ -201,11 +204,11 @@ describe("MetricSettingsForm integration", () => {
 
     try {
       server.use(
-        http.put("/api/proxy/metric-settings/:id", () =>
+        http.put(METRIC_SETTINGS_UPDATE_API, () =>
           HttpResponse.json(
             {
               status: "error",
-              message: "Internal server error",
+              message: INTERNAL_SERVER_ERROR,
               data: null,
             },
             { status: 500 },
@@ -242,7 +245,7 @@ describe("MetricSettingsForm integration", () => {
 
         return HttpResponse.json({
           status: "success",
-          message: "Metric settings created",
+          message: METRIC_SETTINGS_CREATED_MESSAGE,
           data: {
             ...existingSettings,
             id: "33333333-3333-4333-8333-333333333334",
@@ -275,6 +278,61 @@ describe("MetricSettingsForm integration", () => {
           metricId,
           goalEnabled: true,
           goalType: "incremental",
+          goalValue: 42,
+        }),
+      );
+    });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("preserves selected goal type when goal is toggled off and on again", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const createPayloadSpy = jest.fn();
+
+    server.use(
+      http.post(METRIC_SETTINGS_API, async ({ request }) => {
+        const body = await request.json();
+        createPayloadSpy(body);
+
+        return HttpResponse.json({
+          status: "success",
+          message: METRIC_SETTINGS_CREATED_MESSAGE,
+          data: {
+            ...existingSettings,
+            id: "33333333-3333-4333-8333-333333333336",
+            goalEnabled: true,
+            goalType: "cumulative",
+            goalValue: 42,
+          },
+        });
+      }),
+    );
+
+    renderWithProviders(
+      <MetricSettingsForm metricId={metricId} initialSettings={null} onClose={onClose} />,
+    );
+
+    const switches = screen.getAllByRole("switch");
+    await user.click(switches[0]!);
+    await user.click(screen.getByRole("radio", { name: /cumulative/i }));
+
+    await user.type(screen.getByLabelText(/goal value/i), "42");
+    await user.click(switches[0]!);
+    await user.click(switches[0]!);
+    await user.type(screen.getByLabelText(/goal value/i), "42");
+
+    const submitButton = screen.getByRole("button", { name: /^add$/i });
+    await waitFor(() => {
+      expect(submitButton).toBeEnabled();
+    });
+    await user.click(submitButton);
+
+    await waitFor(() => {
+      expect(createPayloadSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          goalEnabled: true,
+          goalType: "cumulative",
           goalValue: 42,
         }),
       );
