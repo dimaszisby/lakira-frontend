@@ -1,5 +1,11 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## Project Documentation
+
+Use the project documentation index as the entry point for engineering standards, plans, and operational docs:
+
+- [Documents Index](documents/README.md)
+
 ## Getting Started
 
 First, run the development server:

@@ -1,385 +1,501 @@
-# Lakira Frontend Product Requirements Document (PRD)
+# Lakira Frontend PRD (Current-State Baseline)
 
-## 1. Introduction
+## Document Control
 
-### 1.1. Purpose of the Document
+- Product: Lakira Frontend
+- Repository: `lakira-frontend`
+- Version: `2.0`
+- Status: Active
+- Last Updated: March 12, 2026
+- Owner: Frontend Engineering
+- Purpose: This PRD reflects the app that is currently implemented in this codebase and replaces the previous placeholder/generic PRD.
 
-This document outlines the requirements for the Lakira frontend application. It serves as a guide for the development team and stakeholders, ensuring a shared understanding of the project's goals, features, and functionality.
+---
 
-### 1.2. Scope of the Project
+## 1. Product Summary
 
-This project encompasses the development of a frontend application using Next.js, React, and other modern frontend technologies. It includes user authentication, metric tracking, data visualization, and integration with the backend API.
+Lakira Frontend is a web application for personal metric tracking. Users can:
 
-### 1.3. Target Audience
+- Register and log in.
+- Create and organize metric categories.
+- Create metrics under those categories.
+- Log metric values over time.
+- Configure metric settings (goal/timeframe/alerts/display metadata).
+- Visualize trends on metric detail pages and on the dashboard.
 
-The target audience for the Lakira frontend application includes individuals who want to track and improve their progress in various areas of life, such as fitness, wellness, productivity, learning, or personal habits. This includes:
+The product is built with Next.js App Router, React 19, TypeScript, TanStack Query, Jotai, and Tailwind CSS.
 
-- **Individual Users:** Users who want to track their personal goals and progress.
-- **Data-Driven Individuals:** Users who want to visualize their data and identify trends.
-- **Motivated Individuals:** Users who want to stay motivated and accountable through reminders and progress summaries.
+---
 
-## 2. Goals and Objectives
+## 2. Goals and Non-Goals
 
-### 2.1. Business Goals
+### 2.1 Current Product Goals
 
-- Increase user engagement and retention by providing a valuable and user-friendly frontend application.
-- Support the overall business goals of Lakira by providing a seamless and engaging user experience.
+1. Provide reliable authenticated access to personal tracking data.
+2. Provide complete day-to-day CRUD workflows for categories, metrics, and logs.
+3. Provide trend visualization for metrics and dashboard-level summary cards.
+4. Preserve list/search/sort/pagination state in URL for deep-linking and shareability.
+5. Support responsive usage across desktop and mobile layouts.
 
-### 2.2. User Goals
+### 2.2 Non-Goals (Current Release)
 
-- Easily track progress towards personal goals with an intuitive and user-friendly interface.
-- Visualize data to identify trends and patterns, enabling data-driven decision-making.
-- Stay motivated and accountable through reminders and progress summaries.
-- Customize the application to fit individual needs and preferences.
+1. Smart reminders, push notifications, or scheduled nudges.
+2. Social/team collaboration features.
+3. Native iOS/Android apps.
+4. In-app profile edit management (account page is read-only display + refresh).
+5. Full RBAC UX (role is displayed, but role-based UI controls are not implemented).
+6. Offline-first sync.
 
-### 2.3. Technical Goals
+---
 
-- Develop a responsive and user-friendly interface that is accessible across a range of devices and screen sizes.
-- Maintain a clean and well-documented codebase, adhering to coding standards and best practices.
-- Ensure the frontend application is performant and scalable, capable of handling a large number of users and metrics.
-- Implement a secure frontend application that protects user data and privacy.
+## 3. Target Users
 
-## 3. Background and Strategy
+### 3.1 Primary User Segment
 
-### 3.1. Problem Statement
+- Individual users tracking personal growth or habits via customizable metrics.
 
-Many individuals struggle to consistently track their progress towards personal goals, leading to decreased motivation and a lack of accountability. Existing goal-tracking solutions may be too complex, lack customization options, or fail to provide meaningful insights. The frontend application aims to address these issues by providing a simple, intuitive, and customizable platform for tracking progress.
+### 3.2 User Jobs-To-Be-Done
 
-### 3.2. Proposed Solution
+1. Define categories and metrics quickly.
+2. Log values with low friction.
+3. Review trends and progress over time.
+4. Manage metric visibility and dashboard display preferences.
 
-The Lakira frontend application provides a user-friendly interface for users to track their progress towards any type of goal. By offering customizable metrics, data visualization, and smart reminders, Lakira empowers users to stay motivated, accountable, and informed. The frontend application integrates with the backend API to provide a seamless and engaging user experience.
+---
 
-### 3.3. Competitive Analysis
+## 4. Scope (Implemented Functional Requirements)
 
-Lakira will differentiate itself through its minimalist design inspired by Japanese and Javanese aesthetics, its focus on data visualization, and its customizable metric system.
+### 4.1 Authentication and Session
 
-## 4. Product Description
+#### Requirements
 
-### 4.1. Product Overview
+- User can register (`/register`) and log in (`/login`) with email/password.
+- Session is persisted via `lakira_token` cookie (`HttpOnly`, `SameSite=Lax`, `Secure`).
+- `returnUrl` query parameter is supported and sanitized to safe relative paths.
+- Protected routes redirect unauthenticated users to login with `returnUrl`.
 
-The Lakira frontend application is a versatile tracking app designed to help users monitor, visualize, and improve their progress in fitness, wellness, productivity, learning, or personal habits. It allows users to track custom metrics, visualize trends with interactive charts, set goal-oriented milestones, and receive smart reminders. The application is designed with a minimalist aesthetic inspired by Japanese and Javanese design principles.
+#### Acceptance Criteria
 
-### 4.2. Key Features
+1. Unauthenticated access to `/dashboard`, `/metrics`, `/metric-categories`, `/account` redirects to `/login`.
+2. Successful login/register stores session token and navigates to `returnUrl` or `/dashboard`.
+3. Logout clears user state and session cookie.
 
-- **Custom Metrics:** Track anything, from gym workouts and study hours to sleep quality and mindfulness sessions.
-- **Visual Analytics:** Interactive charts & insights for tracking trends.
-- **Goal-Oriented Tracking:** Set milestones, measure improvements.
-- **Minimalist Design:** Inspired by Japanese precision and structured simplicity and Javanese calming and elegant.
-- **Smart Reminders:** Stay accountable with nudges and progress summaries.
+### 4.2 Navigation and App Shell
 
-## 5. Features
+#### Requirements
 
-### 5.1. User Authentication
+- Desktop: persistent left sidebar navigation.
+- Mobile: bottom navigation bar.
+- Navigation sections: Dashboard, Metrics, Category, Account.
 
-#### 5.1.1. Description
+#### Acceptance Criteria
 
-The application will provide secure user authentication using email and password. Users will be able to register a new account, log in to an existing account, and manage their profile information.
+1. Current route is visually indicated in nav.
+2. Navigation is available on all authenticated pages.
 
-#### 5.1.2. User Stories
+### 4.3 Dashboard
 
-- As a new user, I want to be able to register an account with my email and password so that I can access the application.
-- As an existing user, I want to be able to log in to my account with my email and password so that I can track my goals.
-- As a logged-in user, I want to be able to update my profile information so that I can keep my account up-to-date.
-- As a logged-in user, I want to be able to log out of my account so that I can protect my privacy.
+#### Requirements
 
-#### 5.1.3. Acceptance Criteria
+- Route: `/dashboard`.
+- Server-side prefetch + hydration for dashboard analytics query.
+- Default analytics query baseline: relative `30d`, bucket `1d`, timezone `Asia/Jakarta`, fill mode `none`.
+- Dashboard renders up to 12 metric cards from analytics endpoint.
+- Each card shows category chip, mini trend chart, and summary stats.
+- Supports loading, empty, and error states.
 
-- Users can register with a valid email address and a password that meets complexity requirements (e.g., minimum 8 characters, including one uppercase letter, one lowercase letter, and one number).
-- Users can log in with their registered email and password.
-- Users can update their profile information, including email and password.
-- The system securely stores user passwords using bcrypt hashing.
-- Protected routes require a valid JWT for access.
+#### Acceptance Criteria
 
-### 5.2. Dashboard
+1. Dashboard loads from `/analytics/dashboard` through proxy.
+2. If no dashboard metrics are available, user sees empty-state guidance.
+3. Query parameters `bucket` and time range are supported in URL parsing.
 
-#### 5.2.1. Description
+### 4.4 Metric Category Library
 
-The dashboard will provide users with an overview of their key metrics and progress towards their goals.
+#### Requirements
 
-#### 5.2.2. User Stories
+- Route: `/metric-categories`.
+- Category list supports:
+  - Search (`q`)
+  - Sort
+  - Pagination/infinite mode (`mode=pages|scroll`)
+- Create/Edit/Delete category via modal-intercept routes.
+- Category detail route (`/metric-categories/[categoryId]`) shows category info and contained metrics.
 
-- As a logged-in user, I want to see a summary of my most important metrics on the dashboard so that I can quickly assess my progress.
-- As a logged-in user, I want to be able to customize which metrics are displayed on the dashboard so that I can focus on what's most important to me.
-- As a logged-in user, I want to see charts visualizing my progress over time so that I can identify trends and patterns.
+#### Acceptance Criteria
 
-#### 5.2.3. Acceptance Criteria
+1. User can create, edit, and delete a category from list/detail contexts.
+2. List state persists in URL and is restorable on reload.
+3. Category detail allows navigation back to list with preserved return params.
 
-- The dashboard displays a summary of the user's key metrics.
-- Users can customize which metrics are displayed on the dashboard.
-- Charts are displayed for each metric, visualizing progress over time.
-- The dashboard is responsive and adapts to different screen sizes.
+### 4.5 Metrics Library
 
-### 5.3. Libraries of Metric and Metric Category
+#### Requirements
 
-#### 5.3.1. Description
+- Route: `/metrics`.
+- Metric list supports:
+  - Search (`q`)
+  - Sort
+  - Pagination/infinite mode (`mode=pages|scroll`)
+- Create/Edit/Delete metric via modal-intercept routes.
+- Metric form includes category assignment and duplicate-name validation check.
+- Category selector supports async typeahead and inline category creation.
 
-The application will allow users to create and manage libraries of metrics and metric categories.
+#### Acceptance Criteria
 
-#### 5.3.2. User Stories
+1. User can create, edit, and delete metric records.
+2. User can assign or clear category while creating/editing metric.
+3. Duplicate metric name surfaces validation error before submit.
 
-- As a logged-in user, I want to be able to create new metric categories so that I can organize my metrics.
-- As a logged-in user, I want to be able to create new metrics so that I can track my progress towards specific goals.
-- As a logged-in user, I want to be able to view a list of all my metrics and categories so that I can easily find what I'm looking for.
-- As a logged-in user, I want to be able to update my metrics and categories so that I can keep them up-to-date.
-- As a logged-in user, I want to be able to delete metrics and categories that I no longer need so that I can keep my account organized.
+### 4.6 Metric Detail
 
-#### 5.3.3. Acceptance Criteria
+#### Requirements
 
-- Users can create new metric categories.
-- Users can create new metrics.
-- Users can view a list of all their metrics and categories.
-- Users can update their metrics and categories.
-- Users can delete metric categories and metrics.
+- Route: `/metrics/[metricId]`.
+- Shared layout preloads metric detail and exposes:
+  - Header summary
+  - Breadcrumbs
+  - Tabs (Overview, Logs, Settings)
+- Overview tab renders visualization component.
+- Visualization query is URL-driven (`viz-bucket`, `viz-range` or `viz-start`/`viz-end`) and supports bucket aliases: `1h`, `1d`, `1w`, `1m`, `1y`.
 
-### 5.4. Logging Metrics
+#### Acceptance Criteria
 
-#### 5.4.1. Description
+1. Invalid metric ID returns not-found state.
+2. Detail route exposes loading and error boundaries.
 
-The application will allow users to log metrics.
+### 4.7 Metric Logs
 
-#### 5.4.2. User Stories
+#### Requirements
 
-- As a logged-in user, I want to be able to log my metrics manually so that I can track my progress.
-- As a logged-in user, I want the application to validate my input when logging metrics so that I can ensure data quality.
-- As a logged-in user, I want to receive helpful error messages if I enter invalid data so that I can correct my mistakes.
+- Route: `/metrics/[metricId]/logs`.
+- Logs list supports search, sort, pagination.
+- Create/Edit/Delete log entries via modal-intercept routes.
+- Log form captures numeric value + datetime.
 
-#### 5.4.3. Acceptance Criteria
+#### Acceptance Criteria
 
-- Users can log metrics manually.
-- The application validates user input to ensure data quality.
-- Helpful error messages are displayed if the user enters invalid data.
+1. User can add, edit, and delete metric logs.
+2. Logs list updates after mutation through React Query invalidation/update behavior.
 
-### 5.5. Metric Settings
+### 4.8 Metric Settings
 
-#### 5.5.1. Description
+#### Requirements
 
-The application will allow users to set, update, and delete personal goals through MetricSettings.
+- Route: `/metrics/[metricId]/settings`.
+- User can create/update metric settings:
+  - Goal enable/type/value
+  - Timeframe enable/start/deadline
+  - Alerts enable/threshold
+  - Display options (show on dashboard, priority, chart type, color)
+- Settings edit is opened through modal-intercept route.
 
-#### 5.5.2. User Stories
+#### Acceptance Criteria
 
-- As a logged-in user, I want to be able to set a goal for a metric so that I can track my progress towards a specific target.
-- As a logged-in user, I want to be able to update the goal for a metric so that I can adjust my target as needed.
-- As a logged-in user, I want to be able to delete a goal for a metric so that I can remove it if it's no longer relevant.
-- As a logged-in user, I want to be able to view my historical goals so that I can see how my targets have changed over time.
+1. User can save settings and see updated values on settings panel.
+2. Validation enforces goal/timeframe rules from schema.
+3. Delete settings action is not currently exposed in UI.
 
-#### 5.5.3. Acceptance Criteria
+### 4.9 Account Page
 
-- Users can set a goal for a metric.
-- Users can update the goal for a metric.
-- Users can delete a goal for a metric.
-- Users can view their historical goals for a metric.
+#### Requirements
 
-## 6. UI/UX Design
+- Route: `/account`.
+- Displays profile fields: username, email, role, profile visibility.
+- Provides manual refresh action.
 
-### 6.1. Overall Design Principles
+#### Acceptance Criteria
 
-The UI/UX design will incorporate both Japanese and Javanese elements, with a focus on creating a harmonious and balanced design. The UI should use a light color palette with subtle accents, clean typography, and ample whitespace to create a sense of calm and clarity. The UI should prioritize functionality and ease of use, with a focus on clear data visualization and intuitive navigation.
+1. Account page is accessible only for authenticated users.
+2. Profile displays current fetched values.
+3. No profile-edit mutation flow is available in current UI.
 
-### 6.2. User Interface Mockups
+---
 
-- Dashboard
-- Metric Library
-- Metric Category Library
-- Logging Form
-- Settings Page
-- Profile Page
+## 5. End-to-End User Flows
 
-### 6.3. User Flows
+### 5.1 Onboarding and First Data
 
-- Registering an account
-- Logging in to an account
-- Creating a new metric
-- Logging a metric
-- Setting a goal
-- Updating profile information
+1. User lands on `/`.
+2. User opens `/register` and creates account.
+3. User is redirected to `/dashboard`.
+4. User opens category library and creates category.
+5. User opens metrics library and creates metric.
+6. User opens metric logs and adds first log entry.
 
-### 6.4. Accessibility Considerations
+### 5.2 Metric Review and Optimization
 
-The application will be designed to be accessible to users with disabilities, following WCAG guidelines. This includes providing alternative text for images, ensuring sufficient color contrast, and providing keyboard navigation.
+1. User opens `/metrics/[metricId]`.
+2. User reviews trend chart (Overview tab).
+3. User opens Settings tab and updates goal/display options.
+4. User returns to dashboard to verify visibility.
 
-## 7. Technical Architecture
+### 5.3 Ongoing Library Management
 
-### 7.1. System Diagram
+1. User searches/sorts metrics and categories.
+2. User switches list mode (pages vs scroll).
+3. User edits/deletes stale items via row actions (desktop) or swipe actions (mobile).
 
-[To be completed with a system architect. The system diagram will illustrate the key components of the application, including the frontend client, backend API, and database.]
+---
 
-### 7.2. Technology Stack
+## 6. Information Architecture and Route Inventory
 
-- Next.js
-- React
-- TypeScript
-- Jotai (State Management)
-- Tailwind CSS (CSS Framework)
-- TanStack Query (Data Fetching)
-- React Hook Form (Form Management)
-- Axios (HTTP Client)
+| Route | Auth Required | Purpose |
+| --- | --- | --- |
+| `/` | No | Landing page with Login/Register CTAs |
+| `/login` | No | User login |
+| `/register` | No | User registration |
+| `/dashboard` | Yes | Dashboard cards + trend snapshots |
+| `/metrics` | Yes | Metric library list |
+| `/metrics/new` | Yes | Create metric (page/modal intercept) |
+| `/metrics/[metricId]` | Yes | Metric overview |
+| `/metrics/[metricId]/edit` | Yes | Edit metric (page/modal intercept) |
+| `/metrics/[metricId]/logs` | Yes | Metric log list |
+| `/metrics/[metricId]/logs/new` | Yes | Create log (page/modal intercept) |
+| `/metrics/[metricId]/logs/[logId]` | Yes | Edit log (page/modal intercept) |
+| `/metrics/[metricId]/settings` | Yes | Metric settings read view |
+| `/metrics/[metricId]/settings/edit` | Yes | Edit metric settings (page/modal intercept) |
+| `/metric-categories` | Yes | Category library list |
+| `/metric-categories/new` | Yes | Create category (page/modal intercept) |
+| `/metric-categories/[categoryId]` | Yes | Category detail + metrics list |
+| `/metric-categories/[categoryId]/edit` | Yes | Edit category (page/modal intercept) |
+| `/metric-categories/[categoryId]/metrics/new` | Yes | Create metric from category context |
+| `/metric-categories/[categoryId]/metrics/[metricId]` | Yes | Edit metric from category context |
+| `/account` | Yes | Profile display |
 
-### 7.3. API Endpoints
+---
 
-The frontend application will consume the following API endpoints from the backend:
+## 7. Domain Model and Validation Rules
 
-- `POST /api/v1/register`: Register a new user
-- `POST /api/v1/login`: Login user and return JWT
-- `GET /api/v1/profile`: Get authenticated user's profile
-- `PUT /api/v1/profile`: Update authenticated user's profile
-- `POST /api/v1/logout`: Logout user
-- `GET /api/v1/metrics`: Get all metrics for authenticated user (with pagination, filtering)
-- `GET /api/v1/metrics/:id`: Get a specific metric
-- `POST /api/v1/metrics`: Add a new metric
-- `PUT /api/v1/metrics/:id`: Update a metric
-- `DELETE /api/v1/metrics/:id`: Delete a metric
-- `GET /api/v1/metrics/:metricId/settings`: Get all settings for a specific metric
-- `POST /api/v1/metrics/:metricId/settings`: Add new settings to a metric
-- `PATCH /api/v1/metrics/:metricId/settings/:id`: Update a metric setting
-- `DELETE /api/v1/metrics/:metricId/settings/:id`: Delete a metric setting
-- `GET /api/v1/categories`: Get all metric categories for authenticated user
-- `GET /api/v1/categories/:id`: Get a specific category
-- `POST /api/v1/categories`: Add a new metric category
-- `PUT /api/v1/categories/:id`: Update a metric category
-- `DELETE /api/v1/categories/:id`: Delete a metric category
-- `GET /api/v1/metrics/:metricId/logs`: Get all logs for a specific metric
-- `GET /api/v1/metrics/:metricId/logs/:id`: Get a specific log entry
-- `POST /api/v1/metrics/:metricId/logs`: Add a new metric log
-- `PUT /api/v1/metrics/:metricId/logs/:id`: Update a metric log
-- `DELETE /api/v1/metrics/:metricId/logs/:id`: Delete a metric log
-- `GET /api/v1/metrics/:metricId/trends`: Get trend data for a specific metric
+### 7.1 Core Entities
 
-### 7.4. Data Model
+1. User
+- `id`, `username`, `email`, `role`, `isPublicProfile`, timestamps.
 
-The frontend application will use the following data models:
+2. Metric Category
+- `id`, `name`, `color`, `icon`, `metricCount`, timestamps.
 
-- User
-- Metric
-- MetricSettings
-- MetricLog
-- MetricCategory
+3. Metric
+- `id`, `name`, `defaultUnit`, `description`, `isPublic`, `categoryId`, `originalMetricId`, timestamps.
 
-## 8. Performance Requirements
+4. Metric Log
+- `id`, `metricId`, `logValue`, `loggedAt`, `type(manual|automatic)`, timestamps.
 
-### 8.1. Response Times
+5. Metric Settings
+- `id`, `metricId`, `goalEnabled`, `goalType`, `goalValue`, `timeFrameEnabled`, `startDate`, `deadlineDate`, `alertEnabled`, `alertThresholds`, `displayOptions`, timestamps.
 
-- Page load times should be under 2 seconds on average.
-- API requests should respond within 500ms on average.
-- Rendering performance should be smooth and responsive, with a frame rate of at least 60fps.
+### 7.2 Validation Highlights
 
-### 8.2. Scalability
+1. Auth
+- Username min 3 chars.
+- Email format enforced.
+- Password min 6 chars.
+- Password and confirmation must match.
 
-- The frontend application should be able to handle a large number of concurrent users and metrics without performance degradation.
-- The frontend application should be able to scale horizontally to handle increased traffic.
+2. Metric
+- Name required.
+- Default unit required.
 
-### 8.3. Resource Utilization
+3. Metric Category
+- Name required.
+- Color/icon required with defaults.
 
-- The frontend application should be optimized to minimize resource utilization (CPU, memory, network).
-- The frontend application should use code splitting and lazy loading to reduce the initial load time.
+4. Metric Log
+- `metricId` must be UUID.
+- `logValue` must be non-negative.
+- `loggedAt` required.
 
-## 9. Security Considerations
+5. Metric Settings
+- If `goalEnabled=true`, `goalType` and `goalValue` are required.
+- If `timeFrameEnabled=true`, both dates are required and `deadlineDate > startDate`.
+- `alertThresholds` constrained to integer 0-100.
 
-### 9.1. Authentication and Authorization
+---
 
-- Implement JWT-based authentication to protect API endpoints.
-- Use secure password storage practices (e.g., bcrypt hashing) on the backend.
-- Implement role-based access control (RBAC) to restrict access to sensitive data and functionality.
+## 8. API Integration Contract
 
-### 9.2. Data Security
+### 8.1 Frontend API Access Pattern
 
-- Protect against common web vulnerabilities, such as cross-site scripting (XSS) and cross-site request forgery (CSRF).
-- Use HTTPS to encrypt data in transit.
-- Sanitize user input to prevent injection attacks.
+- Primary API surface: `/api/proxy/*` (Next.js route handler proxying to backend API).
+- Auth cookie -> proxy injects `Authorization: Bearer <token>` for protected resource groups.
+- Session cookie synchronization endpoint: `/api/auth/session` (POST/DELETE).
 
-### 9.3. Vulnerability Management
+### 8.2 Resource Endpoints Consumed by Frontend
 
-- Regularly update dependencies to address security vulnerabilities.
-- Use a vulnerability scanner to regularly scan the application for known vulnerabilities.
-- Implement a bug bounty program to encourage security researchers to report vulnerabilities.
+1. Auth
+- `POST /auth/register`
+- `POST /auth/login`
+- `GET /auth/profile`
+- `POST /auth/logout`
 
-## 10. Legal and Compliance Considerations
+2. Metrics
+- `GET /metrics`
+- `GET /metrics/:metricId`
+- `POST /metrics`
+- `PUT /metrics/:metricId`
+- `DELETE /metrics/:metricId`
+- `POST /metrics/dummy` (dev/test utility)
 
-### 10.1. GDPR Compliance
+3. Metric Categories
+- `GET /metric-categories`
+- `GET /metric-categories/:categoryId`
+- `POST /metric-categories`
+- `PUT /metric-categories/:categoryId`
+- `DELETE /metric-categories/:categoryId`
+- `POST /metric-categories/dummy` (dev/test utility)
 
-- Implement mechanisms to obtain user consent for data collection and processing.
-- Provide users with the ability to access, rectify, and erase their personal data.
-- Implement data anonymization and pseudonymization techniques to protect user privacy.
+4. Metric Logs
+- `GET /metric-logs`
+- `GET /metric-logs/:logId`
+- `POST /metric-logs`
+- `PUT /metric-logs/:logId`
+- `DELETE /metric-logs/:logId`
+- `POST /metric-logs/:metricId/dummy` (dev/test utility)
 
-### 10.2. Data Privacy
+5. Metric Settings
+- `GET /metric-settings`
+- `GET /metric-settings/:settingsId`
+- `POST /metric-settings`
+- `PUT /metric-settings/:settingsId`
+- `DELETE /metric-settings/:settingsId` (API available; UI delete not exposed)
+- `PATCH /metric-settings/:settingsId/achieve`
+- `PATCH /metric-settings/:settingsId/display`
 
-- Develop a comprehensive data privacy policy that outlines how user data is collected, used, and protected.
-- Obtain user consent for data sharing with third parties.
-- Implement data retention policies to ensure that user data is not stored for longer than necessary.
+6. Analytics
+- `GET /analytics/dashboard`
+- `GET /analytics/metrics/:metricId`
 
-### 10.3. Terms of Service
+---
 
-- Develop clear and concise terms of service that outline the rights and responsibilities of users and the application provider.
-- Obtain user agreement to the terms of service before allowing them to use the application.
-- Regularly review and update the terms of service to ensure that they are compliant with applicable laws and regulations.
+## 9. Non-Functional Requirements
 
-## 11. Deployment Strategy
+### 9.1 Performance
 
-### 11.1. Environment Setup
+Current enforced thresholds (via scripts and CI):
 
-- The frontend application will be deployed to Vercel.
-- The environment will be configured with the necessary environment variables for the backend API.
+1. Lighthouse categories (selected routes)
+- Performance >= 70
+- Accessibility >= 90
+- Best Practices >= 90
 
-### 11.2. Deployment Process
+2. Lab Web Vitals thresholds
+- LCP <= 3600ms
+- CLS <= 0.15
+- INP <= 300ms
 
-- The frontend application will be deployed using a continuous integration and continuous deployment (CI/CD) pipeline.
-- The deployment process will be automated using GitHub Actions.
+3. Bundle thresholds
+- Total JS <= 3,000,000 bytes
+- Largest chunk <= 300,000 bytes
 
-### 11.3. Monitoring and Maintenance
+### 9.2 Accessibility
 
-- The frontend application will be monitored using Vercel's built-in monitoring tools.
-- The frontend application will be regularly updated to address security vulnerabilities and improve performance.
+1. Target baseline: WCAG 2.1 AA.
+2. Semantic landmarks, keyboard behavior, visible focus, labeled controls.
+3. A11y checks are included in integration testing setup (`jest-axe`) and release checklist guidance.
 
-## 12. Testing and Quality Assurance
+### 9.3 Security
 
-### 12.1. Testing Strategy
+1. HTTP security headers configured in `next.config.ts` (CSP, HSTS, X-Frame-Options, etc.).
+2. Session token in HttpOnly cookie; auth guard at middleware + app layout + proxy layer.
+3. Client-side error message sanitization to reduce unsafe rendering risk.
+4. Security CI jobs include lint/audit and secret scanning.
 
-- Implement a comprehensive testing strategy that includes unit tests, integration tests, and end-to-end tests.
-- Use a test-driven development (TDD) approach to ensure that tests are written before code.
-- Automate the testing process to ensure that tests are run regularly.
+### 9.4 Reliability and Error Handling
 
-### 12.2. Test Cases
+1. Route-level loading/error boundaries for dashboard and metric detail segments.
+2. React Query with retries and cancellation handling.
+3. API error normalization and user-friendly messaging fallback.
+4. Skeleton/empty/error states across major list/detail views.
 
-- Develop detailed test cases for each feature of the application, covering both positive and negative scenarios.
-- Use a test case management tool to track the status of test cases.
-- Ensure that test cases are reviewed and approved by stakeholders.
+### 9.5 Responsive Behavior
 
-### 12.3. Bug Reporting and Tracking
+1. Desktop table patterns for data-heavy views.
+2. Mobile card + swipe actions for list item operations.
+3. Bottom navigation for mobile app shell access.
 
-- Implement a bug reporting and tracking system to manage bug reports.
-- Use a bug tracking tool to track the status of bug reports.
-- Ensure that bug reports are prioritized and resolved in a timely manner.
+---
 
-## 13. Success Metrics
+## 10. Quality and Release Gates
 
-### 13.1. Key Performance Indicators (KPIs)
+### 10.1 CI Workflow Gates
 
-- User engagement: Daily active users (DAU), monthly active users (MAU), session duration, feature usage.
-- User retention: Churn rate, retention rate, customer lifetime value (CLTV).
-- Performance: Page load time, API response time, error rate.
-- Goal achievement: Percentage of users achieving their goals, average time to goal achievement.
+`frontend-ci` currently runs:
 
-### 13.2. Data Collection and Analysis
+1. Lint + CSS lint + typecheck
+2. Unit tests (coverage artifact upload)
+3. Integration tests
+4. Build verification
+5. E2E execution (Cypress)
+6. Security scan (`npm audit` path)
+7. Secret scan (gitleaks)
 
-- Use a data analytics platform to collect and analyze user data.
-- Track key performance indicators (KPIs) to measure the success of the application.
-- Use data insights to identify areas for improvement and inform product development decisions.
+### 10.2 Performance Workflow
 
-## 14. Future Roadmap
+Scheduled/manual `frontend-performance` runs:
 
-### 14.1. Planned Enhancements
+1. Build
+2. Bundle threshold check
+3. Lighthouse checks
+4. Lab Web Vitals summary
 
-- Implement support for automatic metric logging through integrations with third-party apps and devices.
-- Add support for social sharing of progress and achievements.
-- Develop a mobile app for iOS and Android.
+### 10.3 Current Automated Test Surface
 
-### 14.2. Potential New Features
+- Unit test files: 52
+- Integration test files: 16
+- E2E test files: 1
 
-- Implement gamification elements to further incentivize user engagement.
-- Add support for team-based goal tracking and collaboration.
-- Develop a personalized coaching feature to provide users with tailored guidance and support.
+---
 
-### 14.3. Scalability Plans
+## 11. Success Metrics
 
-- Migrate the frontend application to a serverless architecture to improve scalability and reliability.
-- Implement a caching layer to reduce API load and improve response times.
-- Use a content delivery network (CDN) to distribute static assets and improve performance for users around the world.
+### 11.1 Product Outcome Metrics (Target)
+
+1. Activation: user can complete register/login and create first metric + log in one session.
+2. Engagement: repeat metric logging and dashboard return usage.
+3. Reliability: low failed mutation rate for core CRUD actions.
+
+### 11.2 Engineering Quality Metrics (Current Operational)
+
+1. CI pass rate across lint/type/test/build/security jobs.
+2. Lighthouse and Web Vitals threshold pass rate.
+3. Security scan and secret scan pass status.
+
+---
+
+## 12. Known Gaps and Current Limitations
+
+1. Dashboard has URL-driven filter support but no dedicated in-page controls for bucket/range.
+2. Metric settings expose `chartType`, but current chart rendering is line-chart only.
+3. Metric settings delete capability exists in API hooks but is not exposed in current UI.
+4. Account page is read-only (no profile update form/workflow).
+5. E2E coverage is minimal compared to unit/integration coverage.
+6. Legacy/internal routes and utilities exist (`/api/auth/login`, `/api/auth/logout`, legacy `useAuth` hook) but are not primary production flow paths.
+
+---
+
+## 13. Dependencies and Runtime Configuration
+
+### 13.1 Required Environment Configuration
+
+1. `API_URL` or `NEXT_PUBLIC_API_BASE_URL` for backend proxy target.
+2. Optional app-origin env vars used by API base URL resolution for server-side requests:
+- `NEXT_PUBLIC_APP_URL`
+- `NEXT_PUBLIC_SITE_URL`
+- `NEXT_PUBLIC_VERCEL_URL`
+- `VERCEL_URL`
+
+### 13.2 Optional Feature Flags
+
+1. `NEXT_PUBLIC_ENABLE_DUMMY_ACTIONS=true`
+- Enables dummy data generation actions in list UIs.
+- Intended for non-production/testing usage.
+
+---
+
+## 14. Post-Baseline Roadmap (Recommended)
+
+1. Add dashboard filter controls UI (bucket + range) with explicit UX controls.
+2. Implement chart type rendering parity with settings (`line/bar/area/pie`).
+3. Add account profile edit flow (and password/change email strategy if required).
+4. Expand E2E coverage to critical authenticated CRUD and settings flows.
+5. Evaluate role-based UI behavior if admin workflows become product requirement.

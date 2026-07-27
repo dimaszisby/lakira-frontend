@@ -37,6 +37,7 @@ We **do** add a11y checks for:
 - [x] Main layouts:
   - [x] Metric categories list page.
   - [x] Metric category detail header section.
+  - [x] Metric category detail metric list section.
   - [x] Metrics list page.
   - [x] Metric logs page.
   - [x] Dashboard page.

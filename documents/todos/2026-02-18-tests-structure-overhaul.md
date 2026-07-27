@@ -57,7 +57,7 @@
 
 ### P2 Guardrails and Coverage Backfill
 - [x] Add CI-safe discovery checks in docs/runbook.
-- [ ] Continue integration coverage expansion after boundary hardening (progress: added `LogForm.int.test.tsx`, `MetricForm.int.test.tsx`, `MetricSettingsForm.int.test.tsx`, `MetricsPageClient.int.test.tsx`, `DashboardContent.int.test.tsx`, `MetricDetailComposite.int.test.tsx`, `MetricCategoryHeaderSection.int.test.tsx`, and `RegisterForm.int.test.tsx` baselines on 2026-02-18).
+- [ ] Continue integration coverage expansion after boundary hardening (progress: added `LogForm.int.test.tsx`, `MetricForm.int.test.tsx`, `MetricSettingsForm.int.test.tsx`, `MetricsPageClient.int.test.tsx`, `DashboardContent.int.test.tsx`, `MetricDetailComposite.int.test.tsx`, `MetricCategoryHeaderSection.int.test.tsx`, `MetricListSection.int.test.tsx`, and `RegisterForm.int.test.tsx` baselines on 2026-02-18).
 
 ### P3 Optional Future Reorg
 - [ ] Evaluate explicit unit/integration subfolders only if readability degrades.
@@ -84,10 +84,10 @@
 Validation snapshot (2026-02-18):
 
 - Unit discovery isolation: pass (no `*.int.test.ts(x)` listed under unit config).
-- Integration discovery isolation: pass (`LoginForm.int.test.tsx`, `RegisterForm.int.test.tsx`, `MetricCategoryForm.int.test.tsx`, `MetricCategoriesPageClient.int.test.tsx`, `MetricCategoryHeaderSection.int.test.tsx`, `LogForm.int.test.tsx`, `MetricLogsClient.int.test.tsx`, `MetricForm.int.test.tsx`, `MetricSettingsForm.int.test.tsx`, `MetricsPageClient.int.test.tsx`, `DashboardContent.int.test.tsx`, `MetricDetailComposite.int.test.tsx`, `BottomNavigationBar.int.test.tsx`, `Sidebar.int.test.tsx`, `Layout.int.test.tsx`).
+- Integration discovery isolation: pass (`LoginForm.int.test.tsx`, `RegisterForm.int.test.tsx`, `MetricCategoryForm.int.test.tsx`, `MetricCategoriesPageClient.int.test.tsx`, `MetricCategoryHeaderSection.int.test.tsx`, `MetricListSection.int.test.tsx`, `LogForm.int.test.tsx`, `MetricLogsClient.int.test.tsx`, `MetricForm.int.test.tsx`, `MetricSettingsForm.int.test.tsx`, `MetricsPageClient.int.test.tsx`, `DashboardContent.int.test.tsx`, `MetricDetailComposite.int.test.tsx`, `BottomNavigationBar.int.test.tsx`, `Sidebar.int.test.tsx`, `Layout.int.test.tsx`).
 - `npm run test:unit`: pass (43 suites, 165 tests).
 - `npm run test:unit:ci`: pass (43 suites, 165 tests, coverage report generated).
-- `npm run test:integration`: pass (15 suites, 55 tests).
+- `npm run test:integration`: pass (16 suites, 59 tests).
 - `npm run typecheck`: pass.
 
 ## Risks and Mitigations
