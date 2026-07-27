@@ -1,8 +1,9 @@
-import { z } from "zod";
-import {
+import type { z } from "zod";
+
+import type {
   createMetricCategorySchema,
-  updateMetricCategorySchema,
   generateDummyMetricCategoriesSchema,
+  updateMetricCategorySchema,
 } from "@/types/api/zod-metric-category.schema";
 
 /**
@@ -20,54 +21,20 @@ import {
  * @description Represents the structure of a MetricCategory object as returned in API responses.
  */
 export interface MetricCategoryResponseDTO {
-  /**
-   * @property {string} id - The unique identifier for the metric category (typically a UUID).
-   * @readonly
-   */
   readonly id: string;
 
-  /**
-   * @property {string} name - The user-defined name for the metric category.
-   * @readonly
-   */
+  // Base
   readonly name: string;
-
-  /**
-   * @property {string} color - The color code associated with the category for UI display.
-   * @readonly
-   */
   readonly color: string;
-
-  /**
-   * @property {string} icon - The icon identifier associated with the category.
-   * @readonly
-   */
   readonly icon: string;
 
-  /**
-   * @property {string} createdAt - The timestamp when the category was created, formatted as an ISO string.
-   * @readonly
-   */
-  readonly createdAt: string;
-
-  /**
-   * @property {string} updatedAt - The timestamp when the category was last updated, formatted as an ISO string.
-   * @readonly
-   */
-  readonly updatedAt: string;
-
-  /**
-   * @property {string | null} [deletedAt] - The timestamp when the category was soft-deleted, formatted as an ISO string. Null if active.
-   * @readonly
-   */
-  readonly deletedAt?: string | null;
-
-  /**
-   * @property {number} metricCount - The number of metrics associated with the Category.
-   * @readonly
-   * @example 10
-   */
+  // Relations
   readonly metricCount: number;
+
+  // Timestamps
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly deletedAt?: string | null;
 }
 
 export interface PaginatedMetricCategoryListResponseDTO {
@@ -82,18 +49,14 @@ export interface PaginatedMetricCategoryListResponseDTO {
  * @description Represents the expected structure of the request body when creating a new metric category.
  * Inferred from the Zod schema for validation.
  */
-export type CreateMetricCategoryRequestDTO = z.infer<
-  typeof createMetricCategorySchema.shape.body
->;
+export type CreateMetricCategoryRequestDTO = z.infer<typeof createMetricCategorySchema.shape.body>;
 
 /**
  * @typedef UpdateMetricCategoryRequestDTO
  * @description Represents the expected structure of the request body when updating an existing metric category.
  * Inferred from the Zod schema for validation.
  */
-export type UpdateMetricCategoryRequestDTO = z.infer<
-  typeof updateMetricCategorySchema.shape.body
->;
+export type UpdateMetricCategoryRequestDTO = z.infer<typeof updateMetricCategorySchema.shape.body>;
 
 /**
  * * ===== DTOs for Testing Purposes =====

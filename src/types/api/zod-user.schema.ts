@@ -1,24 +1,14 @@
-// src/types/api/zod-user.schema.ts
-
 import { z } from "zod";
+
 import { ZodMessages } from "@/constants/zod-messages";
 import {
-  zUsername,
   zEmail,
   zPassword,
   zPasswordConfirmation,
   zPublicProfile,
   zRole,
-} from "@/src/constants/zod-rules";
-
-/**
- * * Zod Validation + Inferred Types
- */
-
-/**
- * Create User Schema
- * Used for validating incoming data when creating a new user.
- */
+  zUsername,
+} from "@/constants/zod-rules";
 
 export const createUserSchema = z.object({
   body: z
@@ -36,12 +26,6 @@ export const createUserSchema = z.object({
     }),
 });
 
-export type CreateUserRequestDTO = z.infer<typeof createUserSchema.shape.body>;
-
-/**
- * Update User Schema
- * Used for validating incoming data when updating a user.
- */
 export const updateUserSchema = z.object({
   body: z.object({
     username: zUsername.optional(),
@@ -51,8 +35,6 @@ export const updateUserSchema = z.object({
     role: zRole.optional(),
   }),
 });
-
-export type UpdateUserRequestDTO = z.infer<typeof updateUserSchema.shape.body>;
 
 export const loginUserSchema = z.object({
   body: z.object({

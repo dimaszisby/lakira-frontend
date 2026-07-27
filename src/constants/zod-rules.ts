@@ -1,5 +1,5 @@
-// src/validators/zod-rules.ts
 import { z } from "zod";
+
 import { ZodMessages } from "@/constants/zod-messages"; // centralized error messages
 
 /**
@@ -19,6 +19,21 @@ export const zDateOptional = z
   .refine((date) => date === undefined || !isNaN(date.getTime()), {
     message: ZodMessages.common.invalidDate,
   });
+
+// Experimental
+export const zDateRequired = z
+  .preprocess(
+    (val) => (typeof val === "string" && val.trim() === "" ? undefined : val),
+    z.coerce.date()
+  )
+  .refine((date) => date === undefined || !isNaN(date.getTime()), {
+    message: ZodMessages.common.invalidDate,
+  });
+
+// Newly Added on 2025-09-02
+export const zISODateTime = z.string().datetime({ offset: true });
+export const zISODate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
+export const zISOTime = z.string().regex(/^\d{2}:\d{2}:\d{2}$/);
 
 /**
  * export const zMetricCategoryId = zUUID.optional().nullable();
@@ -93,9 +108,11 @@ export const zGoalValue = z
   .positive(ZodMessages.metricSettings.goalValuePositive)
   .optional()
   .nullable();
+
 export const zTimeFrameEnabled = z.boolean().optional().default(false);
 export const zStartDate = zDateOptional.optional().nullable();
 export const zDeadlineDate = zDateOptional.optional().nullable();
+
 export const zAlertEnabled = z.boolean().optional().default(false);
 export const zAlertThresholds = z
   .number()
@@ -104,16 +121,17 @@ export const zAlertThresholds = z
   .max(100, { message: ZodMessages.metricSettings.alertThresholdMax })
   .optional()
   .default(80);
+
 export const zDisplayOptions = z
   .object({
-    showOnDashboard: z.boolean().optional().default(true),
+    showOnDashboard: z.boolean().optional().default(false),
     priority: z.number().optional().nullable(),
-    chartType: z.string().optional().nullable(),
+    chartType: z.enum(["line", "bar", "area", "pie"]).optional().nullable(),
     color: z.string().optional().nullable(),
   })
   .optional()
   .default({
-    showOnDashboard: true,
+    showOnDashboard: false,
     priority: null,
     chartType: null,
     color: null,

@@ -1,4 +1,4 @@
-import type {AxiosResponse} from "axios";
+import type { AxiosResponse } from "axios";
 
 type Status = "success" | "fail" | "error";
 
@@ -34,9 +34,7 @@ export function unwrap<T>(r: AxiosResponse<ApiResponse<T>>): T {
 }
 
 // Probe without throwing:
-export function isSuccess<T>(
-  r: AxiosResponse<ApiResponse<T>>
-): r is AxiosResponse<ApiSuccess<T>> {
+export function isSuccess<T>(r: AxiosResponse<ApiResponse<T>>): r is AxiosResponse<ApiSuccess<T>> {
   return r.data?.status === "success";
 }
 

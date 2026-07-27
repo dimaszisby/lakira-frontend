@@ -1,6 +1,8 @@
-import { z } from "zod";
-import { generateDummyMetricLogsSchema } from "@/types/api/zod-metric-log.schema";
-import { ISODateTimeString } from "../aliases";
+import type { z } from "zod";
+
+import type { generateDummyMetricLogsSchema } from "@/types/api/zod-metric-log.schema";
+
+import type { ISODateTimeString } from "../../generics/date/aliases";
 
 // * ===== Response DTOs =====
 
@@ -10,10 +12,16 @@ import { ISODateTimeString } from "../aliases";
  */
 export interface MetricLogResponseDTO {
   readonly id: string;
+
+  // Parent Relations
   readonly metricId: string;
-  readonly type: "manual" | "automatic";
+
+  // Base
   readonly logValue: number;
   readonly loggedAt: string; // ISO string
+  readonly type: "manual" | "automatic";
+
+  // Timestamps
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -50,7 +58,7 @@ export interface PaginatedMetricLogListResponseDTO {
 // >;
 
 export type CreateMetricLogRequestDTO = {
-  metricId?: string;
+  metricId: string;
   logValue: number;
   type?: "manual" | "automatic";
   loggedAt?: ISODateTimeString; // optional; if omitted, server fills "now"

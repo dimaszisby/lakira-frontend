@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import {
   zDateOptional,
   zDateRequired,
@@ -5,7 +7,6 @@ import {
   zPositiveFloat,
   zUUID,
 } from "@/src/constants/zod-rules";
-import { z } from "zod";
 
 // TODO: Currently schema is not used in the frontend, only for backend validation.
 // However, we can use this for form validation in the future if needed.
@@ -45,10 +46,7 @@ export const getAllMetricLogsSchema = z.object({
       sortBy: z.string().optional(),
       order: z.enum(["asc", "desc"]).optional(),
       page: z.preprocess(Number, z.number().int().min(1)).optional().default(1),
-      limit: z
-        .preprocess(Number, z.number().int().min(1))
-        .optional()
-        .default(10),
+      limit: z.preprocess(Number, z.number().int().min(1)).optional().default(10),
     })
     .optional(),
 });

@@ -6,7 +6,7 @@ import type {
   updateMetricSettingsSchema,
 } from "@/types/api/zod-metric-settings.schema";
 
-import type { ISODateString, ISODateTimeString } from "../aliases";
+import type { ISODateString, ISODateTimeString } from "../../generics/date/aliases";
 
 // TODO - Refactor: to Enum
 type GoalType = "cumulative" | "incremental";

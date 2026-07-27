@@ -1,4 +1,3 @@
-// src/types/api/zod-metric-settings.schema.ts
 // TODO: Refactor to correct foldering
 import { z } from "zod";
 
@@ -38,25 +37,20 @@ export const createMetricSettingsSchema = z.object({
         return true;
       },
       {
-        message:
-          "goalType and goalValue are required when goalEnabled is true.",
-      }
+        message: "goalType and goalValue are required when goalEnabled is true.",
+      },
     )
     .refine(
       (data) => {
         if (data.timeFrameEnabled) {
-          return (
-            data.startDate &&
-            data.deadlineDate &&
-            data.deadlineDate > data.startDate
-          );
+          return data.startDate && data.deadlineDate && data.deadlineDate > data.startDate;
         }
         return true;
       },
       {
         message:
           "startDate and deadlineDate are required, and deadlineDate must be after startDate when timeFrameEnabled is true.",
-      }
+      },
     ),
 });
 
