@@ -2,15 +2,19 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { invalidateMetricLists } from "../cache";
 import { createMetric } from "../metric.api";
-import type { MetricResponseDTO } from "../metric.dto";
+import type { CreateMetricRequestDTO, MetricResponseDTO } from "../metric.dto";
 
 export function useCreateMetric(
   onSuccess?: (created: MetricResponseDTO) => void,
   onError?: (error: Error) => void,
 ) {
   const qc = useQueryClient();
-  const { mutateAsync, isError, isSuccess, error, isPending } = useMutation({
-    mutationFn: createMetric,
+  const { mutateAsync, isError, isSuccess, error, isPending } = useMutation<
+    MetricResponseDTO,
+    Error,
+    CreateMetricRequestDTO
+  >({
+    mutationFn: (metric) => createMetric(metric),
     onSuccess: async (created) => {
       await invalidateMetricLists(qc);
 

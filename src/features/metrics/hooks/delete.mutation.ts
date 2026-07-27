@@ -22,7 +22,7 @@ export function useDeleteMetric(
     string, // TVariables (metricId)
     DeleteCtx // TContext
   >({
-    mutationFn: deleteMetric,
+    mutationFn: (metricId) => deleteMetric(metricId),
     // Optimistic delete
     onMutate: async (metricId) => {
       await qc.cancelQueries({

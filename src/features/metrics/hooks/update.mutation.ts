@@ -30,7 +30,7 @@ export function useUpdateMetric(
     Vars,
     Ctx
   >({
-    mutationFn: updateMetric,
+    mutationFn: (vars) => updateMetric(vars),
     // optimistic patch
     onMutate: async ({ metricId, metric }) => {
       await qc.cancelQueries({

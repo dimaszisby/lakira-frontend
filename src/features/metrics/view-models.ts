@@ -1,6 +1,6 @@
 import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
 import type { CursorPageVM } from "@/generics/cursor/view-model";
-import type { ISODateTimeString } from "@/types/aliases";
+import type { ISODateTimeString } from "@/generics/date/aliases";
 
 import type { MetricSettingsExtendedVM } from "../metric-settings/view-models";
 import type { MetricPreviewResponseDTO } from "./metric.dto";

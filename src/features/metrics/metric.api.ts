@@ -6,45 +6,20 @@ import type {
 } from "@/features/metrics/metric.dto";
 import type { CreateMetricRequestDTO } from "@/features/metrics/metric.dto";
 import type { PaginatedMetricListResponseDTO } from "@/features/metrics/metric.dto";
+import type { CursorListParams } from "@/features/shared/api";
+import { buildCursorQueryString, buildQueryString } from "@/features/shared/api";
 import api from "@/services/api/api";
-import { handleApiError } from "@/services/api/handleApiError";
+import { withApiErrorHandling } from "@/services/api/withApiErrorHandling";
 import type ApiResponse from "@/types/generics/ApiResponse";
 import { unwrap } from "@/types/generics/ApiResponse";
+import type { RequestOpts } from "@/types/generics/RequestOpts";
 
 import { normalizeIncludes } from "./keys";
 import type { MetricCursorPage, MetricFilterViaCursor, MetricSortParamViaCursor } from "./sort";
 import { DEFAULT_METRIC_SORT, DEFAULT_METRIC_SORT_OFFSET, METRICS_PAGE_SIZE } from "./sort";
 import type { IncludeKey, MetricsListParams } from "./types";
 
-// TODO: Generic Function
-export type ListMetricParams = {
-  limit?: number; // default 20
-  sort?: MetricSortParamViaCursor;
-  q?: string;
-  filter?: MetricFilterViaCursor;
-  after?: string; // cursor
-  includeTotal?: boolean;
-};
-
-// TODO: Shared
-type RequestOpts = {
-  signal?: AbortSignal;
-};
-
-/** Build query string without undefined/null and with stable ordering */
-// TODO: Shared Function
-function buildQuery(params: Record<string, unknown>): string {
-  const qs = new URLSearchParams();
-  Object.keys(params)
-    .sort()
-    .forEach((k) => {
-      const v = params[k];
-      if (v === undefined || v === null || v === "") return;
-      qs.set(k, String(v));
-    });
-  const s = qs.toString();
-  return s ? `?${s}` : "";
-}
+export type ListMetricParams = CursorListParams<MetricSortParamViaCursor, MetricFilterViaCursor>;
 
 // * ========== Query Endpoints ==========
 
@@ -58,75 +33,88 @@ export async function getMetricLibraryList(
   params: MetricsListParams,
   opts: RequestOpts = {},
 ): Promise<PaginatedMetricListResponseDTO> {
-  const {
-    page = 1,
-    limit = METRICS_PAGE_SIZE,
-    sortBy = DEFAULT_METRIC_SORT_OFFSET.sortBy,
-    sortOrder = DEFAULT_METRIC_SORT_OFFSET.sortOrder,
-    q,
-    name,
-    categoryId,
-    isPublic,
-  } = params ?? {};
+  return withApiErrorHandling(async () => {
+    const {
+      page = 1,
+      limit = METRICS_PAGE_SIZE,
+      sortBy = DEFAULT_METRIC_SORT_OFFSET.sortBy,
+      sortOrder = DEFAULT_METRIC_SORT_OFFSET.sortOrder,
+      q,
+      name,
+      categoryId,
+      isPublic,
+    } = params ?? {};
 
-  const query = buildQuery({
-    page,
-    limit,
-    sortBy,
-    sortOrder,
-    q,
-    name,
-    categoryId,
-    isPublic,
-  });
+    const query = buildQueryString({
+      page,
+      limit,
+      sortBy,
+      sortOrder,
+      q,
+      name,
+      categoryId,
+      isPublic,
+    });
 
-  const response = await api.get<ApiResponse<PaginatedMetricListResponseDTO>>(`/metrics${query}`, {
-    signal: opts.signal,
-  });
+    const response = await api.get<ApiResponse<PaginatedMetricListResponseDTO>>(
+      `/metrics${query}`,
+      {
+        signal: opts.signal,
+        headers: opts.headers,
+      },
+    );
 
-  return unwrap(response);
+    return unwrap(response);
+  }, "getMetricLibraryList");
 }
 
 // GET ALL via Cursor
-export async function getMetricLibraryViaCursor({
-  limit = 20,
-  sort = DEFAULT_METRIC_SORT,
-  q,
-  filter,
-  after,
-  includeTotal = false,
-}: ListMetricParams): Promise<MetricCursorPage> {
-  const search = new URLSearchParams();
+export async function getMetricLibraryViaCursor(
+  {
+    limit = 20,
+    sort = DEFAULT_METRIC_SORT,
+    q,
+    filter,
+    after,
+    includeTotal = false,
+  }: ListMetricParams,
+  opts: RequestOpts = {},
+): Promise<MetricCursorPage> {
+  return withApiErrorHandling(async () => {
+    const query = buildCursorQueryString({
+      limit,
+      sort,
+      q,
+      filter,
+      after,
+      includeTotal,
+    });
 
-  search.set("limit", String(limit));
-  search.set("sort", sort);
+    const response = await api.get<ApiResponse<MetricCursorPage>>(`/metrics${query}`, {
+      signal: opts.signal,
+      headers: opts.headers,
+    });
 
-  if (q?.trim()) search.set("q", q.trim());
-  if (filter?.name?.trim()) search.set("filter[name]", filter.name.trim());
-  if (filter?.categoryId?.trim()) search.set("filter[categoryId]", filter.categoryId.trim());
-  if (after) search.set("after", after);
-  if (includeTotal) search.set("includeTotal", "true");
-
-  const response = await api.get<ApiResponse<MetricCursorPage>>(`/metrics?${search.toString()}`);
-
-  return unwrap(response);
+    return unwrap(response);
+  }, "getMetricLibraryViaCursor");
 }
 
 /**
  * TODO: Currently not being part of the API MVP, but can be useful in the future
  * @description Get Metric Details that contains core metric information, will be mainly used for public metrics.
  */
-export const getMetricDetails = async (metricId: string): Promise<MetricResponseDTO> => {
-  try {
-    const response = await api.get<ApiResponse<MetricResponseDTO>>(`/metrics/${metricId}`);
+export const getMetricDetails = async (
+  metricId: string,
+  opts: RequestOpts = {},
+): Promise<MetricResponseDTO> =>
+  withApiErrorHandling(async () => {
+    const response = await api.get<ApiResponse<MetricResponseDTO>>(`/metrics/${metricId}`, {
+      signal: opts.signal,
+      headers: opts.headers,
+    });
 
     return unwrap(response);
-  } catch (error: unknown) {
-    console.error("Error in getMetricDetails:", error);
-    handleApiError(error); // Ensure handleApiError is called
-    throw error;
-  }
-};
+  }, "getMetricDetails");
 
 /**
  * * GET Details with extended info
@@ -137,38 +125,33 @@ export const getUserMetricDetails = async (
   params: { includes?: IncludeKey[]; logsLimit?: number } = {},
   opts: RequestOpts = {},
 ): Promise<UserMetricDetailResponseDTO> => {
-  // Checks includes domains/entities
-  const include = normalizeIncludes(params.includes ?? []);
-  const query = buildQuery({
-    include, // undefined => server treats as "flat"
-    logsLimit: params.logsLimit ?? 20,
-  });
+  return withApiErrorHandling(async () => {
+    // Checks includes domains/entities
+    const include = normalizeIncludes(params.includes ?? []);
+    const query = buildQueryString({
+      include, // undefined => server treats as "flat"
+      logsLimit: params.logsLimit ?? 20,
+    });
 
-  try {
     const response = await api.get<ApiResponse<UserMetricDetailResponseDTO>>(
       `/metrics/${metricId}${query}`,
-      { signal: opts.signal },
+      { signal: opts.signal, headers: opts.headers },
     );
 
     return unwrap(response);
-  } catch (error: unknown) {
-    console.error("Error in getUserMetricDetails:", error);
-    handleApiError(error);
-    throw error;
-  }
+  }, "getUserMetricDetails");
 };
 
 // GET ALL metric names
 // Currently have no use for this function, but it can be useful in the future
-export const getAllMetricNames = async (): Promise<string[]> => {
-  try {
-    const response = await api.get("/metrics/names");
+export const getAllMetricNames = async (opts: RequestOpts = {}): Promise<string[]> =>
+  withApiErrorHandling(async () => {
+    const response = await api.get<{ data: string[] }>("/metrics/names", {
+      signal: opts.signal,
+      headers: opts.headers,
+    });
     return response.data.data;
-  } catch (error: unknown) {
-    handleApiError(error);
-    throw error;
-  }
-};
+  }, "getAllMetricNames");
 
 // * ========== Commands Endpoints ==========
 
@@ -177,16 +160,18 @@ export const createMetric = async (
   metric: CreateMetricRequestDTO,
   opts: RequestOpts & { idempotencyKey?: string } = {},
 ): Promise<MetricResponseDTO> => {
-  // Avoid dupplicates on retry
-  const headers: Record<string, string> = {};
-  if (opts.idempotencyKey) headers["Idempotency-Key"] = opts.idempotencyKey;
+  return withApiErrorHandling(async () => {
+    // Avoid dupplicates on retry
+    const headers: Record<string, string> = {};
+    if (opts.idempotencyKey) headers["Idempotency-Key"] = opts.idempotencyKey;
 
-  const response = await api.post<ApiResponse<MetricResponseDTO>>("/metrics", metric, {
-    signal: opts.signal,
-    headers,
-  });
+    const response = await api.post<ApiResponse<MetricResponseDTO>>("/metrics", metric, {
+      signal: opts.signal,
+      headers: { ...headers, ...(opts.headers ?? {}) },
+    });
 
-  return unwrap(response);
+    return unwrap(response);
+  }, "createMetric");
 };
 
 // UPDATE a metric
@@ -194,17 +179,15 @@ export async function updateMetric(
   args: { metricId: string; metric: UpdateMetricRequestDTO },
   opts: RequestOpts = {},
 ): Promise<MetricResponseDTO> {
-  const { metricId, metric } = args;
-  try {
+  return withApiErrorHandling(async () => {
+    const { metricId, metric } = args;
     const response = await api.put<ApiResponse<MetricResponseDTO>>(`/metrics/${metricId}`, metric, {
       signal: opts.signal,
+      headers: opts.headers,
     });
 
     return unwrap(response);
-  } catch (error) {
-    handleApiError(error);
-    throw error;
-  }
+  }, "updateMetric");
 }
 
 // Delete a metric
@@ -212,16 +195,14 @@ export async function deleteMetric(
   metricId: string,
   opts: RequestOpts = {},
 ): Promise<MetricResponseDTO> {
-  try {
+  return withApiErrorHandling(async () => {
     const response = await api.delete<ApiResponse<MetricResponseDTO>>(`/metrics/${metricId}`, {
       signal: opts.signal,
+      headers: opts.headers,
     });
 
     return unwrap(response);
-  } catch (error) {
-    handleApiError(error);
-    throw error;
-  }
+  }, "deleteMetric");
 }
 
 /**
@@ -232,14 +213,12 @@ export async function createMetricDummy(
   payload: GenerateDummyMetricsRequestDTO,
   opts: RequestOpts = {},
 ): Promise<MetricResponseDTO[]> {
-  try {
+  return withApiErrorHandling(async () => {
     const res = await api.post<ApiResponse<MetricResponseDTO[]>>("/metrics/dummy", payload, {
       signal: opts.signal,
+      headers: opts.headers,
     });
 
     return unwrap(res);
-  } catch (error) {
-    handleApiError(error);
-    throw error;
-  }
+  }, "createMetricDummy");
 }

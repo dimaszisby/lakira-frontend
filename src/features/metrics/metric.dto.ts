@@ -1,6 +1,6 @@
 import type { z } from "zod";
 
-import type { ISODateString, ISODateTimeString } from "@/src/types/aliases";
+import type { ISODateString, ISODateTimeString } from "@/src/generics/date/aliases";
 import type {
   createMetricSchema,
   deleteMetricSchema,
