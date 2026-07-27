@@ -7,7 +7,6 @@ import type { AuthResponseDTO, LoginRequestDTO } from "@/types/dtos/user.dto";
 
 import { setCachedUserProfile } from "../cache";
 import { persistSessionToken } from "../session.client";
-import { clearAuthToken, setAuthToken } from "../token.storage";
 
 export function useLoginUserMutation(
   onSuccess?: (response: AuthResponseDTO) => void | Promise<void>,
@@ -19,13 +18,7 @@ export function useLoginUserMutation(
   const mutation = useMutation<AuthResponseDTO, Error, LoginRequestDTO>({
     mutationFn: loginUser,
     onSuccess: async (response) => {
-      if (response.token) {
-        setAuthToken(response.token);
-        await persistSessionToken(response.token);
-      } else {
-        clearAuthToken();
-        await persistSessionToken(null);
-      }
+      await persistSessionToken(response.token ?? null);
 
       if (response.user) {
         setUser(response.user);

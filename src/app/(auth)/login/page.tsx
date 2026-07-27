@@ -10,16 +10,18 @@ export const metadata: Metadata = {
 };
 
 type LoginPageProps = {
-  searchParams?: {
+  searchParams?: Promise<{
     returnUrl?: string;
-  };
+  }>;
 };
 
-const LoginPage = ({ searchParams }: LoginPageProps) => {
-  const token = cookies().get("lakira_token");
+const LoginPage = async ({ searchParams }: LoginPageProps) => {
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const cookieStore = await cookies();
+  const token = cookieStore.get("lakira_token");
 
   if (token?.value) {
-    redirect(authRoutes.afterAuth(searchParams?.returnUrl));
+    redirect(authRoutes.afterAuth(resolvedSearchParams.returnUrl));
   }
 
   return <LoginForm />;

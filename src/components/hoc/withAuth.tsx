@@ -1,79 +1,82 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { useAtom } from "jotai";
-import { userAtom, UserAtom } from "@/src/services/state/atoms";
-import { useRouter } from "next/navigation";
-import { fetchUserProfile } from "@/src/services/api/auth.api";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAtom, useSetAtom } from "jotai";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react";
 
-/**
- * HOC to wrap pages/components that require authentication.
- * If not authenticated, redirects to login.
- * Now with TypeScript, React best practices, and improved error handling.
- */
-export function withAuth<P extends object>(
-  WrappedComponent: React.ComponentType<P>
-): React.FC<P> {
-  const AuthenticatedComponent: React.FC<P> = (props) => {
-    const [user, setUser] = useAtom(userAtom);
+import { fetchUserProfile } from "@/src/services/api/auth.api";
+import type { UserAtom } from "@/src/services/state/atoms";
+import { userAtom } from "@/src/services/state/atoms";
+
+import { FullScreenSpinner } from "../ui/FullScreenSpinner";
+
+export function withAuth<P extends object>(Wrapped: React.ComponentType<P>): React.FC<P> {
+  const Guard: React.FC<P> = (props) => {
+    const [user] = useAtom(userAtom);
+    const setUser = useSetAtom(userAtom);
     const router = useRouter();
     const queryClient = useQueryClient();
 
-    // Fetch and validate user on mount (only if no user in state)
+    // prevent re-running the bootstrapper in StrictMode
+    const startedRef = useRef(false);
+
+    // local flag to avoid rendering while we decide/redirect
+    const [checking, setChecking] = useState(true);
+
     useEffect(() => {
-      if (!user) {
-        const fetchUser = async () => {
-          const token = localStorage.getItem("token");
-          if (!token) {
-            router.replace("/auth/login");
+      if (startedRef.current) return;
+      startedRef.current = true;
+
+      let cancelled = false;
+
+      const bootstrap = async () => {
+        try {
+          // prefer cache if available
+          const cached = queryClient.getQueryData<UserAtom>(["userProfile"]);
+          if (cached) {
+            if (!cancelled) setUser(cached);
             return;
           }
 
-          try {
-            // Optionally use QueryClient to check cache first
-            const cached = queryClient.getQueryData<UserAtom>(["userProfile"]);
-            if (cached) {
-              setUser(cached);
-              return;
+          const data = await fetchUserProfile();
+
+          if (!cancelled) {
+            if (data) {
+              setUser(data);
+              queryClient.setQueryData(["userProfile"], data);
+            } else {
+              setUser(null);
+              router.replace("/login");
             }
-            const data = await fetchUserProfile();
-            setUser(data);
-            queryClient.setQueryData(["userProfile"], data);
-          } catch (error) {
-            console.error("Auth failed, redirecting to login", error);
-            setUser(null);
-            router.replace("/auth/login");
           }
-        };
-        fetchUser();
-      }
-    }, [user, setUser, router, queryClient]);
+        } catch {
+          if (!cancelled) {
+            setUser(null);
+            router.replace("/login");
+          }
+        } finally {
+          if (!cancelled) setChecking(false);
+        }
+      };
 
-    // UX: Loading spinner
-    if (!user) {
-      return (
-        <div
-          style={{
-            width: "100vw",
-            height: "100vh",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <span>Loading...</span>
-        </div>
-      );
-    }
+      void bootstrap();
 
-    return <WrappedComponent {...props} />;
+      return () => {
+        cancelled = true;
+      };
+    }, [queryClient, router, setUser]);
+
+    // 1) Still deciding: show spinner (no child render yet)
+    if (checking) return <FullScreenSpinner />;
+
+    // 2) Redirecting (no user): render nothing to prevent further renders
+    if (!user) return null;
+
+    // 3) Authenticated: render page
+    return <Wrapped {...props} />;
   };
 
-  // Give better display name for React DevTools
-  AuthenticatedComponent.displayName = `withAuth(${
-    WrappedComponent.displayName || WrappedComponent.name || "Component"
-  })`;
-
-  return AuthenticatedComponent;
+  Guard.displayName = `withAuth(${Wrapped.displayName || Wrapped.name || "Component"})`;
+  return Guard;
 }

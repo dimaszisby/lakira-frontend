@@ -6,7 +6,6 @@ import { fetchUserProfile } from "@/api/auth.api";
 import { userAtom } from "@/src/services/state/atoms";
 
 import { authKeys } from "../keys";
-import { hasAuthToken } from "../token.storage";
 
 type UseAuthProfileOptions = {
   enabled?: boolean;
@@ -16,7 +15,7 @@ type UseAuthProfileOptions = {
 
 export function useAuthProfileQuery(options: UseAuthProfileOptions = {}) {
   const setUser = useSetAtom(userAtom);
-  const enabled = options.enabled ?? hasAuthToken();
+  const enabled = options.enabled ?? true;
 
   const query = useQuery({
     queryKey: authKeys.profile(),

@@ -7,7 +7,6 @@ import type ApiResponse from "@/types/generics/ApiResponse";
 
 import { removeUserProfile, setCachedUserProfile } from "../cache";
 import { persistSessionToken } from "../session.client";
-import { clearAuthToken } from "../token.storage";
 
 type LogoutResponse = ApiResponse<{ message: string }>;
 
@@ -21,7 +20,6 @@ export function useLogoutUserMutation(
   const mutation = useMutation<LogoutResponse, Error, void>({
     mutationFn: logoutUser,
     onSuccess: async (response) => {
-      clearAuthToken();
       await persistSessionToken(null);
       setUser(null);
       setCachedUserProfile(qc, null);

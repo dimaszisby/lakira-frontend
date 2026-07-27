@@ -6,7 +6,7 @@ import { userAtom } from "@/src/services/state/atoms";
 import type { AuthResponseDTO, CreateUserRequestDTO } from "@/types/dtos/user.dto";
 
 import { setCachedUserProfile } from "../cache";
-import { clearAuthToken, setAuthToken } from "../token.storage";
+import { persistSessionToken } from "../session.client";
 
 export function useRegisterUserMutation(
   onSuccess?: (response: AuthResponseDTO) => void | Promise<void>,
@@ -18,11 +18,7 @@ export function useRegisterUserMutation(
   const mutation = useMutation<AuthResponseDTO, Error, CreateUserRequestDTO>({
     mutationFn: registerUser,
     onSuccess: async (response) => {
-      if (response.token) {
-        setAuthToken(response.token);
-      } else {
-        clearAuthToken();
-      }
+      await persistSessionToken(response.token ?? null);
 
       if (response.user) {
         setUser(response.user);

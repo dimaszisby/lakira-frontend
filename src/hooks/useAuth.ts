@@ -1,21 +1,16 @@
 // TODO: refactor to Auth
 
-import { useAtom } from "jotai";
-import { UserAtom, userAtom } from "@/src/services/state/atoms";
-import { useRouter } from "next/router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAtom } from "jotai";
+import { useRouter } from "next/router";
 import { useEffect } from "react";
-import {
-  fetchUserProfile,
-  loginUser,
-  registerUser,
-  logoutUser,
-} from "@/src/services/api/auth.api";
-import {
-  AuthResponseDTO,
-  CreateUserRequestDTO,
-  LoginRequestDTO,
-} from "@/types/dtos/user.dto";
+
+import { authRoutes, dashboardRoute } from "@/lib/routes";
+import { persistSessionToken } from "@/src/features/auth/session.client";
+import { fetchUserProfile, loginUser, logoutUser, registerUser } from "@/src/services/api/auth.api";
+import type { UserAtom } from "@/src/services/state/atoms";
+import { userAtom } from "@/src/services/state/atoms";
+import type { AuthResponseDTO, CreateUserRequestDTO, LoginRequestDTO } from "@/types/dtos/user.dto";
 
 /**
  * Custom Hook to handle authentication state.
@@ -44,37 +39,33 @@ export function useAuth() {
   // Login Mutation
   const loginMutation = useMutation<AuthResponseDTO, Error, LoginRequestDTO>({
     mutationFn: loginUser,
-    onSuccess: (data) => {
-      localStorage.setItem("token", data.token!); // ✅ Ensure token is stored
+    onSuccess: async (data) => {
+      await persistSessionToken(data.token ?? null);
       setUser(data.user!);
       queryClient.setQueryData(["userProfile"], data.user); // ✅ Update cache
-      router.push("/dashboard"); // Redirect after login
+      await router.push(dashboardRoute()); // Redirect after login
     },
   });
 
   // Register Mutation
-  const registerMutation = useMutation<
-    AuthResponseDTO,
-    Error,
-    CreateUserRequestDTO
-  >({
+  const registerMutation = useMutation<AuthResponseDTO, Error, CreateUserRequestDTO>({
     mutationFn: registerUser,
-    onSuccess: (data) => {
-      localStorage.setItem("token", data.token!);
+    onSuccess: async (data) => {
+      await persistSessionToken(data.token ?? null);
       setUser(data.user!);
       queryClient.setQueryData(["userProfile"], data.user);
-      router.push("/dashboard"); // Redirect after registration
+      await router.push(dashboardRoute()); // Redirect after registration
     },
   });
 
   // Logout Mutation
   const logoutMutation = useMutation({
     mutationFn: logoutUser,
-    onSuccess: () => {
-      localStorage.removeItem("token");
+    onSuccess: async () => {
+      await persistSessionToken(null);
       setUser(null);
-      queryClient.setQueryData(["userProfile"], null); // ✅ Reset cache
-      router.push("/auth/login"); // Redirect after logout
+      queryClient.setQueryData(["userProfile"], null);
+      await router.push(authRoutes.login());
     },
   });
 

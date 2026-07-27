@@ -10,16 +10,18 @@ export const metadata: Metadata = {
 };
 
 type RegisterPageProps = {
-  searchParams?: {
+  searchParams?: Promise<{
     returnUrl?: string;
-  };
+  }>;
 };
 
-const RegisterPage = ({ searchParams }: RegisterPageProps) => {
-  const token = cookies().get("lakira_token");
+const RegisterPage = async ({ searchParams }: RegisterPageProps) => {
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const cookieStore = await cookies();
+  const token = cookieStore.get("lakira_token");
 
   if (token?.value) {
-    redirect(authRoutes.afterAuth(searchParams?.returnUrl));
+    redirect(authRoutes.afterAuth(resolvedSearchParams.returnUrl));
   }
 
   return <RegisterForm />;
