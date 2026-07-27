@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import { memo } from "react";
 
 import type { MetricLogVM } from "@/features/metric-logs/view-models";
 import type { TableColumn } from "@/ui/Table";
@@ -6,13 +6,20 @@ import { TableBase } from "@/ui/Table";
 
 import type { LogTableProps } from "./table-config";
 
+const formatTimestamp = (value?: string) => {
+  if (!value) return "N/A";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return "N/A";
+  return parsed.toLocaleString();
+};
+
 const columns: TableColumn<MetricLogVM>[] = [
   {
     key: "loggedAt",
     label: "LOGGED AT",
     align: "center",
     sortable: true,
-    renderCell: (log) => new Date(log.loggedAt).toLocaleString(),
+    renderCell: (log) => formatTimestamp(log.loggedAt),
   },
   {
     key: "logValue",
@@ -31,18 +38,22 @@ export const LogDesktopTableBase = ({
   onEdit,
   onDelete,
   onRowClick,
+  className,
 }: LogTableProps) => {
   return (
     <TableBase<MetricLogVM>
       data={logs}
       columns={columns}
-      sortBy={sortBy as keyof MetricLogVM}
+      sortBy={sortBy}
       sortOrder={sortOrder}
-      onSort={(col) => onSort(String(col))}
+      onSort={onSort}
       rowKey={(cat) => cat.id}
       onEdit={onEdit}
       onDelete={onDelete}
       onRowClick={onRowClick}
+      className={className}
+      ariaLabel="Metric logs table"
+      emptyMessage="No logs available"
       // Optionally: custom row component for editing/deleting per row
       // renderRow={(category) => <MetricCategoryTableRow key={category.id} category={category} />}
     />

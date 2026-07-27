@@ -1,5 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo } from "react";
+
+import { useCursorPager } from "@/lib/cursor/useCursorPager";
+import { computeTotalPages, makePageItemsSelect } from "@/utils/cursor/page-map";
 
 import { getMetricLogsListViaCursor } from "../api";
 import { metricLogsKeys } from "../keys";
@@ -16,63 +19,59 @@ export function useMetricLogListCursorPage(params: {
   filter?: MetricLogFilter;
   enabled: boolean;
 }) {
-  type Map = Record<number, string | null>;
-  const [page, setPage] = useState(1);
-  const [cursorByPage, setCursorByPage] = useState<Map>({ 1: null });
-  const { enabled = true } = params;
+  const { limit, sort, q, filter, enabled = true } = params;
 
-  // reset cursors when query changes
-  useEffect(() => {
-    setPage(1);
-    setCursorByPage({ 1: null });
-  }, [params.limit, params.sort, params.q, params.filter?.name, params.filter?.metricId]);
+  const resetDeps = useMemo(
+    () => [limit, sort, q ?? "", filter?.name ?? "", filter?.metricId ?? ""],
+    [limit, sort, q, filter?.name, filter?.metricId],
+  );
 
-  const after = cursorByPage[page] ?? undefined;
+  const { page, after, setPage, updateNextCursor, canPrev, canNextUsing } =
+    useCursorPager(resetDeps);
 
   const query = useQuery<LogCursorPageDTO, Error, MetricLogCursorPageVM>({
     queryKey: metricLogsKeys.cursor.pages({
-      ...params,
+      limit,
+      sort,
+      q,
+      filter,
       page,
       includeTotal: true,
     }),
-    queryFn: async () =>
-      await getMetricLogsListViaCursor({
-        ...params,
+    queryFn: () =>
+      getMetricLogsListViaCursor({
+        limit,
+        sort,
+        q,
+        filter,
         after,
         includeTotal: true,
       }),
 
-    select: (d) => ({
-      ...d,
-      items: d.items.map(toMetricLogVM),
-    }),
+    select: makePageItemsSelect(toMetricLogVM),
+    placeholderData: keepPreviousData,
 
-    placeholderData: (previousData) => previousData,
-
-    enabled: enabled,
     staleTime: 30_000,
+    enabled,
   });
 
-  // when we get new data, store the next cursor for the next page
   useEffect(() => {
-    const next = query.data?.nextCursor;
-    if (!next) return;
-    setCursorByPage((prev) => (prev[page + 1] === next ? prev : { ...prev, [page + 1]: next }));
-  }, [page, query.data?.nextCursor]);
+    updateNextCursor(query.data?.nextCursor ?? null);
+  }, [page, query.data?.nextCursor, updateNextCursor]);
 
-  const items = query.data?.items ?? [];
+  const items = useMemo(() => query.data?.items ?? [], [query.data?.items]);
   const totalCount = query.data?.totalCount;
-  const totalPages = totalCount ? Math.max(1, Math.ceil(totalCount / params.limit)) : undefined;
-
-  // navigation helpers (works even if total unknown)
-  const canPrev = page > 1;
-  const canNext = Boolean(cursorByPage[page + 1] ?? query.data?.nextCursor);
+  const totalPages = computeTotalPages(totalCount, limit);
+  const canNext = canNextUsing(query.data?.nextCursor);
 
   return {
     items,
     page,
     setPage,
     isFetching: query.isFetching,
+    isError: query.isError,
+    error: query.error,
+    refetch: query.refetch,
     totalCount,
     totalPages,
     canPrev,

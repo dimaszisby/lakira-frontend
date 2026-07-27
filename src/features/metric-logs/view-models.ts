@@ -1,5 +1,5 @@
 import type { CursorPageVM } from "@/generics/cursor/view-model";
-import type { ISODateTimeString } from "@/types/aliases";
+import type { ISODateTimeString } from "@/src/generics/date/aliases";
 import type { MetricLogResponseDTO } from "@/types/dtos/metric-log.dto";
 
 import type { MetricLogFilter, MetricLogSortableKey } from "./sort";

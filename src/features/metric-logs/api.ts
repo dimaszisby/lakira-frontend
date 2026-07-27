@@ -1,3 +1,5 @@
+import type { CursorListParams } from "@/features/shared/api";
+import { buildCursorQueryString } from "@/features/shared/api";
 import api from "@/services/api/api";
 import { withApiErrorHandling } from "@/services/api/withApiErrorHandling";
 import type {
@@ -14,15 +16,7 @@ import type { RequestOpts } from "@/types/generics/RequestOpts";
 import type { MetricLogCursorPageResponse, MetricLogFilter, MetricLogSortParam } from "./sort";
 import { DEFAULT_METRIC_LOG_SORT } from "./sort";
 
-// TODO: Generic/Shared Function
-type ListLogsRequestParams = {
-  limit?: number; // default 20
-  sort?: MetricLogSortParam;
-  q?: string;
-  filter?: MetricLogFilter;
-  after?: string; // cursor
-  includeTotal?: boolean;
-};
+type ListLogsRequestParams = CursorListParams<MetricLogSortParam, MetricLogFilter>;
 
 const BASE_URL = "/metric-logs";
 
@@ -67,33 +61,57 @@ export const getMetricLogs = async ({
  * * GET ALL via Cursor
  * Fetches a list of metric log entries, optionally filtered by metricId.
  */
-export async function getMetricLogsListViaCursor({
-  limit = 20,
-  sort = DEFAULT_METRIC_LOG_SORT,
-  q,
-  filter,
-  after,
-  includeTotal = false,
-}: ListLogsRequestParams): Promise<MetricLogCursorPageResponse> {
+export async function getMetricLogsListViaCursor(
+  {
+    limit = 20,
+    sort = DEFAULT_METRIC_LOG_SORT,
+    q,
+    filter,
+    after,
+    includeTotal = false,
+  }: ListLogsRequestParams,
+  opts: RequestOpts = {},
+): Promise<MetricLogCursorPageResponse> {
   return withApiErrorHandling(async () => {
-    const search = new URLSearchParams();
-
-    search.set("limit", String(limit));
-    search.set("sort", sort);
-
-    if (q?.trim()) search.set("q", q.trim());
-    if (filter?.name?.trim()) search.set("filter[name]", filter.name.trim());
-    if (filter?.metricId?.trim()) search.set("filter[metricId]", filter.metricId.trim());
-    if (after) search.set("after", after);
-    if (includeTotal) search.set("includeTotal", "true");
+    const query = buildCursorQueryString({
+      limit,
+      sort,
+      q,
+      filter,
+      after,
+      includeTotal,
+    });
 
     const response = await api.get<ApiResponse<MetricLogCursorPageResponse>>(
-      `${BASE_URL}?${search.toString()}`,
+      `${BASE_URL}${query}`,
+      { signal: opts.signal, headers: opts.headers },
     );
 
     return unwrap(response);
   }, "getMetricLogsListViaCursor");
 }
+
+export const getMetricLogDetail = async (
+  {
+    logId,
+    metricId,
+  }: {
+    logId: string;
+    metricId: string;
+  },
+  opts: RequestOpts = {},
+): Promise<MetricLogResponseDTO> =>
+  withApiErrorHandling(async () => {
+    const response = await api.get<ApiResponse<MetricLogResponseDTO>>(
+      `${BASE_URL}/${logId}`,
+      {
+        signal: opts.signal,
+        headers: opts.headers,
+        params: { metricId },
+      },
+    );
+    return unwrap(response);
+  }, "getMetricLogDetail");
 
 // * ========== Command Endpoints ==========
 
@@ -109,7 +127,7 @@ export const createMetricLog = async (
 
     const response = await api.post<ApiResponse<MetricLogResponseDTO>>("/metric-logs", metricLog, {
       signal: opts.signal,
-      headers,
+      headers: { ...headers, ...(opts.headers ?? {}) },
     });
 
     return unwrap(response);
@@ -127,7 +145,7 @@ export const updateMetricLog = async (
     const response = await api.put<ApiResponse<MetricLogResponseDTO>>(
       `${BASE_URL}/${metricLogId}`,
       metricLog,
-      { signal: opts.signal },
+      { signal: opts.signal, headers: opts.headers },
     );
 
     return unwrap(response);
@@ -142,7 +160,7 @@ export const deleteMetricLog = async (
   return withApiErrorHandling(async () => {
     const response = await api.delete<ApiResponse<MetricLogResponseDTO>>(
       `${BASE_URL}/${metricLogId}`,
-      { signal: opts.signal },
+      { signal: opts.signal, headers: opts.headers },
     );
 
     return unwrap(response);

@@ -3,6 +3,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { MetricLogResponseDTO, UpdateMetricLogRequestDTO } from "@/types/dtos/metric-log.dto";
 
+import { invalidateMetricVisualization } from "@/features/data-visualizations/cache";
+
 import { updateMetricLog } from "../api";
 import { invalidateLogDetail, invalidateLogLists, patchLogHeaderOptimistic } from "../cache";
 import { metricLogsKeys } from "../keys";
@@ -10,6 +12,7 @@ import type { MetricLogVM } from "../view-models";
 
 type UpdateLogVars = {
   logId: string;
+  metricId: string;
   log: UpdateMetricLogRequestDTO;
 };
 
@@ -47,6 +50,7 @@ export function useUpdateMetricLog(
     onSettled: async (_data, _err, vars) => {
       await invalidateLogDetail(qc, vars.logId);
       await invalidateLogLists(qc);
+      await invalidateMetricVisualization(qc, vars.metricId);
     },
 
     onSuccess: (updated) => {

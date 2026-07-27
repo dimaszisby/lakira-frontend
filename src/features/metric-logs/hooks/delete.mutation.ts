@@ -3,6 +3,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import type { MetricLogResponseDTO } from "@/types/dtos/metric-log.dto";
 
+import { invalidateMetricVisualization } from "@/features/data-visualizations/cache";
+
 import { deleteMetricLog } from "../api";
 import { invalidateLogLists, removeLogDetail } from "../cache";
 import { metricLogsKeys } from "../keys";
@@ -12,19 +14,21 @@ type DeleteCtx = {
   details: Array<{ key: QueryKey; prev: unknown }>;
 };
 
-export function useDeleteMetricLog(
-  onSuccess?: (deletedId: string) => void,
-  onErrorCb?: (error: Error) => void,
-) {
+type DeleteVars = {
+  logId: string;
+  metricId: string;
+};
+
+export function useDeleteMetricLog(onSuccess?: (deletedId: string) => void, onErrorCb?: (error: Error) => void) {
   const qc = useQueryClient();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation<
     MetricLogResponseDTO,
     Error,
-    string,
+    DeleteVars,
     DeleteCtx
   >({
-    mutationFn: deleteMetricLog,
-    onMutate: async (logId) => {
+    mutationFn: ({ logId }) => deleteMetricLog(logId),
+    onMutate: async ({ logId }) => {
       await qc.cancelQueries({
         queryKey: metricLogsKeys.detail(logId),
       });
@@ -44,12 +48,13 @@ export function useDeleteMetricLog(
       });
       onErrorCb?.(err);
     },
-    onSuccess: (_void, logId) => {
+    onSuccess: (_void, { logId }) => {
       removeLogDetail(qc, logId);
       onSuccess?.(logId);
     },
-    onSettled: async () => {
+    onSettled: async (_data, _err, vars) => {
       await invalidateLogLists(qc);
+      await invalidateMetricVisualization(qc, vars.metricId);
     },
   });
 

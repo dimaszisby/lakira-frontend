@@ -1,7 +1,8 @@
 import { Lightning } from "phosphor-react";
 import { memo, useCallback } from "react";
 
-import type { MetricLogVM } from "@/src/features/metric-logs/view-models";
+import type { MetricLogVM } from "@/features/metric-logs/view-models";
+import { formatHuman } from "@/utils/date-io";
 
 interface LogMobileCardProps {
   log: MetricLogVM;
@@ -10,39 +11,37 @@ interface LogMobileCardProps {
 
 const LogMobileCardBase = ({ log, onClick }: LogMobileCardProps) => {
   const { logValue, loggedAt } = log;
+  const loggedAtLabel = formatHuman(loggedAt);
 
   const handleCardClick = useCallback(() => {
-    if (onClick) return onClick(log); // prefer parent handler
+    onClick?.(log);
   }, [onClick, log]);
 
   return (
-    <div
-      role="button"
-      tabIndex={0}
+    <button
+      type="button"
       onClick={handleCardClick}
-      onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          handleCardClick();
-        }
-      }}
-      className="flex flex-row flex-wrap justify-between"
-      aria-label={`Open category ${name}`}
+      className="flex w-full flex-row flex-wrap justify-between gap-2 text-left"
+      aria-label={`Open log from ${loggedAtLabel}`}
     >
-      <section className="flex flex-row items-center gap-2">
+      <span className="flex flex-row items-center gap-2">
         <Lightning size={18} weight="fill" className="text-status-warning" />
-        <p>{loggedAt}</p>
-      </section>
-      <h6 className="font-bold">{logValue}</h6>
-    </div>
+        <span>{loggedAtLabel}</span>
+      </span>
+      <span className="font-bold">{logValue}</span>
+    </button>
   );
 };
 
-LogMobileCardBase.displayName = "MetricCategoryMobileCard";
+LogMobileCardBase.displayName = "LogMobileCard";
 
 const LogMobileCard = memo(
   LogMobileCardBase,
-  (prev, next) => prev.log.id === next.log.id && prev.onClick === next.onClick,
+  (prev, next) =>
+    prev.log.id === next.log.id &&
+    prev.log.logValue === next.log.logValue &&
+    prev.log.loggedAt === next.log.loggedAt &&
+    prev.onClick === next.onClick,
 );
-LogMobileCard.displayName = "MetricCategoryMobileCard";
+LogMobileCard.displayName = "LogMobileCard";
 export default LogMobileCard;
