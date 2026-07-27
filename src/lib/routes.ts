@@ -77,4 +77,35 @@ export const authRoutes = {
   afterAuth: (returnUrl?: string | null) => resolveReturnUrl(returnUrl) ?? "/dashboard",
 };
 
+export const metricRoutes = {
+  list: (params?: QueryParams) => buildPath("/metrics", params),
+  detail: (metricId: string) => `/metrics/${metricId}`,
+  overview: (metricId: string, params?: QueryParams) =>
+    buildPath(`/metrics/${metricId}`, params),
+  logs: (metricId: string, params?: QueryParams) =>
+    buildPath(`/metrics/${metricId}/logs`, params),
+  settings: (metricId: string, params?: QueryParams) =>
+    buildPath(`/metrics/${metricId}/settings`, params),
+  modal: {
+    new: () => "/metrics/new",
+    edit: (metricId: string) => `/metrics/${metricId}/edit`,
+    log: (metricId: string, logId?: string) =>
+      `/metrics/${metricId}/logs/${logId ?? "new"}`,
+  },
+};
+
+export const metricCategoryRoutes = {
+  list: (params?: QueryParams) => buildPath("/metric-categories", params),
+  detail: (categoryId: string, params?: QueryParams) =>
+    buildPath(`/metric-categories/${categoryId}`, params),
+  modal: {
+    new: () => "/metric-categories/new",
+    edit: (categoryId: string) => `/metric-categories/${categoryId}/edit`,
+  },
+};
+
+export const dashboardRoute = (params?: QueryParams) => buildPath("/dashboard", params);
+
 export type AuthRoutes = typeof authRoutes;
+export type MetricRoutes = typeof metricRoutes;
+export type MetricCategoryRoutes = typeof metricCategoryRoutes;
