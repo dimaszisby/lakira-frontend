@@ -6,25 +6,29 @@ import { DASHBOARD_VIZ_LIMIT } from "@/features/data-visualizations/dashboardCon
 import { parseDashboardFilters } from "@/features/data-visualizations/dashboardFilters";
 import { vizKeys } from "@/features/data-visualizations/keys";
 import { buildVizQuery, DEFAULT_FILL, DEFAULT_TZ } from "@/features/data-visualizations/viz-helpers";
+import { getServerAuthHeaders } from "@/services/api/serverHeaders";
 
 export const metadata = {
   title: "Dashboard • Lakira",
 };
 
 type DashboardPageProps = {
-  searchParams?: Record<string, string | string[] | undefined>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 };
 
-const DashboardPage = async ({ searchParams = {} }: DashboardPageProps) => {
+const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
+  const resolvedSearchParams = (await searchParams) ?? {};
   const resolveValue = (value?: string | string[]) =>
     Array.isArray(value) ? value[0] ?? null : value ?? null;
 
   const filters = parseDashboardFilters({
-    bucket: resolveValue(searchParams.bucket),
-    range: resolveValue(searchParams.range),
-    rangeStart: resolveValue(searchParams.rangeStart),
-    rangeEnd: resolveValue(searchParams.rangeEnd),
+    bucket: resolveValue(resolvedSearchParams.bucket),
+    range: resolveValue(resolvedSearchParams.range),
+    rangeStart: resolveValue(resolvedSearchParams.rangeStart),
+    rangeEnd: resolveValue(resolvedSearchParams.rangeEnd),
   });
+
+  const serverHeaders = await getServerAuthHeaders();
 
   const queryClient = new QueryClient();
   const vizQuery = buildVizQuery(filters.range, filters.bucket, DEFAULT_TZ, DEFAULT_FILL);
@@ -32,7 +36,7 @@ const DashboardPage = async ({ searchParams = {} }: DashboardPageProps) => {
 
   await queryClient.prefetchQuery({
     queryKey: vizKeys.dashboard(dashboardQuery),
-    queryFn: () => getDashboardVisualizations(dashboardQuery),
+    queryFn: () => getDashboardVisualizations(dashboardQuery, { headers: serverHeaders }),
   });
 
   const dehydratedState = dehydrate(queryClient);

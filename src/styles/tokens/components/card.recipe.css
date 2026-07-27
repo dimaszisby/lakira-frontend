@@ -61,6 +61,10 @@
 
   /* ===== Radius mapping ===== */
 
+  .card[data-radius="none"] {
+    border-radius: 0;
+  }
+
   .card[data-radius="sm"] {
     border-radius: var(--card-radius-sm);
   }

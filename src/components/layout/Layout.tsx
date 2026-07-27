@@ -30,24 +30,8 @@ const Layout = ({ children }: LayoutProps) => {
       />
 
       <div className="flex min-h-screen flex-1 flex-col lg:pl-64">
-        {/* <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-surface2 bg-bg/80 px-4 py-3 backdrop-blur lg:hidden">
-          <button
-            type="button"
-            onClick={() => setMobileSidebarOpen(true)}
-            className="rounded-xl border border-transparent bg-surface px-3 py-2 text-ink transition hover:border-surface2"
-            aria-label="Open navigation menu"
-          >
-            <List size={20} />
-          </button>
-          <div>
-            <p className="text-ink-muted text-sm">Lakira</p>
-            <p className="text-base font-semibold">Analytics Console</p>
-          </div>
-        </header> */}
-
         <main
           id="main"
-          // className="flex-1 overflow-x-hidden bg-blue-500 px-4 pb-24 pt-4 sm:px-6 lg:px-8 lg:pb-8 lg:pt-6"
           className="flex-1 overflow-x-hidden bg-bg sm:px-6 lg:px-8 lg:pb-8 lg:pt-6"
         >
           {children}

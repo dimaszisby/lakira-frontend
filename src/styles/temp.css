@@ -1,0 +1,245 @@
+/* 
+TODO: Not Refacored yet
+* Brand Colors
+This is brand color palette for Lakira Design System, served as the foundation for theming and styling across the application.
+This brand color directly applies to UI components to ensure a cohesive and visually appealing user interface.
+This colors works for both light and dark themes.
+*/
+:root {
+  /* * Core Colors */
+  --core-primary: var(--primary-sakurapink-500);
+  --core-secondary: var(--primary-matchagreen-500);
+  --core-accent: var(--accent-softlavender-500);
+
+  /* * Status Colors */
+  --status-error-bg: var(--accent-vividcoral-100);
+  --status-error: var(--accent-vividcoral-500);
+  --status-error-emphasis: var(--accent-vividcoral-700);
+  --status-success-bg: var(--primary-matchagreen-100);
+  --status-success: var(--primary-matchagreen-500);
+  --status-success-emphasis: var(--primary-matchagreen-700);
+  --status-warning-bg: var(--accent-goldenyellow-100);
+  --status-warning: var(--accent-goldenyellow-500);
+  --status-warning-emphasis: var(--accent-goldenyellow-700);
+}
+
+/*
+TODO: Not Refactored yet -> Currently implementing one-by-one
+* Light Theme
+This section defines the color variables specifically for the light theme of the Lakira Design System.
+These colors are optimized for visibility and aesthetics in a light-themed user interface.
+*/
+:root[data-theme="light"],
+:root:not([data-theme]) {
+  /* * Info Colors */
+  --info-100: #f7f9fc;
+  --info-500: #a3c7d6;
+  --info-700: #4a4a4a;
+
+  /* * Text Colors */
+  --text-emphasis: var(--grayscale-gray-900);
+  --text-primary: var(--grayscale-gray-800);
+  --text-secondary: var(--grayscale-gray-700);
+  --text-tertiary: var(--grayscale-gray-600);
+  --text-overline: var(--secondary-origamiblue-700);
+  --text-error: var(--accent-vividcoral-500);
+  --text-placeholder: var(--grayscale-gray-500);
+  --text-disabled: var(--grayscale-gray-600);
+  --text-inverted: var(--grayscale-white); /* For dark backgrounds */
+  --status-info-bg: var(--info-100);
+  --status-info: var(--info-500);
+  --status-info-emphasis: var(--info-700);
+
+  /* * Background Colors */
+  --background-base: var(--grayscale-white);
+  --background-primary: var(--grayscale-gray-50);
+  --background-secondary: var(--grayscale-gray-100);
+  --background-tertiary: var(--grayscale-gray-200);
+  --background-overlay: rgb(0 0 0 / 50%);
+  --background-disabled: var(--grayscale-gray-400);
+
+  /* * Borders & Dividers */
+  --border-default: var(--transparent);
+  --border-active: var(--accent-softlavender-500);
+  --border-focus: var(--core-primary);
+  --border-success: var(--primary-matchagreen-500);
+  --border-warning: var(--accent-goldenyellow-500);
+  --border-error: var(--accent-vividcoral-500);
+  --border-info: var(--info-500);
+  --border-destructive: var(--accent-vividcoral-500);
+  --border-disabled: var(--grayscale-gray-400);
+
+  /* * ===== Interactive Components ===== */
+
+  /**
+  * Glossary of Component Variables
+  * bg = background
+  * fg = foreground (text color and/or icon color)
+  /
+
+  /* Button */
+
+  /* --button-bg: var(--core-secondary);
+  --button-fg: var(--grayscale-white);
+  --button-border: var(--core-secondary);
+
+  --button-secondary-bg: var(--grayscale-white);
+  --button-secondary-fg: var(--core-secondary);
+  --button-secondary-border: var(--core-secondary);
+
+  --button-tertiary-bg: var(--core-accent);
+  --button-tertiary-fg: var(--text-emphasis);
+  --button-tertiary-border: var(--core-accent);
+
+  --button-disabled-bg: var(--background-disabled);
+  --button-disabled-fg: var(--text-disabled);
+  --button-disabled-border: var(--border-disabled);
+
+  --button-destructive-bg: var(--accent-vividcoral-500);
+  --button-destructive-fg: var(--grayscale-white);
+  --button-destructive-border: var(--accent-vividcoral-500);
+
+  --button-ghost-bg: var(--transparent);
+  --button-ghost-fg: var(--core-secondary);
+  --button-ghost-border: var(--transparent);
+
+  --button-link-bg: var(--transparent);
+  --button-link-fg: var(--core-primary);
+  --button-link-border: var(--transparent); */
+
+  /* Textfield */
+
+  /* --textfield-bg: var(--background-secondary);
+  --textfield-fg: var(--text-primary);
+  --textfield-placeholder: var(--text-placeholder);
+
+  --textfield-border: var(--border-default);
+  --textfield-border-active: var(--border-focus);
+  --textfield-border-error: var(--border-error);
+  --textfield-border-success: var(--border-success);
+  --textfield-border-warning: var(--border-warning);
+  --textfield-border-info: var(--border-info);
+  --textfield-border-destructive: var(--border-destructive);
+
+  --textfield-bg-disabled: var(--background-disabled);
+  --textfield-fg-disabled: var(--text-disabled);
+  --textfield-placeholder-disabled: var(--text-disabled);
+  --textfield-border-disabled: var(--border-disabled); */
+
+  /* Selection */
+
+  /* For example: Chip, Picker, Dropdown, Segmented Control, Slider, Toggle, Pagination */
+
+  /* --selection-bg: var(--background-secondary);
+  --selection-fg: var(--text-primary);
+  --selection-hover-bg: var(--grayscale-gray-200);
+  --selection-hover-fg: var(--core-accent);
+  --selection-active-bg: var(--core-accent);
+  --selection-active-fg: var(--grayscale-white); */
+}
+
+/*
+TODO: Not Refactored yet -> Currently implementing one-by-one
+*/
+:root[data-theme="dark"],
+:root:not([data-theme]) {
+  /* * Text Colors */
+  --text-emphasis: var(--grayscale-white);
+  --text-primary: var(--grayscale-gray-200);
+  --text-secondary: var(--grayscale-gray-300);
+  --text-tertiary: var(--grayscale-gray-400);
+  --text-overline: var(--secondary-origamiblue-500);
+  --text-error: var(--accent-vividcoral-100);
+  --text-placeholder: var(--grayscale-gray-400);
+  --text-disabled: var(--grayscale-gray-600);
+  --text-inverted: var(--grayscale-gray-800); /* For light backgrounds */
+  --status-info-bg: var(--info-100);
+  --status-info: var(--info-500);
+  --status-info-emphasis: var(--info-700);
+
+  /* * Background Colors */
+  --background-base: var(--grayscale-black);
+  --background-primary: var(--grayscale-gray-900);
+  --background-secondary: var(--grayscale-gray-800);
+  --background-tertiary: var(--grayscale-gray-700);
+  --background-overlay: rgb(0 0 0 / 50%);
+  --background-disabled: var(--grayscale-gray-400);
+
+  /* * Borders & Dividers */
+  --border-default: var(--transparent);
+  --border-active: var(--accent-softlavender-500);
+  --border-focus: var(--core-primary);
+  --border-success: var(--primary-matchagreen-500);
+  --border-warning: var(--accent-goldenyellow-500);
+  --border-error: var(--accent-vividcoral-500);
+  --border-info: var(--info-500);
+  --border-destructive: var(--accent-vividcoral-500);
+
+  /* * ===== Interactive Components ===== */
+
+  /**
+  * Glossary of Component Variables
+  * bg = background
+  * fg = foreground (text color and/or icon color)
+  /
+
+  /* Button */
+
+  /* --button-bg: var(--core-secondary);
+  --button-fg: var(--grayscale-gray-900);
+  --button-border: var(--core-secondary);
+
+  --button-secondary-bg: var(--grayscale-gray-900);
+  --button-secondary-fg: var(--core-secondary);
+  --button-secondary-border: var(--core-secondary);
+
+  --button-tertiary-bg: var(--core-accent);
+  --button-tertiary-fg: var(--grayscale-gray-900);
+  --button-tertiary-border: var(--core-accent);
+
+  --button-disabled-bg: var(--grayscale-gray-400);
+  --button-disabled-fg: var(--grayscale-gray-600);
+  --button-disabled-border: var(--grayscale-gray-400);
+
+  --button-destructive-bg: var(--accent-vividcoral-500);
+  --button-destructive-fg: var(--grayscale-white);
+  --button-destructive-border: var(--accent-vividcoral-500);
+
+  --button-ghost-bg: var(--transparent);
+  --button-ghost-fg: var(--core-secondary);
+  --button-ghost-border: var(--transparent);
+
+  --button-link-bg: var(--transparent);
+  --button-link-fg: var(--core-primary);
+  --button-link-border: var(--transparent); */
+
+  /* Textfield */
+
+  /* --textfield-bg: var(--background-secondary);
+  --textfield-fg: var(--text-primary);
+  --textfield-placeholder: var(--text-placeholder);
+
+  --textfield-border: var(--border-default);
+  --textfield-border-active: var(--border-focus);
+  --textfield-border-error: var(--border-error);
+  --textfield-border-success: var(--border-success);
+  --textfield-border-warning: var(--border-warning);
+  --textfield-border-info: var(--border-info);
+  --textfield-border-destructive: var(--border-destructive);
+
+  --textfield-bg-disabled: var(--background-disabled);
+  --textfield-fg-disabled: var(--text-disabled);
+  --textfield-placeholder-disabled: var(--text-disabled);
+  --textfield-border-disabled: var(--border-default); */
+
+  /* Selection */
+
+  /* For example: Chip, Picker, Dropdown, Segmented Control, Slider, Toggle, Pagination */
+
+  /* --selection-bg: var(--background-secondary);
+  --selection-fg: var(--text-primary);
+  --selection-hover-bg: var(--grayscale-gray-200);
+  --selection-hover-fg: var(--core-accent);
+  --selection-active-bg: var(--core-accent);
+  --selection-active-fg: var(--grayscale-white); */
+}

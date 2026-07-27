@@ -19,12 +19,12 @@ const SideBarNavigationItems = ({
             <Link
               href={item.href}
               onClick={onLinkClick}
-              className={cn("flex items-center rounded-md px-4 py-2 transition", {
-                "text-brand-primary font-bold": pathname === item.href,
+              className={cn("flex items-center rounded-xl px-4 py-2.5 text-sm font-medium transition", {
+                "bg-brand-primary text-white": pathname === item.href,
                 "text-ink hover:bg-surface2": pathname !== item.href,
               })}
             >
-              <item.icon size={20} className="mr-2" />
+              <item.icon size={18} className="mr-3 shrink-0" />
               {item.name}
             </Link>
           </li>

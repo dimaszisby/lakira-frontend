@@ -4,13 +4,14 @@ import { authRoutes } from "@/lib/routes";
 import Button from "@/ui/Button";
 
 type HomePageProps = {
-  searchParams?: {
+  searchParams?: Promise<{
     returnUrl?: string;
-  };
+  }>;
 };
 
-const HomePage = ({ searchParams }: HomePageProps) => {
-  const returnUrl = searchParams?.returnUrl;
+const HomePage = async ({ searchParams }: HomePageProps) => {
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const returnUrl = resolvedSearchParams.returnUrl;
 
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center gap-6">

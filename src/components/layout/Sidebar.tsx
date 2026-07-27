@@ -27,16 +27,18 @@ interface SidebarContentProps {
 
 const SidebarContentWrapper = ({ includeCloseButton, onClose, children }: SidebarContentProps) => (
   <div className="flex h-full flex-col">
-    <div className="flex items-center justify-between pb-6">
-      <div>
-        <p className="text-2xl font-semibold text-ink">Lakira</p>
-        <p className="text-ink-muted text-sm">Measure what matters</p>
+    <div className="flex items-center justify-between pb-8">
+      <div className="flex items-center gap-2">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary text-sm font-bold text-white">
+          L
+        </div>
+        <p className="text-lg font-semibold text-ink">Lakira</p>
       </div>
       {includeCloseButton ? (
         <button
           type="button"
           onClick={onClose}
-          className="text-ink-muted p-2 transition hover:text-ink"
+          className="p-2 text-ink-secondary transition hover:text-ink"
           aria-label="Close navigation"
         >
           <X size={20} />
@@ -75,23 +77,23 @@ const Sidebar = ({ navItems, pathname, onLinkClick, isMobileOpen, onClose }: Sid
   }, [isMobileOpen, onClose, onLinkClick]);
 
   const logoutButton = (
-    <div className="mt-auto pt-6">
-      <Button
-        variant="ghost"
+    <div className="mt-auto border-t border-surface2 pt-4">
+      <button
+        type="button"
         onClick={() => setLogoutModalOpen(true)}
-        className="w-full justify-start px-4 text-ink hover:text-status-error"
-        leftIcon={<SignOut size={20} />}
+        className="flex w-full items-center rounded-xl px-4 py-2.5 text-sm font-medium text-ink transition hover:bg-status-error-bg hover:text-status-error"
         aria-label="Logout"
       >
+        <SignOut size={18} className="mr-3 shrink-0" />
         Sign Out
-      </Button>
+      </button>
     </div>
   );
 
   return (
     <>
       <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <Card className="flex h-full flex-col border-r border-surface2 px-4 py-6">
+        <Card radius="none" className="flex h-full flex-col border-r border-surface2 px-4 py-6">
           <SidebarContentWrapper>
             <SideBarNavigationItems
               navItems={navItems}
@@ -123,7 +125,7 @@ const Sidebar = ({ navItems, pathname, onLinkClick, isMobileOpen, onClose }: Sid
           )}
           aria-label="Mobile navigation"
         >
-          <Card className="flex h-full flex-col rounded-none border-r border-surface2 px-4 py-6">
+          <Card radius="none" className="flex h-full flex-col border-r border-surface2 px-4 py-6">
             <SidebarContentWrapper includeCloseButton onClose={onClose}>
               <SideBarNavigationItems
                 navItems={navItems}
