@@ -14,7 +14,7 @@ import { CATEGORY_DEFAULTS } from "@/features/metric-categories/constants";
 import { useCreateMetricCategory } from "@/features/metric-categories/hooks";
 import { useCategoryTypeahead } from "@/features/metric-categories/useCategoryTypehead";
 import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
-import { cn } from "@/src/lib/cn";
+import { cn } from "@/lib/cn";
 
 type A11yProps = Pick<
   React.InputHTMLAttributes<HTMLInputElement>,

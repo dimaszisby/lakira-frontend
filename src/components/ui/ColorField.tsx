@@ -4,7 +4,7 @@ import { Check, Palette, PencilSimpleLine } from "phosphor-react";
 import React, { useEffect, useId, useRef, useState } from "react";
 
 import { COLOR_FIELD_PRESET_HEXES, DEFAULT_COLOR_HEX } from "@/constants/color-presets";
-import { cn } from "@/src/lib/cn";
+import { cn } from "@/lib/cn";
 
 export type ColorFieldProps = {
   id?: string;

@@ -1,6 +1,7 @@
-import classNames from "classnames";
 import type { ComponentType, ReactNode } from "react";
 import { memo } from "react";
+
+import { cn } from "@/lib/cn";
 
 type IconWeight = "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
 type ToneText = "default" | "muted" | "success" | "warning" | "danger";
@@ -14,8 +15,8 @@ export type IconProps = {
 interface IconLabelProps {
   label: ReactNode;
   icon: ComponentType<IconProps>;
-  size?: "sm" | "md"; // layout scale
-  tone?: ToneText; // semantic color
+  size?: "sm" | "md";
+  tone?: ToneText;
   className?: string;
   iconClassName?: string;
 }
@@ -28,7 +29,7 @@ const toneToText = {
   danger: "text-status-error",
 } as const;
 
-const sizeToGap = { sm: "text-xs", md: "text-sm" } as const;
+const sizeToText = { sm: "text-xs", md: "text-sm" } as const;
 const sizeToIcon = { sm: 14, md: 16 } as const;
 
 export const IconLabelBase = ({
@@ -39,26 +40,15 @@ export const IconLabelBase = ({
   className,
   iconClassName,
 }: IconLabelProps) => (
-  <div
-    className={classNames(
-      "flex items-center",
-      sizeToGap[size],
-      toneToText[tone],
-      "text-bold",
-      className,
-    )}
-  >
-    <Icon
-      size={sizeToIcon[size]}
-      weight="bold"
-      className={classNames("mr-1", iconClassName)}
-      aria-hidden
-    />
-    <span className="font-bold">{label}</span>
-  </div>
+  <span className={cn("inline-flex items-center font-semibold", sizeToText[size], toneToText[tone], className)}>
+    <Icon size={sizeToIcon[size]} weight="bold" className={cn("mr-1", iconClassName)} aria-hidden />
+    <span>{label}</span>
+  </span>
 );
+
 IconLabelBase.displayName = "IconLabel";
 
 const IconLabel = memo(IconLabelBase);
 IconLabel.displayName = "IconLabel";
+
 export default IconLabel;

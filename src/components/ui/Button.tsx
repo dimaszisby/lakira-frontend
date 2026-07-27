@@ -2,7 +2,7 @@
 
 import React from "react";
 
-import { cn } from "@/src/lib/cn";
+import { cn } from "@/lib/cn";
 
 type Size = "sm" | "md" | "lg";
 type Variant = "primary" | "secondary" | "tertiary" | "destructive" | "neutral" | "ghost" | "link";

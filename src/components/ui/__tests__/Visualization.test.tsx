@@ -145,6 +145,10 @@ describe("Visualization", () => {
       expect.stringContaining("view-range=90d"),
       expect.objectContaining({ scroll: false }),
     );
+    expect(mockReplace).toHaveBeenCalledWith(
+      expect.stringContaining("view-bucket=1w"),
+      expect.objectContaining({ scroll: false }),
+    );
   });
 
   it("supports absolute range from URL and syncs absolute params", async () => {

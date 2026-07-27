@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import GranularityPicker from "@/features/data-visualizations/components/GranularityPicker";
 import MetricChart from "@/features/data-visualizations/components/MetricChart";
@@ -106,6 +106,13 @@ const Visualization = ({ metricId, goalValue, searchParamKey = "view" }: Visuali
     () => parseInitialRange(searchParams, searchParamKey),
     [searchParams, searchParamKey],
   );
+  const latestBucketRef = useRef<BucketAlias>(bucket);
+  const latestRangeRef = useRef<TimeRangeValue>(range);
+
+  useEffect(() => {
+    latestBucketRef.current = bucket;
+    latestRangeRef.current = range;
+  }, [bucket, range]);
 
   const syncSearchParams = (nextRange: TimeRangeValue, nextBucket: BucketAlias) => {
     const nextParams = buildSyncedParams(searchParams, searchParamKey, nextRange, nextBucket);
@@ -115,11 +122,13 @@ const Visualization = ({ metricId, goalValue, searchParamKey = "view" }: Visuali
 
   const handleBucketChange = (nextBucket: BucketAlias) => {
     if (!isBucketAlias(nextBucket)) return;
-    syncSearchParams(range, nextBucket);
+    latestBucketRef.current = nextBucket;
+    syncSearchParams(latestRangeRef.current, nextBucket);
   };
 
   const handleRangeChange = (nextRange: TimeRangeValue) => {
-    syncSearchParams(nextRange, bucket);
+    latestRangeRef.current = nextRange;
+    syncSearchParams(nextRange, latestBucketRef.current);
   };
 
   const query = useMemo(

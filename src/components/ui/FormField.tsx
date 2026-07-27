@@ -2,7 +2,7 @@ import { WarningCircle } from "phosphor-react";
 import type { HTMLAttributes, LabelHTMLAttributes, ReactElement } from "react";
 import React, { cloneElement, createContext, useContext, useId } from "react";
 
-import { cn } from "@/src/lib/cn";
+import { cn } from "@/lib/cn";
 
 type Ctx = {
   id: string;

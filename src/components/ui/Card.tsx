@@ -5,7 +5,7 @@ import { cn } from "@/lib/cn";
 
 export type CardSize = "xs" | "sm" | "md" | "lg";
 export type CardVariant = "primary" | "secondary" | "ghost" | "outlined";
-export type CardRadius = "sm" | "md" | "lg";
+export type CardRadius = "none" | "sm" | "md" | "lg";
 export type CardElevation = "none" | "sm" | "md";
 
 type CardElement = "article" | "section" | "aside" | "div";

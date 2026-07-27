@@ -32,7 +32,7 @@ export const Pagination = ({
   className,
   ariaLabel = "Pagination",
 }: PaginationProps) => {
-  const safePageSize = Math.max(1, pageSize);
+  const safePageSize = normalizePositiveInteger(pageSize, 1);
   const totalPages =
     typeof total === "number" ? Math.max(1, Math.ceil(Math.max(0, total) / safePageSize)) : null;
 
@@ -187,4 +187,9 @@ function getPaginationItems(currentPage: number, totalPages: number): PageItem[]
 
 function clampPage(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
+}
+
+function normalizePositiveInteger(value: number, fallback: number): number {
+  if (!Number.isFinite(value)) return fallback;
+  return Math.max(1, Math.floor(value));
 }
