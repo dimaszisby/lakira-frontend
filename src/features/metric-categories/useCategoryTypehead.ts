@@ -1,29 +1,29 @@
 import type { InfiniteData } from "@tanstack/react-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { useDebounce } from "react-use";
-
-import type { MetricCategoryResponseDTO } from "@/src/types/dtos/metric-category.dto";
 
 import { listMetricCategories } from "./api";
 import { metricCategoriesKeys } from "./keys";
+import { toVM } from "./mappers";
 import type { MetricCategoryCursorPage } from "./sort";
+import type { MetricCategoryCursorPageVM } from "./view-models";
 
-export type CategoryOption = {
-  value: string;
-  label: string;
-  color: string;
-  icon: string;
-  metricCount: number;
-};
+// export type CategoryOption = {
+//   value: string;
+//   label: string;
+//   color: string;
+//   icon: string;
+//   metricCount: number;
+// };
 
-const toOption = (c: MetricCategoryResponseDTO): CategoryOption => ({
-  value: c.id,
-  label: c.name,
-  color: c.color,
-  icon: c.icon,
-  metricCount: c.metricCount ?? 0,
-});
+// const toOption = (c: MetricCategoryResponseDTO): MetricCategoryVM => ({
+//   id: c.id,
+//   name: c.name,
+//   color: c.color,
+//   icon: c.icon,
+//   metricCount: c.metricCount ?? 0,
+// });
 
 export function useCategoryTypeahead(rawQuery: string, limit = 15) {
   const [q, setQ] = useState<string>(rawQuery.trim());
@@ -32,7 +32,7 @@ export function useCategoryTypeahead(rawQuery: string, limit = 15) {
   const query = useInfiniteQuery<
     MetricCategoryCursorPage, // TQueryFnData (server response page)
     Error, // TError
-    InfiniteData<MetricCategoryCursorPage, string | undefined>, // TData
+    InfiniteData<MetricCategoryCursorPageVM, string | undefined>, // TData
     ReturnType<typeof metricCategoriesKeys.cursor.infinite>, // TQueryKey
     string | undefined // TPageParam
   >({
@@ -49,21 +49,29 @@ export function useCategoryTypeahead(rawQuery: string, limit = 15) {
         q: q || undefined,
         after: pageParam,
       }),
+
     initialPageParam: undefined,
     getNextPageParam: (last) => last.nextCursor ?? undefined,
+
+    select: (data) => ({
+      pageParams: data.pageParams,
+      pages: data.pages.map((p) => ({
+        ...p,
+        items: p.items.map(toVM),
+      })),
+    }),
+
     staleTime: 30_000,
     gcTime: 5 * 60_000,
     refetchOnWindowFocus: false,
   });
 
-  const options = useMemo(
-    () => query.data?.pages.flatMap((p) => p.items).map(toOption) ?? [],
-    [query.data],
-  );
+  const items = query.data?.pages.flatMap((p) => p.items) ?? [];
 
   return {
+    ...query,
     q,
-    options,
+    items,
     hasNextPage: query.hasNextPage,
     isFetching: query.isFetching,
     isLoading: query.isLoading,

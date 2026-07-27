@@ -1,5 +1,7 @@
+import type { CursorListParams } from "@/features/shared/api";
+import { buildCursorQueryString } from "@/features/shared/api";
 import api from "@/services/api/api";
-import { handleApiError } from "@/services/api/handleApiError";
+import { withApiErrorHandling } from "@/services/api/withApiErrorHandling";
 import type {
   CreateMetricCategoryRequestDTO,
   GenerateDummyMetricCategoriesRequestDTO,
@@ -9,6 +11,7 @@ import type {
 } from "@/types/dtos/metric-category.dto";
 import type ApiResponse from "@/types/generics/ApiResponse";
 import { unwrap } from "@/types/generics/ApiResponse";
+import type { RequestOpts } from "@/types/generics/RequestOpts";
 
 import type {
   MetricCategoryCursorPage,
@@ -17,20 +20,10 @@ import type {
 } from "./sort";
 import { DEFAULT_METRIC_CATEGORY_SORT } from "./sort";
 
-// Developer Note: Should this replaced with generics?
-export type ListCategoryParams = {
-  limit?: number; // default 50
-  sort?: MetricCategorySortParam;
-  q?: string;
-  filter?: MetricCategoryFilter;
-  after?: string;
-  includeTotal?: boolean;
-};
-
-// TODO: Shared
-type RequestOpts = {
-  signal?: AbortSignal;
-};
+export type ListCategoryParams = CursorListParams<
+  MetricCategorySortParam,
+  MetricCategoryFilter
+>;
 
 // * ========== Queries ==========
 
@@ -38,29 +31,34 @@ type RequestOpts = {
  * * GET List via Cursor
  * @description Fetches the list of metric categories from the API.
  */
-export async function listMetricCategories({
-  limit = 20,
-  sort = DEFAULT_METRIC_CATEGORY_SORT,
-  q,
-  filter,
-  after,
-  includeTotal = false,
-}: ListCategoryParams): Promise<MetricCategoryCursorPage> {
-  const search = new URLSearchParams();
+export async function listMetricCategories(
+  {
+    limit = 20,
+    sort = DEFAULT_METRIC_CATEGORY_SORT,
+    q,
+    filter,
+    after,
+    includeTotal = false,
+  }: ListCategoryParams,
+  opts: RequestOpts = {},
+): Promise<MetricCategoryCursorPage> {
+  return withApiErrorHandling(async () => {
+    const query = buildCursorQueryString({
+      limit,
+      sort,
+      q,
+      filter,
+      after,
+      includeTotal,
+    });
 
-  search.set("limit", String(limit));
-  search.set("sort", sort);
+    const res = await api.get<ApiResponse<MetricCategoryCursorPage>>(
+      `/metric-categories${query}`,
+      { signal: opts.signal, headers: opts.headers },
+    );
 
-  if (q?.trim()) search.set("q", q.trim());
-  if (filter?.name?.trim()) search.set("filter[name]", filter.name.trim());
-  if (after) search.set("after", after);
-  if (includeTotal) search.set("includeTotal", "true");
-
-  const res = await api.get<ApiResponse<MetricCategoryCursorPage>>(
-    `/metric-categories?${search.toString()}`,
-  );
-
-  return unwrap(res);
+    return unwrap(res);
+  }, "listMetricCategories");
 }
 
 /**
@@ -78,8 +76,8 @@ export const getMetricCategoryLibraries = async ({
   limit?: number;
   sortBy?: string;
   sortOrder?: "ASC" | "DESC" | null;
-}): Promise<PaginatedMetricCategoryListResponseDTO> => {
-  try {
+}): Promise<PaginatedMetricCategoryListResponseDTO> =>
+  withApiErrorHandling(async () => {
     let url = `/metric-categories?page=${page}&limit=${limit}`;
 
     if (sortBy) {
@@ -92,12 +90,7 @@ export const getMetricCategoryLibraries = async ({
     const res = await api.get<ApiResponse<PaginatedMetricCategoryListResponseDTO>>(url);
 
     return unwrap(res);
-  } catch (error: unknown) {
-    console.error("Error fetching metric library list:", error);
-    handleApiError(error);
-    throw error;
-  }
-};
+  }, "getMetricCategoryLibraries");
 
 /**
  * * GET by ID
@@ -106,19 +99,15 @@ export const getMetricCategoryLibraries = async ({
 export const getMetricCategoryById = async (
   id: string,
   opts: RequestOpts = {},
-): Promise<MetricCategoryResponseDTO> => {
-  try {
+): Promise<MetricCategoryResponseDTO> =>
+  withApiErrorHandling(async () => {
     const res = await api.get<ApiResponse<MetricCategoryResponseDTO>>(`/metric-categories/${id}`, {
       signal: opts.signal,
+      headers: opts.headers,
     });
 
     return unwrap(res);
-  } catch (error: unknown) {
-    console.error(`Error fetching metric category with ID ${id}:`, error);
-    handleApiError(error);
-    throw error;
-  }
-};
+  }, "getMetricCategoryById");
 
 // * ========== Mutations ==========
 
@@ -132,19 +121,15 @@ export const createMetricCategory = async (
 ): Promise<MetricCategoryResponseDTO> => {
   const headers: Record<string, string> = {};
   if (opts.idempotencyKey) headers["Idempotency-Key"] = opts.idempotencyKey;
-  try {
+  return withApiErrorHandling(async () => {
     const res = await api.post<ApiResponse<MetricCategoryResponseDTO>>(
       "/metric-categories",
       category,
-      { signal: opts.signal, headers },
+      { signal: opts.signal, headers: { ...headers, ...(opts.headers ?? {}) } },
     );
 
     return unwrap(res);
-  } catch (error: unknown) {
-    console.error("Error in createMetric:", error);
-    handleApiError(error);
-    throw error;
-  }
+  }, "createMetricCategory");
 };
 
 /**
@@ -154,21 +139,16 @@ export const createMetricCategory = async (
 export const updateMetricCategory = async (
   args: { categoryId: string; category: UpdateMetricCategoryRequestDTO },
   opts: RequestOpts = {},
-): Promise<MetricCategoryResponseDTO> => {
-  try {
+): Promise<MetricCategoryResponseDTO> =>
+  withApiErrorHandling(async () => {
     const res = await api.put<ApiResponse<MetricCategoryResponseDTO>>(
       `/metric-categories/${args.categoryId}`,
       args.category,
-      { signal: opts.signal },
+      { signal: opts.signal, headers: opts.headers },
     );
 
     return unwrap(res);
-  } catch (error: unknown) {
-    console.error(`Error updating metric category with ID ${args.categoryId}:`, error);
-    handleApiError(error);
-    throw error;
-  }
-};
+  }, "updateMetricCategory");
 
 /**
  * * DELETE
@@ -177,18 +157,14 @@ export const updateMetricCategory = async (
 export const deleteMetricCategory = async (
   id: string,
   opts: RequestOpts = {},
-): Promise<MetricCategoryResponseDTO> => {
-  try {
-    const res = await api.delete(`/metric-categories/${id}`, {
+): Promise<MetricCategoryResponseDTO> =>
+  withApiErrorHandling(async () => {
+    const res = await api.delete<ApiResponse<MetricCategoryResponseDTO>>(`/metric-categories/${id}`, {
       signal: opts.signal,
+      headers: opts.headers,
     });
     return unwrap(res);
-  } catch (error: unknown) {
-    console.error(`Error deleting metric category with ID ${id}:`, error);
-    handleApiError(error);
-    throw error;
-  }
-};
+  }, "deleteMetricCategory");
 
 /**
  * * ===== API Endopoints for Testing Purposes =====
@@ -196,17 +172,12 @@ export const deleteMetricCategory = async (
 
 export const createMetricCategoryDummy = async (
   category: GenerateDummyMetricCategoriesRequestDTO,
-): Promise<{ categories: MetricCategoryResponseDTO[] }> => {
-  try {
+): Promise<{ categories: MetricCategoryResponseDTO[] }> =>
+  withApiErrorHandling(async () => {
     const res = await api.post<ApiResponse<{ categories: MetricCategoryResponseDTO[] }>>(
       "/metric-categories/dummy",
       category,
     );
 
     return unwrap(res) ?? { categories: [] };
-  } catch (error: unknown) {
-    console.error("Error in generating Metric Dummy:", error);
-    handleApiError(error);
-    throw error;
-  }
-};
+  }, "createMetricCategoryDummy");

@@ -10,4 +10,5 @@ export const toVM = (d: MetricCategoryResponseDTO): MetricCategoryVM => ({
   createdAt: d.createdAt,
   updatedAt: d.updatedAt,
   deletedAt: d.deletedAt ?? null,
+  metricCount: d.metricCount ?? 0,
 });

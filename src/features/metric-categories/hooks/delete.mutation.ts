@@ -22,7 +22,7 @@ export const useDeleteMetricCategory = (
     string,
     DeleteCtx
   >({
-    mutationFn: deleteMetricCategory,
+    mutationFn: (categoryId) => deleteMetricCategory(categoryId),
     onMutate: async (categoryId) => {
       await qc.cancelQueries({
         queryKey: metricCategoriesKeys.detailByIdRoot(categoryId),

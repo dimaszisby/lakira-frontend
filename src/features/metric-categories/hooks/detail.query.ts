@@ -5,7 +5,6 @@ import { metricCategoriesKeys } from "../keys";
 import { toVM } from "../mappers";
 import type { MetricCategoryVM } from "../view-models";
 
-// MetricCategoryDetailPage
 export const useMetricCategoryById = (categoryId: string) => {
   return useQuery<MetricCategoryVM, Error>({
     queryKey: metricCategoriesKeys.detail(categoryId),

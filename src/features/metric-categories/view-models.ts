@@ -1,6 +1,7 @@
+import type { CursorPageVM } from "@/src/generics/cursor/view-model";
 import type { MetricCategoryResponseDTO } from "@/types/dtos/metric-category.dto";
 
-import type { CursorPageVM } from "../metric-logs/view-models";
+import type { MetricCategoryListSearchParams } from "./listSearchParams";
 import type { MetricCategoryFilter, MetricCategorySortableKey } from "./sort";
 
 export type MetricCategoryVM = {
@@ -18,6 +19,8 @@ export type MetricCategoryVM = {
   createdAt?: string;
   updatedAt?: string;
   deletedAt?: string | null;
+
+  returnParams?: MetricCategoryListSearchParams | null;
 };
 
 // The UI shape is strictly non-nullable for rendering.

@@ -32,7 +32,7 @@ export const useUpdateMetricCategory = (
     UpdateCategoryVars,
     UpdateCtx
   >({
-    mutationFn: updateMetricCategory,
+    mutationFn: (vars) => updateMetricCategory(vars),
     onMutate: async ({ categoryId, category }) => {
       await qc.cancelQueries({
         queryKey: metricCategoriesKeys.detailByIdRoot(categoryId),
