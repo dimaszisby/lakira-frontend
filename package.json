@@ -20,6 +20,7 @@
     "test:unit": "jest --runInBand --config jest.unit.config.ts",
     "test:unit:watch": "jest --watch --config jest.unit.config.ts",
     "test:unit:ci": "jest --runInBand --coverage --config jest.unit.config.ts",
+    "test:coverage:all": "jest --runInBand --coverage --config jest.config.ts",
     "test:integration": "jest --runInBand --config jest.integration.config.ts",
     "test:e2e": "env -u ELECTRON_RUN_AS_NODE cypress run --e2e --browser electron --headless",
     "perf:bundle-size": "node scripts/perf/bundle-size-report.mjs",

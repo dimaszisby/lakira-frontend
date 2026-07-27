@@ -3,7 +3,7 @@ import type { Config } from "jest";
 const config: Config = {
   preset: "ts-jest",
   testEnvironment: "jest-environment-jsdom",
-  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts", "<rootDir>/jest.integration.setup.ts"],
   moduleNameMapper: {
     "^@/src/(.*)$": "<rootDir>/src/$1",
     "^@/app/(.*)$": "<rootDir>/src/app/$1",
@@ -28,6 +28,10 @@ const config: Config = {
     "<rootDir>/cypress/",
     "<rootDir>/dist/"
   ],
+  transformIgnorePatterns: ["/node_modules/(?!(msw|@mswjs|until-async)/)"],
+  testEnvironmentOptions: {
+    customExportConditions: ["node", "node-addons"],
+  },
   collectCoverageFrom: [
     "src/**/*.{ts,tsx}",
     "!src/**/*.d.ts",

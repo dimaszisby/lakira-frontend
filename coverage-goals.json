@@ -1,0 +1,8 @@
+{
+  "src/utils": 5,
+  "src/lib": 5,
+  "src/components/ui": 5,
+  "src/features/metric-categories": 2,
+  "src/features/metrics": 2,
+  "src/components/pages": 1
+}
