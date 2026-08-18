@@ -3,3 +3,14 @@ node_modules
 dist
 coverage
 out
+
+# Generated — Prettier must not touch these, or the codegen drift gates
+# (npm run api:types:check / api:spec:check) fail against a reformatted file.
+src/types/api/generated
+documents/openapi/lakira-backend-openapi.json
+src/styles/output.css
+
+# Agent-owned. .claude/hooks/format-on-edit.sh already skips these; keeping
+# `npm run format:fix` out too closes the same hole (the backend hit a bug
+# where the formatter re-injected frontmatter into agent-memory files).
+.claude
