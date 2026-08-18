@@ -200,6 +200,31 @@ jobs:
           path: cypress/screenshots
           if-no-files-found: warn
 
+  api-contract:
+    name: API Contract Drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Fails when lakira-backend has shipped a contract change that this repo
+      # has not picked up. Fix with: npm run api:spec:sync && npm run api:types:generate
+      - name: Check OpenAPI snapshot against backend
+        run: npm run api:spec:check
+
+      - name: Check generated types against snapshot
+        run: npm run api:types:check
+
   security:
     name: Security Scan
     runs-on: ubuntu-latest
