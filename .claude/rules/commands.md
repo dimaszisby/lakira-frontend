@@ -1,6 +1,6 @@
 # Common Commands Reference
 
-**Canonical list: [`documents/documentation/commands.md`](../../documents/documentation/commands.md).**
+**Canonical list: [`docs/reference/commands.md`](../../docs/reference/commands.md).**
 
 That file is the single source of truth and is checked against `package.json`. Do not keep a second copy here — link instead. The backend repo learned this the hard way: `.claude/rules/commands.md` there documented a `migrate:dev` script that never existed, because it held a second copy of the command list that drifted from reality.
 

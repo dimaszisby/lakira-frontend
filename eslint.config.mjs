@@ -230,7 +230,7 @@ const config = [
    * mapped in boundaries/elements), so this debt accumulated unseen.
    *
    * Two distinct problems, both tracked in
-   * documents/todos/2026-08-17-todo-claude-code-setup.md:
+   * docs/internal/todos/2026-08-17-todo-claude-code-setup.md:
    *   - CategorySelect and Visualization are feature components misfiled under
    *     ui/; they should move into their feature modules.
    *   - withAuth, HydrateUser, Header and Sidebar are app-shell concerns that

@@ -10,7 +10,7 @@ paths:
 
 # Security
 
-Audit history: [`documents/security/audit/`](../../documents/security/audit/).
+Audit history: [`docs/internal/audits/security/`](../../docs/internal/audits/security/).
 
 ## Auth and session
 

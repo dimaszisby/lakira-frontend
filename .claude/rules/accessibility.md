@@ -8,7 +8,7 @@ paths:
 
 # Accessibility
 
-Canonical baseline: [`documents/documentation/accessibility-guidelines.md`](../../documents/documentation/accessibility-guidelines.md). Release gate: [`documents/checklists/a11y-release-checklist.md`](../../documents/checklists/a11y-release-checklist.md).
+Canonical baseline: [`docs/reference/accessibility-baseline.md`](../../docs/reference/accessibility-baseline.md). Release gate: [`docs/how-to/releases/a11y-release-checklist.md`](../../docs/how-to/releases/a11y-release-checklist.md).
 
 Target is **WCAG 2.1 AA**, with 2.2 criteria where practical.
 
@@ -59,6 +59,6 @@ Know these so you do not mistake a passing lint run for a passing a11y check:
 
 - **`eslint-plugin-jsx-a11y` is installed but only `alt-text` is enabled.** The recommended ruleset is not spread in, so label association, ARIA validity, and keyboard handlers are all unchecked by lint.
 - **`npm run check-accessibility` is a placeholder** that installs `axe-core` and echoes. It checks nothing.
-- There is no `cypress-axe`, so E2E accessibility is not covered. `documents/tests-plans-and-logs/4-end-to-end-tests/a11y-e2e-checklist.md` describes the intent.
+- There is no `cypress-axe`, so E2E accessibility is not covered. `docs/internal/initiatives/tests-overhaul/4-end-to-end-tests/a11y-e2e-checklist.md` describes the intent.
 
 Until those close, `jest-axe` in integration tests is the only automated coverage — and axe catches roughly a third of real issues. Keyboard-test anything you build by hand.

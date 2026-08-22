@@ -7,7 +7,7 @@ disable-model-invocation: true
 
 # Scaffold an App Router Route
 
-This skill exists because the `@modal` pattern has a non-obvious invariant that already caused an incident: `documents/incidents/fix-metric-modal-routing-20251130.md`. Read `.claude/rules/architecture.md` before starting.
+This skill exists because the `@modal` pattern has a non-obvious invariant that already caused an incident: `docs/internal/incidents/fix-metric-modal-routing-20251130.md`. Read `.claude/rules/architecture.md` before starting.
 
 ## The invariant
 

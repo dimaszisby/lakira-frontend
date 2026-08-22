@@ -39,7 +39,7 @@ if [[ "$REL_PATH" == "src/styles/output.css" ]]; then
 fi
 
 # --- Block: synced OpenAPI snapshot ---
-if [[ "$REL_PATH" == "documents/openapi/lakira-backend-openapi.json" ]]; then
+if [[ "$REL_PATH" == "docs/reference/api/lakira-backend-openapi.json" ]]; then
   echo "Protected: the OpenAPI snapshot is synced from lakira-backend, never hand-edited. Run 'npm run api:spec:sync'." >&2
   exit 2
 fi

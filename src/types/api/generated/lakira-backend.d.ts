@@ -1,7 +1,7 @@
 /**
  * GENERATED FILE — DO NOT EDIT.
  *
- * Source:    documents/openapi/lakira-backend-openapi.json
+ * Source:    docs/reference/api/lakira-backend-openapi.json
  * Regenerate: npm run api:types:generate
  * Drift gate: npm run api:types:check (runs in CI as the api-contract job)
  */

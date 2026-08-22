@@ -33,7 +33,7 @@ component → TanStack Query hook → feature api.ts → axios (src/services/api
 
 ### Server-side fetches
 
-An SSR fetch for a protected route must forward the session or it silently 401s. Use `getServerAuthHeaders()` from `src/services/api/serverHeaders.ts`, which builds a `Cookie` header from `next/headers`. This is a logged incident, not a hypothetical — see `documents/incidents/`.
+An SSR fetch for a protected route must forward the session or it silently 401s. Use `getServerAuthHeaders()` from `src/services/api/serverHeaders.ts`, which builds a `Cookie` header from `next/headers`. This is a logged incident, not a hypothetical — see `docs/internal/incidents/`.
 
 ## Errors
 
@@ -68,7 +68,7 @@ Backend rate limits you will hit: 100/15min per IP globally, 50/15min per user, 
 
 ## The contract
 
-`documents/openapi/lakira-backend-openapi.json` is a synced snapshot of the backend's spec — never hand-edited. `src/types/api/generated/**` is generated from it. Run `/sync-api-types` when the backend ships a change; `npm run api:spec:check` and `npm run api:types:check` fail CI on drift.
+`docs/reference/api/lakira-backend-openapi.json` is a synced snapshot of the backend's spec — never hand-edited. `src/types/api/generated/**` is generated from it. Run `/sync-api-types` when the backend ships a change; `npm run api:spec:check` and `npm run api:types:check` fail CI on drift.
 
 Hand-written DTOs still live in `src/types/dtos/*.dto.ts` and are being replaced by generated types feature by feature. When you touch a feature, prefer the generated type; if it disagrees with the hand-written one, the generated type is right.
 

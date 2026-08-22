@@ -67,4 +67,4 @@ For what classes to reach for, see `.claude/rules/styling.md`.
 - `sonarjs/no-duplicate-string`, `sonarjs/prefer-immediate-return`.
 - `security/detect-object-injection` is off — too noisy for frontend code.
 
-Lint currently emits non-blocking warnings across the repo (import order, tailwind class order, react-refresh, sonarjs, react-hooks). That backlog is tracked in `documents/todos/2026-02-16-todo-cicd-overview.md`. Do not add to it: leave every file you touch warning-free.
+Lint currently emits non-blocking warnings across the repo (import order, tailwind class order, react-refresh, sonarjs, react-hooks). That backlog is tracked in `docs/internal/todos/2026-02-16-todo-cicd-overview.md`. Do not add to it: leave every file you touch warning-free.
