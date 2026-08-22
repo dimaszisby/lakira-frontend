@@ -1,42 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Lakira Frontend
 
-## Project Documentation
+A web app for tracking custom metrics. Create categories, define metrics under them, log values over
+time, set goals and alerts, and see trends on the dashboard.
 
-Use the project documentation index as the entry point for engineering standards, plans, and operational docs:
+Next.js 16 (App Router) · React 19 · TypeScript · TanStack Query · Jotai · React Hook Form + Zod ·
+Tailwind 3 over a CSS-variable token system · Ariakit.
 
-- [Documents Index](documents/README.md)
+Pairs with [`lakira-backend`](https://github.com/dimaszisby/lakira-backend) (Express REST API).
+**Every backend call goes through this app's own `/api/proxy/[...path]` handler** — the browser never
+talks to the backend directly, so the session token can stay in an httpOnly cookie.
 
-## Getting Started
-
-First, run the development server:
+## Quick start
 
 ```bash
+npm ci
+
+cat > .env.local <<'EOF'
+API_URL=https://lakira-backend-staging.onrender.com/api/v1
+NEXT_PUBLIC_API_BASE_URL=https://lakira-backend-staging.onrender.com/api/v1
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+EOF
+
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open <http://localhost:3000> and register an account.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Requires **Node 20**. The staging backend sleeps when idle — the first request after a quiet period
+can take 30–60 seconds.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Full walkthrough: [`docs/tutorials/getting-started.md`](docs/tutorials/getting-started.md).
+To run against a local backend instead, see
+[`docs/how-to/development/run-against-a-local-backend.md`](docs/how-to/development/run-against-a-local-backend.md).
 
-## Learn More
+## Checks
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run lint && npm run lint:css && npm run typecheck && npm run test:unit
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Those are CI's `checks` and `unit` jobs. Every script is documented in
+[`docs/reference/commands.md`](docs/reference/commands.md).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Documentation
 
-## Deploy on Vercel
+[`docs/`](docs/README.md) is organised by [Diátaxis](https://diataxis.fr/) — by what you are trying
+to do, not by what the document is called:
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+|                                          |                                                                       |
+| ---------------------------------------- | --------------------------------------------------------------------- |
+| [`docs/tutorials/`](docs/tutorials/)     | Learning — getting started, first feature slice, first component      |
+| [`docs/how-to/`](docs/how-to/)           | Task recipes — development, testing, releases, CI/CD, security        |
+| [`docs/reference/`](docs/reference/)     | Lookup — commands, configuration, design tokens, routes, API contract |
+| [`docs/explanation/`](docs/explanation/) | Understanding — architecture, ADR registry, testing strategy          |
+| [`docs/internal/`](docs/internal/)       | Working material — initiative kits, audit runs, incidents, todos      |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Frequently needed:
+
+- [`docs/reference/routes-and-proxy.md`](docs/reference/routes-and-proxy.md) — the route map, the
+  `@modal` contract, and how the proxy authenticates
+- [`docs/reference/configuration.md`](docs/reference/configuration.md) — every env var and the
+  `NEXT_PUBLIC_*` exposure rule
+- [`docs/explanation/decisions/`](docs/explanation/decisions/) — the ADR registry; check **Status**
+  before trusting a record
+- [`docs/internal/incidents/`](docs/internal/incidents/) — four postmortems on routing, caching,
+  prefetch, and `searchParams`. Read these before touching those areas; the causes recur.
+
+## Contributing
+
+Branch off `dev`, never `main`. Promotion is `feature/* → dev → main`; there is no `staging` branch.
+
+Repository conventions for agents and humans live in [`CLAUDE.md`](CLAUDE.md) and
+[`.claude/rules/`](.claude/rules/).

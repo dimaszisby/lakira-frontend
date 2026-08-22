@@ -8,7 +8,7 @@ This file is an **index**. The substance lives one hop away in `.claude/rules/`,
 
 Lakira frontend — Next.js 16 (App Router) + React 19 + TypeScript. Server state via TanStack Query, client state via Jotai, forms via React Hook Form + Zod, styling via Tailwind 3 over a CSS-variable token system, accessible primitives from Ariakit.
 
-Pairs with `lakira-backend` (Express/TypeScript REST API). All backend calls route through `/api/proxy/[...path]`; the contract lives in `documents/openapi/lakira-backend-openapi.json`.
+Pairs with `lakira-backend` (Express/TypeScript REST API). All backend calls route through `/api/proxy/[...path]`; the contract lives in `docs/reference/api/lakira-backend-openapi.json`.
 
 Branches: `dev` (working) and `main`. No `staging`.
 
@@ -34,7 +34,7 @@ Read [`.claude/lessons.md`](.claude/lessons.md) at session start.
 
 ## Commands
 
-Canonical list: [`documents/documentation/commands.md`](documents/documentation/commands.md). Do not keep a second copy anywhere.
+Canonical list: [`docs/reference/commands.md`](docs/reference/commands.md). Do not keep a second copy anywhere.
 
 ```bash
 npm run lint && npm run lint:css && npm run typecheck && npm run test:unit
@@ -57,14 +57,24 @@ Skills: `/pre-push`, `/new-feature`, `/new-route`, `/sync-api-types`.
 
 ## Documentation map
 
-[`documents/README.md`](documents/README.md) is the entry point. The taxonomy is two-track — long-lived standards under `documents/documentation/`, time-bound initiatives in domain folders. See `.claude/rules/documentation.md` before creating any document.
+[`docs/README.md`](docs/README.md) is the entry point. `docs/` is organised by reader purpose ([Diátaxis](https://diataxis.fr/)), matching `lakira-backend`. **Placement rules: `.claude/rules/documentation.md`** — consult it before creating any document.
+
+|                     |                                                                                   |
+| ------------------- | --------------------------------------------------------------------------------- |
+| `docs/tutorials/`   | Learning — getting started, first feature slice, first component                  |
+| `docs/how-to/`      | Task recipes — development, testing, releases, ci-cd, security                    |
+| `docs/reference/`   | Lookup — commands, configuration, design tokens, routes, API contract, components |
+| `docs/explanation/` | Understanding — architecture (C4 + Mermaid), **ADR registry**, testing strategy   |
+| `docs/internal/`    | Working material — initiative kits, audit runs, incidents, todos, archive         |
 
 Worth knowing about:
 
-- [`documents/incidents/`](documents/incidents/) — four postmortems covering routing, caching, prefetch, and `searchParams`. Check these before touching those areas; the causes recur.
-- [`documents/tests-plans-and-logs/TESTING_STRATEGY.md`](documents/tests-plans-and-logs/TESTING_STRATEGY.md) — the full pyramid.
-- [`documents/documentation/engineering/components/README.md`](documents/documentation/engineering/components/README.md) — UI standards, read in the order that README gives.
-- [`documents/todos/`](documents/todos/) — active backlogs.
+- [`docs/internal/incidents/`](docs/internal/incidents/) — four postmortems covering routing, caching, prefetch, and `searchParams`. Check these before touching those areas; the causes recur.
+- [`docs/explanation/testing-strategy.md`](docs/explanation/testing-strategy.md) — the full pyramid.
+- [`docs/reference/components/README.md`](docs/reference/components/README.md) — UI standards, read in the order that README gives.
+- [`docs/internal/todos/`](docs/internal/todos/) — active backlogs.
+- [`docs/explanation/decisions/`](docs/explanation/decisions/) — 14 ADRs, one per file. Check **Status** before trusting one.
+- [`docs/reference/commands.md`](docs/reference/commands.md) — canonical npm scripts. Do not keep a second copy elsewhere.
 
 ## Known state of the repo
 

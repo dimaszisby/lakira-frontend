@@ -9,7 +9,7 @@ disable-model-invocation: true
 Keeps this repo's view of the backend contract honest. Two artifacts, two gates:
 
 ```
-lakira-backend  ──api:spec:sync──►  documents/openapi/lakira-backend-openapi.json
+lakira-backend  ──api:spec:sync──►  docs/reference/api/lakira-backend-openapi.json
                                               │
                                     api:types:generate
                                               ▼

@@ -9,7 +9,7 @@ paths:
 
 # Performance
 
-Human baseline: [`documents/documentation/performance-budget.md`](../../documents/documentation/performance-budget.md).
+Human baseline: [`docs/reference/performance-budget.md`](../../docs/reference/performance-budget.md).
 Machine-enforced thresholds: `scripts/perf/performance-thresholds.json`.
 
 ## The budgets

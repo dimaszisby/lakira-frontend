@@ -10,7 +10,7 @@ paths:
 
 # Styling and Design Tokens
 
-Canonical references: [`documents/documentation/style/color-palette.md`](../../documents/documentation/style/color-palette.md), [`documents/documentation/style/typography.md`](../../documents/documentation/style/typography.md), [`documents/documentation/engineering/components/component-styling-tailwind-and-tokens.md`](../../documents/documentation/engineering/components/component-styling-tailwind-and-tokens.md).
+Canonical references: [`docs/reference/style/color-palette.md`](../../docs/reference/style/color-palette.md), [`docs/reference/style/typography.md`](../../docs/reference/style/typography.md), [`docs/reference/components/component-styling-tailwind-and-tokens.md`](../../docs/reference/components/component-styling-tailwind-and-tokens.md).
 
 Tailwind 3 (not v4) with a six-layer CSS-variable token system.
 

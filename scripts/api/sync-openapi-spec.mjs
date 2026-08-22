@@ -32,7 +32,7 @@ import path from "node:path";
 import process from "node:process";
 
 const REPO_ROOT = path.resolve(import.meta.dirname, "..", "..");
-const SNAPSHOT = path.join(REPO_ROOT, "documents", "openapi", "lakira-backend-openapi.json");
+const SNAPSHOT = path.join(REPO_ROOT, "docs", "reference", "api", "lakira-backend-openapi.json");
 const SPEC_SUBPATH = path.join("docs", "reference", "api", "lakira-backend-openapi.json");
 const BRANCH = process.env.LAKIRA_OPENAPI_BRANCH ?? "dev";
 const DEFAULT_URL = `https://raw.githubusercontent.com/dimaszisby/lakira-backend/${BRANCH}/docs/reference/api/lakira-backend-openapi.json`;

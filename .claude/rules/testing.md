@@ -17,7 +17,7 @@ paths:
 
 # Testing
 
-Full strategy: [`documents/tests-plans-and-logs/TESTING_STRATEGY.md`](../../documents/tests-plans-and-logs/TESTING_STRATEGY.md).
+Full strategy: [`docs/explanation/testing-strategy.md`](../../docs/explanation/testing-strategy.md).
 
 Stack: **Jest 29** (two configs) + React Testing Library + MSW 2 + `jest-axe` + Cypress 14. There is no Vitest and no Playwright — do not introduce either without a decision doc.
 

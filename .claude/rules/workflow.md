@@ -38,7 +38,7 @@ Note that this repo's commit history is only partly conventional — the older h
 
 The bar: would a staff engineer approve this as-is?
 
-For anything touching routing, auth, or caching, check `documents/incidents/` first — four logged postmortems cover exactly those areas, and their causes recur.
+For anything touching routing, auth, or caching, check `docs/internal/incidents/` first — four logged postmortems cover exactly those areas, and their causes recur.
 
 ## Subagents
 
@@ -57,7 +57,7 @@ Read `.claude/lessons.md` at session start. Iterate on it until the mistake rate
 For any multi-step task:
 
 1. Plan it.
-2. Write `documents/todos/YYYY-MM-DD-todo-<kebab-title>.md` with checkable items.
+2. Write `docs/internal/todos/YYYY-MM-DD-todo-<kebab-title>.md` with checkable items.
 3. Verify the plan against the code before executing.
 4. Track progress by checking items off as they land.
 5. Explain what changed and why.

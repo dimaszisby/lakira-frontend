@@ -79,7 +79,7 @@ metric-categories/
   [categoryId]/edit/page.tsx
 ```
 
-**Every layout in a tree that has an `@modal` slot must render `{modal}` alongside `{children}`**, or Next throws `Invalid interception route`. When adding a nested route level under a modal-enabled section, check whether it needs its own `@modal` + `default.tsx` pair. See `documents/incidents/fix-metric-modal-routing-20251130.md`.
+**Every layout in a tree that has an `@modal` slot must render `{modal}` alongside `{children}`**, or Next throws `Invalid interception route`. When adding a nested route level under a modal-enabled section, check whether it needs its own `@modal` + `default.tsx` pair. See `docs/internal/incidents/fix-metric-modal-routing-20251130.md`.
 
 Use `/new-route` to scaffold these — it holds the invariant so you do not have to.
 

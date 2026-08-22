@@ -19,7 +19,7 @@ import { promisify } from "node:util";
 const run = promisify(execFile);
 
 const REPO_ROOT = path.resolve(import.meta.dirname, "..", "..");
-const SNAPSHOT = path.join(REPO_ROOT, "documents", "openapi", "lakira-backend-openapi.json");
+const SNAPSHOT = path.join(REPO_ROOT, "docs", "reference", "api", "lakira-backend-openapi.json");
 const OUT_DIR = path.join(REPO_ROOT, "src", "types", "api", "generated");
 const OUT_FILE = path.join(OUT_DIR, "lakira-backend.d.ts");
 const BIN = path.join(REPO_ROOT, "node_modules", ".bin", "openapi-typescript");
@@ -34,7 +34,7 @@ const fail = (message) => {
 const BANNER = `/**
  * GENERATED FILE — DO NOT EDIT.
  *
- * Source:    documents/openapi/lakira-backend-openapi.json
+ * Source:    docs/reference/api/lakira-backend-openapi.json
  * Regenerate: npm run api:types:generate
  * Drift gate: npm run api:types:check (runs in CI as the api-contract job)
  */

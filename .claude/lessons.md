@@ -20,7 +20,7 @@ Updated after any correction per `.claude/rules/workflow.md`.
 
 ## [2026-08-17] The OpenAPI snapshot drifted 12 paths behind the backend
 
-**Mistake**: `documents/openapi/lakira-backend-openapi.json` was a manual copy with no drift gate. It sat at 18 paths while the backend shipped 30 — the entire multi-tenancy surface (`/organizations/*`, `/invites/accept`, `/memberships/{id}`) and most of the auth lifecycle (`/auth/refresh`, `/auth/verify-email`, `/auth/reset-password`, `/auth/switch-org`) were invisible to the frontend.
+**Mistake**: `docs/reference/api/lakira-backend-openapi.json` was a manual copy with no drift gate. It sat at 18 paths while the backend shipped 30 — the entire multi-tenancy surface (`/organizations/*`, `/invites/accept`, `/memberships/{id}`) and most of the auth lifecycle (`/auth/refresh`, `/auth/verify-email`, `/auth/reset-password`, `/auth/switch-org`) were invisible to the frontend.
 
 **Rule**: a copied artifact needs a check that fails in CI, not a convention that says to update it. Run `npm run api:spec:check` before trusting anything in `src/types/dtos/**`.
 

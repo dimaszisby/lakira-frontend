@@ -10,7 +10,7 @@ paths:
 
 # Environment
 
-Canonical matrix: [`documents/ci-cd/frontend/ENVIRONMENTS_MATRIX.md`](../../documents/ci-cd/frontend/ENVIRONMENTS_MATRIX.md).
+Canonical matrix: [`docs/reference/environments.md`](../../docs/reference/environments.md).
 
 ## The exposure rule
 
@@ -60,7 +60,7 @@ Keep `API_URL` and `NEXT_PUBLIC_API_BASE_URL` **equal** within an environment. T
 1. Decide server-only vs `NEXT_PUBLIC_` using the exposure rule. Default to server-only.
 2. Read it in exactly one place and pass the value down. Do not scatter `process.env` reads through feature code.
 3. Give it a fallback, or fail loudly at startup. Never let it silently become `undefined` in a URL.
-4. Add it to the table above **and** `documents/ci-cd/frontend/ENVIRONMENTS_MATRIX.md`.
+4. Add it to the table above **and** `docs/reference/environments.md`.
 5. If it is needed in CI, add it to the workflow; if it is a secret, it goes in GitHub/Vercel secrets and never in the repo.
 
 `.env*` files are gitignored by a blanket rule and Claude cannot edit them — that is a global guardrail. Ask the user to make env changes by hand.
