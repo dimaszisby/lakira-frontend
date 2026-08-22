@@ -48,7 +48,10 @@ const TextField = ({
   const inputRef = React.useRef<HTMLInputElement>(null);
   const [showPwd, setShowPwd] = React.useState(false);
   const [hasValue, setHasValue] = React.useState<boolean>(Boolean(rest.defaultValue ?? rest.value));
-  const registrationRef = registration?.ref;
+  const registrationRef = registration?.ref as
+    | ((instance: HTMLInputElement | null) => void)
+    | React.MutableRefObject<HTMLInputElement | null>
+    | undefined;
   const registrationOnChange = registration?.onChange;
   const registrationOnBlur = registration?.onBlur;
   const registrationName = registration?.name;

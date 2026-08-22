@@ -2,7 +2,7 @@
 
 import "chartjs-adapter-date-fns";
 
-import type { ChartData, ChartOptions, ScatterDataPoint, TooltipItem } from "chart.js";
+import type { ChartData, ChartOptions, TooltipItem } from "chart.js";
 import {
   Chart as ChartJS,
   Filler,
@@ -61,7 +61,7 @@ const MetricChart = ({ data, goalValue, height = 260, className }: Props) => {
   }
 
   const metricSeries = toScatterDataPoints(xy);
-  const datasets: ChartData<"line", ScatterDataPoint[]>["datasets"] = [
+  const datasets: ChartData<"line", TimeSeriesPoint[]>["datasets"] = [
     {
       label: metricLabel,
       data: metricSeries,
@@ -129,11 +129,11 @@ const MetricChart = ({ data, goalValue, height = 260, className }: Props) => {
 
 export default memo(MetricChart);
 
-function toScatterDataPoints(
-  points: ReturnType<typeof seriesToXY>,
-): ChartData<"line", ScatterDataPoint[]>["datasets"][number]["data"] {
+type TimeSeriesPoint = { x: string; y: number };
+
+function toScatterDataPoints(points: ReturnType<typeof seriesToXY>): TimeSeriesPoint[] {
   return points.map((point) => ({
-    x: point.x,
+    x: point.x instanceof Date ? point.x.toISOString() : String(point.x),
     y: typeof point.y === "number" && Number.isFinite(point.y) ? point.y : Number.NaN,
   }));
 }

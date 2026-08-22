@@ -107,3 +107,17 @@ Server-side branch protection on `dev`/`main` (still zero rulesets — the `guar
 | `api:types:check`  | 0    |                                       |
 
 Anything other than these two known failures is new — investigate before proceeding.
+
+## Status (2026-08-21)
+
+All open items from this handoff except opening the PR are resolved.
+
+- **Hooks verified live.** `protect-files.sh` blocked a `package-lock.json` edit with the documented message; `validate-bash.sh` exited 2 on `git add .`; `guard-branch.sh` exited 0 on this feature branch. Guardrails are confirmed active this session.
+- **All 3 typecheck errors fixed:**
+  - `TextField.tsx:51` — `registrationRef` was collapsing to `never` after the `typeof === "function"` narrowing because RHF's `ref` type is a pure `RefCallback`. Widened the local type annotation to retain the object-ref branch.
+  - `MetricChart.tsx` — `toScatterDataPoints` mapped `point.x` (`Date | string | number`) straight into Chart.js's `Point["x"]` (`number | null`). First attempt converted to numeric timestamps, which passed typecheck but silently changed runtime output and broke 2 passing unit tests that assert ISO-string `x` values (Chart.js's time scale accepts strings via the date adapter at runtime despite the stricter static `Point` type). Corrected to a type-only fix: introduced a local `TimeSeriesPoint = { x: string; y: number }` type and typed `datasets` against it instead of `ScatterDataPoint[]`, preserving the original ISO-string runtime values.
+  - `TimeRangePicker.tsx:32` — `value.last` was read directly in a `useEffect` dependency array outside the narrowing guard. Extracted a narrowed `relativeLast` const before the effect and depended on that instead.
+- **Sidebar test fixed** — was an actively failing test (not just a style nit): asserted on a stale `text-brand-primary` substring that never matched the real class (`bg-brand-primary text-white`), and the component had no accessible active-state attribute at all. Added `aria-current="page"` to the active link in `SideBarNavigationItems.tsx` and rewrote the assertion in `Sidebar.int.test.tsx` to check `aria-current` instead of a class name, per `.claude/rules/testing.md`.
+- **Gate rerun, all green:** `lint` 0 errors/43 pre-existing warnings (none in touched files), `lint:css` 0, `typecheck` 0, `test:unit` 243/243, `test:integration` 74/74 (previously 73/74).
+
+**Not done:** opening the PR — that's the user's action per `.claude/rules/workflow.md`. PR title/body drafted in the session; regenerate from this file if lost. Phase 7 backlog (branch protection, coverage thresholds, MSW handlers, `jsx-a11y`, port conflicts) remains untouched, as scoped.
