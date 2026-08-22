@@ -27,6 +27,10 @@
     "perf:lighthouse": "node scripts/perf/run-lighthouse.mjs",
     "perf:web-vitals": "node scripts/perf/web-vitals-lab-summary.mjs",
     "coverage:check": "node scripts/coverage-checklist.mjs",
+    "api:spec:sync": "node scripts/api/sync-openapi-spec.mjs",
+    "api:spec:check": "node scripts/api/sync-openapi-spec.mjs --check",
+    "api:types:generate": "node scripts/api/generate-api-types.mjs",
+    "api:types:check": "node scripts/api/generate-api-types.mjs --check",
     "security:lint": "npm run lint && npm run lint:css",
     "security:audit": "npm audit --audit-level=high",
     "security:scan": "npm run security:lint && npm run security:audit"
@@ -97,6 +101,7 @@
     "jest-canvas-mock": "^2.5.2",
     "jest-environment-jsdom": "^29.7.0",
     "msw": "^2.12.2",
+    "openapi-typescript": "^7.13.0",
     "postcss": "^8.4.35",
     "postcss-import": "^16.1.1",
     "prettier": "^3.6.2",

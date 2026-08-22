@@ -41,20 +41,13 @@ describe("Sidebar integration", () => {
 
   it("renders navigation items and marks active route", () => {
     renderWithProviders(
-      <Sidebar
-        navItems={navItems}
-        pathname="/metrics"
-        isMobileOpen={false}
-        onClose={jest.fn()}
-      />,
+      <Sidebar navItems={navItems} pathname="/metrics" isMobileOpen={false} onClose={jest.fn()} />,
     );
 
     expect(screen.getAllByRole("link", { name: /dashboard/i }).length).toBeGreaterThan(0);
 
     const metricLinks = screen.getAllByRole("link", { name: /metrics/i });
-    expect(metricLinks.some((link) => link.getAttribute("class")?.includes("text-brand-primary"))).toBe(
-      true,
-    );
+    expect(metricLinks.some((link) => link.getAttribute("aria-current") === "page")).toBe(true);
   });
 
   it("opens logout confirmation modal and closes it on cancel", async () => {

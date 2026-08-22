@@ -62,15 +62,6 @@ jobs:
       - name: Run unit tests with coverage
         run: npm run test:unit:ci
 
-      - name: Upload coverage to Codecov
-        if: always()
-        uses: codecov/codecov-action@v4
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          files: ./coverage/lcov.info
-          flags: unittests
-          fail_ci_if_error: true
-
       - name: Upload coverage artifact
         if: always()
         uses: actions/upload-artifact@v4
@@ -127,6 +118,7 @@ jobs:
           name: next-build
           path: .next
           if-no-files-found: error
+          include-hidden-files: true
 
   e2e:
     name: E2E tests
@@ -152,7 +144,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: next-build
-          path: .
+          path: .next
 
       - name: Start Next.js app
         run: |
@@ -199,6 +191,31 @@ jobs:
           name: cypress-screenshots
           path: cypress/screenshots
           if-no-files-found: warn
+
+  api-contract:
+    name: API Contract Drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Fails when lakira-backend has shipped a contract change that this repo
+      # has not picked up. Fix with: npm run api:spec:sync && npm run api:types:generate
+      - name: Check OpenAPI snapshot against backend
+        run: npm run api:spec:check
+
+      - name: Check generated types against snapshot
+        run: npm run api:types:check
 
   security:
     name: Security Scan

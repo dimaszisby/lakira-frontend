@@ -31,6 +31,8 @@ Key entrypoints:
 
 - Documentation system rules:
   - `documents/documentation/dev-documentation-guidelines.md`
+- Commands (canonical npm script reference — do not duplicate elsewhere):
+  - `documents/documentation/commands.md`
 - Engineering standards:
   - `documents/documentation/engineering/components/README.md`
 - Accessibility baseline:
@@ -69,8 +71,6 @@ Use these folders for active implementation work:
   - `documents/incidents/`
 - Security audits:
   - `documents/security/`
-- Code review references:
-  - `documents/code-review/`
 
 ---
 

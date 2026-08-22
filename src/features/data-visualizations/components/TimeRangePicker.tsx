@@ -24,12 +24,14 @@ const TimeRangePicker = ({ value, onChange, className }: Props) => {
     value.mode === "relative" ? value.last : DEFAULT_RELATIVE_LAST,
   );
 
+  const relativeLast = value.mode === "relative" ? value.last : undefined;
+
   useEffect(() => {
-    if (value.mode !== "relative") return;
-    lastRelativeRef.current = value.last;
+    if (relativeLast === undefined) return;
+    lastRelativeRef.current = relativeLast;
     if (!relativeInputRef.current) return;
-    relativeInputRef.current.value = value.last;
-  }, [value.mode, value.last]);
+    relativeInputRef.current.value = relativeLast;
+  }, [relativeLast]);
 
   const handleRangeModeChange = (nextMode: "relative" | "absolute") => {
     if (nextMode === value.mode) return;
@@ -122,7 +124,10 @@ const TimeRangePicker = ({ value, onChange, className }: Props) => {
               onBlur={handleRelativeInputBlur}
             />
 
-            <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center" aria-hidden="true">
+            <span
+              className="pointer-events-none absolute inset-y-0 right-2 flex items-center"
+              aria-hidden="true"
+            >
               <PencilSimple size={16} className="text-brand-accent" />
             </span>
           </div>

@@ -85,6 +85,7 @@ const config = [
       "boundaries/elements": [
         { type: "app", pattern: "src/app/**" },
         { type: "features", pattern: "src/features/**" },
+        { type: "components", pattern: "src/components/**" },
         { type: "generics", pattern: "src/generics/**" },
         { type: "types", pattern: "src/types/**" },
         { type: "utils", pattern: "src/utils/**" },
@@ -190,11 +191,14 @@ const config = [
             // app (Next.js routes) can depend on everything below it
             {
               from: "app",
-              allow: ["features", "services", "lib", "utils", "generics"],
+              allow: ["features", "components", "services", "lib", "utils", "generics"],
             },
 
-            // features can use cross-cutting libs & pure utils/types
-            { from: "features", allow: ["services", "lib", "utils", "types", "generics"] },
+            // features can use shared UI primitives, cross-cutting libs & pure utils/types
+            {
+              from: "features",
+              allow: ["components", "services", "lib", "utils", "types", "generics"],
+            },
 
             // components can use cross-cutting libs & pure utils/types
             { from: "components", allow: ["lib", "utils", "types", "generics"] },
@@ -216,6 +220,35 @@ const config = [
           ],
         },
       ],
+    },
+  },
+
+  /* Known layer inversions, quarantined.
+   *
+   * These files live in `components` but reach up into `features`/`services`.
+   * The boundary rule was inert until 2026-08-17 (src/components/** was never
+   * mapped in boundaries/elements), so this debt accumulated unseen.
+   *
+   * Two distinct problems, both tracked in
+   * documents/todos/2026-08-17-todo-claude-code-setup.md:
+   *   - CategorySelect and Visualization are feature components misfiled under
+   *     ui/; they should move into their feature modules.
+   *   - withAuth, HydrateUser, Header and Sidebar are app-shell concerns that
+   *     need auth state; they belong under src/app/ or need state injected.
+   *
+   * Do not add to this list. New code must satisfy the boundary rule.
+   */
+  {
+    files: [
+      "src/components/hoc/withAuth.tsx",
+      "src/components/layout/Header.tsx",
+      "src/components/layout/Sidebar.tsx",
+      "src/components/providers/HydrateUser.tsx",
+      "src/components/ui/CategorySelect.tsx",
+      "src/components/ui/Visualization.tsx",
+    ],
+    rules: {
+      "boundaries/element-types": "off",
     },
   },
 
