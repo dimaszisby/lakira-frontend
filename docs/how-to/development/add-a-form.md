@@ -84,8 +84,16 @@ expected. `handleSubmit` returns a promise, so wrap it:
 
 ## 5. Map server errors onto fields
 
-The backend returns field errors as `{ errors: [{ path, message }] }`. Put them back on the inputs
-rather than dumping them in a banner:
+The backend returns field errors as:
+
+```json
+{ "status": "fail", "errors": [{ "field": "body.defaultUnit", "message": "Required" }] }
+```
+
+Two details that bite: the key is **`field`**, not `path`, and it is dotted and prefixed with the
+request part (`body.`), so it has to be trimmed before it will match a form field name.
+
+Put them back on the inputs rather than dumping them in a banner:
 
 ```ts
 const onValid = async (values: TagFormInput) => {
@@ -97,7 +105,8 @@ const onValid = async (values: TagFormInput) => {
     if (normalized.isAbort) return;
 
     for (const issue of normalized.raw?.errors ?? []) {
-      form.setError(issue.path as keyof TagFormInput, { message: issue.message });
+      const field = issue.field.replace(/^body\./, "") as keyof TagFormInput;
+      form.setError(field, { message: issue.message });
     }
   }
 };

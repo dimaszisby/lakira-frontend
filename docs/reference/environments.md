@@ -6,18 +6,23 @@ This matrix captures FE-relevant CI/CD environment values based on current FE re
 
 ## 2. Current Status
 
-- Staging backend is active: `https://lakira-backend-staging.onrender.com/api/v1`.
+- Staging backend `https://lakira-backend-staging.onrender.com/api/v1` is **not usable** as of
+  2026-08-22. Its Render Postgres instance was deleted, so `start:staging` fails at `db:migrate`
+  with `getaddrinfo ENOTFOUND dpg-…` and the service crash-loops. TCP connects and no response ever
+  arrives. Restoring it needs a new database provisioned and `DATABASE_URL` repointed.
+- Local development runs the backend directly — see
+  [`../how-to/development/run-against-a-local-backend.md`](../how-to/development/run-against-a-local-backend.md).
 - Production backend URL is not available yet.
 - FE production domain is not finalized yet.
 
 ## 3. Environment Matrix
 
-| Environment | FE URL | Backend API URL used by FE | Provisioning Source |
-| --- | --- | --- | --- |
-| `local` | `http://localhost:3000` | Recommended explicit env: `http://localhost:4000/api/v1` | `.env.local` |
-| `ci` | n/a (runner) | Not required for current Cypress smoke + unit scope | GitHub Actions |
-| `preview` | Vercel preview URL (TBD concrete domain) | `https://lakira-backend-staging.onrender.com/api/v1` | Vercel env config |
-| `prod` | FE prod URL not finalized | Backend prod URL not available | Pending |
+| Environment | FE URL                                   | Backend API URL used by FE                                                                            | Provisioning Source |
+| ----------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------- |
+| `local`     | `http://localhost:3000`                  | `http://localhost:8001/api/v1` (the frontend's built-in fallback; start the backend with `PORT=8001`) | `.env.local`        |
+| `ci`        | n/a (runner)                             | Not required for current Cypress smoke + unit scope                                                   | GitHub Actions      |
+| `preview`   | Vercel preview URL (TBD concrete domain) | `https://lakira-backend-staging.onrender.com/api/v1` — **currently down**, see Current Status         | Vercel env config   |
+| `prod`      | FE prod URL not finalized                | Backend prod URL not available                                                                        | Pending             |
 
 ## 4. FE Runtime Env Vars Used In Code
 
