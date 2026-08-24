@@ -61,14 +61,35 @@ audit. Phases land as separate PRs; this file tracks them.
       it is Phase 3's job, once `src/lib/env.ts` exists.
 - [x] Fork surface measured: `bootstrap-fork.sh` rewrote **115 files before, 93 after**
 
-## Phase 3 — Env validation + DX
+## Phase 3 — Env validation + DX (complete)
 
-- [ ] `src/lib/env.ts` — Zod schema, server/client segments, fail-fast
-- [ ] Fix `src/app/api/auth/login/route.ts:6` (`undefined/auth/login`)
-- [ ] Resolve the three conflicting local port defaults; do not add a fourth
-- [ ] Correct `.claude/rules/environment.md` — it says Claude cannot edit `.env*`, but the global
-      hook explicitly exempts `.env.example`
-- [ ] Update `docs/reference/configuration.md` + `environments.md` in the same commit
+- [x] `src/lib/env.ts` — Zod schema, public and server segments, no throw at module load
+- [x] 17 unit tests in `src/lib/__tests__/env.test.ts`, written **before** the `api.ts` refactor.
+      `resolveAppOrigin` had lived unexported and untested inside `src/services/api/api.ts`;
+      Phase 2 deferred touching it for exactly that reason.
+- [x] Fixed `src/app/api/auth/login/route.ts` — no longer builds `undefined/auth/login`
+- [x] Proxy resolves the base URL **per request**, not at module load, and returns a 500 naming
+      the missing configuration instead of fetching `undefined/...`
+- [x] `src/services/api/api.ts` refactored onto the shared `resolveAppOrigin()`
+- [x] Three `NEXT_PUBLIC_ENABLE_DUMMY_ACTIONS` reads replaced with `isDummyActionsEnabled`
+- [x] **Resolved the port conflict: `:8001` is canonical, not `:4000`.** The audit and the
+      original plan both assumed `:4000` because that is what reference prose said. The executed
+      path disagrees: `docs/tutorials/getting-started.md` and
+      `docs/how-to/development/run-against-a-local-backend.md` both use `:8001`, both were
+      validated by running them verbatim (commit `034442d`), and `:8001` exists to dodge the
+      macOS AirPlay clash on the backend's own default of `5000` — which answers 403 rather than
+      refusing, so it presents as a broken API. `docs/reference/environments.md` had contradicted
+      itself, `:8001` in its table and `:4000` in its prose.
+- [x] Corrected `.env.example` from Phase 1, which had `:4000`
+- [x] Corrected `.claude/rules/environment.md`: the `.env*` guardrail claim (the global hook
+      explicitly allows `.env.example`), the local port, and the resolved-problems list
+- [x] Updated `docs/reference/{configuration,environments,routes-and-proxy}.md`,
+      `docs/reference/ci-pipeline/backend-handoff.md`, `docs/tutorials/getting-started.md`,
+      `docs/how-to/development/run-against-a-local-backend.md`
+- [x] Ticked the long-open port item in `docs/internal/todos/2026-08-17-todo-claude-code-setup.md`
+- [x] `robots.ts` and `sitemap.ts`, carried over from Phase 2 and unblocked by `resolveAppOrigin()`
+- [ ] `next.config.ts` still reads `NEXT_PUBLIC_API_BASE_URL` raw — it runs before the app's
+      module graph exists and cannot import from `src/`. Documented as a known exception.
 
 ## Phase 4 — Observability
 

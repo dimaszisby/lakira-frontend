@@ -19,11 +19,15 @@ cookie (`lakira_token`) that only the server can read.
 `src/app/api/proxy/[...path]/route.ts`. One handler exported as GET, POST, PUT, PATCH, DELETE, and
 OPTIONS.
 
-**Base URL resolution**, in order:
+**Base URL resolution** is `getApiBaseUrl()` in `src/lib/env.ts`, resolved per request:
 
 ```
-API_URL  →  NEXT_PUBLIC_API_BASE_URL  →  http://localhost:8001/api/v1
+API_URL  →  NEXT_PUBLIC_API_BASE_URL  →  http://localhost:8001/api/v1  (development only)
 ```
+
+In production there is no fallback: if neither variable is set, `getApiBaseUrl()` throws and the
+proxy returns a 500 naming the missing configuration, rather than sending a request to
+`undefined/...`.
 
 Prefer `API_URL`: it is server-only, so it never ships to the browser. See
 [`configuration.md`](./configuration.md).

@@ -6,10 +6,11 @@ import {
   SESSION_COOKIE_OPTIONS,
   SESSION_MAX_AGE_SECONDS,
 } from "@/constants/app";
+import { getApiBaseUrl } from "@/lib/env";
 
 export async function POST(req: Request) {
   const body = await req.json();
-  const res = await fetch(`${process.env.API_URL}/auth/login`, {
+  const res = await fetch(`${getApiBaseUrl()}/auth/login`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),

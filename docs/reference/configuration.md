@@ -6,6 +6,31 @@ For the per-environment matrix of which value goes where, see
 [`environments.md`](./environments.md). For how the proxy uses `API_URL`, see
 [`routes-and-proxy.md`](./routes-and-proxy.md).
 
+## Where env is read
+
+`src/lib/env.ts` is the only module that touches `process.env` (apart from `NODE_ENV` checks and
+one read in `next.config.ts`, which runs before the app's module graph exists and cannot import
+from `src/`).
+
+It has two segments:
+
+| Export                               | Segment                       | Safe to import from                                |
+| ------------------------------------ | ----------------------------- | -------------------------------------------------- |
+| `clientEnv`, `isDummyActionsEnabled` | Public — `NEXT_PUBLIC_*` only | Anywhere                                           |
+| `getApiBaseUrl()`                    | Server                        | Route handlers, server components, `middleware.ts` |
+| `resolveAppOrigin()`                 | Server                        | Route handlers, server components, metadata routes |
+
+Parsing is lenient on purpose: every field is optional and nothing throws at module load, because
+`npm run build` runs in CI with no environment set. Required values fail at the point of use
+instead — `getApiBaseUrl()` throws in production when nothing is configured, rather than
+interpolating `undefined` into a request URL.
+
+Start from the committed template:
+
+```bash
+cp .env.example .env.local
+```
+
 ## The `NEXT_PUBLIC_` rule
 
 Next.js inlines any variable prefixed `NEXT_PUBLIC_` into the client bundle at build time. It is

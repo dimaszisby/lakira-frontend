@@ -1,7 +1,5 @@
 "use client";
 
-const DUMMY_FEATURE_ENABLED = process.env.NEXT_PUBLIC_ENABLE_DUMMY_ACTIONS === "true";
-
 import { useRouter } from "next/navigation";
 import { Plus } from "phosphor-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -29,6 +27,7 @@ import type { MetricPreviewVM } from "@/features/metrics/view-models";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { LIST_MODE_DESKTOP_MQ } from "@/hooks/useListMode";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { isDummyActionsEnabled } from "@/lib/env";
 import { metricRoutes } from "@/lib/routes";
 import { sanitizeErrorMessage } from "@/lib/sanitizeErrorMessage";
 import { makeOnColumnSort } from "@/lib/sort/makeOnColumnSort";
@@ -155,7 +154,7 @@ const MetricsPageClient = ({ initialParams }: MetricsPageClientProps) => {
   );
 
   const dummyMetricAsync = useCallback(async () => {
-    if (!DUMMY_FEATURE_ENABLED) return;
+    if (!isDummyActionsEnabled) return;
     try {
       await createMetricDummy({ count: 50 });
     } catch (error) {
@@ -228,7 +227,7 @@ const MetricsPageClient = ({ initialParams }: MetricsPageClientProps) => {
         />
 
         <div className="flex flex-wrap gap-2">
-          {DUMMY_FEATURE_ENABLED ? (
+          {isDummyActionsEnabled ? (
             <Button variant="secondary" onClick={handleDummyCreateClick} aria-label="Add dummy">
               {isCreatingDummy ? "Saving..." : "Add Dummy"}
             </Button>

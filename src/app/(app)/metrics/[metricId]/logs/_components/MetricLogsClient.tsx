@@ -1,7 +1,5 @@
 "use client";
 
-const DUMMY_FEATURE_ENABLED = process.env.NEXT_PUBLIC_ENABLE_DUMMY_ACTIONS === "true";
-
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -22,6 +20,7 @@ import {
 import { useMetricLogSearchState } from "@/features/metric-logs/useMetricLogSearchState";
 import type { MetricLogVM } from "@/features/metric-logs/view-models";
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
+import { isDummyActionsEnabled } from "@/lib/env";
 import { metricRoutes } from "@/lib/routes";
 import { makeOnColumnSort } from "@/lib/sort/makeOnColumnSort";
 import Button from "@/ui/Button";
@@ -140,7 +139,7 @@ const MetricLogsClient = ({ initialParams }: MetricLogsClientProps) => {
 
   const { createMetricLogDummy } = useCreateMetricLogDummy();
   const dummyLogAsync = useCallback(async () => {
-    if (!DUMMY_FEATURE_ENABLED) return;
+    if (!isDummyActionsEnabled) return;
     try {
       await createMetricLogDummy({ count: 5, metricId });
     } catch (error) {
@@ -160,7 +159,7 @@ const MetricLogsClient = ({ initialParams }: MetricLogsClientProps) => {
       <CardHeader className="flex w-full flex-row flex-wrap items-center justify-between gap-y-4">
         <section className="flex flex-row items-center gap-4">
           <CardTitle className="text-h3">Logs</CardTitle>
-          {DUMMY_FEATURE_ENABLED ? (
+          {isDummyActionsEnabled ? (
             <Button
               variant="secondary"
               size="sm"

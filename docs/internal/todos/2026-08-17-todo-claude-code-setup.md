@@ -140,7 +140,7 @@ All kept agents use `memory: project` with the `MEMORY.md`-index + `**How to app
 - [ ] Populate `src/test-utils/msw/handlers.ts` — currently empty while `onUnhandledRequest: "error"`
 - [ ] Enable `jsx-a11y` recommended ruleset
 - [ ] Replace the `check-accessibility` placeholder script
-- [ ] Reconcile the three conflicting local backend defaults (`:3000` / `:4000` / `:8001`)
+- [x] Reconcile the three conflicting local backend defaults (`:3000` / `:4000` / `:8001`) — closed 2026-08-24 by SaaS-readiness Phase 3. `:8001` is canonical; see `DEV_API_BASE_URL` in `src/lib/env.ts`.
 - [ ] `docs/README.md` references `docs/code-review/`, which does not exist
 
 ---

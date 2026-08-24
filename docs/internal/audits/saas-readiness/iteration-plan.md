@@ -15,8 +15,8 @@ This is the master roadmap for closing the 8 P0 + 21 P1 + 8 P2 items in the base
 | 0   | Kit + baseline audit          | — (establishes the trail)                 | S      | Done 2026-08-24 | ADR-001, 002, 003, 004 |
 | 1   | Forkability scaffolding       | §4.13 all; §4.6 Node pin                  | M      | Done            | —                      |
 | 2   | De-branding + white-label     | §4.13 branding, API tooling; §4.3 favicon | M      | Done            | —                      |
-| 3   | Env validation + DX           | §4.6 all                                  | M      | Next            | —                      |
-| 4   | Observability                 | §4.5 all; §4.4 CSP sink; §4.10 RUM        | M      | Scaffolded      | —                      |
+| 3   | Env validation + DX           | §4.6 all                                  | M      | Done            | —                      |
+| 4   | Observability                 | §4.5 all; §4.4 CSP sink; §4.10 RUM        | M      | Next            | —                      |
 | 5   | Auth lifecycle                | §4.1 all; §4.2 proxy allowlist            | L      | Scaffolded      | —                      |
 | 6   | Multi-tenancy UI              | §4.11 all                                 | L      | Blocked on 5    | **ADR-004**            |
 | 7   | Testing, gates, CI/CD, deploy | §4.7, §4.8, §4.9 all                      | L      | Scaffolded      | ADR-003                |
@@ -72,6 +72,12 @@ exactly this class of defect going unnoticed.
 Phase 2 centralized the brand into `src/constants/app.ts` and mapped `constants` in the ESLint
 boundary map, which had been unmapped. The fork surface fell from 115 files to 93. `robots.ts`
 and `sitemap.ts` moved to Phase 3, which owns the env work they depend on.
+
+Phase 3 added `src/lib/env.ts` with 17 tests, fixed the `undefined/auth/login` bug, and resolved
+the long-standing port conflict in favour of `:8001` — **not** the `:4000` the audit assumed. The
+audit had weighed reference prose over the two guides that were validated by running them
+verbatim; `:8001` also exists to dodge a macOS AirPlay clash on port 5000. `.env.example` from
+Phase 1 was corrected. `robots.ts` and `sitemap.ts`, deferred from Phase 2, shipped here.
 
 ## P2-only items (deferred, not scaffolded)
 

@@ -2,9 +2,8 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { SESSION_COOKIE_NAME } from "@/constants/app";
+import { getApiBaseUrl } from "@/lib/env";
 
-const FALLBACK_API = "http://localhost:8001/api/v1";
-const API_BASE_URL = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? FALLBACK_API;
 const PROTECTED_SEGMENTS = new Set([
   "metrics",
   "metric-categories",
@@ -20,14 +19,21 @@ type RouteContext = {
 };
 
 async function proxyHandler(request: NextRequest, context: RouteContext) {
-  if (!API_BASE_URL) {
+  // Resolved per request, not at module load: `next build` evaluates route
+  // modules with no environment, and getApiBaseUrl() throws in production when
+  // nothing is configured.
+  let apiBaseUrl: string;
+  try {
+    apiBaseUrl = getApiBaseUrl();
+  } catch (error) {
+    console.error("[proxy] API base URL is not configured:", error);
     return NextResponse.json({ error: "API base URL is not configured" }, { status: 500 });
   }
 
   const params = await context.params;
   const rawSegments = params.path ?? [];
   const targetPath = rawSegments.join("/");
-  const targetUrl = new URL(API_BASE_URL.replace(/\/$/, "") + `/${targetPath}`);
+  const targetUrl = new URL(`${apiBaseUrl}/${targetPath}`);
 
   request.nextUrl.searchParams.forEach((value, key) => {
     targetUrl.searchParams.append(key, value);
