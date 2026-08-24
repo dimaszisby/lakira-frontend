@@ -13,8 +13,8 @@ This is the master roadmap for closing the 8 P0 + 21 P1 + 8 P2 items in the base
 | #   | Phase                         | Closes                                    | Effort | Status          | Gating ADR             |
 | --- | ----------------------------- | ----------------------------------------- | ------ | --------------- | ---------------------- |
 | 0   | Kit + baseline audit          | — (establishes the trail)                 | S      | Done 2026-08-24 | ADR-001, 002, 003, 004 |
-| 1   | Forkability scaffolding       | §4.13 all; §4.6 Node pin                  | M      | Next            | —                      |
-| 2   | De-branding + white-label     | §4.13 branding, API tooling; §4.3 favicon | M      | Scaffolded      | —                      |
+| 1   | Forkability scaffolding       | §4.13 all; §4.6 Node pin                  | M      | Done            | —                      |
+| 2   | De-branding + white-label     | §4.13 branding, API tooling; §4.3 favicon | M      | Next            | —                      |
 | 3   | Env validation + DX           | §4.6 all                                  | M      | Scaffolded      | —                      |
 | 4   | Observability                 | §4.5 all; §4.4 CSP sink; §4.10 RUM        | M      | Scaffolded      | —                      |
 | 5   | Auth lifecycle                | §4.1 all; §4.2 proxy allowlist            | L      | Scaffolded      | —                      |
@@ -55,6 +55,19 @@ Note for the record: the global agent hook at `~/.claude/hooks/protect-files.sh`
 exempts** `.env.example` ("a committed template (no secrets) and is always allowed"), despite
 `.claude/rules/environment.md` stating that Claude cannot edit `.env*` files. The rule is
 overbroad; correct it when Phase 3 touches that file.
+
+## Progress since the baseline
+
+Phase 1 closed the whole of §4.13 except the branding footprint (Phase 2 owns that) and the
+Node pin from §4.6. `LICENSE` and `.env.example` are both present, so **ADR-001 criterion 4
+now passes**. The dated audit and `SAAS-BASE-CHECKLIST.md` still show the 2026-08-24 numbers by
+design — they are that run's immutable record. The scorecard moves at the next dated audit.
+
+`scripts/bootstrap-fork.sh` was verified end to end on a throwaway clone, not just written: the
+forked tree passes `lint`, `lint:css`, `typecheck`, `test:unit`, `test:integration` and `build`
+after `npm ci`. Two bugs were found and fixed during that verification — the script rewrote its
+own replacement patterns, and a re-run clobbered `FORKED-FROM.md`. The backend's caveat C1 was
+exactly this class of defect going unnoticed.
 
 ## P2-only items (deferred, not scaffolded)
 

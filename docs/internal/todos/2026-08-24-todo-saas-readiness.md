@@ -21,16 +21,16 @@ audit. Phases land as separate PRs; this file tracks them.
 - [x] `docs/internal/audits/README.md` — new program index
 - [x] Link the kit from `docs/README.md`; fix its stale file count (54/76 → 58/120)
 
-## Phase 1 — Forkability scaffolding
+## Phase 1 — Forkability scaffolding (complete)
 
-- [ ] `LICENSE` (MIT, matching the backend)
-- [ ] `CONTRIBUTING.md`
-- [ ] `SECURITY.md`
-- [ ] `.nvmrc` pinning Node 20 + `engines.node`
-- [ ] `scripts/bootstrap-fork.sh --name <slug>`, validated slug, idempotent, portable `sed -i`
-- [ ] README: licence, deployment, fork/rename sections; fix the quick-start heredoc pointing at
+- [x] `LICENSE` (MIT, matching the backend)
+- [x] `CONTRIBUTING.md`
+- [x] `SECURITY.md`
+- [x] `.nvmrc` pinning Node 20 + `engines.node`
+- [x] `scripts/bootstrap-fork.sh --name <slug>`, validated slug, idempotent, portable `sed -i`
+- [x] README: licence, deployment, fork/rename sections; fix the quick-start heredoc pointing at
       the staging backend that has been down since 2026-08-22
-- [ ] Verify the fork flow on a real scratch clone — the backend's caveat C1 was that its own
+- [x] Verify the fork flow on a real scratch clone — the backend's caveat C1 was that its own
       script did not work as printed
 
 ## Phase 2 — De-branding + white-label
