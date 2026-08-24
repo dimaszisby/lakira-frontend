@@ -3,6 +3,7 @@
 import { useAtom } from "jotai";
 import Link from "next/link";
 
+import { APP_NAME } from "@/constants/app";
 import { userAtom } from "@/services/state/atoms";
 import Card from "@/ui/Card";
 
@@ -16,7 +17,7 @@ const Header = () => {
           <header>
             <nav className="flex w-full items-center justify-between">
               <Link href="/" className="text-h5 font-bold text-brand-primary">
-                Lakira
+                {APP_NAME}
               </Link>
 
               <div className="text-nav-item flex flex-row gap-12">

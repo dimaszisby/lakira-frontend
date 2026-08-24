@@ -33,18 +33,33 @@ audit. Phases land as separate PRs; this file tracks them.
 - [x] Verify the fork flow on a real scratch clone — the backend's caveat C1 was that its own
       script did not work as printed
 
-## Phase 2 — De-branding + white-label
+## Phase 2 — De-branding + white-label (complete, one item deferred)
 
-- [ ] `src/constants/app.ts` — app name, cookie name, theme storage key, wordmark
-- [ ] Check whether `middleware.ts` resolves the path alias; if not, `bootstrap-fork.sh` owns it
-- [ ] Replace 8 inline `lakira_token` literals — **renaming invalidates live sessions once**
-- [ ] Reconcile `lakira.theme` between `src/utils/theme.ts` and `public/scripts/theme-init.js`
-- [ ] 6 metadata titles; normalise the `-` vs `•` separator split
-- [ ] 6 visible-copy sites
-- [ ] Fix `cypress/e2e/home.cy.ts:7` — asserts on the brand string
-- [ ] Generalise `scripts/api/*.mjs` off `dimaszisby/lakira-backend`
-- [ ] `manifest.ts`, `robots.ts`, `sitemap.ts`, `openGraph`; drop the dead favicon link at
-      `src/app/layout.tsx:41`
+- [x] `src/constants/app.ts` — app name, description, title separator, cookie name, cookie
+      options, session max-age, theme storage key
+- [x] Mapped `constants` in `eslint.config.mjs` `boundaries/elements`. It was unmapped, like
+      `src/components/**` was before 2026-08-17, so `utils -> constants` only worked because the
+      rule did not run. Mapping it surfaced **zero** new violations (the components mapping
+      surfaced 126). `hooks`, `styles` and `test-utils` remain unmapped.
+- [x] `middleware.ts` **does** resolve the `@/constants/*` alias despite sitting outside the
+      `src/**` element map — verified by typecheck, lint and build. No fork-script fallback needed.
+- [x] Replaced all 8 inline `lakira_token` literals
+- [x] Reconciled `lakira.theme`. `src/utils/theme.ts` imports the constant;
+      `public/scripts/theme-init.js` keeps a literal because it is a blocking inline script with
+      no module system, now cross-referenced in both directions and kept in sync by the fork script
+- [x] 6 metadata titles collapsed onto a root `title.template`, which also removes the
+      inconsistent `-` vs `•` separator split
+- [x] 6 visible-copy sites
+- [x] `cypress/e2e/home.cy.ts` asserts structure instead of brand copy
+- [x] `scripts/api/*.mjs` — covered by Phase 1's fork script, which rewrites the env prefix and
+      repoints the owner to `your-org`. No source change needed here.
+- [x] `manifest.ts` added; dead `<link rel="icon">` removed from `src/app/layout.tsx`
+      (it pointed at `/favicon.ico`, which does not exist in `public/`)
+- [ ] `robots.ts` / `sitemap.ts` — **deferred to Phase 3.** Both need a base-URL helper, and the
+      only origin-resolution logic lives privately inside `src/services/api/api.ts` with zero test
+      coverage. Duplicating the env chain would violate `.claude/rules/environment.md`; extracting
+      it is Phase 3's job, once `src/lib/env.ts` exists.
+- [x] Fork surface measured: `bootstrap-fork.sh` rewrote **115 files before, 93 after**
 
 ## Phase 3 — Env validation + DX
 

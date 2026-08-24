@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { APP_NAME } from "@/constants/app";
 import { authRoutes } from "@/lib/routes";
 import Button from "@/ui/Button";
 
@@ -16,7 +17,7 @@ const HomePage = async ({ searchParams }: HomePageProps) => {
   return (
     <main className="flex min-h-dvh flex-col items-center justify-center gap-6">
       {/* Branding */}
-      <h1 className="text-center">Lakira</h1>
+      <h1 className="text-center">{APP_NAME}</h1>
       <p className="max-w-prose text-center">
         Track and monitor your progress seamlessly. Set goals, view trends, and stay motivated!
       </p>

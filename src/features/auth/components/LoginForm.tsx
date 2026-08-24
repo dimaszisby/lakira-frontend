@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 
+import { APP_NAME } from "@/constants/app";
 import { useLoginUserMutation } from "@/features/auth/hooks/login.mutation";
 import { authRoutes } from "@/lib/routes";
 import { handleApiError } from "@/services/api/handleApiError";
@@ -73,7 +74,7 @@ const LoginForm = () => {
     <Card variant="primary" size="md" className="mx-auto w-full max-w-md">
       <CardHeader className="text-center">
         <CardTitle>Login</CardTitle>
-        <CardDescription>Login using your Lakira Account</CardDescription>
+        <CardDescription>Login using your {APP_NAME} Account</CardDescription>
       </CardHeader>
 
       <CardContent>

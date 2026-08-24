@@ -7,7 +7,7 @@ import {
 } from "@/features/metrics/listSearchParams";
 
 export const metadata: Metadata = {
-  title: "Metrics • Lakira",
+  title: "Metrics",
 };
 
 type MetricsPageProps = {

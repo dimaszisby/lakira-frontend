@@ -14,8 +14,8 @@ This is the master roadmap for closing the 8 P0 + 21 P1 + 8 P2 items in the base
 | --- | ----------------------------- | ----------------------------------------- | ------ | --------------- | ---------------------- |
 | 0   | Kit + baseline audit          | — (establishes the trail)                 | S      | Done 2026-08-24 | ADR-001, 002, 003, 004 |
 | 1   | Forkability scaffolding       | §4.13 all; §4.6 Node pin                  | M      | Done            | —                      |
-| 2   | De-branding + white-label     | §4.13 branding, API tooling; §4.3 favicon | M      | Next            | —                      |
-| 3   | Env validation + DX           | §4.6 all                                  | M      | Scaffolded      | —                      |
+| 2   | De-branding + white-label     | §4.13 branding, API tooling; §4.3 favicon | M      | Done            | —                      |
+| 3   | Env validation + DX           | §4.6 all                                  | M      | Next            | —                      |
 | 4   | Observability                 | §4.5 all; §4.4 CSP sink; §4.10 RUM        | M      | Scaffolded      | —                      |
 | 5   | Auth lifecycle                | §4.1 all; §4.2 proxy allowlist            | L      | Scaffolded      | —                      |
 | 6   | Multi-tenancy UI              | §4.11 all                                 | L      | Blocked on 5    | **ADR-004**            |
@@ -68,6 +68,10 @@ forked tree passes `lint`, `lint:css`, `typecheck`, `test:unit`, `test:integrati
 after `npm ci`. Two bugs were found and fixed during that verification — the script rewrote its
 own replacement patterns, and a re-run clobbered `FORKED-FROM.md`. The backend's caveat C1 was
 exactly this class of defect going unnoticed.
+
+Phase 2 centralized the brand into `src/constants/app.ts` and mapped `constants` in the ESLint
+boundary map, which had been unmapped. The fork surface fell from 115 files to 93. `robots.ts`
+and `sitemap.ts` moved to Phase 3, which owns the env work they depend on.
 
 ## P2-only items (deferred, not scaffolded)
 

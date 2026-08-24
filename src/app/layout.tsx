@@ -3,13 +3,24 @@ import "@/styles/globals.css";
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Quicksand } from "next/font/google";
 
+import { APP_DESCRIPTION, APP_NAME, TITLE_SEPARATOR } from "@/constants/app";
+
 import { Providers } from "./providers";
 import ThemeScript from "./ThemeScript";
 
 export const metadata: Metadata = {
-  title: "Lakira - Your Personal Growth Tracker",
-  description:
-    "Track and monitor your progress seamlessly. Set goals, view trends, and stay motivated!",
+  title: {
+    default: `${APP_NAME} - Your Personal Growth Tracker`,
+    template: `%s ${TITLE_SEPARATOR} ${APP_NAME}`,
+  },
+  description: APP_DESCRIPTION,
+  applicationName: APP_NAME,
+  openGraph: {
+    siteName: APP_NAME,
+    title: `${APP_NAME} - Your Personal Growth Tracker`,
+    description: APP_DESCRIPTION,
+    type: "website",
+  },
 };
 
 const quicksand = Quicksand({
@@ -36,7 +47,6 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
         <ThemeScript />
       </head>
       <body className=" min-h-dvh font-sans antialiased">

@@ -86,6 +86,7 @@ const config = [
         { type: "app", pattern: "src/app/**" },
         { type: "features", pattern: "src/features/**" },
         { type: "components", pattern: "src/components/**" },
+        { type: "constants", pattern: "src/constants/**" },
         { type: "generics", pattern: "src/generics/**" },
         { type: "types", pattern: "src/types/**" },
         { type: "utils", pattern: "src/utils/**" },
@@ -191,32 +192,43 @@ const config = [
             // app (Next.js routes) can depend on everything below it
             {
               from: "app",
-              allow: ["features", "components", "services", "lib", "utils", "generics"],
+              allow: [
+                "features",
+                "components",
+                "services",
+                "lib",
+                "utils",
+                "generics",
+                "constants",
+              ],
             },
 
             // features can use shared UI primitives, cross-cutting libs & pure utils/types
             {
               from: "features",
-              allow: ["components", "services", "lib", "utils", "types", "generics"],
+              allow: ["components", "services", "lib", "utils", "types", "generics", "constants"],
             },
 
             // components can use cross-cutting libs & pure utils/types
-            { from: "components", allow: ["lib", "utils", "types", "generics"] },
+            { from: "components", allow: ["lib", "utils", "types", "generics", "constants"] },
 
             // services can use cross-cutting libs & pure utils/types
-            { from: "services", allow: ["lib", "utils", "types", "generics"] },
+            { from: "services", allow: ["lib", "utils", "types", "generics", "constants"] },
 
             // lib can only depend on utils & generics (no feature imports)
-            { from: "lib", allow: ["utils", "types", "generics"] },
+            { from: "lib", allow: ["utils", "types", "generics", "constants"] },
 
             // utils can only depend on generics
-            { from: "utils", allow: ["generics"] },
+            { from: "utils", allow: ["generics", "constants"] },
 
             // types can only depend on generics
-            { from: "types", allow: ["generics"] },
+            { from: "types", allow: ["generics", "constants"] },
 
             // generics (type-only) depends on nothing inside the repo
             { from: "generics", allow: [] },
+
+            // constants are leaf values: importable everywhere, importing nothing
+            { from: "constants", allow: ["constants"] },
           ],
         },
       ],

@@ -1,6 +1,8 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { SESSION_COOKIE_NAME } from "@/constants/app";
+
 const PROTECTED_PATHS = ["/dashboard", "/metrics", "/metric-categories", "/account"];
 
 export function middleware(request: NextRequest) {
@@ -11,7 +13,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const tokenCookie = request.cookies.get("lakira_token");
+  const tokenCookie = request.cookies.get(SESSION_COOKIE_NAME);
 
   if (tokenCookie?.value) {
     return NextResponse.next();

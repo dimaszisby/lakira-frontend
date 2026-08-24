@@ -1,7 +1,7 @@
 /* 
 TODO: Not Refacored yet
 * Brand Colors
-This is brand color palette for Lakira Design System, served as the foundation for theming and styling across the application.
+This is brand color palette for the design system, served as the foundation for theming and styling across the application.
 This brand color directly applies to UI components to ensure a cohesive and visually appealing user interface.
 This colors works for both light and dark themes.
 */
@@ -26,7 +26,7 @@ This colors works for both light and dark themes.
 /*
 TODO: Not Refactored yet -> Currently implementing one-by-one
 * Light Theme
-This section defines the color variables specifically for the light theme of the Lakira Design System.
+This section defines the color variables specifically for the light theme of the the design system.
 These colors are optimized for visibility and aesthetics in a light-themed user interface.
 */
 :root[data-theme="light"],

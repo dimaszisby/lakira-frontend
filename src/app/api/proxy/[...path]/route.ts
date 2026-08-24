@@ -1,6 +1,8 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
+import { SESSION_COOKIE_NAME } from "@/constants/app";
+
 const FALLBACK_API = "http://localhost:8001/api/v1";
 const API_BASE_URL = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? FALLBACK_API;
 const PROTECTED_SEGMENTS = new Set([
@@ -31,7 +33,7 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
     targetUrl.searchParams.append(key, value);
   });
 
-  const token = request.cookies.get("lakira_token")?.value ?? null;
+  const token = request.cookies.get(SESSION_COOKIE_NAME)?.value ?? null;
   const requiresAuth = rawSegments.length === 0 ? false : PROTECTED_SEGMENTS.has(rawSegments[0]);
 
   if (requiresAuth && !token) {

@@ -8,6 +8,7 @@ import type { ReactNode } from "react";
 import { useCallback, useState } from "react";
 import { toast } from "react-hot-toast";
 
+import { APP_NAME } from "@/constants/app";
 import { cn } from "@/lib/cn";
 import { authRoutes } from "@/lib/routes";
 import { logoutUser } from "@/services/api/auth.api";
@@ -32,7 +33,7 @@ const SidebarContentWrapper = ({ includeCloseButton, onClose, children }: Sideba
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary text-sm font-bold text-white">
           L
         </div>
-        <p className="text-lg font-semibold text-ink">Lakira</p>
+        <p className="text-lg font-semibold text-ink">{APP_NAME}</p>
       </div>
       {includeCloseButton ? (
         <button
