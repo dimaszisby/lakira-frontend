@@ -119,6 +119,26 @@
         },
         "description": "Resource not found"
       },
+      "TooManyRequestsError": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "message": {
+                  "example": "Too many requests, please try again later.",
+                  "type": "string"
+                },
+                "status": {
+                  "example": 429,
+                  "type": "number"
+                }
+              },
+              "type": "object"
+            }
+          }
+        },
+        "description": "Rate limit exceeded"
+      },
       "UnauthorizedError": {
         "content": {
           "application/json": {
@@ -772,6 +792,20 @@
         ],
         "type": "object"
       },
+      "GenerateDummyMetricCategoriesRequest": {
+        "example": {
+          "count": 5
+        },
+        "properties": {
+          "count": {
+            "default": 5,
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
       "GenerateDummyMetricLogsRequest": {
         "example": {
           "count": 50
@@ -798,6 +832,20 @@
         "required": [
           "jobId"
         ],
+        "type": "object"
+      },
+      "GenerateDummyMetricsRequest": {
+        "example": {
+          "count": 50
+        },
+        "properties": {
+          "count": {
+            "default": 50,
+            "maximum": 1000,
+            "minimum": 1,
+            "type": "integer"
+          }
+        },
         "type": "object"
       },
       "GetTrendRequest": {
@@ -3845,6 +3893,68 @@
         ]
       }
     },
+    "/metric-categories/dummy": {
+      "post": {
+        "description": "Creates `count` randomly generated categories for the authenticated user in their active organization and returns them. Inserts synchronously. Only available when `ENABLE_DUMMY_ENDPOINTS=true`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateDummyMetricCategoriesRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "items": {
+                            "$ref": "#/components/schemas/MetricCategory"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "Dummy categories created"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequestsError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Generate dummy metric categories",
+        "tags": [
+          "Dummy Data"
+        ]
+      }
+    },
     "/metric-categories/{id}": {
       "delete": {
         "parameters": [
@@ -4547,7 +4657,7 @@
         ],
         "summary": "Enqueue dummy metric log generation",
         "tags": [
-          "Metric Logs"
+          "Dummy Data"
         ]
       }
     },
@@ -5252,6 +5362,68 @@
         "summary": "Create a new metric",
         "tags": [
           "Metrics"
+        ]
+      }
+    },
+    "/metrics/dummy": {
+      "post": {
+        "description": "Creates `count` randomly generated metrics for the authenticated user in their active organization and returns them. Inserts synchronously — unlike the metric-logs generator, this does not enqueue work. Only available when `ENABLE_DUMMY_ENDPOINTS=true`.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateDummyMetricsRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/SuccessResponse"
+                    },
+                    {
+                      "properties": {
+                        "data": {
+                          "items": {
+                            "$ref": "#/components/schemas/Metric"
+                          },
+                          "type": "array"
+                        }
+                      },
+                      "type": "object"
+                    }
+                  ]
+                }
+              }
+            },
+            "description": "Dummy metrics created"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "429": {
+            "$ref": "#/components/responses/TooManyRequestsError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Generate dummy metrics",
+        "tags": [
+          "Dummy Data"
         ]
       }
     },

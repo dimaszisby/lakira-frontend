@@ -882,6 +882,55 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/metric-categories/dummy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate dummy metric categories
+         * @description Creates `count` randomly generated categories for the authenticated user in their active organization and returns them. Inserts synchronously. Only available when `ENABLE_DUMMY_ENDPOINTS=true`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["GenerateDummyMetricCategoriesRequest"];
+                };
+            };
+            responses: {
+                /** @description Dummy categories created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SuccessResponse"] & {
+                            data?: components["schemas"]["MetricCategory"][];
+                        };
+                    };
+                };
+                400: components["responses"]["BadRequestError"];
+                401: components["responses"]["UnauthorizedError"];
+                429: components["responses"]["TooManyRequestsError"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/metric-categories/{id}": {
         parameters: {
             query?: never;
@@ -1673,6 +1722,55 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/metrics/dummy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Generate dummy metrics
+         * @description Creates `count` randomly generated metrics for the authenticated user in their active organization and returns them. Inserts synchronously — unlike the metric-logs generator, this does not enqueue work. Only available when `ENABLE_DUMMY_ENDPOINTS=true`.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["GenerateDummyMetricsRequest"];
+                };
+            };
+            responses: {
+                /** @description Dummy metrics created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SuccessResponse"] & {
+                            data?: components["schemas"]["Metric"][];
+                        };
+                    };
+                };
+                400: components["responses"]["BadRequestError"];
+                401: components["responses"]["UnauthorizedError"];
+                429: components["responses"]["TooManyRequestsError"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/metrics/{id}": {
         parameters: {
             query?: never;
@@ -2176,6 +2274,15 @@ export interface components {
         };
         /**
          * @example {
+         *       "count": 5
+         *     }
+         */
+        GenerateDummyMetricCategoriesRequest: {
+            /** @default 5 */
+            count: number;
+        };
+        /**
+         * @example {
          *       "count": 50
          *     }
          */
@@ -2190,6 +2297,15 @@ export interface components {
              * @example aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee
              */
             jobId: string;
+        };
+        /**
+         * @example {
+         *       "count": 50
+         *     }
+         */
+        GenerateDummyMetricsRequest: {
+            /** @default 50 */
+            count: number;
         };
         GetTrendRequest: {
             params: {
@@ -3024,6 +3140,20 @@ export interface components {
                     message?: string;
                     /** @example fail */
                     status?: string;
+                };
+            };
+        };
+        /** @description Rate limit exceeded */
+        TooManyRequestsError: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": {
+                    /** @example Too many requests, please try again later. */
+                    message?: string;
+                    /** @example 429 */
+                    status?: number;
                 };
             };
         };
