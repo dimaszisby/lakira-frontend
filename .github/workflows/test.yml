@@ -62,6 +62,12 @@ jobs:
       - name: Run unit tests with coverage
         run: npm run test:unit:ci
 
+      # Reuses the coverage/ output the step above produces; no second test run.
+      # Global thresholds are enforced by jest itself in test:unit:ci; this adds
+      # the per-folder goals in coverage-goals.json.
+      - name: Check per-folder coverage goals
+        run: npm run coverage:check
+
       - name: Upload coverage artifact
         if: always()
         uses: actions/upload-artifact@v4

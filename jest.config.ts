@@ -40,12 +40,18 @@ const config: Config = {
     "!src/styles/**"
   ],
   coverageReporters: ["text", "lcov", "json-summary"],
+  // Ratcheted to just below measured coverage on 2026-08-27
+  // (statements 29.56 / branches 30.21 / functions 26.97 / lines 29.61), so a
+  // real regression fails while normal fluctuation does not. These were 3/2/3/3,
+  // roughly a tenth of actual, which meant the gate could not fail for the
+  // reason it exists. Raise them as suites grow; never lower them to make a
+  // build pass.
   coverageThreshold: {
     global: {
-      statements: 3,
-      branches: 2,
-      functions: 3,
-      lines: 3
+      statements: 29,
+      branches: 29,
+      functions: 26,
+      lines: 29
     }
   },
   transform: {

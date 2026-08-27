@@ -10,17 +10,17 @@ This is the master roadmap for closing the 8 P0 + 21 P1 + 8 P2 items in the base
 
 ## Phase index
 
-| #   | Phase                         | Closes                                    | Effort | Status              | Gating ADR             |
-| --- | ----------------------------- | ----------------------------------------- | ------ | ------------------- | ---------------------- |
-| 0   | Kit + baseline audit          | — (establishes the trail)                 | S      | Done 2026-08-24     | ADR-001, 002, 003, 004 |
-| 1   | Forkability scaffolding       | §4.13 all; §4.6 Node pin                  | M      | Done                | —                      |
-| 2   | De-branding + white-label     | §4.13 branding, API tooling; §4.3 favicon | M      | Done                | —                      |
-| 3   | Env validation + DX           | §4.6 all                                  | M      | Done                | —                      |
-| 4   | Observability                 | §4.5 all; §4.4 CSP sink; §4.10 RUM        | M      | 4a Done, 4b blocked | —                      |
-| 5   | Auth lifecycle                | §4.1 all; §4.2 proxy allowlist            | L      | 5a Done, 5b next    | —                      |
-| 6   | Multi-tenancy UI              | §4.11 all                                 | L      | Blocked on 5        | **ADR-004**            |
-| 7   | Testing, gates, CI/CD, deploy | §4.7, §4.8, §4.9 all                      | L      | Scaffolded          | ADR-003                |
-| 8   | Re-audit + closeout           | —                                         | S      | Scaffolded          | ADR-002                |
+| #   | Phase                         | Closes                                    | Effort | Status                      | Gating ADR             |
+| --- | ----------------------------- | ----------------------------------------- | ------ | --------------------------- | ---------------------- |
+| 0   | Kit + baseline audit          | — (establishes the trail)                 | S      | Done 2026-08-24             | ADR-001, 002, 003, 004 |
+| 1   | Forkability scaffolding       | §4.13 all; §4.6 Node pin                  | M      | Done                        | —                      |
+| 2   | De-branding + white-label     | §4.13 branding, API tooling; §4.3 favicon | M      | Done                        | —                      |
+| 3   | Env validation + DX           | §4.6 all                                  | M      | Done                        | —                      |
+| 4   | Observability                 | §4.5 all; §4.4 CSP sink; §4.10 RUM        | M      | 4a Done, 4b blocked         | —                      |
+| 5   | Auth lifecycle                | §4.1 all; §4.2 proxy allowlist            | L      | 5a Done, 5b next            | —                      |
+| 6   | Multi-tenancy UI              | §4.11 all                                 | L      | Blocked on 5                | **ADR-004**            |
+| 7   | Testing, gates, CI/CD, deploy | §4.7, §4.8, §4.9 all                      | L      | Gates done, deploy deferred | ADR-003                |
+| 8   | Re-audit + closeout           | —                                         | S      | Scaffolded                  | ADR-002                |
 
 Status legend: Scaffolded = planned, no code · Next = up now · Blocked = a predecessor
 must land first · Done = all phase targets closed.
@@ -91,6 +91,13 @@ allowlist derived from the OpenAPI contract, and `/api/auth/session` validates a
 storing it. One audit finding was **withdrawn** — `login/route.ts` calling the backend directly
 is correct for a server route, not a bypass. **5b** is the five missing UI flows and needs a
 running backend to verify.
+
+Phase 7 closed the vacuous gates from ADR-003: coverage thresholds ratcheted to real levels and
+proven to fail, `coverage:check` wired into CI with a phantom directory entry removed, and the
+`check-accessibility` stub deleted rather than replaced with an alias. **One ADR-003 finding was
+withdrawn** — the MSW harness is correct and stricter than claimed; the audit, `CLAUDE.md` and
+`.claude/rules/testing.md` all repeated a false claim that no integration suite mocks feature
+hooks at module level. Deploy config and Cypress expansion remain deferred.
 
 ## P2-only items (deferred, not scaffolded)
 

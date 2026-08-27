@@ -55,7 +55,11 @@ const { container } = renderWithProviders(<MetricsPageClient />);
 expect(await axe(container)).toHaveNoViolations();
 ```
 
-**The MSW trap:** `jest.integration.setup.ts` starts the server with `onUnhandledRequest: "error"`, and `src/test-utils/msw/handlers.ts` is currently an **empty array**. Any test that lets a real request escape fails immediately. Existing tests work around this by mocking feature hooks at the module level. When you add network-level handlers, add them to `handlers.ts` — do not call `server.use()` with a one-off in each file unless the handler is genuinely test-specific.
+**MSW is per-test, not global.** `jest.integration.setup.ts` starts the server with `onUnhandledRequest: "error"`, and `src/test-utils/msw/handlers.ts` is an **empty array by design**. Every suite declares the requests it expects with `server.use()`; any request that escapes fails immediately.
+
+That is deliberate and stricter than a shared handler list — a test cannot pass while silently depending on a response it never declared. **Write your handlers in the test that needs them.** Add to `handlers.ts` only for a request every integration suite would otherwise repeat.
+
+(An earlier version of this rule said existing tests "work around this by mocking feature hooks at the module level." That was wrong: 11 of 16 suites use `server.use()`, the other 5 are layout components with no network calls, and none mocks a feature hook. Corrected 2026-08-27.)
 
 ## E2E
 
