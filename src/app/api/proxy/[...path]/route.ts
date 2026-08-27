@@ -2,15 +2,9 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { SESSION_COOKIE_NAME } from "@/constants/app";
+import { isPublicApiPath } from "@/lib/auth-paths";
 import { getApiBaseUrl } from "@/lib/env";
-
-const PROTECTED_SEGMENTS = new Set([
-  "metrics",
-  "metric-categories",
-  "metric-logs",
-  "metric-settings",
-  "users",
-]);
+import { logger } from "@/lib/logger";
 
 const FORWARDED_HEADER_BLOCKLIST = new Set(["connection", "content-length", "host"]);
 
@@ -40,9 +34,14 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
   });
 
   const token = request.cookies.get(SESSION_COOKIE_NAME)?.value ?? null;
-  const requiresAuth = rawSegments.length === 0 ? false : PROTECTED_SEGMENTS.has(rawSegments[0]);
 
-  if (requiresAuth && !token) {
+  // Deny by default. This was previously an allowlist of protected first
+  // segments, which is a denylist by omission: any backend resource added
+  // upstream proxied unauthenticated until someone remembered to list it.
+  // `analytics/*` and `admin/_ping` were both exposed that way, and the
+  // OpenAPI contract marks both as secured.
+  if (!isPublicApiPath(rawSegments) && !token) {
+    logger.warn("proxy.unauthenticated", { path: targetPath, method: request.method });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

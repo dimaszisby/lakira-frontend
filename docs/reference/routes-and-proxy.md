@@ -41,17 +41,24 @@ Prefer `API_URL`: it is server-only, so it never ships to the browser. See
 4. Streams the request and response bodies (`duplex: "half"`), so uploads are not buffered.
 5. Uses `redirect: "manual"` — upstream redirects are passed through, not followed.
 
-**Auth enforcement** is an allowlist of _first_ path segments:
+**Auth enforcement denies by default.** A request with no token gets a `401` without reaching the
+backend, unless its full path is one of the public auth entry points in `PUBLIC_API_PATHS`
+(`src/lib/auth-paths.ts`):
 
 ```
-metrics · metric-categories · metric-logs · metric-settings · users
+auth/login · auth/register · auth/logout · auth/refresh
+auth/forgot-password · auth/reset-password · auth/verify-email
 ```
 
-A request whose first segment is in that set and which has no token gets a `401` without reaching
-the backend.
+That list comes from the OpenAPI contract, where every other operation declares `security`. Paths
+are matched **whole**, not by prefix, so `auth/profile` and `auth/switch-org` — both secured
+upstream — still require a token.
 
-> **`analytics/*` is not in the allowlist**, so those requests are forwarded regardless of whether a
-> token is present. The backend is the only thing enforcing auth on that path.
+Adding a backend resource needs no change here: it is protected from the moment it exists.
+
+> Until 2026-08-27 this was inverted — an allowlist of _protected_ first segments, which meant
+> every unlisted path proxied unauthenticated. `analytics/*` and `admin/_ping` were both exposed
+> that way despite the contract marking them secured.
 
 ## Middleware
 
@@ -61,7 +68,8 @@ the backend.
 /dashboard  ·  /metrics  ·  /metric-categories  ·  /account
 ```
 
-matched as `/<path>/:path*`. An unauthenticated request is redirected to
+matched as `/<path>/:path*`. The gate checks the token's `exp` claim, not merely that a cookie
+exists, and clears a stale cookie on the way out. An unauthenticated request is redirected to
 `/login?returnUrl=<target>`.
 
 ## SSR must forward the cookie

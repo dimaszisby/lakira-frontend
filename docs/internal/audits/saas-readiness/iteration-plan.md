@@ -17,7 +17,7 @@ This is the master roadmap for closing the 8 P0 + 21 P1 + 8 P2 items in the base
 | 2   | De-branding + white-label     | §4.13 branding, API tooling; §4.3 favicon | M      | Done                | —                      |
 | 3   | Env validation + DX           | §4.6 all                                  | M      | Done                | —                      |
 | 4   | Observability                 | §4.5 all; §4.4 CSP sink; §4.10 RUM        | M      | 4a Done, 4b blocked | —                      |
-| 5   | Auth lifecycle                | §4.1 all; §4.2 proxy allowlist            | L      | Next                | —                      |
+| 5   | Auth lifecycle                | §4.1 all; §4.2 proxy allowlist            | L      | 5a Done, 5b next    | —                      |
 | 6   | Multi-tenancy UI              | §4.11 all                                 | L      | Blocked on 5        | **ADR-004**            |
 | 7   | Testing, gates, CI/CD, deploy | §4.7, §4.8, §4.9 all                      | L      | Scaffolded          | ADR-003                |
 | 8   | Re-audit + closeout           | —                                         | S      | Scaffolded          | ADR-002                |
@@ -84,6 +84,13 @@ logging with substring-matched redaction, a CSP sink that persists in production
 Vitals RUM, and the two missing error boundaries — adding no dependency and no CSP origin.
 **4b**, the vendor adapter, is blocked on choosing a provider; `setLogSink()` is the seam it
 registers against. Section 4.5's P1s are closed; its P0 is downgraded, not closed.
+
+Phase 5 was split. **5a** hardened the existing auth surface: the middleware now checks token
+expiry rather than cookie presence, the proxy was inverted to deny-by-default against an
+allowlist derived from the OpenAPI contract, and `/api/auth/session` validates a token before
+storing it. One audit finding was **withdrawn** — `login/route.ts` calling the backend directly
+is correct for a server route, not a bypass. **5b** is the five missing UI flows and needs a
+running backend to verify.
 
 ## P2-only items (deferred, not scaffolded)
 

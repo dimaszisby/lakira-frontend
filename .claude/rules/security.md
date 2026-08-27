@@ -20,15 +20,17 @@ Non-negotiables:
 
 - **The token never touches JavaScript.** Not `localStorage`, not `sessionStorage`, not a non-httpOnly cookie, not a global. If a component appears to need the token, it needs a server route instead.
 - **The bearer header is injected by the proxy**, from the cookie. Feature code never sets `Authorization`.
-- `middleware.ts` gate-checks the cookie for `/dashboard`, `/metrics`, `/metric-categories`, `/account`. Adding a protected top-level route means adding it there — the gate is not inferred from the folder structure.
+- `middleware.ts` gate-checks the cookie for the paths in `PROTECTED_APP_PATHS` (`src/lib/auth-paths.ts`), validating the token's `exp` claim rather than merely its presence. Adding a protected top-level route means adding it to that list **and** to `config.matcher` in `middleware.ts` — Next.js requires the matcher to be a static literal, so it cannot be derived. A test asserts the two stay in sync.
 
 `secure: true` is unconditional, so the cookie will not be set over plain `http`. That is intentional; work around it in local dev with the documented setup rather than by weakening the flag.
 
-## The proxy's auth allowlist
+## The proxy denies by default
 
-`src/app/api/proxy/[...path]/route.ts` requires a token only when the first path segment is `metrics`, `metric-categories`, `metric-logs`, `metric-settings`, or `users`. Everything else — including `analytics/*` — passes through unauthenticated (the token is still forwarded if present).
+`src/app/api/proxy/[...path]/route.ts` rejects any request without a token, unless the path appears in `PUBLIC_API_PATHS` (`src/lib/auth-paths.ts`) — the seven unauthenticated auth entry points, matched exactly rather than by prefix so `auth/profile` and `auth/switch-org` stay protected.
 
-**When adding a backend resource that requires auth, add its segment to that list.** A missing segment means an endpoint that looks protected and is not.
+**Adding a backend resource requires no change here.** It is protected from the moment it exists. Only add to `PUBLIC_API_PATHS` when the contract genuinely marks an operation unauthenticated, and cover it in `src/lib/__tests__/auth-paths.test.ts`.
+
+Until 2026-08-27 this was inverted — an allowlist of protected segments, so every unlisted resource proxied unauthenticated. `analytics/*` and `admin/_ping` were both exposed that way.
 
 ## Content Security Policy
 
@@ -55,7 +57,7 @@ Defined in `next.config.ts` alongside HSTS, `Referrer-Policy`, `Permissions-Poli
 Use the built-in `/security-review` for a full pass. When reviewing by hand, the checks that catch real issues in this codebase:
 
 1. Does any new route handler read the cookie without validating it?
-2. Does a new backend resource need adding to the proxy's auth allowlist?
+2. Does a route handler return data the proxy's deny-by-default would otherwise have gated?
 3. Is a cache key missing a scope that makes one user's data reachable by another?
 4. Did a new external origin get added to the CSP, or worked around?
 5. Is anything sensitive newly behind a `NEXT_PUBLIC_` name?

@@ -129,16 +129,54 @@ console-only) are closed. The **P0 "no error monitoring of any kind" is downgrad
 closed** — structured stdout is collectable by any log drain, but it is not an error
 aggregator. 4b closes it.
 
-## Phase 5 — Auth lifecycle
+## Phase 5 — Auth lifecycle (5a complete; 5b is the UI flows)
+
+Split like Phase 4: 5a hardens existing surface, 5b adds the five missing flows. 5a needs no
+running backend to verify; 5b does.
+
+### 5a — security fixes to existing surface (done)
+
+- [x] `src/lib/jwt.ts` — dependency-free payload decode plus `exp` check. `jose` verifies
+      signatures we deliberately do not check; `jwt-decode` is a few lines of base64url.
+- [x] `middleware.ts` validates `exp`, not just cookie presence, and clears a stale cookie on
+      redirect so the browser stops presenting a token every request will reject
+- [x] `src/lib/auth-paths.ts` — one home for both "which pages need a session" and "which API
+      paths are public"
+- [x] **Proxy inverted to deny-by-default.** `PUBLIC_API_PATHS` lists the seven unauthenticated
+      auth entry points from the contract; everything else needs a token. Verified against the
+      OpenAPI spec: every operation declares `security` except those seven. `analytics/*` and
+      `admin/_ping` were both exposed by the old protected-segment allowlist.
+- [x] Whole-path matching, not prefix — a prefix match on `auth` would expose `auth/profile`,
+      `auth/switch-org` and `auth/resend-verification`, all secured upstream
+- [x] `/api/auth/session` validates structure, expiry, and backend acceptance before setting the
+      cookie. A network failure during verification falls back to the structural checks rather
+      than making login unavailable whenever the backend blips.
+- [x] `/api/auth/login` guards JSON parsing and rejects a malformed upstream token instead of
+      storing it — that failure used to surface later as an unexplained 401
+- [x] 58 tests across `jwt.test.ts` and `auth-paths.test.ts`
+- [x] Matcher drift guard, **proven to fail on drift** rather than assumed: temporarily changing
+      `/account` to `/billing` in `middleware.ts` failed the test; restoring it passed
+- [x] Updated `.claude/rules/{data-access,security}.md`, `docs/reference/routes-and-proxy.md`,
+      `docs/how-to/security/run-a-security-audit.md`
+
+**One audit finding withdrawn.** Section 4.1 listed "`login/route.ts` calls the backend directly,
+bypassing the proxy" as a defect. It is not. The proxy exists so the _browser_ never reaches the
+backend; `login/route.ts` is already server-side, so calling the backend is exactly what the proxy
+itself does. Routing it through would make the server issue an HTTP request to itself — an extra
+hop and an absolute URL to resolve, for no security gain.
+
+**Deferred to 5b.** `config.matcher` must be a static literal — Next.js fails the build with
+"matcher needs to be a static string or array of static strings" if it is derived. The list is
+therefore duplicated, with a test enforcing that it matches `PROTECTED_APP_MATCHERS`.
+
+### 5b — the five missing flows (needs a running backend)
 
 - [ ] `/auth/refresh` — retry-once on 401 inside the proxy
-- [ ] `/verify-email` + resend affordance
-- [ ] `/forgot-password` + `/reset-password`
-- [ ] Middleware: decode and check `exp`, not just presence
-- [ ] Middleware: de-duplicate the protected-path list
-- [ ] `session/route.ts`: validate the token before setting the cookie
-- [ ] `logout/route.ts`: clear with matching cookie attributes
-- [ ] Invert the proxy allowlist to deny-by-default
+- [ ] `/verify-email` plus a resend affordance
+- [ ] `/forgot-password` and `/reset-password`
+- [ ] Manual pass through all five against a live backend. `docs/reference/environments.md`
+      records the staging backend as down since 2026-08-22, so this needs a local backend on
+      `:8001`.
 
 ## Phase 6 — Multi-tenancy UI (**ADR-004: never partially**)
 
