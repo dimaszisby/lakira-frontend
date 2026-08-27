@@ -81,6 +81,6 @@ Worth knowing about:
 Things a reasonable reader would otherwise assume are true, and are not:
 
 - **Six files are exempt from the layer rule.** `src/components/**` was unmapped in `boundaries/elements` until 2026-08-17, so the `components` boundary never ran and 18 inversions accumulated. The rule is live now, with `withAuth.tsx`, `Header.tsx`, `Sidebar.tsx`, `HydrateUser.tsx`, `CategorySelect.tsx`, and `Visualization.tsx` quarantined at the bottom of `eslint.config.mjs` pending a refactor. Do not add to that list.
-- **Integration tests are not MSW-backed in practice.** `src/test-utils/msw/handlers.ts` is an empty array while the server runs with `onUnhandledRequest: "error"`, so existing tests mock feature hooks at the module level instead.
-- **Coverage thresholds gate nothing.** They sit at 3/2/3/3 %, and `coverage:check` only fails with `--strict`, which nothing passes.
+- **Integration tests are MSW-backed, per test rather than globally.** `src/test-utils/msw/handlers.ts` is an empty array _by design_: the server runs `onUnhandledRequest: "error"` and each suite declares its own requests via `server.use()`. That is stricter than a shared handler list. (An earlier note here claimed tests mocked feature hooks at module level; verified false on 2026-08-27 — no suite does.)
+- **Coverage thresholds are real as of 2026-08-27.** Global thresholds sit just below measured coverage (29/29/26/29 %), and `coverage:check --strict` runs in CI. They were 3/2/3/3 %, roughly a tenth of actual. Do not lower them to make a build pass.
 - **The OpenAPI snapshot drifts.** Run `npm run api:spec:check` before trusting `src/types/dtos/**`.

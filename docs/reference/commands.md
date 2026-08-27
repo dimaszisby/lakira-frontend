@@ -77,7 +77,6 @@ npx jest --config jest.integration.config.ts path/to/file.int.test.tsx
 
 ## Known-broken
 
-- `npm run check-accessibility` is a placeholder that installs `axe-core` and echoes. It does not check anything. Do not wire it into a gate.
 
 ## Generated artifacts — never hand-edit
 

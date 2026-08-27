@@ -58,7 +58,7 @@ Queries in tests should be by role and accessible name. `getByRole("button", { n
 Know these so you do not mistake a passing lint run for a passing a11y check:
 
 - **`eslint-plugin-jsx-a11y` is installed but only `alt-text` is enabled.** The recommended ruleset is not spread in, so label association, ARIA validity, and keyboard handlers are all unchecked by lint.
-- **`npm run check-accessibility` is a placeholder** that installs `axe-core` and echoes. It checks nothing.
+- **`npm run check-accessibility` was removed on 2026-08-27.** It ran `npm install axe-core && echo` and asserted nothing. It was not replaced: all 16 integration suites already carry `toHaveNoViolations`, so a dedicated script would be an exact alias for `npm run test:integration`, which gates CI. Run that.
 - There is no `cypress-axe`, so E2E accessibility is not covered. `docs/internal/initiatives/tests-overhaul/4-end-to-end-tests/a11y-e2e-checklist.md` describes the intent.
 
 Until those close, `jest-axe` in integration tests is the only automated coverage — and axe catches roughly a third of real issues. Keyboard-test anything you build by hand.
