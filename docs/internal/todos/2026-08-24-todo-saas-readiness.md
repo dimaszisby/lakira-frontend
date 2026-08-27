@@ -91,13 +91,43 @@ audit. Phases land as separate PRs; this file tracks them.
 - [ ] `next.config.ts` still reads `NEXT_PUBLIC_API_BASE_URL` raw — it runs before the app's
       module graph exists and cannot import from `src/`. Documented as a known exception.
 
-## Phase 4 — Observability
+## Phase 4 — Observability (4a complete; 4b pending a provider decision)
 
-- [ ] `@sentry/nextjs` + `instrumentation.ts` + client/server/edge configs
-- [ ] `beforeSend` PII scrubber (the backend's open caveat C5 — do not repeat it)
-- [ ] Make the CSP report sink persist in production
-- [ ] `useReportWebVitals` → the sink
-- [ ] Add the ingest origin to the CSP explicitly; never widen to a wildcard
+Split deliberately. 4a closes everything that needs no external account; 4b is the vendor
+adapter, which needs a provider choice, a DSN, and a new CSP origin.
+
+### 4a — provider-agnostic layer (done)
+
+- [x] `src/lib/logger.ts` — structured JSON to stdout, one object per line, matching the
+      backend's "logs as an event stream" change. No dependency added.
+- [x] `SENSITIVE_KEY_PATTERN` is **substring-matched, not suffix-anchored**. The backend's is
+      anchored with `$`, so it misses `authorization`, `cookie`, `bearer` and `dsn` — its own
+      caveats C6 and F2. Verified by test and by a runtime smoke run.
+- [x] `setLogSink()` — the seam an APM adapter registers against
+- [x] CSP report sink **persists in production** instead of discarding, with an 8 KB body cap,
+      per-field truncation, and a 204 response so a violating page never retries
+- [x] Core Web Vitals RUM via `useReportWebVitals` -> `/api/observability/web-vitals`, using
+      `sendBeacon` so unload-time CLS and LCP survive. Same-origin, so `connect-src 'self'`
+      already covers it — **no CSP change needed**.
+- [x] `src/app/global-error.tsx` and `src/app/not-found.tsx` (audit section 4.3 P1). Only two
+      route subtrees had an `error.tsx`; everything else showed the raw Next.js default.
+- [x] `/api/observability/client-error` receives boundary reports, schema-validated and capped
+- [x] 38 tests in `src/lib/__tests__/logger.test.ts`, run under `@jest-environment node`
+      because the logger no-ops in the browser and the unit default is jsdom
+- [x] `docs/how-to/development/plug-in-error-monitoring.md`
+
+### 4b — vendor adapter (blocked on a decision)
+
+- [ ] Choose a provider. Needs a DSN, a dependency, and an explicit CSP ingest origin.
+- [ ] Register it through `setLogSink()` in `instrumentation.ts`
+- [ ] PII scrubber at the SDK level (`beforeSend` or equivalent) — the logger redacts by key,
+      but an SDK also captures breadcrumbs, request bodies and locals it never sees
+- [ ] Absent configuration must disable reporting, not throw
+
+**Audit status:** section 4.5's P1s (RUM, discarded CSP reports, production diagnostics being
+console-only) are closed. The **P0 "no error monitoring of any kind" is downgraded, not
+closed** — structured stdout is collectable by any log drain, but it is not an error
+aggregator. 4b closes it.
 
 ## Phase 5 — Auth lifecycle
 

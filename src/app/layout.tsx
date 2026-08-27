@@ -5,6 +5,7 @@ import { Plus_Jakarta_Sans, Quicksand } from "next/font/google";
 
 import { APP_DESCRIPTION, APP_NAME, TITLE_SEPARATOR } from "@/constants/app";
 
+import WebVitalsReporter from "./_components/WebVitalsReporter";
 import { Providers } from "./providers";
 import ThemeScript from "./ThemeScript";
 
@@ -50,6 +51,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
         <ThemeScript />
       </head>
       <body className=" min-h-dvh font-sans antialiased">
+        <WebVitalsReporter />
         <Providers>{children}</Providers>
       </body>
     </html>

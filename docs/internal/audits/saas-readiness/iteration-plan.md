@@ -10,17 +10,17 @@ This is the master roadmap for closing the 8 P0 + 21 P1 + 8 P2 items in the base
 
 ## Phase index
 
-| #   | Phase                         | Closes                                    | Effort | Status          | Gating ADR             |
-| --- | ----------------------------- | ----------------------------------------- | ------ | --------------- | ---------------------- |
-| 0   | Kit + baseline audit          | — (establishes the trail)                 | S      | Done 2026-08-24 | ADR-001, 002, 003, 004 |
-| 1   | Forkability scaffolding       | §4.13 all; §4.6 Node pin                  | M      | Done            | —                      |
-| 2   | De-branding + white-label     | §4.13 branding, API tooling; §4.3 favicon | M      | Done            | —                      |
-| 3   | Env validation + DX           | §4.6 all                                  | M      | Done            | —                      |
-| 4   | Observability                 | §4.5 all; §4.4 CSP sink; §4.10 RUM        | M      | Next            | —                      |
-| 5   | Auth lifecycle                | §4.1 all; §4.2 proxy allowlist            | L      | Scaffolded      | —                      |
-| 6   | Multi-tenancy UI              | §4.11 all                                 | L      | Blocked on 5    | **ADR-004**            |
-| 7   | Testing, gates, CI/CD, deploy | §4.7, §4.8, §4.9 all                      | L      | Scaffolded      | ADR-003                |
-| 8   | Re-audit + closeout           | —                                         | S      | Scaffolded      | ADR-002                |
+| #   | Phase                         | Closes                                    | Effort | Status              | Gating ADR             |
+| --- | ----------------------------- | ----------------------------------------- | ------ | ------------------- | ---------------------- |
+| 0   | Kit + baseline audit          | — (establishes the trail)                 | S      | Done 2026-08-24     | ADR-001, 002, 003, 004 |
+| 1   | Forkability scaffolding       | §4.13 all; §4.6 Node pin                  | M      | Done                | —                      |
+| 2   | De-branding + white-label     | §4.13 branding, API tooling; §4.3 favicon | M      | Done                | —                      |
+| 3   | Env validation + DX           | §4.6 all                                  | M      | Done                | —                      |
+| 4   | Observability                 | §4.5 all; §4.4 CSP sink; §4.10 RUM        | M      | 4a Done, 4b blocked | —                      |
+| 5   | Auth lifecycle                | §4.1 all; §4.2 proxy allowlist            | L      | Next                | —                      |
+| 6   | Multi-tenancy UI              | §4.11 all                                 | L      | Blocked on 5        | **ADR-004**            |
+| 7   | Testing, gates, CI/CD, deploy | §4.7, §4.8, §4.9 all                      | L      | Scaffolded          | ADR-003                |
+| 8   | Re-audit + closeout           | —                                         | S      | Scaffolded          | ADR-002                |
 
 Status legend: Scaffolded = planned, no code · Next = up now · Blocked = a predecessor
 must land first · Done = all phase targets closed.
@@ -78,6 +78,12 @@ the long-standing port conflict in favour of `:8001` — **not** the `:4000` the
 audit had weighed reference prose over the two guides that were validated by running them
 verbatim; `:8001` also exists to dodge a macOS AirPlay clash on port 5000. `.env.example` from
 Phase 1 was corrected. `robots.ts` and `sitemap.ts`, deferred from Phase 2, shipped here.
+
+Phase 4 was split. **4a** shipped a provider-agnostic observability layer — structured stdout
+logging with substring-matched redaction, a CSP sink that persists in production, Core Web
+Vitals RUM, and the two missing error boundaries — adding no dependency and no CSP origin.
+**4b**, the vendor adapter, is blocked on choosing a provider; `setLogSink()` is the seam it
+registers against. Section 4.5's P1s are closed; its P0 is downgraded, not closed.
 
 ## P2-only items (deferred, not scaffolded)
 
