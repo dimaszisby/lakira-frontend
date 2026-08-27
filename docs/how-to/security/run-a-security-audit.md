@@ -36,7 +36,7 @@ Worth knowing before auditing, so you test the right things:
 - Session token in an httpOnly cookie (`lakira_token`), never readable from JavaScript.
 - All backend traffic through `/api/proxy/[...path]`, which attaches the `Authorization` header
   server-side.
-- Proxy auth allowlist on the **first** path segment only — `analytics/*` is forwarded unchecked.
+- Proxy auth is **deny-by-default** (`PUBLIC_API_PATHS` in `src/lib/auth-paths.ts`). Check that anything added there is genuinely unauthenticated in the OpenAPI contract.
 - Full CSP, HSTS, Referrer-Policy, Permissions-Policy, X-Frame-Options, and nosniff set in
   `next.config.ts`, with violations reported to `/api/security/csp-report`.
 - `connect-src` derived from `NEXT_PUBLIC_API_BASE_URL`'s origin.

@@ -42,18 +42,37 @@ Per environment:
 
 | Env | `API_URL` and `NEXT_PUBLIC_API_BASE_URL` |
 |---|---|
-| local | `http://localhost:4000/api/v1` |
+| local | `http://localhost:8001/api/v1` |
 | preview | `https://lakira-backend-staging.onrender.com/api/v1` |
 | production | not finalised |
 
 Keep `API_URL` and `NEXT_PUBLIC_API_BASE_URL` **equal** within an environment. The FE CI secret feeding both is `STAGING_API_BASE_URL`.
 
+## Read env through `src/lib/env.ts`
+
+Do not scatter `process.env` reads through feature code. `src/lib/env.ts` is the one module that touches the environment, and it has two segments:
+
+- **Public** — `clientEnv` and `isDummyActionsEnabled`, covering the `NEXT_PUBLIC_*` vars. Safe to import anywhere.
+- **Server** — `getApiBaseUrl()` and `resolveAppOrigin()`. Route handlers, server components, and `middleware.ts` only.
+
+Each variable is referenced as a **literal** `process.env.X` inside that module. Next.js substitutes those literals at build time; a dynamic lookup like `process.env[name]` is never substituted and resolves to `undefined`.
+
+Parsing is deliberately lenient — every field is optional and nothing throws at module load — because `npm run build` runs in CI with no environment at all. Values that are genuinely required fail at the point of use instead: `getApiBaseUrl()` throws in production when nothing is configured, rather than interpolating `undefined` into a request URL.
+
+`NODE_ENV` is exempt and can be read directly.
+
 ## Known problems — do not propagate
 
-- **Three conflicting local defaults are in circulation.** The proxy hardcodes `http://localhost:8001/api/v1`; the CI/CD docs recommend `:4000`; the app itself runs on `:3000`. The backend handoff says its dev server is `:4000` while the backend's own rules say `:5000`. Confirm the actual port before wiring anything, and do not add a fourth default.
-- **`src/app/api/auth/login/route.ts` reads `API_URL` with no fallback** — unset, it builds `undefined/auth/login`. Any new server route reading env should fall back or fail loudly.
-- **There is no `.env.example` and no runtime validation.** Env is read as bare `process.env.X` with inline `??` chains. Until that changes, every new var must be added to the table above and to `ENVIRONMENTS_MATRIX.md` in the same commit — that documentation is the only inventory that exists.
 - **`NEXT_PUBLIC_ENABLE_DUMMY_ACTIONS` is absent from both CI/CD env docs.** Fix that when you next touch them.
+- **`next.config.ts` still reads `process.env.NEXT_PUBLIC_API_BASE_URL` directly** to derive the CSP `connect-src` origin. It runs before the app's module graph exists and cannot import from `src/`, so this one read stays raw. Keep it in sync with `.env.example` by hand.
+
+## Resolved (kept for context)
+
+These were live problems and are now fixed; do not reintroduce them.
+
+- The three conflicting local API defaults are gone. **`:8001` won.** It is what `docs/tutorials/getting-started.md` and `docs/how-to/development/run-against-a-local-backend.md` tell you to start the backend on, both validated by running them verbatim, and it avoids the macOS AirPlay clash on the backend's own default of `5000`. The competing `:4000` that appeared in some reference prose is retired. The single dev default now lives in `DEV_API_BASE_URL` in `src/lib/env.ts`.
+- `src/app/api/auth/login/route.ts` no longer builds `undefined/auth/login`; it calls `getApiBaseUrl()`.
+- `.env.example` exists at the repo root, and `.gitignore` carries a `!.env.example` negation so the blanket `.env*` rule does not swallow it.
 
 ## Rules for adding a var
 
@@ -63,4 +82,4 @@ Keep `API_URL` and `NEXT_PUBLIC_API_BASE_URL` **equal** within an environment. T
 4. Add it to the table above **and** `docs/reference/environments.md`.
 5. If it is needed in CI, add it to the workflow; if it is a secret, it goes in GitHub/Vercel secrets and never in the repo.
 
-`.env*` files are gitignored by a blanket rule and Claude cannot edit them — that is a global guardrail. Ask the user to make env changes by hand.
+`.env*` files are gitignored and Claude must not edit them — with one deliberate exception. The global guardrail at `~/.claude/hooks/protect-files.sh` **explicitly allows `.env.example`**, because it is a committed template that holds no secrets. Everything else (`.env`, `.env.local`, …) is blocked; ask the user to make those changes by hand.

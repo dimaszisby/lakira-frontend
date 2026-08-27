@@ -1,5 +1,8 @@
 (() => {
   try {
+    // Mirrors THEME_STORAGE_KEY in src/constants/app.ts. This file is a blocking
+    // inline script served as static JS, so it cannot import the constant.
+    // Change both together; scripts/bootstrap-fork.sh keeps them in sync.
     const key = "lakira.theme";
     let theme = localStorage.getItem(key);
 

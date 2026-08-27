@@ -14,20 +14,21 @@ talks to the backend directly, so the session token can stay in an httpOnly cook
 
 ```bash
 npm ci
-
-cat > .env.local <<'EOF'
-API_URL=https://lakira-backend-staging.onrender.com/api/v1
-NEXT_PUBLIC_API_BASE_URL=https://lakira-backend-staging.onrender.com/api/v1
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-EOF
-
+cp .env.example .env.local
 npm run dev
 ```
 
 Then open <http://localhost:3000> and register an account.
 
-Requires **Node 20**. The staging backend sleeps when idle — the first request after a quiet period
-can take 30–60 seconds.
+Requires **Node 20** — pinned in `.nvmrc` and `.node-version`, so `nvm use` or `fnm use` picks it
+up automatically.
+
+`.env.example` points at a backend on `http://localhost:4000/api/v1`, so you need
+[`lakira-backend`](https://github.com/dimaszisby/lakira-backend) running locally. See
+[`docs/how-to/development/run-against-a-local-backend.md`](docs/how-to/development/run-against-a-local-backend.md).
+
+> The hosted staging backend that earlier versions of this guide pointed at has been down since
+> 2026-08-22. Run the backend locally instead.
 
 Full walkthrough: [`docs/tutorials/getting-started.md`](docs/tutorials/getting-started.md).
 To run against a local backend instead, see
@@ -66,9 +67,42 @@ Frequently needed:
 - [`docs/internal/incidents/`](docs/internal/incidents/) — four postmortems on routing, caching,
   prefetch, and `searchParams`. Read these before touching those areas; the causes recur.
 
+## Deployment
+
+Nothing is committed to drive a deploy today — no `Dockerfile`, no `vercel.json`, and no deploy
+job in CI. The app reads `VERCEL_URL` when present, so Vercel is the assumed target, but that is
+convention rather than configuration. Adding a gated production deploy is tracked as Phase 7 in
+[`docs/internal/audits/saas-readiness/iteration-plan.md`](docs/internal/audits/saas-readiness/iteration-plan.md).
+
+## Forking
+
+This repo is intended to be reusable as a SaaS frontend base. To rename a fresh fork:
+
+```bash
+./scripts/bootstrap-fork.sh --name my-app        # add --dry-run to preview
+```
+
+It rewrites the brand across every tracked file, renames the two brand-named generated artifacts,
+creates `.env.local`, drops upstream working material under `docs/internal/`, and records the fork
+point in `FORKED-FROM.md`. It is idempotent, and it deliberately leaves `LICENSE` alone — ISC
+requires the original copyright notice to be retained.
+
+Renaming changes the session cookie name, which signs out any existing session once.
+
+**Read [`SAAS-BASE-CHECKLIST.md`](SAAS-BASE-CHECKLIST.md) before forking.** It carries the current
+readiness verdict and the known gaps a fork inherits — as of 2026-08-24 the honest answer is
+_not fork-ready_, most importantly because the frontend implements none of the multi-tenancy
+surface the backend exposes.
+
 ## Contributing
 
 Branch off `dev`, never `main`. Promotion is `feature/* → dev → main`; there is no `staging` branch.
 
+Full guide: [`CONTRIBUTING.md`](CONTRIBUTING.md). Security policy: [`SECURITY.md`](SECURITY.md).
+
 Repository conventions for agents and humans live in [`CLAUDE.md`](CLAUDE.md) and
 [`.claude/rules/`](.claude/rules/).
+
+## Licence
+
+[ISC](LICENSE) — same as [`lakira-backend`](https://github.com/dimaszisby/lakira-backend).

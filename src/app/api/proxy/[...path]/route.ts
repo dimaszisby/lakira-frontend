@@ -1,15 +1,10 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-const FALLBACK_API = "http://localhost:8001/api/v1";
-const API_BASE_URL = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? FALLBACK_API;
-const PROTECTED_SEGMENTS = new Set([
-  "metrics",
-  "metric-categories",
-  "metric-logs",
-  "metric-settings",
-  "users",
-]);
+import { SESSION_COOKIE_NAME } from "@/constants/app";
+import { isPublicApiPath } from "@/lib/auth-paths";
+import { getApiBaseUrl } from "@/lib/env";
+import { logger } from "@/lib/logger";
 
 const FORWARDED_HEADER_BLOCKLIST = new Set(["connection", "content-length", "host"]);
 
@@ -18,23 +13,35 @@ type RouteContext = {
 };
 
 async function proxyHandler(request: NextRequest, context: RouteContext) {
-  if (!API_BASE_URL) {
+  // Resolved per request, not at module load: `next build` evaluates route
+  // modules with no environment, and getApiBaseUrl() throws in production when
+  // nothing is configured.
+  let apiBaseUrl: string;
+  try {
+    apiBaseUrl = getApiBaseUrl();
+  } catch (error) {
+    console.error("[proxy] API base URL is not configured:", error);
     return NextResponse.json({ error: "API base URL is not configured" }, { status: 500 });
   }
 
   const params = await context.params;
   const rawSegments = params.path ?? [];
   const targetPath = rawSegments.join("/");
-  const targetUrl = new URL(API_BASE_URL.replace(/\/$/, "") + `/${targetPath}`);
+  const targetUrl = new URL(`${apiBaseUrl}/${targetPath}`);
 
   request.nextUrl.searchParams.forEach((value, key) => {
     targetUrl.searchParams.append(key, value);
   });
 
-  const token = request.cookies.get("lakira_token")?.value ?? null;
-  const requiresAuth = rawSegments.length === 0 ? false : PROTECTED_SEGMENTS.has(rawSegments[0]);
+  const token = request.cookies.get(SESSION_COOKIE_NAME)?.value ?? null;
 
-  if (requiresAuth && !token) {
+  // Deny by default. This was previously an allowlist of protected first
+  // segments, which is a denylist by omission: any backend resource added
+  // upstream proxied unauthenticated until someone remembered to list it.
+  // `analytics/*` and `admin/_ping` were both exposed that way, and the
+  // OpenAPI contract marks both as secured.
+  if (!isPublicApiPath(rawSegments) && !token) {
+    logger.warn("proxy.unauthenticated", { path: targetPath, method: request.method });
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

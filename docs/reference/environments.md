@@ -17,12 +17,14 @@ This matrix captures FE-relevant CI/CD environment values based on current FE re
 
 ## 3. Environment Matrix
 
-| Environment | FE URL                                   | Backend API URL used by FE                                                                            | Provisioning Source |
-| ----------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------- |
-| `local`     | `http://localhost:3000`                  | `http://localhost:8001/api/v1` (the frontend's built-in fallback; start the backend with `PORT=8001`) | `.env.local`        |
-| `ci`        | n/a (runner)                             | Not required for current Cypress smoke + unit scope                                                   | GitHub Actions      |
-| `preview`   | Vercel preview URL (TBD concrete domain) | `https://lakira-backend-staging.onrender.com/api/v1` — **currently down**, see Current Status         | Vercel env config   |
-| `prod`      | FE prod URL not finalized                | Backend prod URL not available                                                                        | Pending             |
+> Copy `.env.example` to `.env.local` to get the local column pre-filled.
+
+| Environment | FE URL                                   | Backend API URL used by FE                                                                               | Provisioning Source |
+| ----------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------- |
+| `local`     | `http://localhost:3000`                  | `http://localhost:8001/api/v1` (the frontend's built-in dev default; start the backend with `PORT=8001`) | `.env.local`        |
+| `ci`        | n/a (runner)                             | Not required for current Cypress smoke + unit scope                                                      | GitHub Actions      |
+| `preview`   | Vercel preview URL (TBD concrete domain) | `https://lakira-backend-staging.onrender.com/api/v1` — **currently down**, see Current Status            | Vercel env config   |
+| `prod`      | FE prod URL not finalized                | Backend prod URL not available                                                                           | Pending             |
 
 ## 4. FE Runtime Env Vars Used In Code
 
@@ -51,8 +53,8 @@ Not currently required by this FE workflow:
 
 Use explicit local env values to avoid auth/proxy mismatch:
 
-- `API_URL=http://localhost:4000/api/v1`
-- `NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/api/v1`
+- `API_URL=http://localhost:8001/api/v1`
+- `NEXT_PUBLIC_API_BASE_URL=http://localhost:8001/api/v1`
 
 This keeps server route handlers and browser-side API calls aligned.
 

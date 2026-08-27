@@ -3,39 +3,21 @@
 import axios from "axios";
 import axiosRetry, { isNetworkOrIdempotentRequestError } from "axios-retry";
 
+import { resolveAppOrigin } from "@/lib/env";
+
 /**
  * Api Client using Axios
  */
 
 const API_PROXY_PATH = "/api/proxy";
 
-function normalizeBaseUrlCandidate(raw?: string | null) {
-  if (!raw) return null;
-  const trimmed = raw.trim();
-  if (!trimmed) return null;
-  return trimmed.startsWith("http://") || trimmed.startsWith("https://")
-    ? trimmed
-    : `https://${trimmed}`;
-}
-
 function resolveBaseUrl() {
+  // In the browser a relative path is enough; the proxy is same-origin.
   if (typeof window !== "undefined") return API_PROXY_PATH;
 
-  const envOrigin =
-    normalizeBaseUrlCandidate(process.env.NEXT_PUBLIC_APP_URL) ??
-    normalizeBaseUrlCandidate(process.env.NEXT_PUBLIC_SITE_URL) ??
-    normalizeBaseUrlCandidate(process.env.NEXT_PUBLIC_VERCEL_URL) ??
-    normalizeBaseUrlCandidate(process.env.VERCEL_URL);
-
-  if (envOrigin) {
-    return new URL(API_PROXY_PATH, envOrigin).toString();
-  }
-
-  const protocol = process.env.NODE_ENV === "production" ? "https" : "http";
-  const host = (process.env.HOST ?? "localhost").replace(/\/$/, "");
-  const portSegment = host.includes(":") ? "" : `:${process.env.PORT ?? "3000"}`;
-  const fallbackOrigin = `${protocol}://${host}${portSegment}`;
-  return new URL(API_PROXY_PATH, fallbackOrigin).toString();
+  // On the server the request needs an absolute URL. Origin resolution is
+  // shared with the metadata routes and is covered by src/lib/__tests__/env.test.ts.
+  return new URL(API_PROXY_PATH, resolveAppOrigin()).toString();
 }
 
 const api = axios.create({

@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
 
+import { APP_NAME } from "@/constants/app";
 import { useRegisterUserMutation } from "@/features/auth/hooks/register.mutation";
 import { authRoutes } from "@/lib/routes";
 import { handleApiError } from "@/services/api/handleApiError";
@@ -86,7 +87,7 @@ const RegisterForm = () => {
     <Card variant="primary" size="md" className="mx-auto w-full max-w-md">
       <CardHeader className="text-center">
         <CardTitle>Register</CardTitle>
-        <CardDescription>Create your Lakira Account</CardDescription>
+        <CardDescription>Create your {APP_NAME} Account</CardDescription>
       </CardHeader>
 
       <CardContent>

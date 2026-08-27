@@ -66,12 +66,16 @@ from a clean clone.
 incidents, todos, and archive. It sits _beside_ the four quadrants rather than inside them.
 
 The reason is that Diátaxis classifies documentation **of a system**. It says nothing about the
-plans, checklists, trackers, and audit runs a real project accumulates — which here is 54 of 76
+plans, checklists, trackers, and audit runs a real project accumulates — which here is 58 of 120
 files. Forcing that material into a quadrant would corrupt the taxonomy; deleting it would destroy
 real evidence.
 
 > [`internal/incidents/`](./internal/incidents/) holds four postmortems covering routing, caching,
 > prefetch, and `searchParams`. Read them before touching those areas — the causes recur.
+
+> [`internal/audits/saas-readiness/`](./internal/audits/saas-readiness/) grades this repo against
+> what a forkable SaaS base needs. Its public one-pager is
+> [`SAAS-BASE-CHECKLIST.md`](../SAAS-BASE-CHECKLIST.md) at the repo root.
 
 ## Where new documentation goes
 

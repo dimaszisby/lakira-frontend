@@ -17,16 +17,16 @@ Current FE runtime expects:
 Notes:
 
 - `/api/auth/login` route uses `API_URL` directly.
-- `/api/proxy/[...path]` resolves upstream as `API_URL` -> `NEXT_PUBLIC_API_BASE_URL` -> fallback `http://localhost:8001/api/v1`.
+- `/api/proxy/[...path]` resolves upstream as `API_URL` -> `NEXT_PUBLIC_API_BASE_URL` -> `http://localhost:8001/api/v1` (development only; production throws when neither is set).
 
 ## 3. FE/BE Release Dependency Rule
 
-| Change type | Independent deploy allowed? | Recommended order |
-| --- | --- | --- |
-| FE-only (no API contract impact) | Yes | FE anytime |
-| BE-only internal (no API contract impact) | Yes | BE anytime |
-| Backward-compatible API changes | Coordinate | BE staging first, then FE |
-| Breaking API changes | No | Versioning + coordinated rollout |
+| Change type                               | Independent deploy allowed? | Recommended order                |
+| ----------------------------------------- | --------------------------- | -------------------------------- |
+| FE-only (no API contract impact)          | Yes                         | FE anytime                       |
+| BE-only internal (no API contract impact) | Yes                         | BE anytime                       |
+| Backward-compatible API changes           | Coordinate                  | BE staging first, then FE        |
+| Breaking API changes                      | No                          | Versioning + coordinated rollout |
 
 ## 4. Smoke Checks Before Full FE CD
 
@@ -48,8 +48,8 @@ The following are backend-owned and not sourced from FE code:
 
 Keep local FE config explicit and aligned:
 
-- `API_URL=http://localhost:4000/api/v1`
-- `NEXT_PUBLIC_API_BASE_URL=http://localhost:4000/api/v1`
+- `API_URL=http://localhost:8001/api/v1`
+- `NEXT_PUBLIC_API_BASE_URL=http://localhost:8001/api/v1`
 
 Reason:
 

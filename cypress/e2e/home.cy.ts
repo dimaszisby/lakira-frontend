@@ -4,8 +4,8 @@ describe("Public home page", () => {
 
     cy.visit("/");
 
-    cy.contains("h1", "Lakira").should(visibleAssertion);
-    cy.contains("Track and monitor your progress seamlessly").should(visibleAssertion);
+    // Assert on structure, not brand copy — renaming a fork must not break e2e.
+    cy.get("h1").should(visibleAssertion).and("not.be.empty");
 
     cy.get('a[aria-label="Login to your account"]')
       .should(visibleAssertion)

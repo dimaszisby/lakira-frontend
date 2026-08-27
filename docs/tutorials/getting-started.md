@@ -45,14 +45,18 @@ API URL is configured, so the two line up.
 
 ## 3. Configure the frontend
 
-Back in `lakira-frontend`. There is no `.env.example` yet, so create the file directly:
+Back in `lakira-frontend`. Copy the committed template:
 
 ```bash
-cat > .env.local <<'EOF'
+cp .env.example .env.local
+```
+
+That gives you the three values you need, already pointing at `http://localhost:8001/api/v1`:
+
+```bash
 API_URL=http://localhost:8001/api/v1
 NEXT_PUBLIC_API_BASE_URL=http://localhost:8001/api/v1
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-EOF
 ```
 
 Both variables are needed and they are not redundant:

@@ -1,7 +1,5 @@
 "use client";
 
-const DUMMY_FEATURE_ENABLED = process.env.NEXT_PUBLIC_ENABLE_DUMMY_ACTIONS === "true";
-
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
@@ -25,6 +23,7 @@ import type { MetricCategoryVM } from "@/features/metric-categories/view-models"
 import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { LIST_MODE_DESKTOP_MQ } from "@/hooks/useListMode";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { isDummyActionsEnabled } from "@/lib/env";
 import { metricCategoryRoutes } from "@/lib/routes";
 import { makeOnColumnSort } from "@/lib/sort/makeOnColumnSort";
 import { useMetricCategorySearchState } from "@/src/features/metric-categories/hooks/useMetricCategorySearchState";
@@ -140,7 +139,7 @@ const MetricCategoriesPageClient = ({ initialParams }: MetricCategoriesPageClien
   } = useCreateMetricCategoryDummy();
 
   const dummyMetricAsync = useCallback(async () => {
-    if (!DUMMY_FEATURE_ENABLED) return;
+    if (!isDummyActionsEnabled) return;
     try {
       await createCategoryDummy({ count: 5 });
     } catch (error) {
@@ -206,7 +205,7 @@ const MetricCategoriesPageClient = ({ initialParams }: MetricCategoriesPageClien
         />
 
         <div className="flex flex-wrap gap-2">
-          {DUMMY_FEATURE_ENABLED ? (
+          {isDummyActionsEnabled ? (
             <Button variant="secondary" onClick={handleDummyCreateClick} aria-label="Add Dummy">
               {isCreatingDummy ? "Saving..." : "Add Dummy"}
             </Button>

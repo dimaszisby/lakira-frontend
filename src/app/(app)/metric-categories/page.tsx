@@ -4,7 +4,7 @@ import MetricCategoriesPageClient from "@/app/(app)/metric-categories/_component
 import { DEFAULT_CATEGORY_LIST_PARAMS, parseCategoryListSearchParams } from "@/features/metric-categories/listSearchParams";
 
 export const metadata: Metadata = {
-  title: "Metric Categories • Lakira",
+  title: "Metric Categories",
 };
 
 type MetricCategoriesPageProps = {

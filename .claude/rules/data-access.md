@@ -27,9 +27,15 @@ component → TanStack Query hook → feature api.ts → axios (src/services/api
 
 ### The proxy
 
-`src/app/api/proxy/[...path]/route.ts` reads the httpOnly `lakira_token` cookie and sets `Authorization: Bearer <token>`. It enforces auth only when the **first path segment** is one of `metrics`, `metric-categories`, `metric-logs`, `metric-settings`, `users`. Anything else — including `analytics/*` — is forwarded without that check. Adding a new authed backend resource means adding its segment to that list.
+`src/app/api/proxy/[...path]/route.ts` reads the httpOnly session cookie and sets `Authorization: Bearer <token>`.
 
-`src/app/api/auth/*` handles login/logout/session directly rather than through the proxy, because it is what mints the cookie. `middleware.ts` gate-checks the same cookie for `/dashboard`, `/metrics`, `/metric-categories`, `/account` and redirects to `/login?returnUrl=…`.
+**It denies by default.** A request without a token is rejected with 401 unless its path is in `PUBLIC_API_PATHS` (`src/lib/auth-paths.ts`), which lists the seven unauthenticated auth entry points and nothing else. That list is derived from the OpenAPI contract, where every other operation declares `security`. Adding a new authed backend resource requires **no change** — it is protected the moment it exists.
+
+This used to be an allowlist of *protected* segments, which was a denylist by omission: `analytics/*` and `admin/_ping` both proxied unauthenticated even though the contract marks them secured.
+
+`src/app/api/auth/*` handles login/logout/session directly rather than through the proxy. That is correct, not a bypass: the proxy exists so the **browser** never reaches the backend, and these are already server routes — routing them through the proxy would make the server call itself.
+
+`middleware.ts` gate-checks the same cookie for the paths in `PROTECTED_APP_PATHS` and redirects to `/login?returnUrl=…`. It **validates the token's `exp` claim**, not just its presence, and clears a stale cookie on the way out. The signature is deliberately not verified there — that needs the backend's secret, and the backend re-checks every proxied request.
 
 ### Server-side fetches
 

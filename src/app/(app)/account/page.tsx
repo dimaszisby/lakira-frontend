@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 
 import { withAuth } from "@/components/hoc/withAuth";
+import { APP_NAME } from "@/constants/app";
 import { useAuthProfileQuery } from "@/features/auth/hooks/profile.query";
 import Button from "@/ui/Button";
 import Card, { CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
@@ -64,7 +65,9 @@ const AccountPageBase = () => {
       <Card>
         <CardHeader>
           <CardTitle>Profile</CardTitle>
-          <CardDescription>Basic account information pulled from your Lakira account.</CardDescription>
+          <CardDescription>
+            Basic account information pulled from your {APP_NAME} account.
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <dl className="divide-y divide-surface2 text-sm">

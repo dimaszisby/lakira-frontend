@@ -1,7 +1,7 @@
 import React from "react";
 
 export const metadata = {
-  title: "Dashboard - Lakira",
+  title: "Dashboard",
 };
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {

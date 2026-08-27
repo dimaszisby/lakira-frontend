@@ -21,7 +21,7 @@ held by AirPlay Receiver (`ControlCenter`). It answers with `403` instead of ref
 connection, so the symptom looks like a broken API rather than a port clash. If you would rather
 keep `5000`, turn off System Settings → General → AirDrop & Handoff → AirPlay Receiver.
 
-`8001` is also this frontend's built-in fallback, so the two line up by default.
+`8001` is also this frontend's built-in dev default (`DEV_API_BASE_URL` in `src/lib/env.ts`), so the two line up.
 
 ## 2. Point the frontend at it
 
@@ -39,7 +39,7 @@ Both are required, and for different reasons:
 - `NEXT_PUBLIC_API_BASE_URL` is compiled into the client bundle and derives the CSP `connect-src`
   origin in `next.config.ts`.
 
-`http://localhost:8001/api/v1` is also the built-in fallback when neither is set, so an empty
+`http://localhost:8001/api/v1` is also the built-in dev default when neither is set, so an empty
 `.env.local` happens to work for a local backend. Set them explicitly anyway — relying on the
 fallback hides the misconfiguration when you later switch to staging.
 

@@ -1,9 +1,11 @@
+import { THEME_STORAGE_KEY } from "@/constants/app";
+
 export const setTheme = (theme: "light" | "dark") => {
   document.documentElement.setAttribute("data-theme", theme);
-  localStorage.setItem("lakira.theme", theme);
+  localStorage.setItem(THEME_STORAGE_KEY, theme);
 };
 export const getStoredTheme = (): "light" | "dark" | null => {
-  const storedTheme = localStorage.getItem("lakira.theme");
+  const storedTheme = localStorage.getItem(THEME_STORAGE_KEY);
   if (storedTheme === "light" || storedTheme === "dark") {
     return storedTheme;
   }
@@ -73,7 +75,7 @@ export const prefersLightMode = (): boolean => {
 // You can use prefersLightMode() to check if the user has a system preference for light mode.
 
 export const resetTheme = () => {
-  localStorage.removeItem("lakira.theme");
+  localStorage.removeItem(THEME_STORAGE_KEY);
   const systemTheme = getSystemTheme();
   setTheme(systemTheme);
 };
