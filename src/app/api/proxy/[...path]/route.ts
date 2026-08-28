@@ -1,8 +1,9 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-import { SESSION_COOKIE_NAME } from "@/constants/app";
+import { REFRESH_COOKIE_NAME, SESSION_COOKIE_NAME } from "@/constants/app";
 import { isPublicApiPath } from "@/lib/auth-paths";
+import { applyRefreshedSession, refreshAccessToken } from "@/lib/auth-refresh";
 import { getApiBaseUrl } from "@/lib/env";
 import { logger } from "@/lib/logger";
 
@@ -57,28 +58,62 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
     upstreamHeaders.delete("Authorization");
   }
 
-  const init: RequestInit & { duplex?: "half" } = {
-    method: request.method,
-    headers: upstreamHeaders,
-    redirect: "manual",
+  const hasBody = request.body !== null && !["GET", "HEAD"].includes(request.method);
+
+  // A streamed body can only be consumed once, so buffer it when a retry is
+  // possible. GET and HEAD have no body and stay streamed.
+  const bufferedBody = hasBody ? await request.arrayBuffer() : null;
+
+  const send = (bearer: string | null) => {
+    const headers = new Headers(upstreamHeaders);
+    if (bearer) headers.set("Authorization", `Bearer ${bearer}`);
+    else headers.delete("Authorization");
+
+    const init: RequestInit & { duplex?: "half" } = {
+      method: request.method,
+      headers,
+      redirect: "manual",
+    };
+    if (bufferedBody !== null) {
+      init.body = bufferedBody;
+      init.duplex = "half";
+    }
+    return fetch(targetUrl, init);
   };
 
-  const hasBody = request.body !== null && !["GET", "HEAD"].includes(request.method);
-  if (hasBody && request.body) {
-    init.body = request.body;
-    init.duplex = "half";
+  let response = await send(token);
+  let refreshed: Awaited<ReturnType<typeof refreshAccessToken>> = null;
+
+  // Retry once on 401. The backend issues 15-minute access tokens, so an
+  // otherwise-valid session hits this constantly; without the retry the app
+  // stops working a quarter of an hour after login.
+  if (response.status === 401) {
+    refreshed = await refreshAccessToken(request.cookies.get(REFRESH_COOKIE_NAME)?.value);
+    if (refreshed) {
+      logger.info("proxy.refreshed", { path: targetPath });
+      response = await send(refreshed.token);
+    }
   }
 
-  const response = await fetch(targetUrl, init);
   const responseHeaders = new Headers(response.headers);
   ["content-encoding", "transfer-encoding", "content-length"].forEach((header) =>
     responseHeaders.delete(header),
   );
 
-  return new NextResponse(response.body, {
+  // Never let the backend's own Set-Cookie through: its refresh cookie is
+  // scoped to the backend's path and would be dead on this origin.
+  responseHeaders.delete("set-cookie");
+
+  const proxied = new NextResponse(response.body, {
     status: response.status,
     headers: responseHeaders,
   });
+
+  // Rotation means the refresh token changes on every use. Persisting the new
+  // pair is what keeps the next refresh working.
+  if (refreshed) applyRefreshedSession(proxied.cookies, refreshed);
+
+  return proxied;
 }
 
 export const GET = proxyHandler;

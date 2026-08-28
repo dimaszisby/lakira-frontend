@@ -51,8 +51,42 @@ export const SESSION_COOKIE_OPTIONS = {
   path: "/",
 } as const;
 
-/** Session lifetime in seconds (7 days). */
-export const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
+/**
+ * Lifetime of the session cookie, in seconds.
+ *
+ * The access token inside it expires far sooner — the backend issues 15-minute
+ * tokens — so this is *not* how long a session is usable. It is how long the
+ * browser keeps presenting the cookie, which must outlive the token so the
+ * refresh flow has something to work with. Expiry is decided by the token's
+ * `exp` claim, checked in `middleware.ts`.
+ *
+ * Matched to the backend's refresh-token lifetime (30 days): once the refresh
+ * token is gone, a stored access token is worthless.
+ */
+export const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
+
+/**
+ * Name of the httpOnly refresh cookie, issued by the backend.
+ *
+ * The backend scopes it to `Path=/api/v1/auth/refresh` — *its* path, not one
+ * that exists on this origin. Forwarding that verbatim would store a cookie the
+ * browser never sends back, so `src/lib/auth-refresh.ts` re-scopes it to
+ * {@link REFRESH_COOKIE_PATH}.
+ */
+export const REFRESH_COOKIE_NAME = "lakira_refresh";
+
+/**
+ * Path the refresh cookie is scoped to on this origin.
+ *
+ * `/api` rather than `/api/auth`: the proxy at `/api/proxy/[...path]` is what
+ * redeems the token when an upstream call returns 401, and a cookie scoped to
+ * `/api/auth` is never sent there. Narrower than `/` so page navigations do not
+ * carry it.
+ */
+export const REFRESH_COOKIE_PATH = "/api";
+
+/** Refresh-token lifetime in seconds (30 days), matching the backend. */
+export const REFRESH_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 
 /** localStorage key for the persisted theme. Mirrored in `public/scripts/theme-init.js`. */
 export const THEME_STORAGE_KEY = "lakira.theme";

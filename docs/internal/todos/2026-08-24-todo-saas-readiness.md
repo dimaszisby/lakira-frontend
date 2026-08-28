@@ -171,7 +171,24 @@ therefore duplicated, with a test enforcing that it matches `PROTECTED_APP_MATCH
 
 ### 5b — the five missing flows (needs a running backend)
 
-- [ ] `/auth/refresh` — retry-once on 401 inside the proxy
+- [x] `/auth/refresh` — retry-once on 401 inside the proxy. **Verified end to end against a
+      live backend**, not just unit-tested: an expired access token now returns 200 where it
+      previously returned 401, and `proxy.refreshed` appears in the log stream.
+- [x] **Found: the access token lives 15 minutes** while the session cookie had a 7-day
+      `maxAge`. The app broke a quarter of an hour after login — silent 401s before Phase 5a,
+      a bounce to `/login` after. Refresh was load-bearing, not optional.
+- [x] **Fixed a pre-existing bug in `/api/auth/login`**: it read `token` and `user` from the
+      top level of the response, but the backend wraps everything in `{status, message, data}`.
+      Both were always `undefined`, so the cookie was set to the string "undefined". Phase 5a's
+      token validation turned that silent failure into a visible 502, which is how it surfaced.
+- [x] **Fixed a bug of my own, caught only by the live test**: the refresh cookie was first
+      scoped to `/api/auth`, but the proxy that redeems it is at `/api/proxy`, so the browser
+      never sent it. Re-scoped to `/api`. Unit tests would not have caught this.
+- [x] Backend rotation verified: consecutive refreshes work, so the rotated cookie is being
+      persisted; replaying a spent one is rejected by the backend as designed.
+- [x] Proxy strips upstream `Set-Cookie` — the backend scopes its refresh cookie to
+      `Path=/api/v1/auth/refresh`, which is dead on this origin.
+- [ ] `/verify-email` plus a resend affordance
 - [ ] `/verify-email` plus a resend affordance
 - [ ] `/forgot-password` and `/reset-password`
 - [ ] Manual pass through all five against a live backend. `docs/reference/environments.md`
