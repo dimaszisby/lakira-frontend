@@ -2,10 +2,14 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 import {
+  REFRESH_COOKIE_NAME,
+  REFRESH_COOKIE_PATH,
+  REFRESH_MAX_AGE_SECONDS,
   SESSION_COOKIE_NAME,
   SESSION_COOKIE_OPTIONS,
   SESSION_MAX_AGE_SECONDS,
 } from "@/constants/app";
+import { captureRefreshCookie } from "@/lib/auth-refresh";
 import { getApiBaseUrl } from "@/lib/env";
 import { decodeJwtPayload } from "@/lib/jwt";
 import { logger } from "@/lib/logger";
@@ -24,9 +28,18 @@ import { logger } from "@/lib/logger";
  * is the correct shape, and the finding is withdrawn.
  */
 
+/**
+ * The backend wraps every response in `{status, message, data}` — see
+ * `.claude/rules/data-access.md`. This route previously read `token` and `user`
+ * from the top level, so both were always `undefined` and the session cookie
+ * was set to the string "undefined". The Phase 5a token validation turned that
+ * silent failure into a visible 502, which is how it surfaced.
+ */
 type LoginResponse = {
-  token?: unknown;
-  user?: unknown;
+  data?: {
+    token?: unknown;
+    user?: unknown;
+  };
 };
 
 export async function POST(req: Request) {
@@ -59,8 +72,10 @@ export async function POST(req: Request) {
 
   // Only trust a structurally valid JWT. Storing whatever arrived would defer
   // the failure to the next request, where it reads as an unexplained 401.
-  if (typeof data?.token !== "string" || decodeJwtPayload(data.token) === null) {
-    logger.error("login.upstream.malformed", { hasToken: typeof data?.token });
+  const token = data?.data?.token;
+
+  if (typeof token !== "string" || decodeJwtPayload(token) === null) {
+    logger.error("login.upstream.malformed", { hasToken: typeof token });
     return NextResponse.json(
       { error: "Authentication service returned an invalid token" },
       {
@@ -69,10 +84,26 @@ export async function POST(req: Request) {
     );
   }
 
-  (await cookies()).set(SESSION_COOKIE_NAME, data.token, {
+  const cookieStore = await cookies();
+  cookieStore.set(SESSION_COOKIE_NAME, token, {
     ...SESSION_COOKIE_OPTIONS,
     maxAge: SESSION_MAX_AGE_SECONDS,
   });
 
-  return NextResponse.json({ user: data.user });
+  // The backend scopes its refresh cookie to Path=/api/v1/auth/refresh, a path
+  // this origin does not serve. Storing it verbatim would give the browser a
+  // cookie it never sends back, so re-scope it to this app's auth routes.
+  // Without this the access token still expires in 15 minutes with no recovery.
+  const refreshToken = captureRefreshCookie(upstream.headers);
+  if (refreshToken) {
+    cookieStore.set(REFRESH_COOKIE_NAME, refreshToken, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+      path: REFRESH_COOKIE_PATH,
+      maxAge: REFRESH_MAX_AGE_SECONDS,
+    });
+  }
+
+  return NextResponse.json({ user: data?.data?.user });
 }

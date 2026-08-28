@@ -99,6 +99,21 @@ withdrawn** — the MSW harness is correct and stricter than claimed; the audit,
 `.claude/rules/testing.md` all repeated a false claim that no integration suite mocks feature
 hooks at module level. Deploy config and Cypress expansion remain deferred.
 
+### Phase 6 note — the session token already carries the tenant
+
+Verified against a live backend on 2026-08-27: the access-token JWT includes an
+`organizationId` claim alongside `id`, `email` and `username`. The current organization
+therefore needs **no extra fetch** — it is readable from the session token the app already
+holds, server-side via `decodeJwtPayload`.
+
+That reshapes Phase 6. The org dimension for the six `keys.ts` factories can be derived from
+the token rather than from a separate `/organizations` call, which removes a loading state and
+a whole class of "key computed before org known" race. `/auth/switch-org` returns a **new
+token** with a different `organizationId`, so switching organizations is a token exchange —
+which is why Phase 5b's refresh handling had to land first.
+
+Not visible from the OpenAPI contract alone; found by decoding a real token.
+
 ## P2-only items (deferred, not scaffolded)
 
 - §4.4 — `secure: true` unconditional (documented as intentional; flagged for forker awareness only)
