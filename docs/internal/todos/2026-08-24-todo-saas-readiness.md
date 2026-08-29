@@ -188,7 +188,6 @@ therefore duplicated, with a test enforcing that it matches `PROTECTED_APP_MATCH
       persisted; replaying a spent one is rejected by the backend as designed.
 - [x] Proxy strips upstream `Set-Cookie` — the backend scopes its refresh cookie to
       `Path=/api/v1/auth/refresh`, which is dead on this origin.
-- [ ] `/verify-email` plus a resend affordance
 - [x] `/verify-email` plus a resend affordance on the account page
 - [x] `/forgot-password` and `/reset-password`
 - [x] `src/features/auth/api.ts` — follows the `withApiErrorHandling` + `unwrap` convention
@@ -228,15 +227,75 @@ therefore duplicated, with a test enforcing that it matches `PROTECTED_APP_MATCH
   pages carry the same warning and none disables it, so this matches the convention rather than
   diverging from it. Lint goes 41 -> 44 for that reason alone; all new files are warning-free.
 
-## Phase 6 — Multi-tenancy UI (**ADR-004: never partially**)
+## Phase 6 — Multi-tenancy UI (org scoping + members/invites done; switcher blocked)
 
-- [ ] Kit: `docs/internal/initiatives/multi-tenancy-ui/`
-- [ ] Read `docs/internal/incidents/` first — cache-key assumptions have bitten this repo before
-- [ ] `src/features/organizations/` — switcher, members, invites, roles
-- [ ] `/invites/accept` route; `/auth/switch-org` wiring
-- [ ] **Org dimension into all six `src/features/*/keys.ts` in one change**
-- [ ] One integration test per feature asserting the key changes with the active org
-- [ ] Manual two-org cross-check: org A never sees org B's cached data
+### Cache-key tenant scoping (the safety-critical part) — done
+
+- [x] Five key factories org-scoped in **one commit** per ADR-004:
+      `metrics`, `metric-logs`, `metric-settings`, `metric-categories`, `data-visualizations`
+- [x] `auth/keys.ts` deliberately **not** scoped — the profile is a property of the user, not
+      the tenant. Documented in the file so the omission does not read as a miss.
+- [x] Org id at **index 1**, after the resource root. The plan originally said index 0; that was
+      wrong. `data-visualizations/cache.ts` matches by position (`key[0] === "viz" && key[1] ===
+"metric"`), and index 0 would have made that predicate match nothing — cross-org viz data
+      silently never invalidating. Isolation comes from the id being present at all, not its
+      position; position only decides invalidation correctness.
+- [x] All six `cache.ts` helpers thread the org id
+- [x] 31 consumer files updated. Making the factories take a **required** argument turned every
+      missed site into a compile error — 46 of them, enumerated by `tsc` rather than by
+      inspection.
+- [x] `getServerOrganizationId()` in `services/api/serverHeaders.ts` for the one server-side
+      consumer (`dashboard/page.tsx`), which cannot use React context
+- [x] `renderWithProviders` provides a test organization; exports `TEST_ORGANIZATION_ID`
+
+### Org context
+
+- [x] `src/features/organizations/context.tsx` — throws outside the provider, so a missing org
+      id fails loudly rather than producing an unscoped key
+- [x] Sourced **server-side** in `(app)/layout.tsx` via `decodeJwtPayload`. Not from `userAtom`:
+      that is populated client-side after a profile fetch, so keys would be built with
+      `undefined` on first paint and re-keyed once it landed.
+- [x] A session whose token carries no org claim redirects to login rather than rendering
+
+### Members, invites, roles
+
+- [x] `src/features/organizations/` — `api.ts` (`withApiErrorHandling` + `unwrap`), `keys.ts`,
+      `cache.ts`, `types.ts`, five hooks, three components
+- [x] Routes `/organization` and `/invites/accept`; `/organization` added to
+      `PROTECTED_APP_PATHS` **and** the middleware matcher, with the drift test confirming both
+- [x] Nav entry added — the page was otherwise unreachable
+- [x] `InvitableRole` excludes `owner`, which the backend assigns and never invites
+
+### Tests — 94 new, where there were zero
+
+There were **no** tests touching any key factory or `cache.ts` before this.
+
+- [x] `features/__tests__/key-tenant-scoping.test.ts` — 82 tests over all 25 key-builder methods
+- [x] `data-visualizations/__tests__/cache.test.ts` — 5 tests pinning the positional predicate
+- [x] `organizations/__tests__/context.test.tsx` — 7 tests incl. the throw-outside-provider case
+- [x] `organizations/components/__tests__/MemberList.int.test.tsx` — 5 MSW-backed, incl. `jest-axe`
+- [x] **Both guards proven to fail on regression**, not assumed: removing the org id from
+      `vizKeys` failed 10 tests; moving it to the tail failed 16 including the prefix test.
+      Restoring passed all 87.
+
+### Verified against the live backend
+
+- [x] Two distinct organizations created; cross-org member reads return **403 in both
+      directions** while same-org returns 200
+- [x] Through the frontend proxy with a real session: `/organization` renders 200, redirects 307
+      unauthenticated, fetches its own org's members, and gets **403 for the other org**
+
+### Not verified
+
+- [ ] **One user in two organizations, switching between them.** That is the scenario the org
+      dimension exists for. It needs the invite flow, whose token is emailed — the same blocker
+      as Phase 5b's verify-email. Unit tests prove the keys differ and the live tests prove
+      backend isolation, but the in-session switch is unexercised.
+
+### Blocked
+
+- [ ] **Organization switcher.** No `GET /organizations`, and `User` carries no memberships, so
+      the frontend cannot discover the ids `/auth/switch-org` requires. Backend handoff written.
 
 ## Phase 7 — Testing, gates, CI/CD, deploy (gates done; deploy deferred)
 

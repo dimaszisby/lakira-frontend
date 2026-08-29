@@ -1,4 +1,4 @@
-import { ChartBar, Folder, SquaresFour, UserCircle } from "phosphor-react";
+import { ChartBar, Folder, SquaresFour, UserCircle, UsersThree } from "phosphor-react";
 
 import { authRoutes, dashboardRoute, metricCategoryRoutes, metricRoutes } from "@/lib/routes";
 
@@ -12,6 +12,7 @@ export const navItems: NavItem[] = [
   { name: "Dashboard", href: dashboardRoute(), icon: SquaresFour },
   { name: "Metrics", href: metricRoutes.list(), icon: ChartBar },
   { name: "Category", href: metricCategoryRoutes.list(), icon: Folder },
+  { name: "Organization", href: authRoutes.organization(), icon: UsersThree },
   { name: "Account", href: authRoutes.account(), icon: UserCircle },
 ];
 

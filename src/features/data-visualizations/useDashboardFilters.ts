@@ -7,11 +7,11 @@ import { useCallback, useEffect, useMemo } from "react";
 import { useRouteSync } from "@/hooks/useRouteSync";
 import { dashboardRoute } from "@/lib/routes";
 
+import type {DashboardFilters} from "./dashboardFilters";
 import {
   encodeDashboardFilters,
   isTimeRangeEqual,
-  parseDashboardFilters,
-  type DashboardFilters,
+  parseDashboardFilters
 } from "./dashboardFilters";
 import { globalBucketAtom, globalRangeAtom } from "./state";
 import type { BucketAlias, TimeRangeValue } from "./types";

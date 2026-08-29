@@ -2,6 +2,7 @@ import type { InfiniteData } from "@tanstack/react-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useMemo } from "react";
 
+import { useOrganizationId } from "@/features/organizations/context";
 import { httpStatusFrom } from "@/services/api/http-status";
 import { getNextCursor, makeInfiniteItemsSelect } from "@/utils/cursor/page-map";
 
@@ -20,6 +21,7 @@ type UseMetricArgs = {
 };
 
 export function useMetricListInfiniteViaCursor(opts: UseMetricArgs & { enabled: boolean }) {
+  const organizationId = useOrganizationId();
   const { limit = 20, sort = DEFAULT_METRIC_SORT, q, filter, enabled = true } = opts;
 
   type TQueryFnData = MetricCursorPage; // DTO from API
@@ -33,7 +35,7 @@ export function useMetricListInfiniteViaCursor(opts: UseMetricArgs & { enabled: 
     ReturnType<typeof metricsKeys.cursor.infinite>,
     TPageParam
   >({
-    queryKey: metricsKeys.cursor.infinite({ limit, sort, q, filter }),
+    queryKey: metricsKeys.cursor.infinite(organizationId, { limit, sort, q, filter }),
     queryFn: ({ pageParam }) =>
       getMetricLibraryViaCursor({
         limit,

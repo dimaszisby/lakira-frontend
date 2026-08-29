@@ -74,6 +74,7 @@ export const authRoutes = {
     return buildPath("/register", safeReturnUrl ? { returnUrl: safeReturnUrl } : undefined);
   },
   account: () => "/account",
+  organization: () => "/organization",
   afterAuth: (returnUrl?: string | null) => resolveReturnUrl(returnUrl) ?? "/dashboard",
   forgotPassword: () => "/forgot-password",
   // Token is carried in the query string because it arrives from an emailed

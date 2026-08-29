@@ -45,5 +45,11 @@ export const config = {
   // The two are therefore kept in sync by a test:
   // src/lib/__tests__/auth-paths.test.ts asserts this array equals
   // PROTECTED_APP_MATCHERS. Add a protected section in auth-paths.ts, then here.
-  matcher: ["/dashboard/:path*", "/metrics/:path*", "/metric-categories/:path*", "/account/:path*"],
+  matcher: [
+    "/dashboard/:path*",
+    "/metrics/:path*",
+    "/metric-categories/:path*",
+    "/account/:path*",
+    "/organization/:path*",
+  ],
 };

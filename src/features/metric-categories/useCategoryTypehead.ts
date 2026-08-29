@@ -3,6 +3,8 @@ import { useInfiniteQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useDebounce } from "react-use";
 
+import { useOrganizationId } from "@/features/organizations/context";
+
 import { listMetricCategories } from "./api";
 import { metricCategoriesKeys } from "./keys";
 import { toVM } from "./mappers";
@@ -26,6 +28,7 @@ import type { MetricCategoryCursorPageVM } from "./view-models";
 // });
 
 export function useCategoryTypeahead(rawQuery: string, limit = 15) {
+  const organizationId = useOrganizationId();
   const [q, setQ] = useState<string>(rawQuery.trim());
   useDebounce(() => setQ(rawQuery.trim()), 250, [rawQuery]);
 
@@ -36,7 +39,7 @@ export function useCategoryTypeahead(rawQuery: string, limit = 15) {
     ReturnType<typeof metricCategoriesKeys.cursor.infinite>, // TQueryKey
     string | undefined // TPageParam
   >({
-    queryKey: metricCategoriesKeys.cursor.infinite({
+    queryKey: metricCategoriesKeys.cursor.infinite(organizationId, {
       limit,
       sort: "-metricCount", // sorted from the most used
       q: q || undefined,

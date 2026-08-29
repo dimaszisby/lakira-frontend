@@ -45,46 +45,70 @@ const normalizeCursor = (p: {
 });
 
 // Cache invalidations based on => List or Details
+/**
+ * Cache keys for metrics.
+ *
+ * Every key carries the organization id at index 1, immediately after the
+ * resource root. Without it, a user in two organizations would be served one
+ * org's cached payload while acting as the other — the defect `lakira-backend`
+ * shipped and patched as findings N1/N2.
+ *
+ * Index 1 rather than 0 keeps `key[0]` naming the resource, which the
+ * prefix-matched invalidations in `cache.ts` depend on.
+ */
 export const metricsKeys = {
-  all: ["metrics"] as const,
+  all: (organizationId: string) => ["metrics", organizationId] as const,
 
   // Offset lists (legacy)
-  lists: () => [...metricsKeys.all, "list"] as const,
-  list: (params: MetricsListParams) => [...metricsKeys.lists(), normalizeList(params)] as const,
+  lists: (organizationId: string) => [...metricsKeys.all(organizationId), "list"] as const,
+  list: (organizationId: string, params: MetricsListParams) =>
+    [...metricsKeys.lists(organizationId), normalizeList(params)] as const,
 
   // Cursor lists (current)
   cursor: {
-    root: () => [...metricsKeys.all, "cursor"] as const,
-    pages: (p: {
-      limit: number;
-      sort: MetricSortParamViaCursor;
-      q?: string;
-      filter?: MetricFilterViaCursor;
-      includeTotal?: boolean;
-      page: number;
-    }) => [...metricsKeys.cursor.root(), "pages", normalizeCursor(p)] as const,
-    infinite: (p: {
-      limit: number;
-      sort: MetricSortParamViaCursor;
-      q?: string;
-      filter?: MetricFilterViaCursor;
-    }) =>
+    root: (organizationId: string) => [...metricsKeys.all(organizationId), "cursor"] as const,
+    pages: (
+      organizationId: string,
+      p: {
+        limit: number;
+        sort: MetricSortParamViaCursor;
+        q?: string;
+        filter?: MetricFilterViaCursor;
+        includeTotal?: boolean;
+        page: number;
+      },
+    ) => [...metricsKeys.cursor.root(organizationId), "pages", normalizeCursor(p)] as const,
+    infinite: (
+      organizationId: string,
+      p: {
+        limit: number;
+        sort: MetricSortParamViaCursor;
+        q?: string;
+        filter?: MetricFilterViaCursor;
+      },
+    ) =>
       [
-        ...metricsKeys.cursor.root(),
+        ...metricsKeys.cursor.root(organizationId),
         "infinite",
         normalizeCursor({ ...p, after: undefined }),
       ] as const,
   },
 
   // Details
-  details: () => [...metricsKeys.all, "detail"] as const,
+  details: (organizationId: string) => [...metricsKeys.all(organizationId), "detail"] as const,
   /** fully-qualified detail key (variant-specific) */
-  detail: (metricId: string, includes: IncludeKey[] = [], logsLimit?: number) =>
+  detail: (
+    organizationId: string,
+    metricId: string,
+    includes: IncludeKey[] = [],
+    logsLimit?: number,
+  ) =>
     [
-      ...metricsKeys.details(),
+      ...metricsKeys.details(organizationId),
       metricId,
       { includes: normalizeIncludes(includes), logsLimit: logsLimit ?? 20 },
     ] as const,
   /** prefix for invalidating all variants of one metricId */
-  detailByIdRoot: (metricId: string) => [...metricsKeys.details(), metricId] as const,
+  detailByIdRoot: (organizationId: string, metricId: string) =>
+    [...metricsKeys.details(organizationId), metricId] as const,
 };

@@ -24,6 +24,7 @@ export const PROTECTED_APP_PATHS = [
   "/metrics",
   "/metric-categories",
   "/account",
+  "/organization",
 ] as const;
 
 /** Matcher patterns for `middleware.ts`, derived so they cannot drift. */

@@ -1,6 +1,7 @@
 import type { QueryKey } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { useOrganizationId } from "@/features/organizations/context";
 import { toIsoFromLocalInput } from "@/src/utils/date-io";
 import type {
   MetricSettingsResponseDTO,
@@ -29,6 +30,7 @@ export function useUpdateMetricSettings(
   onErrorCb?: (error: Error) => void,
 ) {
   const qc = useQueryClient();
+  const organizationId = useOrganizationId();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation<
     MetricSettingsResponseDTO,
     Error,
@@ -39,7 +41,7 @@ export function useUpdateMetricSettings(
       updateMetricSettings(settingsId, metricId, settings),
     onMutate: async ({ settingsId, settings }) => {
       await qc.cancelQueries({
-        queryKey: metricSettingsKeys.detail(settingsId),
+        queryKey: metricSettingsKeys.detail(organizationId, settingsId),
       });
 
       const patch: Partial<
@@ -73,7 +75,7 @@ export function useUpdateMetricSettings(
           color: settings.displayOptions?.color ?? null,
         },
       };
-      return patchMetricSettingsOptimistic(qc, settingsId, patch);
+      return patchMetricSettingsOptimistic(qc, organizationId, settingsId, patch);
     },
     onError: (err, _vars, ctx) => {
       if (ctx?.prev) {
@@ -82,8 +84,8 @@ export function useUpdateMetricSettings(
       onErrorCb?.(err);
     },
     onSettled: async (_data, _err, vars) => {
-      await invalidateMetricSettingsDetail(qc, vars.settingsId);
-      await invalidateMetricSettingsLists(qc);
+      await invalidateMetricSettingsDetail(qc, organizationId, vars.settingsId);
+      await invalidateMetricSettingsLists(qc, organizationId);
     },
 
     onSuccess: (updated) => {

@@ -1,6 +1,8 @@
 import type { InfiniteData } from "@tanstack/react-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
+import { useOrganizationId } from "@/features/organizations/context";
+
 import { listMetricCategories } from "../api";
 import { metricCategoriesKeys } from "../keys";
 import { toVM } from "../mappers";
@@ -22,6 +24,7 @@ type UseMetricCategoriesArgs = {
 export const useMetricCategoryListCursorInfinite = (
   opts: UseMetricCategoriesArgs & { enabled: boolean },
 ) => {
+  const organizationId = useOrganizationId();
   const { limit = 20, sort = DEFAULT_METRIC_CATEGORY_SORT, q, filter, enabled = true } = opts;
 
   const query = useInfiniteQuery<
@@ -31,7 +34,7 @@ export const useMetricCategoryListCursorInfinite = (
     ReturnType<typeof metricCategoriesKeys.cursor.infinite>, // TQueryKey
     string | undefined // TPageParam
   >({
-    queryKey: metricCategoriesKeys.cursor.infinite({ limit, sort, q, filter }),
+    queryKey: metricCategoriesKeys.cursor.infinite(organizationId, { limit, sort, q, filter }),
     queryFn: ({ pageParam }) =>
       listMetricCategories({
         limit,

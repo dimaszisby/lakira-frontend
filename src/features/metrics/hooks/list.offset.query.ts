@@ -1,13 +1,16 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
+import { useOrganizationId } from "@/features/organizations/context";
+
 import { metricsKeys } from "../keys";
 import { getMetricLibraryList } from "../metric.api";
 import type { PaginatedMetricListResponseDTO } from "../metric.dto";
 import type { ListOptions, MetricsListParams } from "../types";
 
 export function useMetricsListViaOffset(params: MetricsListParams, opts: ListOptions = {}) {
+  const organizationId = useOrganizationId();
   const { data, isLoading, isError } = useQuery<PaginatedMetricListResponseDTO | undefined, Error>({
-    queryKey: metricsKeys.list(params),
+    queryKey: metricsKeys.list(organizationId, params),
     queryFn: () => getMetricLibraryList(params),
     placeholderData: keepPreviousData,
     enabled: opts.enabled ?? true,

@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 
+import { useOrganizationId } from "@/features/organizations/context";
 import { useCursorPager } from "@/lib/cursor/useCursorPager";
 import { computeTotalPages, makePageItemsSelect } from "@/utils/cursor/page-map";
 
@@ -19,6 +20,7 @@ export function useMetricLogListCursorPage(params: {
   filter?: MetricLogFilter;
   enabled: boolean;
 }) {
+  const organizationId = useOrganizationId();
   const { limit, sort, q, filter, enabled = true } = params;
 
   const resetDeps = useMemo(
@@ -30,7 +32,7 @@ export function useMetricLogListCursorPage(params: {
     useCursorPager(resetDeps);
 
   const query = useQuery<LogCursorPageDTO, Error, MetricLogCursorPageVM>({
-    queryKey: metricLogsKeys.cursor.pages({
+    queryKey: metricLogsKeys.cursor.pages(organizationId, {
       limit,
       sort,
       q,

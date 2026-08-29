@@ -1,6 +1,8 @@
 import type { InfiniteData } from "@tanstack/react-query";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
+import { useOrganizationId } from "@/features/organizations/context";
+
 import { getMetricLogsListViaCursor } from "../api";
 import { metricLogsKeys } from "../keys";
 import { toMetricLogVM } from "../mappers";
@@ -16,6 +18,7 @@ type UseMetricLogArgs = {
 };
 
 export function useMetricLogListCursorInfinite(opts: UseMetricLogArgs & { enabled: boolean }) {
+  const organizationId = useOrganizationId();
   const { limit = 20, sort = DEFAULT_METRIC_LOG_SORT, q, filter, enabled = true } = opts;
 
   const query = useInfiniteQuery<
@@ -25,7 +28,7 @@ export function useMetricLogListCursorInfinite(opts: UseMetricLogArgs & { enable
     ReturnType<typeof metricLogsKeys.cursor.infinite>, // TQueryKey
     string | undefined // TPageParam
   >({
-    queryKey: metricLogsKeys.cursor.infinite({ limit, sort, q, filter }),
+    queryKey: metricLogsKeys.cursor.infinite(organizationId, { limit, sort, q, filter }),
     queryFn: ({ pageParam }) =>
       getMetricLogsListViaCursor({
         limit,
