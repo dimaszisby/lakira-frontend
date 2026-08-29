@@ -7,6 +7,8 @@ export interface UserAtom {
   username: string;
   email: string;
   isPublicProfile: boolean;
+  /** When the address was confirmed, or null while unverified. */
+  emailVerifiedAt?: string | null;
   role: "admin" | "user";
   token?: string;
 }

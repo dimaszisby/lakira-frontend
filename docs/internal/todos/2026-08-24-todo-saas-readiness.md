@@ -189,11 +189,44 @@ therefore duplicated, with a test enforcing that it matches `PROTECTED_APP_MATCH
 - [x] Proxy strips upstream `Set-Cookie` — the backend scopes its refresh cookie to
       `Path=/api/v1/auth/refresh`, which is dead on this origin.
 - [ ] `/verify-email` plus a resend affordance
-- [ ] `/verify-email` plus a resend affordance
-- [ ] `/forgot-password` and `/reset-password`
-- [ ] Manual pass through all five against a live backend. `docs/reference/environments.md`
-      records the staging backend as down since 2026-08-22, so this needs a local backend on
-      `:8001`.
+- [x] `/verify-email` plus a resend affordance on the account page
+- [x] `/forgot-password` and `/reset-password`
+- [x] `src/features/auth/api.ts` — follows the `withApiErrorHandling` + `unwrap` convention
+      rather than copying the legacy `src/services/api/auth.api.ts`, which the rules mark as
+      not-to-copy
+- [x] Added `emailVerifiedAt` to `UserResponseDTO` and `UserAtom`. It is in the generated types
+      and returned by the live API, but was missing from the hand-written DTO; per
+      `.claude/rules/data-access.md` the generated type wins.
+- [x] "Forgot your password?" linked from `LoginForm` — the pages were otherwise unreachable
+
+**Verified against the live backend (partial — see the gap below):**
+
+- `forgot-password`: full round trip. Confirmed **no account-enumeration oracle** — a real
+  address and `nobody-at-all@example.com` return byte-identical responses.
+- `resend-verification`: authenticated call succeeds; the same call without a session returns
+  401, so Phase 5a's deny-by-default covers it.
+- `verify-email`: page renders, endpoint reachable through the proxy, an invalid token is
+  rejected cleanly rather than 500-ing.
+- All three new routes render 200 and register in the production build.
+
+- [ ] **Not verified: the success paths of `verify-email` and `reset-password`.** Both consume a
+      single-use token delivered by email. The backend logs outbound mail to stdout
+      (`EMAIL_PROVIDER=console`), but its commit `47854e2` moved logging off disk —
+      `logs/combined.log` was last written 2026-08-23 — and the server runs in a terminal this
+      session cannot read. Tokens extracted from that file were stale, which is why early
+      attempts failed. Verifying these needs either the backend's stdout or an inbox.
+
+### Noted, not acted on
+
+- `UserAtom` declares an optional `token?: string`. It is **never populated** — verified by
+  grep — so it is a dead field rather than a live leak, but `.claude/rules/security.md` says the
+  token must never reach a global. Worth deleting.
+- The backend returns a `stack` field with absolute file paths in error responses. Observed in
+  development; confirm it is suppressed in production config.
+- The three new pages each add one `react-refresh/only-export-components` warning, from
+  exporting `metadata` beside the component. Structurally unavoidable in App Router: 13 existing
+  pages carry the same warning and none disables it, so this matches the convention rather than
+  diverging from it. Lint goes 41 -> 44 for that reason alone; all new files are warning-free.
 
 ## Phase 6 — Multi-tenancy UI (**ADR-004: never partially**)
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import { useForm } from "react-hook-form";
@@ -111,6 +112,14 @@ const LoginForm = () => {
               />
             </FormField.Control>
           </FormField>
+
+          <Link
+            href={authRoutes.forgotPassword()}
+            className="self-end text-body2 underline"
+            aria-label="Reset your password"
+          >
+            Forgot your password?
+          </Link>
 
           {/* Submit Button */}
           <Button
