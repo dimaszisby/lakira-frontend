@@ -117,6 +117,11 @@ That is the intended reading.
 
 ## ADR-004 — Multi-tenancy is a gating category for the frontend (Accepted 2026-08-24)
 
+> **The cache-key half of this decision was promoted** to the architecture registry as
+> **[ADR-0015](../../../explanation/decisions/adr-0015-cache-keys-are-organization-scoped.md)**
+> on 2026-08-29. That file is authoritative for how keys are written; the entry below remains
+> the record of why the category was made gating in the first place.
+
 **Context:** The committed contract `docs/reference/api/lakira-backend-openapi.json` exposes a
 complete multi-tenant surface — `/organizations/{id}/members`, `/organizations/{id}/invites`,
 `/memberships/{id}`, `/invites/accept`, `/auth/switch-org`. A grep of `src/` for any of those

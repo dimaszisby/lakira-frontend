@@ -3,7 +3,7 @@
 One decision per file, numbered globally and ordered by the date the decision was made.
 Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions).
 
-**14 records.** 13 accepted, 1 superseded.
+**15 records.** 14 accepted, 1 superseded.
 
 ## Reading these
 
@@ -33,6 +33,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0012](./adr-0012-closure-gates-and-the-tier-test-minimum.md)                   | Closure gates and the tier test minimum                   | Accepted       | 2026-02-18 | `ADR-023` |
 | [ADR-0013](./adr-0013-visualization-url-driven-state-source.md)                     | Visualization URL-driven state source                     | Accepted       | 2026-03-02 | `ADR-053` |
 | [ADR-0014](./adr-0014-modal-shared-scroll-lock-coordination.md)                     | Modal shared scroll-lock coordination                     | Accepted       | 2026-03-12 | `ADR-062` |
+| [ADR-0015](./adr-0015-cache-keys-are-organization-scoped.md)                        | Cache keys are organization-scoped                        | Accepted       | 2026-08-29 | `ADR-004` |
 
 ## Where the other decisions went
 
@@ -55,7 +56,7 @@ The full log remains at
 
 ## Adding one
 
-Take the next free number — **ADR-0015** — copy the shape of an existing record, and open with
+Take the next free number — **ADR-0016** — copy the shape of an existing record, and open with
 `Status: Proposed`. Flip it to `Accepted` in the same PR that implements it. A registry full of
 stale `Proposed` entries is worse than no registry, because readers cannot tell intent from fact.
 

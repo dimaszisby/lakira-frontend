@@ -3,10 +3,10 @@
 Audit runs, grouped by **program**. Each program owns a folder; each run inside it is dated and
 immutable once written.
 
-| Program        | Folder                                 | What it grades                                                                        | Latest run                                                          |
-| -------------- | -------------------------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| SaaS readiness | [`saas-readiness/`](./saas-readiness/) | How close the repo is to being forkable as a generic SaaS frontend base               | [2026-08-24](./saas-readiness/audit-2026-08-24.md) — NOT FORK-READY |
-| Security       | [`security/`](./security/)             | Threat model, control matrix, and findings against OWASP ASVS / Top 10, CIS, NIST CSF | [2025-11-21](./security/audit-2025-11-21/) — complete               |
+| Program        | Folder                                 | What it grades                                                                        | Latest run                                                                   |
+| -------------- | -------------------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| SaaS readiness | [`saas-readiness/`](./saas-readiness/) | How close the repo is to being forkable as a generic SaaS frontend base               | [2026-08-29](./saas-readiness/audit-2026-08-29.md) — FORK-READY WITH CAVEATS |
+| Security       | [`security/`](./security/)             | Threat model, control matrix, and findings against OWASP ASVS / Top 10, CIS, NIST CSF | [2025-11-21](./security/audit-2025-11-21/) — complete                        |
 
 ## Conventions
 

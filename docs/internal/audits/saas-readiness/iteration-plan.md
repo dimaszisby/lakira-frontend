@@ -20,7 +20,7 @@ This is the master roadmap for closing the 8 P0 + 21 P1 + 8 P2 items in the base
 | 5   | Auth lifecycle                | §4.1 all; §4.2 proxy allowlist            | L      | Done (one verification gap)    | —                      |
 | 6   | Multi-tenancy UI              | §4.11 all                                 | L      | Scoping done, switcher blocked | **ADR-004**            |
 | 7   | Testing, gates, CI/CD, deploy | §4.7, §4.8, §4.9 all                      | L      | Gates done, deploy deferred    | ADR-003                |
-| 8   | Re-audit + closeout           | —                                         | S      | Scaffolded                     | ADR-002                |
+| 8   | Re-audit + closeout           | —                                         | S      | Done 2026-08-29                | ADR-002                |
 
 Status legend: Scaffolded = planned, no code · Next = up now · Blocked = a predecessor
 must land first · Done = all phase targets closed.
@@ -138,3 +138,7 @@ Not visible from the OpenAPI contract alone; found by decoding a real token.
 - `audit-2026-08-24.md` — baseline: 34 pass / 18 partial / 27 missing across 79 items (43%). 8 P0, 21 P1,
   8 P2. **NOT FORK-READY** — all four ADR-001 criteria fail. Seven of eight empirical gates
   green; `api:spec:check` red.
+- `audit-2026-08-29.md` — re-audit after phases 0-7: 66 pass / 11 partial / 2 missing across 79
+  items (84%). 0 P0, 6 P1, 9 P2. **FORK-READY WITH CAVEATS** — all four ADR-001 criteria pass;
+  the switcher is blocked on a backend endpoint, three flows are unverified for want of
+  email-token access, and there is no deploy configuration.
