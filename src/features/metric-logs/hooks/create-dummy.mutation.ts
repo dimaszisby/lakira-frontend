@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { useOrganizationId } from "@/features/organizations/context";
 import type {
   GenerateDummyMetricLogsRequestDTO,
   MetricLogResponseDTO,
@@ -13,6 +14,7 @@ export function useCreateMetricLogDummy(
   onError?: (error: Error) => void,
 ) {
   const qc = useQueryClient();
+  const organizationId = useOrganizationId();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation<
     { logs: MetricLogResponseDTO[] },
     Error,
@@ -20,7 +22,7 @@ export function useCreateMetricLogDummy(
   >({
     mutationFn: (payload) => createMetricLogDummy(payload),
     onSuccess: async (created) => {
-      await invalidateLogLists(qc);
+      await invalidateLogLists(qc, organizationId);
       onSuccess?.(created.logs);
     },
     onError,

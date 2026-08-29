@@ -1,6 +1,7 @@
 import type { QueryKey } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { useOrganizationId } from "@/features/organizations/context";
 import type { MetricCategoryResponseDTO } from "@/types/dtos/metric-category.dto";
 
 import { deleteMetricCategory } from "../api";
@@ -16,6 +17,7 @@ export const useDeleteMetricCategory = (
   onErrorCb?: (error: Error) => void,
 ) => {
   const qc = useQueryClient();
+  const organizationId = useOrganizationId();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation<
     MetricCategoryResponseDTO,
     Error,
@@ -25,12 +27,12 @@ export const useDeleteMetricCategory = (
     mutationFn: (categoryId) => deleteMetricCategory(categoryId),
     onMutate: async (categoryId) => {
       await qc.cancelQueries({
-        queryKey: metricCategoriesKeys.detailByIdRoot(categoryId),
+        queryKey: metricCategoriesKeys.detailByIdRoot(organizationId, categoryId),
       });
 
       const details = qc
         .getQueriesData({
-          queryKey: metricCategoriesKeys.detailByIdRoot(categoryId),
+          queryKey: metricCategoriesKeys.detailByIdRoot(organizationId, categoryId),
         })
         .map(([key, prev]) => {
           qc.setQueryData(key, undefined);
@@ -46,11 +48,11 @@ export const useDeleteMetricCategory = (
       onErrorCb?.(err);
     },
     onSuccess: (_void, categoryId) => {
-      removeMetricCategoryDetail(qc, categoryId);
+      removeMetricCategoryDetail(qc, organizationId, categoryId);
       onSuccess?.(categoryId);
     },
     onSettled: async () => {
-      await invalidateMetricCategoryLists(qc);
+      await invalidateMetricCategoryLists(qc, organizationId);
     },
   });
 

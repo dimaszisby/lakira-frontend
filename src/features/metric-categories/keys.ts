@@ -22,33 +22,60 @@ const normalizeCursor = (p: {
 
 // * Cache Invalidation
 // Cache invalidations based on => List or Details
+/**
+ * Cache keys for metric categories.
+ *
+ * Every key carries the organization id at index 1, immediately after the
+ * resource root. Without it, a user in two organizations would be served one
+ * org's cached payload while acting as the other — the defect `lakira-backend`
+ * shipped and patched as findings N1/N2.
+ *
+ * Index 1 rather than 0 keeps `key[0]` naming the resource, which the
+ * prefix-matched invalidations in `cache.ts` depend on.
+ */
 export const metricCategoriesKeys = {
-  all: ["categories"] as const,
+  all: (organizationId: string) => ["categories", organizationId] as const,
 
   // ----- Cursor lists (current) -----
   cursor: {
-    root: () => [...metricCategoriesKeys.all, "cursor"] as const,
-    pages: (p: {
-      limit: number;
-      sort: MetricCategorySortParam;
-      q?: string;
-      filter?: MetricCategoryFilter;
-      includeTotal?: boolean;
-      page: number;
-    }) => [...metricCategoriesKeys.cursor.root(), "pages", normalizeCursor(p)] as const,
-    infinite: (p: {
-      limit: number;
-      sort: MetricCategorySortParam;
-      q?: string;
-      filter?: MetricCategoryFilter;
-      after?: string;
-    }) => [...metricCategoriesKeys.cursor.root(), "infinite", normalizeCursor(p)] as const,
+    root: (organizationId: string) =>
+      [...metricCategoriesKeys.all(organizationId), "cursor"] as const,
+    pages: (
+      organizationId: string,
+      p: {
+        limit: number;
+        sort: MetricCategorySortParam;
+        q?: string;
+        filter?: MetricCategoryFilter;
+        includeTotal?: boolean;
+        page: number;
+      },
+    ) =>
+      [...metricCategoriesKeys.cursor.root(organizationId), "pages", normalizeCursor(p)] as const,
+    infinite: (
+      organizationId: string,
+      p: {
+        limit: number;
+        sort: MetricCategorySortParam;
+        q?: string;
+        filter?: MetricCategoryFilter;
+        after?: string;
+      },
+    ) =>
+      [
+        ...metricCategoriesKeys.cursor.root(organizationId),
+        "infinite",
+        normalizeCursor(p),
+      ] as const,
   },
 
   // ----- Details -----
-  details: () => [...metricCategoriesKeys.all, "detail"] as const,
+  details: (organizationId: string) =>
+    [...metricCategoriesKeys.all(organizationId), "detail"] as const,
   /** fully-qualified detail key (variant-specific) */
-  detail: (categoryId: string) => [...metricCategoriesKeys.details(), categoryId] as const,
+  detail: (organizationId: string, categoryId: string) =>
+    [...metricCategoriesKeys.details(organizationId), categoryId] as const,
   /** prefix for invalidating all variants of one metricId */
-  detailByIdRoot: (categoryId: string) => [...metricCategoriesKeys.details(), categoryId] as const,
+  detailByIdRoot: (organizationId: string, categoryId: string) =>
+    [...metricCategoriesKeys.details(organizationId), categoryId] as const,
 };

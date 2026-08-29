@@ -5,7 +5,7 @@ import { DASHBOARD_VIZ_LIMIT } from "@/features/data-visualizations/dashboardCon
 import { parseDashboardFilters } from "@/features/data-visualizations/dashboardFilters";
 import { vizKeys } from "@/features/data-visualizations/keys";
 import { buildVizQuery, DEFAULT_FILL, DEFAULT_TZ } from "@/features/data-visualizations/viz-helpers";
-import { getServerAuthHeaders } from "@/services/api/serverHeaders";
+import { getServerAuthHeaders, getServerOrganizationId } from "@/services/api/serverHeaders";
 import DashboardContent from "@/src/app/(app)/dashboard/_components/DashboardContent";
 
 export const metadata = {
@@ -29,15 +29,21 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
   });
 
   const serverHeaders = await getServerAuthHeaders();
+  const organizationId = await getServerOrganizationId();
 
   const queryClient = new QueryClient();
   const vizQuery = buildVizQuery(filters.range, filters.bucket, DEFAULT_TZ, DEFAULT_FILL);
   const dashboardQuery = { ...vizQuery, limit: DASHBOARD_VIZ_LIMIT };
 
-  await queryClient.prefetchQuery({
-    queryKey: vizKeys.dashboard(dashboardQuery),
-    queryFn: () => getDashboardVisualizations(dashboardQuery, { headers: serverHeaders }),
-  });
+  // Skip the prefetch rather than key it without a tenant. The layout already
+  // redirects a session with no organization claim, so this is belt-and-braces:
+  // the client query will fetch normally once mounted.
+  if (organizationId) {
+    await queryClient.prefetchQuery({
+      queryKey: vizKeys.dashboard(organizationId, dashboardQuery),
+      queryFn: () => getDashboardVisualizations(dashboardQuery, { headers: serverHeaders }),
+    });
+  }
 
   const dehydratedState = dehydrate(queryClient);
 

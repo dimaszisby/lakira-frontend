@@ -1,6 +1,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { useEffect, useMemo } from "react";
 
+import { useOrganizationId } from "@/features/organizations/context";
 import { useCursorPager } from "@/lib/cursor/useCursorPager";
 import { httpStatusFrom } from "@/services/api/http-status";
 import { computeTotalPages, makePageItemsSelect } from "@/utils/cursor/page-map";
@@ -20,6 +21,7 @@ export function useMetricsListPaginationViaCursor(params: {
   filter?: MetricFilterViaCursor;
   enabled: boolean;
 }) {
+  const organizationId = useOrganizationId();
   const { limit, sort, q, filter, enabled = true } = params;
 
   // Reset dependencies for pager when query params change
@@ -33,7 +35,7 @@ export function useMetricsListPaginationViaCursor(params: {
   const { page, after, setPage, updateNextCursor, canPrev, canNextUsing } = pager;
 
   const query = useQuery<MetricCursorPageDTO, unknown, MetricCursorPageVM>({
-    queryKey: metricsKeys.cursor.pages({ limit, sort, q, filter, page, includeTotal: true }),
+    queryKey: metricsKeys.cursor.pages(organizationId, { limit, sort, q, filter, page, includeTotal: true }),
     queryFn: () => getMetricLibraryViaCursor({ limit, sort, q, filter, after, includeTotal: true }),
 
     select: makePageItemsSelect(toMetricPreviewVM),

@@ -1,5 +1,6 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
+import { useOrganizationId } from "@/features/organizations/context";
 import { isAbortError } from "@/src/services/api/isAbortError";
 
 import { getDashboardVisualizations, getMetricVisualization } from "./api";
@@ -11,9 +12,10 @@ export function useMetricVisualization(
   query: VizQuery,
   opts?: { enabled?: boolean; staleTime?: number; gcTime?: number },
 ) {
+  const organizationId = useOrganizationId();
   const { enabled = true, staleTime = 60_000, gcTime = 5 * 60_000 } = opts ?? {};
   return useQuery<VizResponse, Error, VizResponse>({
-    queryKey: vizKeys.byMetric(metricId, query),
+    queryKey: vizKeys.byMetric(organizationId, metricId, query),
     queryFn: ({ signal }) => getMetricVisualization(metricId, query, { signal }),
     enabled,
     staleTime,
@@ -27,6 +29,7 @@ export function useDashboardVisualizations(
   q: VizQuery & { limit?: number },
   opts?: { enabled?: boolean; staleTime?: number; gcTime?: number },
 ) {
+  const organizationId = useOrganizationId();
   const { enabled = true, staleTime = 60_000, gcTime = 5 * 60_000 } = opts ?? {};
 
   return useQuery<
@@ -34,7 +37,7 @@ export function useDashboardVisualizations(
     Error,
     ReturnType<typeof getDashboardVisualizations> extends Promise<infer R> ? R : never
   >({
-    queryKey: vizKeys.dashboard(q),
+    queryKey: vizKeys.dashboard(organizationId, q),
     queryFn: ({ signal }) => getDashboardVisualizations(q, { signal }),
     enabled,
     staleTime,

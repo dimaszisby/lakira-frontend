@@ -1,9 +1,9 @@
 import type { QueryKey } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import type { MetricLogResponseDTO } from "@/types/dtos/metric-log.dto";
-
 import { invalidateMetricVisualization } from "@/features/data-visualizations/cache";
+import { useOrganizationId } from "@/features/organizations/context";
+import type { MetricLogResponseDTO } from "@/types/dtos/metric-log.dto";
 
 import { deleteMetricLog } from "../api";
 import { invalidateLogLists, removeLogDetail } from "../cache";
@@ -21,6 +21,7 @@ type DeleteVars = {
 
 export function useDeleteMetricLog(onSuccess?: (deletedId: string) => void, onErrorCb?: (error: Error) => void) {
   const qc = useQueryClient();
+  const organizationId = useOrganizationId();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation<
     MetricLogResponseDTO,
     Error,
@@ -30,11 +31,11 @@ export function useDeleteMetricLog(onSuccess?: (deletedId: string) => void, onEr
     mutationFn: ({ logId }) => deleteMetricLog(logId),
     onMutate: async ({ logId }) => {
       await qc.cancelQueries({
-        queryKey: metricLogsKeys.detail(logId),
+        queryKey: metricLogsKeys.detail(organizationId, logId),
       });
 
       const details = qc
-        .getQueriesData({ queryKey: metricLogsKeys.detailByIdRoot(logId) })
+        .getQueriesData({ queryKey: metricLogsKeys.detailByIdRoot(organizationId, logId) })
         .map(([key, prev]) => {
           qc.setQueryData(key, undefined); // Temp clearing
           return { key, prev };
@@ -49,12 +50,12 @@ export function useDeleteMetricLog(onSuccess?: (deletedId: string) => void, onEr
       onErrorCb?.(err);
     },
     onSuccess: (_void, { logId }) => {
-      removeLogDetail(qc, logId);
+      removeLogDetail(qc, organizationId, logId);
       onSuccess?.(logId);
     },
     onSettled: async (_data, _err, vars) => {
-      await invalidateLogLists(qc);
-      await invalidateMetricVisualization(qc, vars.metricId);
+      await invalidateLogLists(qc, organizationId);
+      await invalidateMetricVisualization(qc, organizationId, vars.metricId);
     },
   });
 

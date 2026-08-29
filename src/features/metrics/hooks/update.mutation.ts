@@ -1,6 +1,8 @@
 import type { QueryKey } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { useOrganizationId } from "@/features/organizations/context";
+
 import {
   invalidateMetricDetail,
   invalidateMetricLists,
@@ -23,6 +25,7 @@ export function useUpdateMetric(
   onErrorCb?: (error: Error) => void,
 ) {
   const qc = useQueryClient();
+  const organizationId = useOrganizationId();
 
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation<
     MetricResponseDTO,
@@ -34,7 +37,7 @@ export function useUpdateMetric(
     // optimistic patch
     onMutate: async ({ metricId, metric }) => {
       await qc.cancelQueries({
-        queryKey: metricsKeys.detailByIdRoot(metricId),
+        queryKey: metricsKeys.detailByIdRoot(organizationId, metricId),
       });
 
       const patch: Partial<
@@ -46,7 +49,7 @@ export function useUpdateMetric(
         description: metric.description,
       };
 
-      return patchMetricHeaderOptimistic(qc, metricId, patch); // return context for rollback
+      return patchMetricHeaderOptimistic(qc, organizationId, metricId, patch); // return context for rollback
     },
     onError: (err, _vars, ctx) => {
       if (ctx?.prev) {
@@ -55,8 +58,8 @@ export function useUpdateMetric(
       onErrorCb?.(err);
     },
     onSettled: async (_data, _err, vars) => {
-      await invalidateMetricDetail(qc, vars.metricId);
-      await invalidateMetricLists(qc);
+      await invalidateMetricDetail(qc, organizationId, vars.metricId);
+      await invalidateMetricLists(qc, organizationId);
     },
     // (Optional) Setup for a success callback for UI toasts
     onSuccess: (updated) => {

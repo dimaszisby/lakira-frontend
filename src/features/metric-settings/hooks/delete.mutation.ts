@@ -1,6 +1,7 @@
 import type { QueryKey } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { useOrganizationId } from "@/features/organizations/context";
 import type { MetricSettingsResponseDTO } from "@/types/dtos/metric-settings.dto";
 
 import { deleteMetricSettings } from "../api";
@@ -17,6 +18,7 @@ export function useDeleteMetricSettings(
   onErrorCb?: (error: Error) => void,
 ) {
   const qc = useQueryClient();
+  const organizationId = useOrganizationId();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation<
     MetricSettingsResponseDTO,
     Error,
@@ -26,11 +28,11 @@ export function useDeleteMetricSettings(
     mutationFn: ({ id, metricId }) => deleteMetricSettings(id, metricId),
     onMutate: async ({ id }) => {
       await qc.cancelQueries({
-        queryKey: metricSettingsKeys.detail(id),
+        queryKey: metricSettingsKeys.detail(organizationId, id),
       });
 
       const details = qc
-        .getQueriesData({ queryKey: metricSettingsKeys.detailByIdRoot(id) })
+        .getQueriesData({ queryKey: metricSettingsKeys.detailByIdRoot(organizationId, id) })
         .map(([key, prev]) => {
           qc.setQueryData(key, undefined); // Temp clearing
           return { key, prev };
@@ -45,11 +47,11 @@ export function useDeleteMetricSettings(
       onErrorCb?.(err);
     },
     onSuccess: (_void, vars) => {
-      removeMetricSettingsDetail(qc, vars.id);
+      removeMetricSettingsDetail(qc, organizationId, vars.id);
       onSuccess?.(vars.id);
     },
     onSettled: async () => {
-      await invalidateMetricSettingsLists(qc);
+      await invalidateMetricSettingsLists(qc, organizationId);
     },
   });
 

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { useOrganizationId } from "@/features/organizations/context";
 import type {
   DisplayOptionsDTO,
   MetricSettingsResponseDTO,
@@ -13,6 +14,7 @@ export function useUpdateDisplayOptions(
   onError?: (error: Error) => void,
 ) {
   const qc = useQueryClient();
+  const organizationId = useOrganizationId();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation({
     mutationFn: ({
       id,
@@ -24,8 +26,8 @@ export function useUpdateDisplayOptions(
       displayOptions: DisplayOptionsDTO;
     }) => updateDisplayOptions(id, metricId, displayOptions),
     onSuccess: async (updated) => {
-      await invalidateMetricSettingsDetail(qc, updated.id);
-      await invalidateMetricSettingsLists(qc);
+      await invalidateMetricSettingsDetail(qc, organizationId, updated.id);
+      await invalidateMetricSettingsLists(qc, organizationId);
       onSuccess?.(updated);
     },
     onError,

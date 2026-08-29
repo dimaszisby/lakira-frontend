@@ -1,9 +1,9 @@
 import type { QueryKey } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import type { MetricLogResponseDTO, UpdateMetricLogRequestDTO } from "@/types/dtos/metric-log.dto";
-
 import { invalidateMetricVisualization } from "@/features/data-visualizations/cache";
+import { useOrganizationId } from "@/features/organizations/context";
+import type { MetricLogResponseDTO, UpdateMetricLogRequestDTO } from "@/types/dtos/metric-log.dto";
 
 import { updateMetricLog } from "../api";
 import { invalidateLogDetail, invalidateLogLists, patchLogHeaderOptimistic } from "../cache";
@@ -23,6 +23,7 @@ export function useUpdateMetricLog(
   onErrorCb?: (error: Error) => void,
 ) {
   const qc = useQueryClient();
+  const organizationId = useOrganizationId();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation<
     MetricLogResponseDTO,
     Error,
@@ -32,14 +33,14 @@ export function useUpdateMetricLog(
     mutationFn: ({ logId, log }) => updateMetricLog({ metricLogId: logId, metricLog: log }),
     onMutate: async ({ logId, log }) => {
       await qc.cancelQueries({
-        queryKey: metricLogsKeys.detail(logId),
+        queryKey: metricLogsKeys.detail(organizationId, logId),
       });
 
       const patch: Partial<Pick<MetricLogVM, "logValue" | "loggedAt">> = {
         logValue: log.logValue,
         loggedAt: log.loggedAt,
       };
-      return patchLogHeaderOptimistic(qc, logId, patch);
+      return patchLogHeaderOptimistic(qc, organizationId, logId, patch);
     },
     onError: (err, _vars, ctx) => {
       if (ctx?.prev) {
@@ -48,9 +49,9 @@ export function useUpdateMetricLog(
       onErrorCb?.(err);
     },
     onSettled: async (_data, _err, vars) => {
-      await invalidateLogDetail(qc, vars.logId);
-      await invalidateLogLists(qc);
-      await invalidateMetricVisualization(qc, vars.metricId);
+      await invalidateLogDetail(qc, organizationId, vars.logId);
+      await invalidateLogLists(qc, organizationId);
+      await invalidateMetricVisualization(qc, organizationId, vars.metricId);
     },
 
     onSuccess: (updated) => {

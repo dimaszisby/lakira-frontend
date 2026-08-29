@@ -1,6 +1,7 @@
 import type { QueryKey } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { useOrganizationId } from "@/features/organizations/context";
 import type {
   MetricCategoryResponseDTO,
   UpdateMetricCategoryRequestDTO,
@@ -26,6 +27,7 @@ export const useUpdateMetricCategory = (
   onErrorCb?: (error: Error) => void,
 ) => {
   const qc = useQueryClient();
+  const organizationId = useOrganizationId();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation<
     MetricCategoryResponseDTO,
     Error,
@@ -35,7 +37,7 @@ export const useUpdateMetricCategory = (
     mutationFn: (vars) => updateMetricCategory(vars),
     onMutate: async ({ categoryId, category }) => {
       await qc.cancelQueries({
-        queryKey: metricCategoriesKeys.detailByIdRoot(categoryId),
+        queryKey: metricCategoriesKeys.detailByIdRoot(organizationId, categoryId),
       });
 
       const patch: Partial<Pick<MetricCategoryVM, "name" | "icon" | "color">> = {
@@ -44,7 +46,7 @@ export const useUpdateMetricCategory = (
         color: category.color,
       };
 
-      return patchCategoryOptimistic(qc, categoryId, patch);
+      return patchCategoryOptimistic(qc, organizationId, categoryId, patch);
     },
     onError: (err, _vars, ctx) => {
       if (ctx?.prev) {
@@ -53,8 +55,8 @@ export const useUpdateMetricCategory = (
       onErrorCb?.(err);
     },
     onSettled: async (_data, _err, vars) => {
-      await invalidateMetricCategoryDetail(qc, vars.categoryId);
-      await invalidateMetricCategoryLists(qc);
+      await invalidateMetricCategoryDetail(qc, organizationId, vars.categoryId);
+      await invalidateMetricCategoryLists(qc, organizationId);
     },
     // (Optional) Setup for a success callback for UI toasts
     onSuccess: (updated) => {
