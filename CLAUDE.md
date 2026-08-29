@@ -80,7 +80,8 @@ Worth knowing about:
 
 Things a reasonable reader would otherwise assume are true, and are not:
 
+- **Cache keys are organization-scoped.** Every `src/features/*/keys.ts` except `auth` takes `organizationId` as a required first argument, so a missed call site is a compile error. Do not add a key factory without it — see ADR-004 and `src/features/__tests__/key-tenant-scoping.test.ts`.
 - **Six files are exempt from the layer rule.** `src/components/**` was unmapped in `boundaries/elements` until 2026-08-17, so the `components` boundary never ran and 18 inversions accumulated. The rule is live now, with `withAuth.tsx`, `Header.tsx`, `Sidebar.tsx`, `HydrateUser.tsx`, `CategorySelect.tsx`, and `Visualization.tsx` quarantined at the bottom of `eslint.config.mjs` pending a refactor. Do not add to that list.
 - **Integration tests are MSW-backed, per test rather than globally.** `src/test-utils/msw/handlers.ts` is an empty array _by design_: the server runs `onUnhandledRequest: "error"` and each suite declares its own requests via `server.use()`. That is stricter than a shared handler list. (An earlier note here claimed tests mocked feature hooks at module level; verified false on 2026-08-27 — no suite does.)
 - **Coverage thresholds are real as of 2026-08-27.** Global thresholds sit just below measured coverage (29/29/26/29 %), and `coverage:check --strict` runs in CI. They were 3/2/3/3 %, roughly a tenth of actual. Do not lower them to make a build pass.
-- **The OpenAPI snapshot drifts.** Run `npm run api:spec:check` before trusting `src/types/dtos/**`.
+- **The OpenAPI snapshot is in sync as of 2026-08-29**, after a backend fix for a dangling `$ref`. It has drifted twice before, so `npm run api:spec:check` is still worth running before trusting `src/types/dtos/**` — but it is a gate that works, not a known gap.

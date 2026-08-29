@@ -28,6 +28,9 @@ It mirrors the equivalent kit in `lakira-backend`
 - `README.md` — this file.
 - `audit-2026-08-24.md` — baseline audit. Scorecard, gap entries (P0/P1/P2), evidence,
   recommended fixes.
+- `audit-2026-08-29.md` — re-audit after phases 0-7. 43% -> 84%; FORK-READY WITH CAVEATS.
+- `FINAL-AUDIT-SUMMARY.md` — closeout across both runs, including the findings the programme
+  itself got wrong and corrected.
 - `iteration-plan.md` — phase roadmap mapping each remediation phase to its gap IDs and kit.
 - `decisions.md` — ADR entries for standards adopted in response to the audit. New decisions
   append at the bottom; do not rewrite history.
@@ -69,12 +72,16 @@ See ADR-001 in [`decisions.md`](./decisions.md). All four must hold:
 npm run lint
 npm run lint:css
 npm run typecheck
-npm run test:unit
+npm run test:unit:ci
+npm run coverage:check
 npm run test:integration
 npm run build
 npm run api:spec:check && npm run api:types:check
 npm run security:scan
 ```
+
+`test:unit:ci` rather than `test:unit`: it collects coverage, which the thresholds gate on.
+`coverage:check` enforces the per-folder goals and runs in CI as of 2026-08-27.
 
 Capture real exit codes. A category cannot be Pass if any gate covering it fails.
 
@@ -96,8 +103,14 @@ find src/features -name keys.ts -exec grep -L 'organization\|orgId' {} +
 
 # Gates that pass vacuously
 grep -n 'coverageThreshold' -A6 jest.config.ts
-cat src/test-utils/msw/handlers.ts
+
+# Every org-scoped key factory must take organizationId as a required first
+# argument, so a missed call site is a compile error rather than a silent leak.
+find src/features -name keys.ts -exec grep -L 'organizationId' {} +   # expect only auth/keys.ts
 ```
+
+The MSW scan from the baseline is retired: `handlers.ts` being empty is correct design, not a
+gap. See the correction in `FINAL-AUDIT-SUMMARY.md` section 3.
 
 ## References
 
