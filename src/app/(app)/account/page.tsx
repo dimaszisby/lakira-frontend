@@ -4,6 +4,7 @@ import { useMemo } from "react";
 
 import { withAuth } from "@/components/hoc/withAuth";
 import { APP_NAME } from "@/constants/app";
+import EmailVerificationNotice from "@/features/auth/components/EmailVerificationNotice";
 import { useAuthProfileQuery } from "@/features/auth/hooks/profile.query";
 import Button from "@/ui/Button";
 import Card, { CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
@@ -61,6 +62,8 @@ const AccountPageBase = () => {
           View your profile details and manage your account visibility.
         </p>
       </header>
+
+      <EmailVerificationNotice emailVerifiedAt={data.emailVerifiedAt} />
 
       <Card>
         <CardHeader>

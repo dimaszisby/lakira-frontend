@@ -52,6 +52,14 @@ export interface UserResponseDTO {
   readonly isPublicProfile: boolean;
 
   /**
+   * @property {string | null} emailVerifiedAt - When the address was confirmed,
+   * or null while unverified. Present in the generated types and returned by
+   * the live API; this hand-written DTO was missing it.
+   * @readonly
+   */
+  readonly emailVerifiedAt: string | null;
+
+  /**
    * @property {string} createdAt - The timestamp when the user account was created, formatted as an ISO string.
    * @readonly
    */

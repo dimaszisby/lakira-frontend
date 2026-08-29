@@ -42,3 +42,27 @@ export const loginUserSchema = z.object({
     password: zPassword,
   }),
 });
+
+/**
+ * Account-recovery schemas.
+ *
+ * Kept beside the other user schemas rather than in the feature module, so all
+ * user-shaped validation stays in one place.
+ */
+export const forgotPasswordSchema = z.object({
+  email: zEmail,
+});
+export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>;
+
+export const resetPasswordSchema = z
+  .object({
+    password: zPassword,
+    passwordConfirmation: zPasswordConfirmation,
+  })
+  // Confirmation is checked here rather than in the component so the error
+  // attaches to the field the user has to fix.
+  .refine((values) => values.password === values.passwordConfirmation, {
+    path: ["passwordConfirmation"],
+    message: ZodMessages.user.passwordMismatch,
+  });
+export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;

@@ -17,7 +17,7 @@ This is the master roadmap for closing the 8 P0 + 21 P1 + 8 P2 items in the base
 | 2   | De-branding + white-label     | §4.13 branding, API tooling; §4.3 favicon | M      | Done                        | —                      |
 | 3   | Env validation + DX           | §4.6 all                                  | M      | Done                        | —                      |
 | 4   | Observability                 | §4.5 all; §4.4 CSP sink; §4.10 RUM        | M      | 4a Done, 4b blocked         | —                      |
-| 5   | Auth lifecycle                | §4.1 all; §4.2 proxy allowlist            | L      | 5a Done, 5b next            | —                      |
+| 5   | Auth lifecycle                | §4.1 all; §4.2 proxy allowlist            | L      | Done (one verification gap) | —                      |
 | 6   | Multi-tenancy UI              | §4.11 all                                 | L      | Blocked on 5                | **ADR-004**            |
 | 7   | Testing, gates, CI/CD, deploy | §4.7, §4.8, §4.9 all                      | L      | Gates done, deploy deferred | ADR-003                |
 | 8   | Re-audit + closeout           | —                                         | S      | Scaffolded                  | ADR-002                |

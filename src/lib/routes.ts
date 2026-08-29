@@ -75,6 +75,13 @@ export const authRoutes = {
   },
   account: () => "/account",
   afterAuth: (returnUrl?: string | null) => resolveReturnUrl(returnUrl) ?? "/dashboard",
+  forgotPassword: () => "/forgot-password",
+  // Token is carried in the query string because it arrives from an emailed
+  // link. It is single-use and short-lived; the backend rejects a spent one.
+  resetPassword: (token?: string | null) =>
+    buildPath("/reset-password", token ? { token } : undefined),
+  verifyEmail: (token?: string | null) =>
+    buildPath("/verify-email", token ? { token } : undefined),
 };
 
 export const metricRoutes = {
