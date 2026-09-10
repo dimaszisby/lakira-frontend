@@ -301,6 +301,7 @@ export interface paths {
                         "application/json": components["schemas"]["SuccessResponse"];
                     };
                 };
+                400: components["responses"]["BadRequestError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -410,6 +411,7 @@ export interface paths {
                         "application/json": components["schemas"]["RefreshResponse"];
                     };
                 };
+                400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -494,6 +496,7 @@ export interface paths {
                         "application/json": components["schemas"]["SuccessResponse"];
                     };
                 };
+                400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 /** @description Rate limit exceeded for resend verification requests */
                 429: {
@@ -2993,17 +2996,12 @@ export interface components {
         Uuid: string;
         ValidationError: {
             errors: {
+                /** @example body.email */
+                field: string;
                 /** @example Invalid email format */
                 message: string;
-                /**
-                 * @example [
-                 *       "body",
-                 *       "email"
-                 *     ]
-                 */
-                path: string[];
             }[];
-            /** @example Validation Error */
+            /** @example Validation failed */
             message: string;
             /** @example fail */
             status: string;
@@ -3076,14 +3074,16 @@ export interface components {
             };
             content: {
                 "application/json": {
+                    /** @description Field-level detail. Present only for validation and body-shape failures. */
                     errors?: {
-                        message?: string;
-                        path?: string[];
+                        /** @example body.name */
+                        field: string;
+                        message: string;
                     }[];
-                    /** @example Bad Request */
-                    message?: string;
+                    /** @example Validation failed */
+                    message: string;
                     /** @example fail */
-                    status?: string;
+                    status: string;
                 };
             };
         };
@@ -3095,9 +3095,9 @@ export interface components {
             content: {
                 "application/json": {
                     /** @example Resource already exists */
-                    message?: string;
+                    message: string;
                     /** @example fail */
-                    status?: string;
+                    status: string;
                 };
             };
         };
@@ -3109,9 +3109,9 @@ export interface components {
             content: {
                 "application/json": {
                     /** @example Forbidden */
-                    message?: string;
+                    message: string;
                     /** @example fail */
-                    status?: string;
+                    status: string;
                 };
             };
         };
@@ -3123,9 +3123,9 @@ export interface components {
             content: {
                 "application/json": {
                     /** @example Internal Server Error */
-                    message?: string;
+                    message: string;
                     /** @example error */
-                    status?: string;
+                    status: string;
                 };
             };
         };
@@ -3137,9 +3137,9 @@ export interface components {
             content: {
                 "application/json": {
                     /** @example Resource not found */
-                    message?: string;
+                    message: string;
                     /** @example fail */
-                    status?: string;
+                    status: string;
                 };
             };
         };
@@ -3151,9 +3151,9 @@ export interface components {
             content: {
                 "application/json": {
                     /** @example Too many requests, please try again later. */
-                    message?: string;
+                    message: string;
                     /** @example 429 */
-                    status?: number;
+                    status: number;
                 };
             };
         };
@@ -3165,9 +3165,9 @@ export interface components {
             content: {
                 "application/json": {
                     /** @example Unauthorized */
-                    message?: string;
+                    message: string;
                     /** @example fail */
-                    status?: string;
+                    status: string;
                 };
             };
         };

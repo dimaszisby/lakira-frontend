@@ -8,24 +8,27 @@
             "schema": {
               "properties": {
                 "errors": {
+                  "description": "Field-level detail. Present only for validation and body-shape failures.",
                   "items": {
                     "properties": {
-                      "message": {
+                      "field": {
+                        "example": "body.name",
                         "type": "string"
                       },
-                      "path": {
-                        "items": {
-                          "type": "string"
-                        },
-                        "type": "array"
+                      "message": {
+                        "type": "string"
                       }
                     },
+                    "required": [
+                      "field",
+                      "message"
+                    ],
                     "type": "object"
                   },
                   "type": "array"
                 },
                 "message": {
-                  "example": "Bad Request",
+                  "example": "Validation failed",
                   "type": "string"
                 },
                 "status": {
@@ -33,6 +36,10 @@
                   "type": "string"
                 }
               },
+              "required": [
+                "status",
+                "message"
+              ],
               "type": "object"
             }
           }
@@ -53,6 +60,10 @@
                   "type": "string"
                 }
               },
+              "required": [
+                "status",
+                "message"
+              ],
               "type": "object"
             }
           }
@@ -73,6 +84,10 @@
                   "type": "string"
                 }
               },
+              "required": [
+                "status",
+                "message"
+              ],
               "type": "object"
             }
           }
@@ -93,6 +108,10 @@
                   "type": "string"
                 }
               },
+              "required": [
+                "status",
+                "message"
+              ],
               "type": "object"
             }
           }
@@ -113,6 +132,10 @@
                   "type": "string"
                 }
               },
+              "required": [
+                "status",
+                "message"
+              ],
               "type": "object"
             }
           }
@@ -133,6 +156,10 @@
                   "type": "number"
                 }
               },
+              "required": [
+                "status",
+                "message"
+              ],
               "type": "object"
             }
           }
@@ -153,6 +180,10 @@
                   "type": "string"
                 }
               },
+              "required": [
+                "status",
+                "message"
+              ],
               "type": "object"
             }
           }
@@ -2556,23 +2587,17 @@
           "errors": {
             "items": {
               "properties": {
+                "field": {
+                  "example": "body.email",
+                  "type": "string"
+                },
                 "message": {
                   "example": "Invalid email format",
                   "type": "string"
-                },
-                "path": {
-                  "example": [
-                    "body",
-                    "email"
-                  ],
-                  "items": {
-                    "type": "string"
-                  },
-                  "type": "array"
                 }
               },
               "required": [
-                "path",
+                "field",
                 "message"
               ],
               "type": "object"
@@ -2580,7 +2605,7 @@
             "type": "array"
           },
           "message": {
-            "example": "Validation Error",
+            "example": "Validation failed",
             "type": "string"
           },
           "status": {
@@ -3203,6 +3228,9 @@
             },
             "description": "User logged out successfully"
           },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
@@ -3318,6 +3346,9 @@
             },
             "description": "New access token issued; new refresh cookie set"
           },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
           },
@@ -3383,6 +3414,9 @@
               }
             },
             "description": "Generic acknowledgement"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
           },
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
