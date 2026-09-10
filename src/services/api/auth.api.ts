@@ -1,5 +1,6 @@
 import type { AuthResponseDTO, CreateUserRequestDTO, LoginRequestDTO } from "@/types/dtos/user.dto";
 import type ApiResponse from "@/types/generics/ApiResponse";
+import { unwrap, unwrapOrNull } from "@/types/generics/ApiResponse";
 
 import type { UserAtom } from "../state/atoms.js";
 import api from "./api";
@@ -15,11 +16,7 @@ export const registerUser = async (userData: CreateUserRequestDTO): Promise<Auth
   try {
     const response = await api.post<ApiResponse<AuthResponseDTO>>("/auth/register", userData);
 
-    if (!response.data?.data) {
-      throw new Error("Invalid register response"); // ✅ Prevent undefined responses
-    }
-
-    return response.data.data;
+    return unwrap(response);
   } catch (error) {
     console.error("API Error in registerUser:", error);
     throw new Error(handleApiError(error).join(", "));
@@ -34,11 +31,7 @@ export const loginUser = async (credentials: LoginRequestDTO): Promise<AuthRespo
   try {
     const response = await api.post<ApiResponse<AuthResponseDTO>>("/auth/login", credentials);
 
-    if (!response.data?.data) {
-      throw new Error("Invalid login response"); // ✅ Prevent undefined responses
-    }
-
-    return response.data.data;
+    return unwrap(response);
   } catch (error) {
     console.error("API Error in loginUser:", error);
     throw new Error(handleApiError(error).join(", "));
@@ -53,7 +46,7 @@ export const fetchUserProfile = async (): Promise<UserAtom | null> => {
   try {
     const response = await api.get<ApiResponse<UserAtom>>("/auth/profile");
 
-    return response.data?.data || null; // returns `null` instead of undefined or throwing an error
+    return unwrapOrNull(response); // returns `null` instead of undefined or throwing an error
   } catch (error) {
     console.error("API Error in fetchUserProfile:", error);
     return null; // ✅ Always return `null` when an error occurs

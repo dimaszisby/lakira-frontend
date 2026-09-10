@@ -13,9 +13,8 @@ export type ApiSuccess<T> = {
 export type ApiFailure = {
   status: Exclude<Status, "success">; // example: "fail" | "error"
   message: string;
-  data: null; // always null on non-success
-  error?: string;
-  errors?: string[];
+  errors?: { field: string; message: string }[];
+  stack?: string; // present only in development
   code?: string | number;
   success?: false;
 };
