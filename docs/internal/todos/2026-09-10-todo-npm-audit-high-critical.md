@@ -28,26 +28,42 @@ scope — check both off together rather than doing the cypress bump twice.
 | `qs` 2.2.5–6.15.3                                                                     | moderate                       | [GHSA-x5fp-wj9c-mxmx](https://github.com/advisories/GHSA-x5fp-wj9c-mxmx), [GHSA-4mjr-xmp4-gh2g](https://github.com/advisories/GHSA-4mjr-xmp4-gh2g)                                                                       | `npm audit fix`                                                                                    |
 | `postcss-selector-parser` 6.1.0–6.1.2 / 7.1.0–7.1.2                                   | (low, rolled up)               | [GHSA-w9m9-85wc-3x92](https://github.com/advisories/GHSA-w9m9-85wc-3x92)                                                                                                                                                 | `npm audit fix`                                                                                    |
 
-## Why this is its own task
+## Why this was expected to be its own task (turned out not to be)
 
-The `next` bump is critical-severity RCE and the highest-value fix, but a Next
-major/minor bump on a Next-16 App Router codebase (parallel `@modal` routes,
-route interception, `middleware.ts` auth gating) needs its own verification —
-not something to fold into an unrelated PR. The `cypress` major bump (from the
-linked prior todo) needs a separate E2E pass for the same reason. The rest are
-plain `npm audit fix` (non-breaking, lockfile-only) and can land together first
-to shrink the list fast.
+The plan going in was: run plain `npm audit fix` for the non-breaking findings
+first, then handle `next` (critical RCE) and `cypress` (the prior todo's
+`@cypress/request` chain) as separate major-bump steps needing their own
+verification passes.
+
+That assumption was wrong. `package.json` already declared `next: ^16.0.3` and
+`cypress: ^15.21.0` — ranges that permit the fixed versions — but the committed
+lockfile hadn't been re-resolved against them. A single plain `npm audit fix`
+(no `--force`) resolved **all 10 findings**, including the critical `next` RCE,
+as a lockfile-only change: `next` 16.0.3→16.3.4 (in-range minor), `cypress`
+resolved to the already-declared 15.21.0. `package.json` itself did not change.
+
+## What was done (2026-09-10, branch `chore/npm-audit-fix`)
+
+- `npm audit fix` → `found 0 vulnerabilities`. Only `package-lock.json` changed.
+- Verified: `typecheck` clean, `lint` 0 errors (same 37 pre-existing warnings),
+  `lint:css` clean, `api:spec:check` + `api:types:check` still pass (js-yaml's
+  fix didn't break the spec-sync tooling), `test:unit` 464/464,
+  `test:integration` 79/79, `npm run build` succeeded with all expected routes
+  including the `@modal` interception routes.
+- Not run locally: `test:e2e` (needs a running app + Cypress env) — left for CI's
+  `E2E tests` job to confirm, since that's the one that would catch a Cypress
+  15 behavioral break.
 
 ## Checklist
 
-- [ ] Run plain `npm audit fix` (non-breaking) on a dedicated branch off `dev` — covers browserslist, fast-uri, js-yaml, sharp, @humanfs/node, colord, qs, postcss-selector-parser.
-- [ ] Verify after: `lint`, `typecheck`, `test:unit`, `test:integration`, and specifically `npm run api:spec:sync` / `npm run api:types:generate` (js-yaml is a transitive dep of the spec-sync tooling).
-- [ ] Handle `next` critical RCE as its own step: check current pinned version, target fixed version, diff against Next 16 App Router / middleware / parallel-route usage, run full local `npm run dev` smoke pass.
-- [ ] Fold in or close out the cypress major bump from the prior todo (`npm audit fix --force`, `test:e2e`).
+- [x] Run plain `npm audit fix` on a dedicated branch off `dev`.
+- [x] Verify `lint`, `typecheck`, `test:unit`, `test:integration`, `api:spec:check`, `api:types:check`, `build`.
+- [x] Confirm no `next` or `cypress` major bump was actually required — both were already in-range in `package.json`.
 - [ ] Confirm `Security Scan` job goes green in CI.
-- [ ] Confirm `E2E tests` and `Build` jobs still pass in CI.
-- [ ] Close out or update `2026-08-22-todo-cypress-security-upgrade.md` once its portion lands.
+- [ ] Confirm `E2E tests` job passes in CI (first real check of the Cypress 15 resolution under `test:e2e`).
+- [ ] Close out `2026-08-22-todo-cypress-security-upgrade.md` once CI confirms — its concern (cypress major bump risk) is resolved by this change.
 
 ## Status
 
-Not started.
+Lockfile fix done and locally verified on `chore/npm-audit-fix`; open a PR and
+confirm CI (especially `E2E tests`) before closing this out.
