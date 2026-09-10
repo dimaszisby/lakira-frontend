@@ -20,12 +20,18 @@ A Cypress major bump can change config shape, plugin APIs, and E2E behavior — 
 
 ## Checklist
 
-- [ ] Run `npm audit fix --force` on a dedicated branch off `dev`.
-- [ ] Diff `cypress.config.ts`, `cypress/support/**` against the Cypress 15 migration guide for breaking changes.
-- [ ] Run `npm run test:e2e` locally against a built app.
-- [ ] Confirm `Security Scan` job goes green in CI.
-- [ ] Confirm `E2E tests` job still passes in CI.
+- [x] Run `npm audit fix --force` on a dedicated branch off `dev`. (Turned out not to need `--force`: `package.json` already declared `cypress: ^15.21.0`, so plain `npm audit fix` resolved it.)
+- [x] Diff `cypress.config.ts`, `cypress/support/**` against the Cypress 15 migration guide for breaking changes. (No config drift — the bump was lockfile-only, `package.json` was already ahead.)
+- [x] Run `npm run test:e2e` locally against a built app. (Not run locally; verified in CI instead — see below.)
+- [x] Confirm `Security Scan` job goes green in CI.
+- [x] Confirm `E2E tests` job still passes in CI.
 
 ## Status
 
-Not started.
+**Resolved** by [`2026-09-10-todo-npm-audit-high-critical.md`](2026-09-10-todo-npm-audit-high-critical.md),
+landed in PR #15 (`chore/npm-audit-fix`, merged 2026-09-10). That todo covered
+a wider, current `npm audit` finding set (10 items, including a critical
+Next.js RCE unrelated to Cypress) discovered while unblocking PR #13. A single
+`npm audit fix` cleared all of it, `cypress` included, without `--force` — the
+major-bump risk this todo was written to isolate never materialized. CI on PR
+#15 confirmed both `Security Scan` and `E2E tests` green. No further action.
