@@ -1,8 +1,9 @@
+import { PencilSimple, Trash } from "phosphor-react";
 import { memo } from "react";
 
 import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
 import { cn } from "@/lib/cn";
-import SwipeableCard from "@/ui/SwipeableCard";
+import { SwipeableCard } from "@/ui/SwipeableCard";
 
 import MetricCategoryMobileCard from "./MetricCategoryMobileCard";
 import type { CategoryTableProps } from "./table-config";
@@ -16,7 +17,10 @@ export const MetricCategoryMobileTableBase = ({
   className = "",
 }: CategoryTableProps) => {
   return (
-    <section className={cn("space-y-4 sm:hidden", className)} aria-label="Metric categories mobile list">
+    <section
+      className={cn("space-y-4 sm:hidden", className)}
+      aria-label="Metric categories mobile list"
+    >
       {categories.length > 0 ? (
         <ul role="list" className="space-y-4">
           {categories.map((item) => (
@@ -25,15 +29,15 @@ export const MetricCategoryMobileTableBase = ({
                 actions={[
                   {
                     label: "Edit",
-                    color: "bg-status-info",
+                    tone: "info",
                     onClick: () => onEdit?.(item),
-                    icon: <span>✏️</span>,
+                    icon: <PencilSimple weight="bold" aria-hidden />,
                   },
                   {
                     label: "Delete",
-                    color: "bg-status-error",
+                    tone: "danger",
                     onClick: () => onDelete?.(item),
-                    icon: <span>🗑️</span>,
+                    icon: <Trash weight="bold" aria-hidden />,
                   },
                 ]}
               >

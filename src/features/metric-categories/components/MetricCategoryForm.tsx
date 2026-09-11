@@ -15,12 +15,12 @@ import type { MetricCategoryFormInput } from "@/features/metric-categories/types
 import { metricCategoryFormSchema } from "@/features/metric-categories/types";
 import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
 import { cn } from "@/lib/cn";
-import Button from "@/ui/Button";
-import ColorField from "@/ui/ColorField";
-import ErrorMessage from "@/ui/ErrorMessage";
+import { Button } from "@/ui/Button";
+import { ColorField } from "@/ui/ColorField";
+import { ErrorMessage } from "@/ui/ErrorMessage";
 import { FormField } from "@/ui/FormField";
-import Modal from "@/ui/Modal";
-import TextField from "@/ui/TextField";
+import { Modal } from "@/ui/Modal";
+import { TextField } from "@/ui/TextField";
 
 interface Props {
   onClose: () => void;
@@ -131,7 +131,7 @@ const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
   const inputBg = "bg-surface2";
 
   return (
-    <Modal isOpen onClose={handleCloseClick} title={formTitle}>
+    <Modal open onClose={handleCloseClick} title={formTitle}>
       <form
         noValidate
         className="mx-auto p-4 lg:p-6"
@@ -146,9 +146,9 @@ const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
             <FormField.Control>
               <TextField
                 placeholder="i.e Muscle Group Growth"
-                registration={register("name")}
+                {...register("name")}
                 leftAddon={<Folder weight="duotone" className="text-ink-secondary" />}
-                hasError={!!errors.name}
+                invalid={!!errors.name}
                 disabled={isBusyInputs}
                 clearable
                 required
@@ -163,8 +163,8 @@ const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
               <FormField.Control>
                 <TextField
                   placeholder="e.g. 💪"
-                  registration={register("icon")}
-                  hasError={!!errors.icon}
+                  {...register("icon")}
+                  invalid={!!errors.icon}
                   disabled={isBusyInputs}
                   clearable
                   wrapperClassName={cn(inputBg, "w-full")}

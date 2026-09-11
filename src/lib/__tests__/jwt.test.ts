@@ -1,5 +1,5 @@
-import type {JwtPayload} from "../jwt";
-import { decodeJwtPayload, isJwtExpired, isSessionTokenUsable  } from "../jwt";
+import type { JwtPayload } from "../jwt";
+import { decodeJwtPayload, isJwtExpired, isSessionTokenUsable } from "../jwt";
 
 const base64Url = (value: object): string =>
   Buffer.from(JSON.stringify(value))

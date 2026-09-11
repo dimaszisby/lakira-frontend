@@ -4,8 +4,8 @@ import CategoryChip from "@/features/metric-categories/components/CategoryChip";
 import { toCategoryUI } from "@/features/metric-categories/presenters/toCategoryUI";
 import { METRIC_SORT_KEYS } from "@/features/metrics/sort";
 import type { MetricPreviewVM } from "@/features/metrics/view-models";
-import IconLabel from "@/ui/IconLabel";
-import type { SortChipsColumns } from "@/ui/SortChipGroup";
+import { IconLabel } from "@/ui/IconLabel";
+import type { SortChipColumn } from "@/ui/SortChipGroup";
 import type { TableColumn } from "@/ui/Table";
 
 // Shared types for both desktop and mobile tables
@@ -24,7 +24,7 @@ export interface MetricTableProps {
   variant?: "desktop" | "mobile" | "both";
 }
 
-export const mobileColumns: SortChipsColumns<MetricPreviewVM>[] = [
+export const mobileColumns: SortChipColumn<MetricPreviewVM>[] = [
   {
     key: "category",
     label: "Category",
@@ -116,7 +116,6 @@ export const desktopColumns: TableColumn<MetricPreviewVM>[] = [
           label={row.isPublic ? "Public" : "Private"}
           tone={row.isPublic ? "success" : "muted"}
           size="sm"
-          iconClassName="mr-1"
         />
       );
     },

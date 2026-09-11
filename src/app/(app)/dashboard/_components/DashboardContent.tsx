@@ -1,14 +1,14 @@
 "use client";
 
+import { DASHBOARD_VIZ_LIMIT } from "@/features/data-visualizations/dashboardConfig";
 import { useDashboardVisualizations } from "@/features/data-visualizations/hooks";
-import { useDashboardFilters } from "@/features/data-visualizations/useDashboardFilters";
 import type { VizQuery } from "@/features/data-visualizations/types";
+import { useDashboardFilters } from "@/features/data-visualizations/useDashboardFilters";
 import {
   buildVizQuery,
   DEFAULT_FILL,
   DEFAULT_TZ,
 } from "@/features/data-visualizations/viz-helpers";
-import { DASHBOARD_VIZ_LIMIT } from "@/features/data-visualizations/dashboardConfig";
 
 import MetricCardFromBatch from "./MetricCardFromBatch";
 
@@ -52,7 +52,7 @@ const SkeletonGrid = () => {
     <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {Array.from({ length: 6 }).map((_, i) => (
         <div key={i} className="bg-card h-64 rounded-2xl border p-3 shadow-sm">
-          <div className="bg-muted h-full animate-pulse rounded-md" />
+          <div className="h-full animate-pulse rounded-md bg-surface2" />
         </div>
       ))}
     </section>

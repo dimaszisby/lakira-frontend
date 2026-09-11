@@ -161,6 +161,33 @@ This color palette includes considerations for dark mode:
 - Grayscale/White is intended to be used as the primary text color in dark mode.
 - Other colors may need to be adjusted or inverted to ensure optimal contrast and readability in dark mode.
 
+## Semantic Tokens
+
+Components never use palette colours directly. They use semantic tokens from
+`src/styles/tokens/semantic.css`, which map to a palette step for each theme. These are the tokens
+for text, borders and interaction. Surface and status tokens are listed in the file itself.
+
+| Token                       | Light                          | Dark               | Use                                        |
+| --------------------------- | ------------------------------ | ------------------ | ------------------------------------------ |
+| `--text-emphasis`           | `--text` (Gray 900)            | `--text`           | Headings h5/h6, button text                |
+| `--text-error`              | Vivid Coral 700                | Vivid Coral 100    | Field error messages                       |
+| `--text-info`               | Info 700                       | Info 500           | Informational tips                         |
+| `--text-placeholder`        | `--text-secondary`             | `--text-secondary` | Input placeholders                         |
+| `--border-control`          | Gray 500                       | Gray 400           | Borders of inputs, chips, switches, pagers |
+| `--ring`                    | Origami Blue 700               | Origami Blue 100   | Focus outline                              |
+| `--overlay`                 | Black                          | Black              | Modal scrim (opacity set in `scales.css`)  |
+| `--interactive-hover`       | `--surface-2`                  | `--surface-2`      | Hover background                           |
+| `--interactive-selected-bg` | `--core-primary` (Sakura Pink) | same               | Selected tint and fill                     |
+| `--interactive-selected-fg` | `--text`                       | `--text`           | Text on the selected tint                  |
+| `--on-brand-fg`             | Gray 900                       | Gray 900           | Text on a solid brand or status fill       |
+
+Each was chosen to meet WCAG AA against the surfaces it sits on, using an existing palette step. The
+contrast figures are recorded in
+[ADR-0016](../../explanation/decisions/adr-0016-ui-primitives-conventions-ariakit-and-centralised-styling.md).
+
+Known gap: Button colour tokens do not meet AA in light mode. The primary button's white text on
+Matcha Green (`--core-secondary`) is 1.96:1. Changing them is a brand decision and has not been made.
+
 ## Color Naming Conventions
 
 The color palette uses the following naming conventions:

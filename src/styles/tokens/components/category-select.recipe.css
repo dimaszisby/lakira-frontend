@@ -1,0 +1,39 @@
+/* CategorySelect (features/metric-categories) builds on .input-shell, .popover, .listbox
+ * and .color-swatch; these rules cover only its selected-value preview and create row. */
+@layer components {
+  .category-select-field {
+    position: relative;
+  }
+
+  .category-select-preview {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    color: hsl(var(--text-secondary));
+  }
+
+  .category-select-input {
+    position: relative;
+    z-index: 1;
+  }
+
+  .category-select-count {
+    flex-shrink: 0;
+    margin-inline-start: auto;
+    color: hsl(var(--text-secondary));
+    font-size: theme("fontSize.caption");
+    font-variant-numeric: tabular-nums;
+    line-height: 1rem;
+  }
+
+  .category-select-create {
+    width: 100%;
+    border-top: 1px solid hsl(var(--border));
+    border-radius: 0;
+    font-weight: 500;
+    text-align: left;
+  }
+}

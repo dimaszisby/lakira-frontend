@@ -73,7 +73,7 @@ Worth knowing about:
 - [`docs/explanation/testing-strategy.md`](docs/explanation/testing-strategy.md) — the full pyramid.
 - [`docs/reference/components/README.md`](docs/reference/components/README.md) — UI standards, read in the order that README gives.
 - [`docs/internal/todos/`](docs/internal/todos/) — active backlogs.
-- [`docs/explanation/decisions/`](docs/explanation/decisions/) — 14 ADRs, one per file. Check **Status** before trusting one.
+- [`docs/explanation/decisions/`](docs/explanation/decisions/) — 16 ADRs, one per file. Check **Status** before trusting one.
 - [`docs/reference/commands.md`](docs/reference/commands.md) — canonical npm scripts. Do not keep a second copy elsewhere.
 
 ## Known state of the repo
@@ -81,7 +81,17 @@ Worth knowing about:
 Things a reasonable reader would otherwise assume are true, and are not:
 
 - **Cache keys are organization-scoped.** Every `src/features/*/keys.ts` except `auth` takes `organizationId` as a required first argument, so a missed call site is a compile error. Do not add a key factory without it — see ADR-004 and `src/features/__tests__/key-tenant-scoping.test.ts`.
-- **Six files are exempt from the layer rule.** `src/components/**` was unmapped in `boundaries/elements` until 2026-08-17, so the `components` boundary never ran and 18 inversions accumulated. The rule is live now, with `withAuth.tsx`, `Header.tsx`, `Sidebar.tsx`, `HydrateUser.tsx`, `CategorySelect.tsx`, and `Visualization.tsx` quarantined at the bottom of `eslint.config.mjs` pending a refactor. Do not add to that list.
+- **Four files are exempt from the layer rule.** `src/components/**` was unmapped in `boundaries/elements` until 2026-08-17, so the `components` boundary never ran and 18 inversions accumulated. The rule is live now, with `withAuth.tsx`, `Header.tsx`, `Sidebar.tsx`, and `HydrateUser.tsx` quarantined at the bottom of `eslint.config.mjs` pending a refactor. (`CategorySelect` and `Visualization` moved into their feature modules on 2026-09-11.) Do not add to that list.
 - **Integration tests are MSW-backed, per test rather than globally.** `src/test-utils/msw/handlers.ts` is an empty array _by design_: the server runs `onUnhandledRequest: "error"` and each suite declares its own requests via `server.use()`. That is stricter than a shared handler list. (An earlier note here claimed tests mocked feature hooks at module level; verified false on 2026-08-27 — no suite does.)
 - **Coverage thresholds are real as of 2026-08-27.** Global thresholds sit just below measured coverage (29/29/26/29 %), and `coverage:check --strict` runs in CI. They were 3/2/3/3 %, roughly a tenth of actual. Do not lower them to make a build pass.
 - **The OpenAPI snapshot is in sync as of 2026-08-29**, after a backend fix for a dangling `$ref`. It has drifted twice before, so `npm run api:spec:check` is still worth running before trusting `src/types/dtos/**` — but it is a gate that works, not a known gap.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

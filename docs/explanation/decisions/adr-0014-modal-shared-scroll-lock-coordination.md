@@ -1,7 +1,8 @@
 # ADR-0014 — Modal Shared Scroll-Lock Coordination
 
-- **Status:** Accepted
+- **Status:** Superseded
 - **Date:** 2026-03-12
+- **Related:** superseded by [ADR-0016](./adr-0016-ui-primitives-conventions-ariakit-and-centralised-styling.md)
 - **Origin:** `ADR-062` in the components-overhaul kit — [`decisions.md`](../../internal/initiatives/components-overhaul/decisions.md)
 
 ---

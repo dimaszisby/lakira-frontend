@@ -1,0 +1,67 @@
+@layer components {
+  .pager {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .pager-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--pager-button-size);
+    height: var(--pager-button-size);
+    padding-inline: var(--space-3);
+    border: 1px solid hsl(var(--pager-button-border));
+    border-radius: var(--radius-xs);
+    background-color: hsl(var(--pager-button-bg));
+    color: hsl(var(--pager-button-fg));
+    font-size: theme("fontSize.body2");
+    font-weight: 500;
+    line-height: 1.25rem;
+    transition: background-color var(--duration-fast) var(--ease-standard);
+  }
+
+  .pager-button:focus-visible {
+    outline: var(--focus-ring-width) solid hsl(var(--ring));
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .pager-button:disabled {
+    cursor: not-allowed;
+    opacity: var(--disabled-opacity);
+  }
+
+  .pager-button:hover:not(:disabled) {
+    background-color: hsl(var(--pager-button-bg-hover));
+  }
+
+  /* The current page is disabled (it cannot be re-selected) but must not look dimmed. */
+  .pager-button[data-current] {
+    border-color: hsl(var(--pager-current) / var(--selected-border-alpha));
+    background-color: hsl(var(--pager-current) / var(--selected-tint-alpha));
+    color: hsl(var(--pager-current-fg));
+    cursor: default;
+    opacity: 1;
+  }
+
+  .pager-ellipsis {
+    padding-inline: var(--space-2);
+    color: hsl(var(--pager-muted-fg));
+  }
+
+  .pager-status {
+    padding: var(--space-1) var(--space-3);
+    font-size: theme("fontSize.body2");
+    line-height: 1.25rem;
+    color: hsl(var(--pager-muted-fg));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pager-button {
+      transition: none;
+    }
+  }
+}

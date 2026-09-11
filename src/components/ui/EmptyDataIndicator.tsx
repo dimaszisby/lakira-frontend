@@ -3,43 +3,41 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/cn";
 
-interface Props {
+type TitleElement = "h2" | "h3" | "h4";
+
+export type EmptyDataIndicatorProps = {
   title?: string;
   description?: string;
   tooltip?: string;
   icon?: ReactNode;
+  /** A next step, such as a "Create" button. */
+  action?: ReactNode;
+  /** Heading level for the title, so it fits the page outline. */
+  titleAs?: TitleElement;
   className?: string;
-}
+};
 
-const EmptyDataIndicator = ({
+export const EmptyDataIndicator = ({
   title = "No data available",
   description = "No items found for this view.",
   tooltip,
   icon,
+  action,
+  titleAs: Title = "h2",
   className,
-}: Props) => {
-  return (
-    <section className={cn("mt-8", className)} aria-label="Empty state">
-      <div className="mx-auto flex max-w-md flex-col items-center justify-center space-y-6 text-center">
-        <div className="flex min-h-[320px] w-full max-w-xs flex-col items-center justify-center space-y-4 rounded-2xl border border-border bg-surface p-8 shadow-sm">
-          <div className="grid h-16 w-16 place-items-center rounded-full bg-surface2 text-ink-secondary">
-            {icon ?? <Files size={32} aria-hidden />}
-          </div>
-          <h2 className="text-center text-xl font-semibold text-ink">{title}</h2>
-          <p className="text-center text-base text-ink-secondary">{description}</p>
-        </div>
+}: EmptyDataIndicatorProps) => (
+  <section aria-label="Empty state" className={cn("empty-state", className)}>
+    <div className="empty-state-panel">
+      <div className="empty-state-icon">{icon ?? <Files aria-hidden />}</div>
+      <Title className="empty-state-title">{title}</Title>
+      <p className="empty-state-description">{description}</p>
+      {action ? <div className="empty-state-action">{action}</div> : null}
+    </div>
 
-        {tooltip ? (
-          <p
-            className="flex items-center rounded-xl border border-status-info/30 bg-status-info/10 px-4 py-2 text-center text-sm text-status-info"
-            aria-live="polite"
-          >
-            <span>{tooltip}</span>
-          </p>
-        ) : null}
-      </div>
-    </section>
-  );
-};
-
-export default EmptyDataIndicator;
+    {tooltip ? (
+      <p className="empty-state-tip" aria-live="polite">
+        {tooltip}
+      </p>
+    ) : null}
+  </section>
+);

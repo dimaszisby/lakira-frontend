@@ -1,0 +1,15 @@
+/* Tokens for floating panels (Select, DateTimePicker, ColorField, CategorySelect). */
+@layer base {
+  :root {
+    --popover-bg: var(--surface);
+    --popover-border: var(--border);
+    --popover-radius: var(--radius-md);
+    --popover-padding: var(--space-3);
+    --popover-max-height: 15rem;
+    --listbox-item-fg: var(--text);
+    --listbox-item-muted-fg: var(--text-secondary);
+    --listbox-item-active-bg: var(--interactive-hover);
+    --listbox-item-selected: var(--interactive-selected-bg);
+    --listbox-item-selected-fg: var(--interactive-selected-fg);
+  }
+}

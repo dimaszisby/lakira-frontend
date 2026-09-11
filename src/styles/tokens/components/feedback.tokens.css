@@ -1,0 +1,40 @@
+/* Tokens for display and feedback primitives: Spinner, FullScreenSpinner,
+ * SkeletonLoader, EmptyDataIndicator, DataLabel, IconLabel. */
+@layer base {
+  :root {
+    /* Spinner */
+    --spinner-size-sm: var(--icon-sm); /* 16px */
+    --spinner-size-md: var(--icon-md); /* 20px */
+    --spinner-size-lg: 2rem; /* 32px */
+    --spinner-border-width: 2px;
+
+    /* Full-screen loader */
+    --fullscreen-spinner-scrim: var(--surface);
+    --fullscreen-spinner-fg: var(--text-secondary);
+
+    /* Skeleton */
+    --skeleton-height: 1.5rem;
+    --skeleton-radius: var(--radius-xs);
+    --skeleton-bg: var(--surface-2);
+
+    /* Empty state */
+    --empty-state-max-width: 28rem;
+    --empty-state-panel-max-width: 20rem;
+    --empty-state-panel-min-height: 20rem;
+    --empty-state-icon-box: 4rem;
+    --empty-state-icon-size: 2rem;
+    --empty-state-tip-fg: var(--text-info);
+    --empty-state-tip-tint: var(--status-info);
+
+    /* Data label */
+    --data-label-title-fg: var(--text-secondary);
+    --data-label-value-fg: var(--text);
+
+    /* Icon label */
+    --icon-label-fg-default: var(--text);
+    --icon-label-fg-muted: var(--text-secondary);
+    --icon-label-fg-danger: var(--text-error);
+    --icon-label-icon-success: var(--status-success);
+    --icon-label-icon-warning: var(--status-warning);
+  }
+}

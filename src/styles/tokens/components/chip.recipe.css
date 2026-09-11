@@ -1,0 +1,78 @@
+@layer components {
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid hsl(var(--chip-border));
+    border-radius: var(--radius-md);
+    background-color: hsl(var(--chip-bg));
+    color: hsl(var(--chip-fg));
+    font-size: theme("fontSize.body2");
+    font-weight: 500;
+    line-height: 1.25rem;
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard),
+      color var(--duration-fast) var(--ease-standard);
+  }
+
+  .chip svg {
+    width: var(--chip-icon-size);
+    height: var(--chip-icon-size);
+  }
+
+  .chip:focus-visible {
+    outline: var(--focus-ring-width) solid hsl(var(--ring));
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .chip:disabled {
+    cursor: not-allowed;
+    opacity: var(--disabled-opacity);
+  }
+
+  .chip:hover:not(:disabled) {
+    background-color: hsl(var(--chip-bg-hover));
+    color: hsl(var(--chip-fg-hover));
+  }
+
+  .chip[data-state="active"] {
+    border-color: hsl(var(--chip-selected) / var(--selected-border-alpha));
+    background-color: hsl(var(--chip-selected) / var(--selected-tint-alpha));
+    box-shadow: var(--elevation-control);
+    color: hsl(var(--chip-selected-fg));
+  }
+
+  /* Horizontally scrolling row of chips with faded edges */
+  .chip-group {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    width: 100%;
+    max-width: 100%;
+    padding-inline: var(--space-1);
+    overflow-x: auto;
+    white-space: nowrap;
+    scroll-snap-type: x mandatory;
+    touch-action: pan-x;
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      hsl(var(--chip-group-mask)) var(--chip-group-fade),
+      hsl(var(--chip-group-mask)) calc(100% - var(--chip-group-fade)),
+      transparent
+    );
+  }
+
+  .chip-group-item {
+    flex-shrink: 0;
+    scroll-snap-align: start;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chip {
+      transition: none;
+    }
+  }
+}

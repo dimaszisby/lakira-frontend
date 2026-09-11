@@ -10,11 +10,11 @@ import { authRoutes } from "@/lib/routes";
 import { handleApiError } from "@/services/api/handleApiError";
 import type { ForgotPasswordInput } from "@/types/api/zod-user.schema";
 import { forgotPasswordSchema } from "@/types/api/zod-user.schema";
-import Button from "@/ui/Button";
-import Card, { CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
-import ErrorMessage from "@/ui/ErrorMessage";
+import { Button } from "@/ui/Button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
+import { ErrorMessage } from "@/ui/ErrorMessage";
 import { FormField } from "@/ui/FormField";
-import TextField from "@/ui/TextField";
+import { TextField } from "@/ui/TextField";
 
 const ForgotPasswordForm = () => {
   const { mutate, isPending, isSuccess, error } = useForgotPasswordMutation();
@@ -76,8 +76,8 @@ const ForgotPasswordForm = () => {
             <FormField.Control>
               <TextField
                 placeholder="e.g., john.doe@example.com"
-                registration={register("email")}
-                hasError={!!errors.email}
+                {...register("email")}
+                invalid={!!errors.email}
                 disabled={isBusyInputs}
                 clearable
                 required
@@ -89,11 +89,7 @@ const ForgotPasswordForm = () => {
             {isPending ? "Sending…" : "Send reset link"}
           </Button>
 
-          <Link
-            href={authRoutes.login()}
-            aria-label="Back to login"
-            className="w-auto self-center"
-          >
+          <Link href={authRoutes.login()} aria-label="Back to login" className="w-auto self-center">
             <Button variant="ghost" type="button">
               Back to login
             </Button>

@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
 import { APP_NAME } from "@/constants/app";
 import { useRegisterUserMutation } from "@/features/auth/hooks/register.mutation";
@@ -11,11 +11,11 @@ import { authRoutes } from "@/lib/routes";
 import { handleApiError } from "@/services/api/handleApiError";
 import { createUserSchema } from "@/types/api/zod-user.schema";
 import type { CreateUserRequestDTO } from "@/types/dtos/user.dto";
-import Button from "@/ui/Button";
-import Card, { CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
-import ErrorMessage from "@/ui/ErrorMessage";
+import { Button } from "@/ui/Button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
+import { ErrorMessage } from "@/ui/ErrorMessage";
 import { FormField } from "@/ui/FormField";
-import TextField from "@/ui/TextField";
+import { TextField } from "@/ui/TextField";
 
 const RegisterForm = () => {
   const router = useRouter();
@@ -36,15 +36,15 @@ const RegisterForm = () => {
     register,
     handleSubmit,
     formState: { errors, isValid, isSubmitting },
-    watch,
+    control,
   } = useForm<CreateUserRequestDTO>({
     resolver: zodResolver(createUserSchema.shape.body),
     mode: "onChange",
   });
 
   // Watch password and passwordConfirmation for live validation
-  const password = watch("password");
-  const passwordConfirmation = watch("passwordConfirmation");
+  const password = useWatch({ control, name: "password" });
+  const passwordConfirmation = useWatch({ control, name: "passwordConfirmation" });
 
   const onValid = useCallback(
     async (data: CreateUserRequestDTO) => {
@@ -100,8 +100,8 @@ const RegisterForm = () => {
             <FormField.Control>
               <TextField
                 placeholder="e.g., john.doe"
-                registration={register("username")}
-                hasError={!!errors.username}
+                {...register("username")}
+                invalid={!!errors.username}
                 disabled={isBusyInputs}
                 clearable
                 required
@@ -115,8 +115,8 @@ const RegisterForm = () => {
             <FormField.Control>
               <TextField
                 placeholder="e.g., john.doe@example.com"
-                registration={register("email")}
-                hasError={!!errors.email}
+                {...register("email")}
+                invalid={!!errors.email}
                 disabled={isBusyInputs}
                 clearable
                 required
@@ -131,8 +131,8 @@ const RegisterForm = () => {
             <FormField.Control>
               <TextField
                 placeholder="Enter your password"
-                registration={register("password")}
-                hasError={!!errors.password}
+                {...register("password")}
+                invalid={!!errors.password}
                 disabled={isBusyInputs}
                 clearable
                 required
@@ -154,8 +154,8 @@ const RegisterForm = () => {
             <FormField.Control>
               <TextField
                 placeholder="Confirm your password"
-                registration={register("passwordConfirmation")}
-                hasError={Boolean(errors.passwordConfirmation) || passwordsMismatch}
+                {...register("passwordConfirmation")}
+                invalid={Boolean(errors.passwordConfirmation) || passwordsMismatch}
                 disabled={isBusyInputs}
                 clearable
                 required

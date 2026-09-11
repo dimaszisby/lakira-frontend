@@ -1,0 +1,25 @@
+/* Tokens for Toggle (role="switch"). Sizes match the previous utility classes. */
+@layer base {
+  :root {
+    --switch-track-off: var(--surface-2);
+    --switch-track-on: var(--core-primary);
+    --switch-border: var(--border-control);
+    --switch-thumb-bg: var(--surface);
+    --switch-label-fg: var(--text-secondary);
+    --switch-w-sm: 2.5rem;
+    --switch-h-sm: 1.5rem;
+    --switch-pad-sm: 0.125rem;
+    --switch-thumb-size-sm: 1.25rem;
+    --switch-shift-sm: 1rem;
+    --switch-w-md: 3rem;
+    --switch-h-md: 1.75rem;
+    --switch-pad-md: 0.25rem;
+    --switch-thumb-size-md: 1.25rem;
+    --switch-shift-md: 1.25rem;
+    --switch-w-lg: 3.5rem;
+    --switch-h-lg: 2rem;
+    --switch-pad-lg: 0.25rem;
+    --switch-thumb-size-lg: 1.5rem;
+    --switch-shift-lg: 1.5rem;
+  }
+}

@@ -23,12 +23,23 @@
     background-color: hsl(var(--button-active-bg, var(--button-bg)) / 100%);
   }
 
+  .button:focus-visible {
+    outline: var(--focus-ring-width) solid hsl(var(--ring));
+    outline-offset: var(--focus-ring-offset);
+  }
+
   .button:disabled,
   .button[aria-disabled="true"] {
     background-color: hsl(var(--button-disabled-bg, var(--button-bg)) / 100%);
     color: hsl(var(--button-disabled-fg, var(--button-fg)) / 100%);
-    opacity: 0.7;
+    opacity: var(--disabled-opacity);
     cursor: not-allowed;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .button {
+      transition: none;
+    }
   }
 
   /* Variant mapping */

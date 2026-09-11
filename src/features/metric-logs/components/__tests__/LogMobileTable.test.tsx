@@ -8,8 +8,7 @@ const ISO_1 = "2026-02-10T10:00:00.000Z";
 const ISO_2 = "2026-02-11T10:00:00.000Z";
 
 jest.mock("@/ui/SwipeableCard", () => ({
-  __esModule: true,
-  default: ({
+  SwipeableCard: ({
     actions,
     children,
   }: {

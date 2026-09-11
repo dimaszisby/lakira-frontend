@@ -1,7 +1,8 @@
 # ADR-0009 — Select Listbox Trigger Semantics and Keyboard Hardening
 
-- **Status:** Accepted
+- **Status:** Superseded
 - **Date:** 2026-02-15
+- **Related:** superseded by [ADR-0016](./adr-0016-ui-primitives-conventions-ariakit-and-centralised-styling.md)
 - **Origin:** `ADR-015` in the components-overhaul kit — [`decisions.md`](../../internal/initiatives/components-overhaul/decisions.md)
 
 ---

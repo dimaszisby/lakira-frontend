@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { APP_NAME } from "@/constants/app";
 import { userAtom } from "@/services/state/atoms";
-import Card from "@/ui/Card";
+import { Card } from "@/ui/Card";
 
 const Header = () => {
   const [user] = useAtom(userAtom);

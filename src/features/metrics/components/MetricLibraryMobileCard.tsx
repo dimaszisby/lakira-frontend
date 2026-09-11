@@ -8,7 +8,7 @@ import CategoryChip from "@/features/metric-categories/components/CategoryChip";
 import { toCategoryUI } from "@/features/metric-categories/presenters/toCategoryUI";
 import type { MetricPreviewVM } from "@/features/metrics/view-models";
 import { metricRoutes } from "@/lib/routes";
-import IconLabel from "@/ui/IconLabel";
+import { IconLabel } from "@/ui/IconLabel";
 
 export interface MetricLibraryCardProps {
   metric: MetricPreviewVM;
@@ -63,29 +63,11 @@ export const MetricLibraryMobileCardBase = ({
           <CategoryChip category={categoryUI} />
         </span>
 
-        <IconLabel
-          icon={Tag}
-          label={defaultUnit ?? "-"}
-          tone="muted"
-          size="sm"
-          iconClassName="mr-1"
-        />
+        <IconLabel icon={Tag} label={defaultUnit ?? "-"} tone="muted" size="sm" />
 
-        <IconLabel
-          icon={Eye}
-          label={isPublic ? "Public" : "Private"}
-          tone="muted"
-          size="sm"
-          iconClassName="mr-1"
-        />
+        <IconLabel icon={Eye} label={isPublic ? "Public" : "Private"} tone="muted" size="sm" />
 
-        <IconLabel
-          icon={CalendarBlank}
-          label={logCount}
-          tone="muted"
-          size="sm"
-          iconClassName="mr-1"
-        />
+        <IconLabel icon={CalendarBlank} label={logCount} tone="muted" size="sm" />
       </span>
     </button>
   );

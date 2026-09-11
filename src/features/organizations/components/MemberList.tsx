@@ -4,9 +4,9 @@ import { useMemo } from "react";
 
 import { useOrganizationMembers } from "@/features/organizations/hooks/members.query";
 import { handleApiError } from "@/services/api/handleApiError";
-import Card, { CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
-import ErrorMessage from "@/ui/ErrorMessage";
-import SkeletonLoader from "@/ui/SkeletonLoader";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
+import { ErrorMessage } from "@/ui/ErrorMessage";
+import { SkeletonLoader } from "@/ui/SkeletonLoader";
 
 const ROLE_LABEL: Record<string, string> = {
   owner: "Owner",
@@ -45,7 +45,7 @@ const MemberList = () => {
           <table className="w-full text-left text-sm">
             <caption className="sr-only">Organization members</caption>
             <thead>
-              <tr className="text-ink-muted">
+              <tr className="text-ink-secondary">
                 <th scope="col" className="py-2">
                   Member
                 </th>
@@ -62,7 +62,7 @@ const MemberList = () => {
                 <tr key={member.membershipId} className="border-t border-surface2">
                   <td className="py-3">
                     <span className="block font-medium text-ink">{member.username}</span>
-                    <span className="text-ink-muted block">{member.email}</span>
+                    <span className="block text-ink-secondary">{member.email}</span>
                   </td>
                   <td className="py-3">{ROLE_LABEL[member.role] ?? member.role}</td>
                   <td className="py-3">{STATUS_LABEL[member.status] ?? member.status}</td>

@@ -1,0 +1,13 @@
+/* Tokens for SwipeableCard. */
+@layer base {
+  :root {
+    --swipe-card-bg: var(--surface);
+    --swipe-card-border: var(--border);
+    --swipe-action-width: 4rem; /* keep in sync with ACTION_WIDTH in SwipeableCard.tsx */
+    --swipe-action-fg: var(--on-brand-fg); /* dark text passes on every tone fill */
+    --swipe-action-bg-neutral: var(--surface-2);
+    --swipe-action-bg-info: var(--status-info);
+    --swipe-action-bg-danger: var(--status-error);
+    --swipe-toggle-fg: var(--text-secondary);
+  }
+}

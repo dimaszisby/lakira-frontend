@@ -14,19 +14,68 @@
     --radius-sm: 0.75rem;
     --radius-md: 1rem;
     --radius-lg: 1.25rem;
+    --radius-full: 9999px;
+
+    /* Elevation */
+    --shadow-xs: 0 1px 2px 0 rgb(0 0 0 / 5%); /* the current control look */
     --shadow-sm: 0 4px 16px rgb(15 23 42 / 6%);
     --shadow-md: 0 10px 30px rgb(15 23 42 / 8%);
+    --elevation-control: var(--shadow-xs);
+    --elevation-popover: var(--shadow-md);
+    --elevation-dialog: var(--shadow-md);
 
-    /* Button */
-    --btn-h-sm: 2.5rem; /* 40px */
-    --btn-h-md: 3rem; /* 48px */
-    --btn-h-lg: 3.5rem; /* 56px */
-    --btn-px-sm: 0.75rem; /* 12px */
-    --btn-px-md: 1.25rem; /* 20px */
-    --btn-px-lg: 1.75rem; /* 28px */
-    --btn-gap-sm: 0.5rem;
-    --btn-gap-md: 0.75rem;
-    --btn-gap-lg: 1rem;
+    /* Layering, lowest to highest */
+    --z-sticky: 10;
+    --z-dropdown: 40;
+    --z-modal: 50;
+    --z-popover: 55;
+    --z-blocking: 60;
+
+    /* Controls: one size scale shared by buttons and form controls */
+    --control-h-sm: 2.5rem; /* 40px */
+    --control-h-md: 3rem; /* 48px */
+    --control-h-lg: 3.5rem; /* 56px */
+    --control-px-sm: 0.75rem; /* 12px */
+    --control-px-md: 1.25rem; /* 20px */
+    --control-px-lg: 1.75rem; /* 28px */
+    --control-gap-sm: 0.5rem;
+    --control-gap-md: 0.75rem;
+    --control-gap-lg: 1rem;
+    --control-radius-sm: var(--radius-sm);
+    --control-radius-md: var(--radius-md);
+    --control-radius-lg: var(--radius-lg);
+
+    /* Interaction states */
+    --focus-ring-width: 2px;
+    --focus-ring-offset: 2px;
+    --disabled-opacity: 0.5;
+    --overlay-opacity: 50%;
+    --selected-tint-alpha: 15%;
+    --selected-border-alpha: 30%;
+
+    /* Motion */
+    --duration-fast: 150ms;
+    --duration-normal: 200ms;
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+    /* Icons and pointer targets */
+    --icon-xs: 0.875rem; /* 14px */
+    --icon-sm: 1rem; /* 16px */
+    --icon-md: 1.25rem; /* 20px */
+    --icon-lg: 1.5rem; /* 24px */
+    --target-min: 1.5rem; /* 24px, WCAG 2.2 AA target size */
+    --target-icon-button: 2rem; /* 32px, icon buttons inside controls */
+
+    /* Button: aliases of the control scale */
+    --btn-h-sm: var(--control-h-sm);
+    --btn-h-md: var(--control-h-md);
+    --btn-h-lg: var(--control-h-lg);
+    --btn-px-sm: var(--control-px-sm);
+    --btn-px-md: var(--control-px-md);
+    --btn-px-lg: var(--control-px-lg);
+    --btn-gap-sm: var(--control-gap-sm);
+    --btn-gap-md: var(--control-gap-md);
+    --btn-gap-lg: var(--control-gap-lg);
     --btn-weight: 600;
     --btn-shadow: 0 1px 2px rgb(0 0 0 / 6%);
     --btn-transition: background-color 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;

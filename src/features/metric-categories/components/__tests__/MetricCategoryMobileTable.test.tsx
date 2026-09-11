@@ -5,8 +5,7 @@ import { MetricCategoryMobileTableBase } from "@/features/metric-categories/comp
 import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
 
 jest.mock("@/ui/SwipeableCard", () => ({
-  __esModule: true,
-  default: ({
+  SwipeableCard: ({
     actions,
     children,
   }: {
@@ -47,7 +46,12 @@ const categories: MetricCategoryVM[] = [
 describe("MetricCategoryMobileTable", () => {
   it("renders empty state when there are no categories", () => {
     render(
-      <MetricCategoryMobileTableBase categories={[]} sortBy="name" sortOrder="ASC" onSort={() => {}} />,
+      <MetricCategoryMobileTableBase
+        categories={[]}
+        sortBy="name"
+        sortOrder="ASC"
+        onSort={() => {}}
+      />,
     );
 
     expect(screen.getByRole("status")).toHaveTextContent("No categories available");

@@ -1,20 +1,21 @@
 import { render, screen } from "@testing-library/react";
 
-import SkeletonLoader from "@/components/ui/SkeletonLoader";
+import { SkeletonLoader } from "@/components/ui/SkeletonLoader";
 
 describe("SkeletonLoader", () => {
-  it("renders default count and loading status", () => {
-    const { container } = render(<SkeletonLoader />);
+  it("announces loading and renders three placeholders by default", () => {
+    render(<SkeletonLoader />);
 
-    expect(screen.getByRole("status", { name: /loading content/i })).toBeInTheDocument();
-    expect(container.querySelectorAll("[aria-hidden='true']")).toHaveLength(3);
+    const status = screen.getByRole("status", { name: /loading content/i });
+    expect(status.querySelectorAll("[aria-hidden='true']")).toHaveLength(3);
   });
 
-  it("renders custom count and className", () => {
-    const { container } = render(<SkeletonLoader count={5} className="h-10" />);
+  it("renders the requested number of placeholders with the item class", () => {
+    render(<SkeletonLoader count={5} itemClassName="h-10" label="Loading metrics" />);
 
-    const blocks = container.querySelectorAll("[aria-hidden='true']");
-    expect(blocks).toHaveLength(5);
-    expect(blocks[0]).toHaveClass("h-10");
+    const status = screen.getByRole("status", { name: /loading metrics/i });
+    const items = status.querySelectorAll("[aria-hidden='true']");
+    expect(items).toHaveLength(5);
+    expect(items[0]).toHaveClass("h-10");
   });
 });

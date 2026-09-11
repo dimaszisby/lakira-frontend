@@ -8,11 +8,11 @@ import { z } from "zod";
 import { zEmail } from "@/constants/zod-rules";
 import { useInviteMemberMutation } from "@/features/organizations/hooks/invite.mutation";
 import { handleApiError } from "@/services/api/handleApiError";
-import Button from "@/ui/Button";
-import Card, { CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
-import ErrorMessage from "@/ui/ErrorMessage";
+import { Button } from "@/ui/Button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
+import { ErrorMessage } from "@/ui/ErrorMessage";
 import { FormField } from "@/ui/FormField";
-import TextField from "@/ui/TextField";
+import { TextField } from "@/ui/TextField";
 
 // `owner` is assigned by the backend on creation and is not invitable.
 const inviteSchema = z.object({
@@ -63,8 +63,8 @@ const InviteMemberForm = () => {
             <FormField.Control>
               <TextField
                 placeholder="e.g., teammate@example.com"
-                registration={register("email")}
-                hasError={!!errors.email}
+                {...register("email")}
+                invalid={!!errors.email}
                 disabled={isBusyInputs}
                 required
               />

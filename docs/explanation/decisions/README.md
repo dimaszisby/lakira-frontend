@@ -3,7 +3,7 @@
 One decision per file, numbered globally and ordered by the date the decision was made.
 Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions).
 
-**15 records.** 14 accepted, 1 superseded.
+**16 records.** 12 accepted, 4 superseded.
 
 ## Reading these
 
@@ -11,9 +11,9 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
   **not implemented** — do not assume the code matches it. There are no `Proposed` records today.
 - **Records are immutable.** A decision that no longer holds is superseded by a new record, not
   edited. The `Related` line links the pair in both directions — see ADR-0001 and ADR-0002.
-- **`Origin` points at the kit** the decision was made in. That kit lives under
+- **`Origin` points at where the decision was made.** ADR-0001…0014 come from the kit under
   [`../../internal/initiatives/components-overhaul/`](../../internal/initiatives/components-overhaul/),
-  and its `decisions.md` remains the full working log.
+  whose `decisions.md` remains the full working log. Later records link their own origin.
 
 ## Records
 
@@ -27,13 +27,14 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0006](./adr-0006-card-primitive-contract.md)                                   | Card primitive contract hardening                         | Accepted       | 2026-02-14 | `ADR-010` |
 | [ADR-0007](./adr-0007-table-contract-and-row-interaction-guardrails.md)             | Table contract and row-interaction guardrails             | Accepted       | 2026-02-15 | `ADR-011` |
 | [ADR-0008](./adr-0008-visualization-url-state-sync.md)                              | Visualization URL-state sync hardening                    | Accepted       | 2026-02-15 | `ADR-012` |
-| [ADR-0009](./adr-0009-select-listbox-trigger-semantics.md)                          | Select listbox trigger semantics and keyboard hardening   | Accepted       | 2026-02-15 | `ADR-015` |
-| [ADR-0010](./adr-0010-modal-focus-management-and-close-behaviour.md)                | Modal focus management and close-behaviour hardening      | Accepted       | 2026-02-15 | `ADR-016` |
+| [ADR-0009](./adr-0009-select-listbox-trigger-semantics.md)                          | Select listbox trigger semantics and keyboard hardening   | **Superseded** | 2026-02-15 | `ADR-015` |
+| [ADR-0010](./adr-0010-modal-focus-management-and-close-behaviour.md)                | Modal focus management and close-behaviour hardening      | **Superseded** | 2026-02-15 | `ADR-016` |
 | [ADR-0011](./adr-0011-sort-controls-and-skeleton-naming.md)                         | Sort controls and skeleton naming standardization         | Accepted       | 2026-02-16 | `ADR-021` |
 | [ADR-0012](./adr-0012-closure-gates-and-the-tier-test-minimum.md)                   | Closure gates and the tier test minimum                   | Accepted       | 2026-02-18 | `ADR-023` |
 | [ADR-0013](./adr-0013-visualization-url-driven-state-source.md)                     | Visualization URL-driven state source                     | Accepted       | 2026-03-02 | `ADR-053` |
-| [ADR-0014](./adr-0014-modal-shared-scroll-lock-coordination.md)                     | Modal shared scroll-lock coordination                     | Accepted       | 2026-03-12 | `ADR-062` |
+| [ADR-0014](./adr-0014-modal-shared-scroll-lock-coordination.md)                     | Modal shared scroll-lock coordination                     | **Superseded** | 2026-03-12 | `ADR-062` |
 | [ADR-0015](./adr-0015-cache-keys-are-organization-scoped.md)                        | Cache keys are organization-scoped                        | Accepted       | 2026-08-29 | `ADR-004` |
+| [ADR-0016](./adr-0016-ui-primitives-conventions-ariakit-and-centralised-styling.md) | UI primitives: conventions, Ariakit, centralised styling  | Accepted       | 2026-09-11 | todo      |
 
 ## Where the other decisions went
 
@@ -56,7 +57,7 @@ The full log remains at
 
 ## Adding one
 
-Take the next free number — **ADR-0016** — copy the shape of an existing record, and open with
+Take the next free number — **ADR-0017** — copy the shape of an existing record, and open with
 `Status: Proposed`. Flip it to `Accepted` in the same PR that implements it. A registry full of
 stale `Proposed` entries is worse than no registry, because readers cannot tell intent from fact.
 

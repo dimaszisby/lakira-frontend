@@ -1,0 +1,91 @@
+@layer components {
+  .switch {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    width: var(--switch-w, var(--switch-w-md));
+    height: var(--switch-h, var(--switch-h-md));
+    padding: var(--switch-pad, var(--switch-pad-md));
+    border: 1px solid hsl(var(--switch-border));
+    border-radius: var(--radius-full);
+    background-color: hsl(var(--switch-track-off));
+    user-select: none;
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      border-color var(--duration-fast) var(--ease-standard);
+  }
+
+  .switch[data-state="checked"] {
+    border-color: transparent;
+    background-color: hsl(var(--switch-track-on));
+  }
+
+  .switch:focus-visible {
+    outline: var(--focus-ring-width) solid hsl(var(--ring));
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .switch:disabled {
+    cursor: not-allowed;
+    opacity: var(--disabled-opacity);
+  }
+
+  .switch-thumb {
+    pointer-events: none;
+    display: inline-block;
+    width: var(--switch-thumb-size, var(--switch-thumb-size-md));
+    height: var(--switch-thumb-size, var(--switch-thumb-size-md));
+    border-radius: var(--radius-full);
+    background-color: hsl(var(--switch-thumb-bg));
+    box-shadow: var(--elevation-control);
+    transition: transform var(--duration-fast) var(--ease-standard);
+  }
+
+  .switch[data-state="checked"] .switch-thumb {
+    transform: translateX(var(--switch-shift, var(--switch-shift-md)));
+  }
+
+  .switch[data-size="sm"] {
+    --switch-w: var(--switch-w-sm);
+    --switch-h: var(--switch-h-sm);
+    --switch-pad: var(--switch-pad-sm);
+    --switch-thumb-size: var(--switch-thumb-size-sm);
+    --switch-shift: var(--switch-shift-sm);
+  }
+
+  .switch[data-size="md"] {
+    --switch-w: var(--switch-w-md);
+    --switch-h: var(--switch-h-md);
+    --switch-pad: var(--switch-pad-md);
+    --switch-thumb-size: var(--switch-thumb-size-md);
+    --switch-shift: var(--switch-shift-md);
+  }
+
+  .switch[data-size="lg"] {
+    --switch-w: var(--switch-w-lg);
+    --switch-h: var(--switch-h-lg);
+    --switch-pad: var(--switch-pad-lg);
+    --switch-thumb-size: var(--switch-thumb-size-lg);
+    --switch-shift: var(--switch-shift-lg);
+  }
+
+  /* State label beside the switch */
+  .switch-label {
+    font-size: theme("fontSize.caption");
+    line-height: 1rem;
+    color: hsl(var(--switch-label-fg));
+  }
+
+  .switch-label[data-size="sm"] {
+    font-size: theme("fontSize.badge");
+    line-height: theme("fontSize.badge[1].lineHeight");
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .switch,
+    .switch-thumb {
+      transition: none;
+    }
+  }
+}

@@ -1,0 +1,15 @@
+/* Tokens for SortChip and SortChipGroup. */
+@layer base {
+  :root {
+    --chip-bg: var(--surface-2);
+    --chip-fg: var(--text-secondary);
+    --chip-border: var(--border-control);
+    --chip-bg-hover: var(--surface);
+    --chip-fg-hover: var(--text);
+    --chip-selected: var(--interactive-selected-bg);
+    --chip-selected-fg: var(--interactive-selected-fg);
+    --chip-icon-size: var(--icon-xs);
+    --chip-group-fade: 2rem;
+    --chip-group-mask: var(--gray-black); /* only the alpha channel matters */
+  }
+}

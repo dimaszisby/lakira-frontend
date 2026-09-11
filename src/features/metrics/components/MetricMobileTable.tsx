@@ -1,8 +1,9 @@
+import { PencilSimple, Trash } from "phosphor-react";
 import { memo } from "react";
 
 import type { MetricPreviewVM } from "@/features/metrics/view-models";
 import { cn } from "@/lib/cn";
-import SwipeableCard from "@/ui/SwipeableCard";
+import { SwipeableCard } from "@/ui/SwipeableCard";
 
 import MetricLibraryMobileCard from "./MetricLibraryMobileCard";
 import type { MetricTableProps } from "./table-config";
@@ -26,19 +27,23 @@ export const MetricMobileTableBase = ({
                 actions={[
                   {
                     label: "Edit",
-                    color: "bg-status-info",
+                    tone: "info",
                     onClick: () => onEdit?.(item),
-                    icon: <span>✏️</span>,
+                    icon: <PencilSimple weight="bold" aria-hidden />,
                   },
                   {
                     label: "Delete",
-                    color: "bg-status-error",
+                    tone: "danger",
                     onClick: () => onDelete?.(item),
-                    icon: <span>🗑️</span>,
+                    icon: <Trash weight="bold" aria-hidden />,
                   },
                 ]}
               >
-                <MetricLibraryMobileCard metric={item} onClick={onRowClick} onPrefetch={onRowHover} />
+                <MetricLibraryMobileCard
+                  metric={item}
+                  onClick={onRowClick}
+                  onPrefetch={onRowHover}
+                />
               </SwipeableCard>
             </li>
           ))}

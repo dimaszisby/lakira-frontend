@@ -18,12 +18,12 @@ import type {
   CreateMetricLogRequestDTO,
   UpdateMetricLogRequestDTO,
 } from "@/types/dtos/metric-log.dto";
-import Button from "@/ui/Button";
-import DateTimePicker from "@/ui/DateTimePicker";
-import ErrorMessage from "@/ui/ErrorMessage";
+import { Button } from "@/ui/Button";
+import { DateTimePicker } from "@/ui/DateTimePicker";
+import { ErrorMessage } from "@/ui/ErrorMessage";
 import { FormField } from "@/ui/FormField";
-import Modal from "@/ui/Modal";
-import TextField from "@/ui/TextField";
+import { Modal } from "@/ui/Modal";
+import { TextField } from "@/ui/TextField";
 import { parseDate, toISOWithOffset, toISOZ } from "@/utils/date-io";
 
 interface Props {
@@ -136,11 +136,13 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
   const inputBg = "bg-surface2";
 
   if (!metricId) {
-    return <p className="mb-4 mt-4 text-xs text-status-error">Metric ID is required to add a log.</p>;
+    return (
+      <p className="mb-4 mt-4 text-xs text-status-error">Metric ID is required to add a log.</p>
+    );
   }
 
   return (
-    <Modal isOpen onClose={handleCloseClick} title={formTitle}>
+    <Modal open onClose={handleCloseClick} title={formTitle}>
       <form
         noValidate
         className="mx-auto w-full p-4 lg:p-6"
@@ -157,10 +159,10 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
             <FormField.Control>
               <TextField
                 type="number"
-                registration={register("logValue", { valueAsNumber: true })}
+                {...register("logValue", { valueAsNumber: true })}
                 placeholder="e.g., 10000"
                 leftAddon={<Lightning weight="duotone" className="text-ink-secondary" />}
-                hasError={!!errors.logValue}
+                invalid={!!errors.logValue}
                 disabled={isBusyInputs}
                 clearable
                 required

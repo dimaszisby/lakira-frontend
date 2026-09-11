@@ -6,12 +6,12 @@ import { memo } from "react";
 
 import CategoryChip from "@/features/metric-categories/components/CategoryChip";
 import { toCategoryUI } from "@/features/metric-categories/presenters/toCategoryUI";
-import { metricRoutes } from "@/lib/routes";
 import { fromDetail } from "@/features/metrics";
-import Button from "@/ui/Button";
-import Card from "@/ui/Card";
-import DataLabel from "@/ui/DataLabel";
-import IconLabel from "@/ui/IconLabel";
+import { metricRoutes } from "@/lib/routes";
+import { Button } from "@/ui/Button";
+import { Card } from "@/ui/Card";
+import { DataLabel } from "@/ui/DataLabel";
+import { IconLabel } from "@/ui/IconLabel";
 import { formatHuman } from "@/utils/date-io";
 import { safeLabel } from "@/utils/label";
 

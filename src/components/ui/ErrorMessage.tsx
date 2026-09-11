@@ -2,94 +2,58 @@
 
 import { WarningCircle } from "phosphor-react";
 import { useId } from "react";
-import type { FieldError } from "react-hook-form";
 
 import { cn } from "@/lib/cn";
 import { sanitizeErrorMessage } from "@/lib/sanitizeErrorMessage";
 
-type Size = "sm" | "md" | "lg";
-type Variant = "plain" | "subtle" | "solid";
+type ErrorMessageSize = "sm" | "md";
+type ErrorMessageVariant = "plain" | "subtle" | "solid";
 
-type Props = {
+export type ErrorMessageProps = {
   id?: string;
   message?: string | null;
-  fieldError?: FieldError;
-  size?: Size;
-  variant?: Variant;
-  fullWidth?: boolean;
+  size?: ErrorMessageSize;
+  variant?: ErrorMessageVariant;
+  /**
+   * `assertive` (default) announces immediately as an alert, for form-level and
+   * request errors. `polite` waits for the user, for per-field validation.
+   */
+  politeness?: "assertive" | "polite";
+  /** Keep the line's height when there is no message, so layout does not jump. */
   reserveSpace?: boolean;
-  hideIcon?: boolean;
   className?: string;
   "aria-label"?: string;
 };
 
-const SIZE = {
-  sm: { text: "text-xs", icon: "h-4 w-4", minH: "min-h-[1rem]" },
-  md: { text: "text-sm", icon: "h-4.5 w-4.5", minH: "min-h-[1.25rem]" },
-  lg: { text: "text-base", icon: "h-5 w-5", minH: "min-h-[1.5rem]" },
-} as const;
-
-const STATUS_ERROR_TEXT = "text-status-error";
-
-const VARIANT = {
-  plain: { wrap: "", text: STATUS_ERROR_TEXT, icon: STATUS_ERROR_TEXT },
-  subtle: {
-    wrap: "rounded-md border border-status-error/30 bg-status-error/10 px-2 py-1",
-    text: STATUS_ERROR_TEXT,
-    icon: STATUS_ERROR_TEXT,
-  },
-  solid: {
-    wrap: "rounded-md bg-status-error px-2 py-1",
-    text: "text-ink-inverted",
-    icon: "text-ink-inverted",
-  },
-} as const;
-
-const ErrorMessage = ({
+export const ErrorMessage = ({
   id,
   message,
-  fieldError,
   size = "md",
   variant = "plain",
-  fullWidth = true,
+  politeness = "assertive",
   reserveSpace = true,
-  hideIcon = false,
   className,
   ...aria
-}: Props) => {
-  const uid = useId();
-  const domId = id ?? `err-${uid}`;
+}: ErrorMessageProps) => {
+  const fallbackId = useId();
+  const text = message ? sanitizeErrorMessage(message) : "";
+  const isVisible = text.length > 0;
 
-  const rawMessage = message ?? fieldError?.message ?? null;
-  const msg = rawMessage ? sanitizeErrorMessage(rawMessage) : null;
-  const show = Boolean(msg);
-
-  const s = SIZE[size];
-  const v = VARIANT[variant];
-
-  if (!show && !reserveSpace) return null;
+  if (!isVisible && !reserveSpace) return null;
 
   return (
     <div
-      id={domId}
-      className={cn(
-        "inline-flex items-start gap-2",
-        s.minH,
-        fullWidth ? "w-full" : "w-auto",
-        v.wrap,
-        className,
-      )}
-      role={show ? "alert" : undefined}
-      aria-live={show ? "assertive" : undefined}
-      aria-atomic={show ? true : undefined}
+      id={id ?? `err-${fallbackId}`}
+      role={isVisible && politeness === "assertive" ? "alert" : undefined}
+      aria-live={isVisible ? politeness : undefined}
+      aria-atomic={isVisible || undefined}
+      data-size={size}
+      data-variant={variant}
+      className={cn("field-message", className)}
       {...aria}
     >
-      {show && !hideIcon ? (
-        <WarningCircle aria-hidden className={cn(v.icon, s.icon, "mt-[1px] shrink-0")} />
-      ) : null}
-      <span className={cn(v.text, s.text)}>{show ? String(msg) : ""}</span>
+      {isVisible ? <WarningCircle aria-hidden /> : null}
+      <span>{text}</span>
     </div>
   );
 };
-
-export default ErrorMessage;

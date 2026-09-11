@@ -1,0 +1,123 @@
+@layer components {
+  .segmented {
+    position: relative;
+    display: inline-grid;
+    grid-auto-flow: column;
+    align-items: stretch;
+    gap: var(--space-2);
+    height: var(--segmented-h, var(--control-h-md));
+    padding: var(--space-1);
+    border: 1px solid hsl(var(--segmented-border));
+    border-radius: var(--segmented-radius, var(--control-radius-md));
+    background-color: hsl(var(--segmented-bg));
+    box-shadow: var(--elevation-control);
+    font-size: var(--segmented-font-size, theme("fontSize.body1"));
+    line-height: 1.5rem;
+  }
+
+  .segmented[data-full-width] {
+    width: 100%;
+  }
+
+  /* Each segment is a <label> around a visually hidden native radio. */
+  .segmented-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-width: var(--segmented-item-min-width);
+    padding: var(--segmented-item-py, 0) var(--segmented-item-px, var(--segmented-item-px-md));
+    border-radius: var(
+      --segmented-item-radius,
+      calc(var(--segmented-radius, var(--control-radius-md)) - var(--space-1))
+    );
+    background-color: var(--segmented-item-background, hsl(var(--segmented-item-bg)));
+    color: hsl(var(--segmented-item-fg));
+    cursor: pointer;
+    white-space: nowrap;
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      color var(--duration-fast) var(--ease-standard);
+  }
+
+  .segmented-input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    white-space: nowrap;
+    opacity: 0;
+    clip-path: inset(50%);
+  }
+
+  .segmented-item[data-disabled] {
+    cursor: not-allowed;
+    opacity: var(--disabled-opacity);
+  }
+
+  .segmented-item:hover:not([data-disabled]) {
+    background-color: hsl(var(--segmented-item-bg-hover));
+    color: hsl(var(--segmented-item-fg-hover));
+  }
+
+  .segmented-item:has(.segmented-input:focus-visible) {
+    outline: var(--focus-ring-width) solid hsl(var(--ring));
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .segmented-item:has(.segmented-input:checked) {
+    background-color: hsl(var(--segmented-selected) / var(--selected-tint-alpha));
+    box-shadow: var(--elevation-control);
+    color: hsl(var(--segmented-selected-fg));
+  }
+
+  /* ===== Sizes ===== */
+
+  .segmented[data-size="sm"] {
+    --segmented-h: var(--control-h-sm);
+    --segmented-radius: var(--control-radius-sm);
+    --segmented-item-px: var(--segmented-item-px-sm);
+    --segmented-font-size: theme("fontSize.body2");
+
+    line-height: 1.25rem;
+  }
+
+  .segmented[data-size="md"] {
+    --segmented-h: var(--control-h-md);
+    --segmented-radius: var(--control-radius-md);
+    --segmented-item-px: var(--segmented-item-px-md);
+  }
+
+  .segmented[data-size="lg"] {
+    --segmented-h: var(--control-h-lg);
+    --segmented-radius: var(--control-radius-lg);
+    --segmented-item-px: var(--segmented-item-px-lg);
+    --segmented-font-size: theme("fontSize.h6");
+  }
+
+  /* ===== Pill variant (ListModeToggle): overrides flow through custom properties ===== */
+
+  .segmented[data-variant="pill"] {
+    --segmented-radius: var(--radius-full);
+    --segmented-item-radius: var(--radius-full);
+    --segmented-item-min-width: 0;
+    --segmented-item-px: var(--space-3);
+    --segmented-item-py: var(--space-1);
+    --segmented-item-background: transparent;
+
+    display: inline-flex;
+    gap: var(--space-1);
+    height: auto;
+    font-weight: 500;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .segmented-item {
+      transition: none;
+    }
+  }
+}

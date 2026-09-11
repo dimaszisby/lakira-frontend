@@ -1,4 +1,4 @@
-import type { SortChipsColumns } from "@/components/ui/SortChipGroup";
+import type { SortChipColumn } from "@/components/ui/SortChipGroup";
 import type { MetricLogVM } from "@/features/metric-logs/view-models";
 
 // Shared types for both desktop and mobile tables
@@ -15,7 +15,7 @@ export interface LogTableProps {
   mobileClassName?: string;
 }
 
-export const mobileColumns: SortChipsColumns<MetricLogVM>[] = [
+export const mobileColumns: SortChipColumn<MetricLogVM>[] = [
   {
     key: "loggedAt",
     label: "Logged At",

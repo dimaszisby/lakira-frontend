@@ -1,0 +1,12 @@
+/* Tokens for ColorField. The swatch colour itself is user data, passed as --swatch. */
+@layer base {
+  :root {
+    --color-swatch-size: 2rem;
+    --color-swatch-size-sm: 1.25rem;
+    --color-swatch-size-xs: 0.75rem;
+    --color-swatch-ring: var(--border);
+    --color-picker-width: 18rem;
+    --color-preset-size: 2rem;
+    --color-picker-muted-fg: var(--text-secondary);
+  }
+}

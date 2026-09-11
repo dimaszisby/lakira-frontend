@@ -1,8 +1,9 @@
 import { memo } from "react";
 
 import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
+import { cn } from "@/lib/cn";
 import type { TableColumn } from "@/ui/Table";
-import { TableBase } from "@/ui/Table";
+import { Table } from "@/ui/Table";
 
 import type { CategoryTableProps } from "./table-config";
 
@@ -80,24 +81,20 @@ export const MetricCategoryDesktopTableBase = ({
   sortBy,
   sortOrder,
   onSort,
-  onEdit,
-  onDelete,
   onRowClick,
   className,
 }: CategoryTableProps) => {
   return (
-    <TableBase<MetricCategoryVM>
+    <Table<MetricCategoryVM>
       data={categories}
       columns={columns}
       sortBy={sortBy}
       sortOrder={sortOrder}
       onSort={onSort}
       rowKey={(cat) => cat.id}
-      onEdit={onEdit}
-      onDelete={onDelete}
       onRowClick={onRowClick}
-      className={className}
-      ariaLabel="Metric categories table"
+      className={cn("hidden sm:block", className)}
+      aria-label="Metric categories table"
       emptyMessage="No categories available"
       // Optionally: custom row component for editing/deleting per row
       // renderRow={(category) => <MetricCategoryTableRow key={category.id} category={category} />}

@@ -90,46 +90,34 @@ Practical standard:
 
 ---
 
-## 4. `ref` Strategy (Two Valid Approaches)
+## 4. `ref` Strategy
 
-React 19 supports passing `ref` as a prop, but many ecosystems still rely on `forwardRef`.
+**`ref` is an ordinary prop.** React 19 passes it through like any other prop, so primitives do not
+use `forwardRef` or set `displayName`. Decided in
+[ADR-0016](../../explanation/decisions/adr-0016-ui-primitives-conventions-ariakit-and-centralised-styling.md).
 
-### Approach A: `forwardRef` (Compatibility-first)
+```tsx
+export type ToggleProps = ComponentProps<"button"> & { checked: boolean };
 
-Use when:
+export const Toggle = ({ ref, checked, className, ...props }: ToggleProps) => (
+  <button
+    ref={ref}
+    type="button"
+    role="switch"
+    aria-checked={checked}
+    className={cn("switch", className)}
+    {...props}
+  />
+);
+```
 
-- You need broad library interoperability.
-- Existing code already follows this pattern.
-- You want stable compatibility with older patterns/tools.
+Rules:
 
-Pros:
-
-- Familiar and widely supported.
-- Easy migration from existing components.
-
-Cons:
-
-- More boilerplate.
-
-### Approach B: React 19 `ref` as prop (Modern-first)
-
-Use when:
-
-- Building new internal components with strict React 19 baseline.
-- You want simpler function signatures.
-
-Pros:
-
-- Less wrapper boilerplate.
-
-Cons:
-
-- Requires disciplined TypeScript typing and team alignment.
-
-Team recommendation for now:
-
-- Keep `forwardRef` for existing primitives.
-- Evaluate `ref`-as-prop in a dedicated migration RFC before wide adoption.
+- Type props with `ComponentProps<"element">`, which already includes `ref`.
+- When a component also needs its own ref to the same node, merge them with `composeRefs` from
+  `src/lib/compose-refs.ts`. Never overwrite the caller's ref.
+- Because `ref` is a prop, a React Hook Form registration spreads straight onto a field:
+  `<TextField {...register("name")} />`. Primitives never import form-library types.
 
 ---
 
@@ -177,14 +165,18 @@ Anti-patterns:
 
 Recommended file shape for primitives:
 
-1. Types
-2. Internal constants/maps
-3. Component implementation
-4. Named exports (optional subcomponents)
-5. Default export or named export (pick one project standard)
+1. `"use client"`, only if the file uses hooks, event handlers or browser APIs
+2. Types
+3. Internal constants
+4. Component implementation, exported by name
+5. Named subcomponents, if any
 
 Rules:
 
+- **Named exports only in `src/components/ui`.** No default exports, no `*Base` + `memo` pairs, no
+  barrel file. Import each primitive from its own file: `import { Button } from "@/ui/Button"`.
+  Feature folders keep their existing default-export convention.
+- Wrap in `memo` only where a profile shows a benefit.
 - One primary component per file.
 - Co-locate tests with component in `__tests__`.
 - Keep helpers in nearby `*.helpers.ts` only when logic is substantial.

@@ -1,0 +1,14 @@
+/* Tokens for Table (class prefix `data-table`; `.table` is a Tailwind utility). */
+@layer base {
+  :root {
+    --data-table-bg: var(--surface);
+    --data-table-border: var(--border);
+    --data-table-head-bg: var(--bg);
+    --data-table-head-fg: var(--text-secondary);
+    --data-table-body-bg: var(--surface-2);
+    --data-table-row-hover: var(--surface);
+    --data-table-cell-fg: var(--text);
+    --data-table-empty-fg: var(--text-secondary);
+    --data-table-sort-icon-size: 0.75rem;
+  }
+}

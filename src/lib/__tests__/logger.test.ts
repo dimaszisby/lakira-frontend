@@ -6,14 +6,8 @@
  * jsdom, where `window` is defined, so these must run under node.
  */
 
-import type {LogEntry} from "../logger";
-import {
-  logger,
-  redact,
-  REDACTED,
-  SENSITIVE_KEY_PATTERN,
-  setLogSink
-} from "../logger";
+import type { LogEntry } from "../logger";
+import { logger, redact, REDACTED, SENSITIVE_KEY_PATTERN, setLogSink } from "../logger";
 
 const AUTH_HEADER = "Bearer abc.def.ghi";
 

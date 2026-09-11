@@ -1,114 +1,101 @@
 "use client";
 
-import * as React from "react";
-import type { UseFormRegisterReturn } from "react-hook-form";
+import type { ChangeEvent, ComponentProps, ReactNode } from "react";
+import { useState } from "react";
 
 import { cn } from "@/lib/cn";
+import { composeRefs } from "@/lib/compose-refs";
 
-import InputChrome from "./InputChrome";
+import { InputChrome } from "./InputChrome";
 
-type Size = "sm" | "md" | "lg";
+type TextAreaSize = "sm" | "md" | "lg";
 
-export type TextAreaProps = Omit<
-  React.TextareaHTMLAttributes<HTMLTextAreaElement>,
-  "size" | "children" | "onChange"
-> & {
-  id?: string;
-  registration?: UseFormRegisterReturn;
-  size?: Size;
-  leftAddon?: React.ReactNode;
-  rightAddon?: React.ReactNode;
-  hasError?: boolean;
-  wrapperClassName?: string;
+export type TextAreaProps = Omit<ComponentProps<"textarea">, "size"> & {
+  size?: TextAreaSize;
+  leftAddon?: ReactNode;
+  rightAddon?: ReactNode;
+  invalid?: boolean;
+  /** Shows a `count/maxLength` counter. Requires `maxLength`. */
   showCount?: boolean;
-  onChange?: React.ChangeEventHandler<HTMLTextAreaElement>;
+  /** Applied to the field shell; `className` goes to the textarea itself. */
+  wrapperClassName?: string;
 };
 
-const TextArea = ({
-  id,
-  registration,
+const lengthOf = (value: ComponentProps<"textarea">["value"]) =>
+  value === undefined || value === null ? 0 : String(value).length;
+
+export const TextArea = ({
+  ref,
   size = "md",
   leftAddon,
   rightAddon,
-  hasError,
+  invalid = false,
   disabled,
-  placeholder,
-  className,
-  wrapperClassName,
-  maxLength,
   showCount = false,
+  maxLength,
   rows = 4,
+  wrapperClassName,
+  className,
+  value,
+  defaultValue,
   onChange,
-  ...rest
+  "aria-invalid": ariaInvalid,
+  ...props
 }: TextAreaProps) => {
-  const ref = React.useRef<HTMLTextAreaElement>(null);
+  const [typedLength, setTypedLength] = useState(() => lengthOf(defaultValue));
 
-  // initialize from defaultValue/value length
-  const [count, setCount] = React.useState<number>(
-    Number(rest.defaultValue?.toString().length ?? 0),
-  );
+  const isControlled = value !== undefined;
+  const count = isControlled ? lengthOf(value) : typedLength;
+  const isInvalid = invalid || ariaInvalid === true || ariaInvalid === "true";
+  const showCounter = showCount && maxLength !== undefined;
+  const hasFooter = Boolean(leftAddon || rightAddon || showCounter);
 
-  // keep counter in sync if parent controls the value (reset/edit cases)
-  React.useEffect(() => {
-    const el = ref.current;
-    if (el) setCount(el.value.length);
-  }, [rest.value, rest.defaultValue]);
-
-  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setCount(e.currentTarget.value.length);
-    if (registration?.onChange) {
-      void registration.onChange(e);
-    }
-    onChange?.(e);
+  // react-hook-form writes default values and reset() values straight to the
+  // DOM node without a change event. The composed ref runs on every commit,
+  // after register()'s ref has written the value, so read the node there.
+  const syncFromNode = (node: HTMLTextAreaElement | null) => {
+    if (node && !isControlled) setTypedLength(node.value.length);
   };
 
-  const counter =
-    showCount && maxLength ? (
-      <span className="text-xs text-ink-tertiary" aria-hidden="true">
-        {count}/{maxLength}
-      </span>
-    ) : null;
-
-  const effectiveRight = (
-    <div className="flex gap-2">
-      {rightAddon}
-      {counter}
-    </div>
-  );
+  const handleChange = (event: ChangeEvent<HTMLTextAreaElement>) => {
+    if (!isControlled) setTypedLength(event.currentTarget.value.length);
+    onChange?.(event);
+  };
 
   return (
     <InputChrome
       multiline
-      hasError={hasError}
-      disabled={disabled}
       size={size}
+      invalid={isInvalid}
+      disabled={disabled}
       className={wrapperClassName}
     >
-      <div className="flex flex-col space-y-4">
-        <textarea
-          id={id}
-          ref={ref}
-          rows={rows}
-          disabled={disabled}
-          placeholder={placeholder}
-          maxLength={maxLength}
-          className={cn(
-            "block w-full resize-y border-none bg-transparent text-ink outline-none placeholder:text-ink-tertiary",
-            size === "sm" ? "py-1 text-sm" : size === "lg" ? "py-2 text-lg" : "py-1.5 text-base",
-            className,
-          )}
-          {...registration}
-          {...rest}
-          onChange={handleChange}
-        />
+      <textarea
+        {...props}
+        ref={composeRefs(ref, syncFromNode)}
+        rows={rows}
+        maxLength={maxLength}
+        value={value}
+        defaultValue={defaultValue}
+        disabled={disabled}
+        aria-invalid={isInvalid || undefined}
+        onChange={handleChange}
+        className={cn("input-control", className)}
+      />
 
-        <div className="flex items-end justify-between">
-          {leftAddon}
-          {effectiveRight}
+      {hasFooter ? (
+        <div className="input-footer">
+          {leftAddon ? <span className="input-addon">{leftAddon}</span> : <span />}
+          <span className="input-addon">
+            {rightAddon}
+            {showCounter ? (
+              <span className="input-counter" aria-hidden="true">
+                {count}/{maxLength}
+              </span>
+            ) : null}
+          </span>
         </div>
-      </div>
+      ) : null}
     </InputChrome>
   );
 };
-
-export default TextArea;

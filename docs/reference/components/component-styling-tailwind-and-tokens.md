@@ -9,12 +9,16 @@ This document defines how to build scalable, maintainable styles for Lakira UI c
 Rules:
 
 - Use semantic design tokens (`--bg`, `--text`, `--ring`, component tokens) as styling source of truth.
-- Avoid hard-coded hex/RGB values inside JSX.
-- Map visual states (`hover`, `active`, `disabled`, `focus`) via tokens or semantic utilities.
+- No raw colour values anywhere but `src/styles/tokens/palette.css`.
+- Map visual states (`hover`, `active`, `disabled`, `focus`) in recipe CSS.
 
 Reason:
 
 - Tokenized styles improve consistency, theming, and maintainability.
+
+The full styling contract — which decision lives in which file — and the lint rules that enforce it
+are in [`.claude/rules/styling.md`](../../../.claude/rules/styling.md). The decision record is
+[ADR-0016](../../explanation/decisions/adr-0016-ui-primitives-conventions-ariakit-and-centralised-styling.md).
 
 ---
 
@@ -24,18 +28,29 @@ Rules:
 
 - Keep class names statically discoverable by Tailwind.
 - Avoid dynamic interpolation such as `bg-${color}-500`.
-- Use explicit variant maps/objects for conditional classes.
+- In `src/components/ui`, do not build variant class maps. Set `data-*` attributes and let the recipe
+  map them.
 - Use `cn()` for class composition and conflict resolution.
+- In `src/components/ui`, ESLint rejects arbitrary values (`z-[60]`), colour utilities with an
+  opacity modifier (`bg-brand-primary/15`) and inline `style` keys that are not custom properties.
 
 Example pattern:
 
 ```tsx
-const variantClass: Record<Variant, string> = {
-  primary: "text-ink-inverted bg-brand-primary",
-  secondary: "text-brand-primary border border-brand-primary",
-};
+<span data-variant={variant} data-size={size} className={cn("badge", className)} />
+```
 
-className={cn("inline-flex items-center", variantClass[variant], className)}
+```css
+.badge[data-variant="danger"] {
+  --badge-bg: var(--badge-danger-bg);
+}
+```
+
+A runtime value, such as a user-picked colour, passes through a custom property that the recipe
+reads:
+
+```tsx
+<span className="color-swatch" style={{ "--swatch": hex } as CSSProperties} />
 ```
 
 ---
@@ -102,11 +117,41 @@ Rules:
 
 - Variant names should be semantic (`primary`, `secondary`, `destructive`, `ghost`).
 - Size names should be abstract (`sm`, `md`, `lg`), not pixel-specific.
-- Use `data-*` attributes or explicit class maps to apply variant/size styles.
+- Use `data-*` attributes to apply variant/size styles.
 
 Current Lakira-aligned approach:
 
 - `data-variant` + `data-size` + tokenized recipe classes (as in `Button`).
+- Ariakit state attributes (`data-active-item`, `data-focus-visible`, `aria-selected`) for
+  interactive state.
+
+### Consistency spec
+
+Every primitive draws these from `src/styles/tokens/scales.css` and `semantic.css`:
+
+| Dimension               | Token                                                                           | Value                                          |
+| ----------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------- |
+| Control height sm/md/lg | `--control-h-*`                                                                 | 40 / 48 / 56 px                                |
+| Control radius          | `--control-radius-*`                                                            | `--radius-sm` / `-md` / `-lg`, matching Button |
+| Elevation               | `--elevation-control` / `-popover` / `-dialog`                                  | `--shadow-xs` / `-md` / `-md`                  |
+| Layering                | `--z-sticky` / `-dropdown` / `-modal` / `-popover` / `-blocking`                | ordered scale                                  |
+| Focus                   | `--focus-ring-width`, `--focus-ring-offset`, colour `--ring`                    | 2px outline, 2px offset                        |
+| Disabled                | `--disabled-opacity`                                                            | 0.5, plus real `disabled` / `aria-disabled`    |
+| Hover / selected        | `--interactive-hover`, `--interactive-selected-bg`, `--interactive-selected-fg` | `surface-2`; brand tint with dark text         |
+| Motion                  | `--duration-fast`, `--duration-normal`, `--ease-standard`                       | 150 / 200 ms; off under reduced motion         |
+| Icons                   | `--icon-xs` / `-sm` / `-md` / `-lg`                                             | 14 / 16 / 20 / 24 px                           |
+| Target size             | `--target-min`, `--target-icon-button`                                          | 24 px minimum; 32 px for in-field icon buttons |
+
+### Shared recipes
+
+| Recipe                                                                                                 | Used by                                                                                         |
+| ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `input` (`.input-shell`, `.input-control`, …)                                                          | TextField, TextArea, SearchInput, Select / DateTimePicker / ColorField triggers, CategorySelect |
+| `popover` (`.popover`, `.listbox`, `.listbox-item`)                                                    | Select, DateTimePicker, ColorField, CategorySelect                                              |
+| `dialog`                                                                                               | Modal (content keeps `.card`)                                                                   |
+| `feedback` (`.spinner`, `.skeleton`, `.empty-state`, …)                                                | Spinner, FullScreenSpinner, SkeletonLoader, EmptyDataIndicator, IconLabel, DataLabel            |
+| `segmented`                                                                                            | SegmentedControl, ListModeToggle                                                                |
+| `switch`, `slider`, `chip`, `pager`, `table`, `calendar`, `color-field`, `swipe-card`, `field-message` | one primitive each                                                                              |
 
 ---
 
@@ -155,8 +200,9 @@ Rules:
 Rules:
 
 - Use motion to clarify state transitions, not as decoration.
-- Keep durations and easing consistent with design tokens.
-- Respect reduced-motion preferences for non-essential animation.
+- Keep durations and easing consistent with design tokens (`--duration-*`, `--ease-standard`).
+- Respect reduced-motion preferences: recipes turn transitions off under
+  `prefers-reduced-motion: reduce`, and framer-motion animations use `useReducedMotion`.
 
 ---
 

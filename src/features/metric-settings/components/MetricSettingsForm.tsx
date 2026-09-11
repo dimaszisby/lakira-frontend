@@ -8,25 +8,22 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import { CATEGORY_DEFAULTS } from "@/features/metric-categories/constants";
 import type { MetricSettingsFormInputs } from "@/features/metric-settings/form";
 import { metricSettingsFormSchema } from "@/features/metric-settings/form";
-import {
-  useCreateMetricSettings,
-  useUpdateMetricSettings,
-} from "@/features/metric-settings/hooks";
+import { useCreateMetricSettings, useUpdateMetricSettings } from "@/features/metric-settings/hooks";
 import type { MetricSettingsExtendedVM } from "@/features/metric-settings/view-models";
 import { cn } from "@/lib/cn";
-import Button from "@/ui/Button";
-import ColorField from "@/ui/ColorField";
-import DateTimePicker from "@/ui/DateTimePicker";
-import ErrorMessage from "@/ui/ErrorMessage";
+import { Button } from "@/ui/Button";
+import { ColorField } from "@/ui/ColorField";
+import { DateTimePicker } from "@/ui/DateTimePicker";
+import { ErrorMessage } from "@/ui/ErrorMessage";
 import { FormField } from "@/ui/FormField";
-import Modal from "@/ui/Modal";
+import { Modal } from "@/ui/Modal";
 import type { SegmentOption } from "@/ui/SegmentedControl";
-import SegmentedControl from "@/ui/SegmentedControl";
+import { SegmentedControl } from "@/ui/SegmentedControl";
 import type { SelectOption } from "@/ui/Select";
-import Select from "@/ui/Select";
-import Slider from "@/ui/Slider";
-import TextField from "@/ui/TextField";
-import Toggle from "@/ui/Toggle";
+import { Select } from "@/ui/Select";
+import { Slider } from "@/ui/Slider";
+import { TextField } from "@/ui/TextField";
+import { Toggle } from "@/ui/Toggle";
 import { parseDate, toISODateOnly } from "@/utils/date-io";
 
 import type { ChartType, GoalType } from "../constants";
@@ -38,11 +35,7 @@ interface Props {
   initialSettings: MetricSettingsExtendedVM | null;
 }
 
-export const MetricSettingsForm = ({
-  onClose,
-  metricId,
-  initialSettings,
-}: Props) => {
+export const MetricSettingsForm = ({ onClose, metricId, initialSettings }: Props) => {
   const isEditMode = !!initialSettings;
   const formTitle = isEditMode ? "Edit Metric Settings" : "Add Metric Settings";
 
@@ -361,7 +354,9 @@ export const MetricSettingsForm = ({
                     options={goalTypeOptions}
                     // value={field.value ?? null}
                     value={
-                      goalEnabled && field.value !== null && field.value ? field.value : "incremental"
+                      goalEnabled && field.value !== null && field.value
+                        ? field.value
+                        : "incremental"
                     }
                     onChange={(v) => field.onChange(v)}
                     size="md"
@@ -378,12 +373,12 @@ export const MetricSettingsForm = ({
                 id="goalValue"
                 type="number"
                 placeholder="e.g., 10000"
-                registration={register("goalValue", {
+                {...register("goalValue", {
                   valueAsNumber: true,
                   setValueAs: (v) => (v === "" || v === null ? undefined : Number(v)),
                 })}
                 leftAddon={<Tag weight="duotone" className="text-ink-secondary" />}
-                hasError={!!errors.goalValue}
+                invalid={!!errors.goalValue}
                 clearable
               />
             </FormField.Control>
@@ -440,11 +435,7 @@ export const MetricSettingsForm = ({
               <SegmentedControl
                 options={priorityOptions}
                 // value={field.value ?? null}
-                value={
-                  showOnDashboard && field.value !== null && field.value
-                    ? field.value
-                    : null
-                }
+                value={showOnDashboard && field.value !== null && field.value ? field.value : null}
                 onChange={(v) => field.onChange(v)}
                 size="md"
                 className="w-auto"
@@ -515,7 +506,7 @@ export const MetricSettingsForm = ({
   }
 
   return (
-    <Modal isOpen onClose={handleCloseClick} title={formTitle}>
+    <Modal open onClose={handleCloseClick} title={formTitle}>
       <form
         noValidate
         className={cn("mx-auto flex max-h-[80vh] w-full max-w-xl flex-col transition-transform")}

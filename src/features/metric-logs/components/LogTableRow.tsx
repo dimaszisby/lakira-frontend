@@ -16,7 +16,7 @@ const LogTableRow: React.FC<LogTableRowProps> = ({ log, onClick }) => {
     <tr
       tabIndex={0}
       role="button"
-      className="cursor-pointer bg-white transition hover:bg-gray-50"
+      className="cursor-pointer bg-surface transition hover:bg-surface2"
       onClick={() => onClick?.(log)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -30,8 +30,8 @@ const LogTableRow: React.FC<LogTableRowProps> = ({ log, onClick }) => {
       <td className="px-4 py-2 font-semibold">{formatHuman(log.loggedAt)}</td>
 
       {/* Log Value */}
-      <td className="max-w-xs truncate px-4 py-2 text-gray-500">
-        {log.logValue ?? <span className="italic text-gray-400">No Description</span>}
+      <td className="max-w-xs truncate px-4 py-2 text-ink-secondary">
+        {log.logValue ?? <span className="italic text-ink-secondary">No Description</span>}
       </td>
     </tr>
   );

@@ -1,4 +1,4 @@
-import type { SortChipsColumns } from "@/components/ui/SortChipGroup";
+import type { SortChipColumn } from "@/components/ui/SortChipGroup";
 import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
 
 // Shared types for both desktop and mobile tables
@@ -14,7 +14,7 @@ export interface CategoryTableProps {
   className?: string;
 }
 
-export const mobileColumns: SortChipsColumns<MetricCategoryVM>[] = [
+export const mobileColumns: SortChipColumn<MetricCategoryVM>[] = [
   {
     key: "icon",
     label: "Icon",

@@ -11,7 +11,7 @@ const OrganizationPage = () => (
   <section className="mx-auto flex max-w-3xl flex-col gap-6">
     <header>
       <h1 className="text-3xl font-semibold text-ink">Organization</h1>
-      <p className="text-ink-muted text-sm">Manage who has access and what they can do.</p>
+      <p className="text-sm text-ink-secondary">Manage who has access and what they can do.</p>
     </header>
 
     <MemberList />

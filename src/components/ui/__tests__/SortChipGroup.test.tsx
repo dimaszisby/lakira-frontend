@@ -1,54 +1,66 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { axe } from "jest-axe";
 
-import SortChipGroup from "@/components/ui/SortChipGroup";
+import type { SortChipColumn } from "@/components/ui/SortChipGroup";
+import { SortChipGroup } from "@/components/ui/SortChipGroup";
 
-type Column = { name: string; createdAt: string };
+type Row = { name: string; createdAt: string; notes: string };
 
-const columns = [
+const columns: SortChipColumn<Row>[] = [
   { key: "name", label: "Name", sortable: true },
   { key: "createdAt", label: "Created", sortable: true },
-] satisfies Parameters<typeof SortChipGroup<Column>>[0]["columns"];
+  { key: "notes", label: "Notes", sortable: false },
+];
 
 describe("SortChipGroup", () => {
-  it("renders sort group and chips with aria-sort metadata", () => {
-    const noop = () => {};
+  it("renders a labelled group with one chip per sortable column", () => {
     render(
-      <SortChipGroup<Column>
+      <SortChipGroup<Row>
         columns={columns}
         sortBy="name"
         sortOrder="ASC"
-        onSort={noop}
+        onSort={() => {}}
         className="custom-class"
       />,
     );
 
-    expect(screen.getByRole("group", { name: /sort options/i })).toBeInTheDocument();
-    const wrappers = screen.getAllByRole("button");
-    expect(wrappers).toHaveLength(2);
-    expect(wrappers[0].parentElement).toHaveAttribute("aria-sort", "ascending");
-    expect(wrappers[1].parentElement).not.toHaveAttribute("aria-sort");
+    const group = screen.getByRole("group", { name: /sort options/i });
+    expect(group).toHaveClass("custom-class");
+    expect(screen.getAllByRole("button")).toHaveLength(2);
+    expect(screen.queryByRole("button", { name: /notes/i })).not.toBeInTheDocument();
   });
 
-  it("invokes onSort with target column", () => {
-    const onSort = jest.fn();
+  it("marks only the sorted column as pressed", () => {
     render(
-      <SortChipGroup<Column> columns={columns} sortBy="name" sortOrder="ASC" onSort={onSort} />,
+      <SortChipGroup<Row> columns={columns} sortBy="name" sortOrder="ASC" onSort={() => {}} />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /created/i }));
+    expect(screen.getByRole("button", { name: /sort by name/i })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(screen.getByRole("button", { name: /sort by created/i })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    );
+  });
+
+  it("calls onSort with the target column", async () => {
+    const user = userEvent.setup();
+    const onSort = jest.fn();
+
+    render(<SortChipGroup<Row> columns={columns} sortBy="name" sortOrder="ASC" onSort={onSort} />);
+
+    await user.click(screen.getByRole("button", { name: /sort by created/i }));
     expect(onSort).toHaveBeenCalledWith("createdAt");
   });
 
-  it("does not render unsortable columns", () => {
-    const mixedColumns = [
-      ...columns,
-      { key: "nonSortable", label: "NoSort", sortable: false },
-    ] as unknown as Parameters<typeof SortChipGroup<Column>>[0]["columns"];
-
-    render(
-      <SortChipGroup<Column> columns={mixedColumns} sortBy="name" sortOrder="ASC" onSort={() => {}} />,
+  it("has no axe violations", async () => {
+    const { container } = render(
+      <SortChipGroup<Row> columns={columns} sortBy="name" sortOrder="DESC" onSort={() => {}} />,
     );
 
-    expect(screen.queryByRole("button", { name: /nosort/i })).not.toBeInTheDocument();
+    expect(await axe(container)).toHaveNoViolations();
   });
 });

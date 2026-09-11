@@ -23,7 +23,7 @@ const SideBarNavigationItems = ({
               className={cn(
                 "flex items-center rounded-xl px-4 py-2.5 text-sm font-medium transition",
                 {
-                  "bg-brand-primary text-white": pathname === item.href,
+                  "bg-brand-primary text-on-brand": pathname === item.href,
                   "text-ink hover:bg-surface2": pathname !== item.href,
                 },
               )}
