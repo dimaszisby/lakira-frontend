@@ -1,0 +1,17 @@
+/* Tokens for SegmentedControl and its pill preset, ListModeToggle. */
+@layer base {
+  :root {
+    --segmented-bg: var(--surface-2);
+    --segmented-border: var(--border-control);
+    --segmented-item-bg: var(--surface);
+    --segmented-item-fg: var(--text-secondary);
+    --segmented-item-bg-hover: var(--surface-2);
+    --segmented-item-fg-hover: var(--text);
+    --segmented-selected: var(--interactive-selected-bg);
+    --segmented-selected-fg: var(--interactive-selected-fg);
+    --segmented-item-min-width: 4rem;
+    --segmented-item-px-sm: 0.75rem;
+    --segmented-item-px-md: 1rem;
+    --segmented-item-px-lg: 1.25rem;
+  }
+}

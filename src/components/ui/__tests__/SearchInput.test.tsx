@@ -1,11 +1,14 @@
-import { fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState } from "react";
+import { axe } from "jest-axe";
+import { createRef, useState } from "react";
 
-import SearchInput from "@/components/ui/SearchInput";
+import { SearchInput } from "@/components/ui/SearchInput";
+
+const SEARCH_NAME = /search metrics/i;
 
 describe("SearchInput", () => {
-  it("emits updated value through onChange", async () => {
+  it("emits the updated value through onChange", async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
 
@@ -18,85 +21,78 @@ describe("SearchInput", () => {
             onChange(nextValue);
             setValue(nextValue);
           }}
-          ariaLabel="Search metrics"
+          aria-label="Search metrics"
         />
       );
     };
 
     render(<Harness />);
 
-    await user.type(screen.getByRole("searchbox", { name: /search metrics/i }), "abc");
+    await user.type(screen.getByRole("searchbox", { name: SEARCH_NAME }), "abc");
 
     expect(onChange).toHaveBeenLastCalledWith("abc");
-    expect(screen.getByRole("searchbox", { name: /search metrics/i })).toHaveValue("abc");
+    expect(screen.getByRole("searchbox", { name: SEARCH_NAME })).toHaveValue("abc");
   });
 
-  it("clears using onClear when provided", async () => {
+  it("uses a default accessible name", () => {
+    render(<SearchInput value="" onChange={() => {}} />);
+
+    expect(screen.getByRole("searchbox", { name: "Search" })).toBeInTheDocument();
+  });
+
+  it("clears through onClear when provided", async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
     const onClear = jest.fn();
 
     render(
-      <SearchInput value="metric" onChange={onChange} onClear={onClear} ariaLabel="Search metrics" />,
+      <SearchInput
+        value="metric"
+        onChange={onChange}
+        onClear={onClear}
+        aria-label="Search metrics"
+      />,
     );
 
     await user.click(screen.getByRole("button", { name: /clear search/i }));
 
-    expect(onClear).toHaveBeenCalled();
+    expect(onClear).toHaveBeenCalledTimes(1);
     expect(onChange).not.toHaveBeenCalledWith("");
   });
 
-  it("falls back to onChange clear behavior when onClear is absent", async () => {
+  it("falls back to onChange('') when onClear is absent", async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
 
-    render(<SearchInput value="metric" onChange={onChange} ariaLabel="Search metrics" />);
+    render(<SearchInput value="metric" onChange={onChange} aria-label="Search metrics" />);
 
     await user.click(screen.getByRole("button", { name: /clear search/i }));
 
     expect(onChange).toHaveBeenCalledWith("");
   });
 
-  it("returns focus to input after clear", async () => {
+  it("returns focus to the input after clearing", async () => {
     const user = userEvent.setup();
 
     const Harness = () => {
       const [value, setValue] = useState("metric");
-      return <SearchInput value={value} onChange={setValue} ariaLabel="Search metrics" />;
+      return <SearchInput value={value} onChange={setValue} aria-label="Search metrics" />;
     };
 
     render(<Harness />);
 
     await user.click(screen.getByRole("button", { name: /clear search/i }));
 
-    await waitFor(() => {
-      expect(screen.getByRole("searchbox", { name: /search metrics/i })).toHaveFocus();
-    });
+    expect(screen.getByRole("searchbox", { name: SEARCH_NAME })).toHaveFocus();
   });
 
-  it("returns focus to input after onClear callback", async () => {
-    const user = userEvent.setup();
-    const onClear = jest.fn();
-
-    render(
-      <SearchInput value="metric" onChange={() => {}} onClear={onClear} ariaLabel="Search metrics" />,
-    );
-
-    await user.click(screen.getByRole("button", { name: /clear search/i }));
-
-    expect(onClear).toHaveBeenCalledTimes(1);
-    await waitFor(() => {
-      expect(screen.getByRole("searchbox", { name: /search metrics/i })).toHaveFocus();
-    });
-  });
-
-  it("supports Escape key to clear current value", async () => {
+  it("clears on Escape", async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
 
-    render(<SearchInput value="metric" onChange={onChange} ariaLabel="Search metrics" />);
+    render(<SearchInput value="metric" onChange={onChange} aria-label="Search metrics" />);
 
-    await user.type(screen.getByRole("searchbox", { name: /search metrics/i }), "{Escape}");
+    await user.type(screen.getByRole("searchbox", { name: SEARCH_NAME }), "{Escape}");
 
     expect(onChange).toHaveBeenCalledWith("");
   });
@@ -104,10 +100,12 @@ describe("SearchInput", () => {
   it("does not clear on Escape during IME composition", () => {
     const onChange = jest.fn();
 
-    render(<SearchInput value="metric" onChange={onChange} ariaLabel="Search metrics" />);
+    render(<SearchInput value="metric" onChange={onChange} aria-label="Search metrics" />);
 
-    const input = screen.getByRole("searchbox", { name: /search metrics/i });
-    fireEvent.keyDown(input, { key: "Escape", isComposing: true });
+    fireEvent.keyDown(screen.getByRole("searchbox", { name: SEARCH_NAME }), {
+      key: "Escape",
+      isComposing: true,
+    });
 
     expect(onChange).not.toHaveBeenCalled();
   });
@@ -115,17 +113,35 @@ describe("SearchInput", () => {
   it("does not clear on Escape when disabled", () => {
     const onChange = jest.fn();
 
-    render(<SearchInput value="metric" onChange={onChange} ariaLabel="Search metrics" disabled />);
+    render(<SearchInput value="metric" onChange={onChange} aria-label="Search metrics" disabled />);
 
-    const input = screen.getByRole("searchbox", { name: /search metrics/i });
-    fireEvent.keyDown(input, { key: "Escape" });
+    fireEvent.keyDown(screen.getByRole("searchbox", { name: SEARCH_NAME }), { key: "Escape" });
 
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it("announces loading state", () => {
-    render(<SearchInput value="" onChange={() => {}} isLoading ariaLabel="Search metrics" />);
+  it("announces the loading state", () => {
+    render(<SearchInput value="" onChange={() => {}} isLoading aria-label="Search metrics" />);
 
     expect(screen.getByRole("status", { name: /loading/i })).toBeInTheDocument();
+    expect(screen.getByRole("searchbox", { name: SEARCH_NAME })).toHaveAttribute(
+      "aria-busy",
+      "true",
+    );
+  });
+
+  it("forwards ref as a prop", () => {
+    const ref = createRef<HTMLInputElement>();
+    render(<SearchInput ref={ref} value="" onChange={() => {}} />);
+
+    expect(ref.current).toBe(screen.getByRole("searchbox"));
+  });
+
+  it("has no axe violations", async () => {
+    const { container } = render(
+      <SearchInput value="metric" onChange={() => {}} isLoading aria-label="Search metrics" />,
+    );
+
+    expect(await axe(container)).toHaveNoViolations();
   });
 });

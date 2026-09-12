@@ -2192,26 +2192,6 @@ export interface components {
             /** @default false */
             timeFrameEnabled: boolean;
         };
-        DashboardVisualizationQueryParams: {
-            /**
-             * @default 1d
-             * @enum {string}
-             */
-            bucket: "1h" | "1d" | "1w" | "1m" | "1y";
-            /** Format: date-time */
-            end?: string;
-            /**
-             * @default none
-             * @enum {string}
-             */
-            fill: "none" | "zero" | "nan";
-            last?: string;
-            limit?: number;
-            /** Format: date-time */
-            start?: string;
-            /** @default Asia/Jakarta */
-            tz: string;
-        };
         DashboardVisualizationResponse: {
             items: {
                 /** @example #663399 */
@@ -2262,12 +2242,6 @@ export interface components {
                 tz: string;
             };
         };
-        Error: {
-            /** @example Error message */
-            message: string;
-            /** @example fail */
-            status: string;
-        };
         ForgotPasswordRequest: {
             /**
              * Format: email
@@ -2309,28 +2283,6 @@ export interface components {
         GenerateDummyMetricsRequest: {
             /** @default 50 */
             count: number;
-        };
-        GetTrendRequest: {
-            params: {
-                metricId: components["schemas"]["Uuid"];
-            };
-            query: {
-                /**
-                 * Format: date-time
-                 * @example 2023-01-31T23:59:59Z
-                 */
-                endDate?: string;
-                /**
-                 * @example daily
-                 * @enum {string}
-                 */
-                interval?: "daily" | "weekly" | "monthly";
-                /**
-                 * Format: date-time
-                 * @example 2023-01-01T00:00:00Z
-                 */
-                startDate?: string;
-            };
         };
         LoginRequest: {
             /**
@@ -2435,17 +2387,6 @@ export interface components {
             updatedAt: string;
             userId: components["schemas"]["Uuid"];
         };
-        MetricCategoryCursorQueryParams: {
-            after?: string;
-            filter?: {
-                name?: string;
-            };
-            includeTotal?: boolean;
-            limit?: number;
-            q?: string;
-            /** @enum {string} */
-            sort?: "createdAt" | "-createdAt" | "updatedAt" | "-updatedAt" | "name" | "-name" | "metricCount" | "-metricCount";
-        };
         MetricCategoryCursorResponse: {
             /** @description Normalized filters applied to the query */
             filter?: {
@@ -2477,19 +2418,6 @@ export interface components {
              * @example 120
              */
             totalCount?: number;
-        };
-        MetricCategoryListResponse: components["schemas"]["MetricCategory"][];
-        MetricCursorQueryParams: {
-            after?: string;
-            filter?: {
-                categoryId?: components["schemas"]["Uuid"];
-                name?: string;
-            };
-            includeTotal?: boolean;
-            limit?: number;
-            q?: string;
-            /** @enum {string} */
-            sort?: "createdAt" | "-createdAt" | "updatedAt" | "-updatedAt" | "name" | "-name" | "logCount" | "-logCount";
         };
         MetricCursorResponse: {
             /** @description Normalized filters applied to the query */
@@ -2523,24 +2451,11 @@ export interface components {
              */
             totalCount?: number;
         };
-        MetricDetailQueryParams: {
-            /** @default flat */
-            include: ("flat" | "full") | string;
-            /** @default 20 */
-            logsLimit: number;
-        };
         MetricDetailResponse: components["schemas"]["Metric"] & {
             category: components["schemas"]["MetricCategory"] | null;
             logs: components["schemas"]["MetricLog"][] | null;
             settings: components["schemas"]["MetricSettings"] | null;
         };
-        MetricIdQuery: {
-            metricId?: components["schemas"]["Uuid"];
-        };
-        MetricIdRequiredQuery: {
-            metricId: components["schemas"]["Uuid"];
-        };
-        MetricListResponse: components["schemas"]["Metric"][];
         MetricLog: {
             /**
              * Format: date-time
@@ -2566,18 +2481,6 @@ export interface components {
              * @example 2023-01-01T12:00:00Z
              */
             updatedAt: string;
-        };
-        MetricLogCursorQueryParams: {
-            after?: string;
-            filter?: {
-                logValue?: number;
-                metricId?: components["schemas"]["Uuid"];
-            };
-            includeTotal?: boolean;
-            limit?: number;
-            q?: string;
-            /** @enum {string} */
-            sort?: "createdAt" | "-createdAt" | "updatedAt" | "-updatedAt" | "logValue" | "-logValue" | "loggedAt" | "-loggedAt";
         };
         MetricLogCursorResponse: {
             /** @description Normalized filters applied to the query */
@@ -2611,7 +2514,6 @@ export interface components {
              */
             totalCount?: number;
         };
-        MetricLogListResponse: components["schemas"]["MetricLog"][];
         MetricLogStatsResponse: {
             /** @example 80 */
             average: number;
@@ -2694,18 +2596,6 @@ export interface components {
              */
             updatedAt: string;
         };
-        MetricSettingsCursorQueryParams: {
-            after?: string;
-            filter?: {
-                isActive?: boolean;
-                metricId?: components["schemas"]["Uuid"];
-            };
-            includeTotal?: boolean;
-            limit?: number;
-            q?: string;
-            /** @enum {string} */
-            sort?: "createdAt" | "-createdAt" | "updatedAt" | "-updatedAt" | "isActive" | "-isActive";
-        };
         MetricSettingsCursorResponse: {
             /** @description Normalized filters applied to the query */
             filter?: {
@@ -2738,7 +2628,6 @@ export interface components {
              */
             totalCount?: number;
         };
-        MetricSettingsListResponse: components["schemas"]["MetricSettings"][];
         RateLimitError: {
             /** @example Too many requests, please try again later. */
             message: string;
@@ -2994,40 +2883,9 @@ export interface components {
          * @example 123e4567-e89b-42d3-a456-426614174000
          */
         Uuid: string;
-        ValidationError: {
-            errors: {
-                /** @example body.email */
-                field: string;
-                /** @example Invalid email format */
-                message: string;
-            }[];
-            /** @example Validation failed */
-            message: string;
-            /** @example fail */
-            status: string;
-        };
         VerifyEmailRequest: {
             /** @example AbCdEf0123456789AbCdEf0123456789AbCdEf01 */
             token: string;
-        };
-        VisualizationQueryParams: {
-            /**
-             * @default 1d
-             * @enum {string}
-             */
-            bucket: "1h" | "1d" | "1w" | "1m" | "1y";
-            /** Format: date-time */
-            end?: string;
-            /**
-             * @default none
-             * @enum {string}
-             */
-            fill: "none" | "zero" | "nan";
-            last?: string;
-            /** Format: date-time */
-            start?: string;
-            /** @default Asia/Jakarta */
-            tz: string;
         };
         VisualizationResponse: {
             meta: {

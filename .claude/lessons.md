@@ -25,3 +25,17 @@ Updated after any correction per `.claude/rules/workflow.md`.
 **Rule**: a copied artifact needs a check that fails in CI, not a convention that says to update it. Run `npm run api:spec:check` before trusting anything in `src/types/dtos/**`.
 
 **Why**: manual sync always drifts; the only question is how long before someone notices.
+
+## [2026-09-11] A styling cleanup plan swept strays without closing the door on them
+
+**Mistake**: The first plan for the `src/components/ui` refactor listed stray colours and arbitrary values to replace one by one. It left Tailwind's default palette enabled and added no lint rule, so the next commit could reintroduce them. It also had no guardrail against a consistency pass altering the brand. The user had to raise both points separately.
+
+**Rule**: Pair every styling sweep with a mechanism:
+
+- only token colours exist in the Tailwind theme;
+- lint arbitrary values, opacity tints and non-custom-property inline styles in shared UI;
+- variant and state styling live in recipe CSS.
+
+Treat the app's identity (palette values, brand mapping, fonts, type scale) as fixed input. A consistency pass unifies how primitives use it; it never changes it.
+
+**Why**: A cleanup without enforcement is a snapshot, and it drifts the same way the OpenAPI copy did. A consistency pass that touches the identity is a redesign, and nobody asked for one.

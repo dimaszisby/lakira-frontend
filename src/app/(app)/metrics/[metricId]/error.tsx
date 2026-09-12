@@ -2,9 +2,15 @@
 
 import { useEffect } from "react";
 
-import Button from "@/ui/Button";
+import { Button } from "@/ui/Button";
 
-const MetricDetailError = ({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) => {
+const MetricDetailError = ({
+  error,
+  reset,
+}: {
+  error: Error & { digest?: string };
+  reset: () => void;
+}) => {
   useEffect(() => {
     console.error("Metric detail route error:", error);
   }, [error]);
@@ -12,7 +18,7 @@ const MetricDetailError = ({ error, reset }: { error: Error & { digest?: string 
   return (
     <section className="border-destructive/20 bg-destructive/5 rounded-xl border p-8 text-center">
       <h2 className="text-destructive text-2xl font-semibold">Unable to load metric</h2>
-      <p className="text-ink-muted mt-2 text-sm">
+      <p className="mt-2 text-sm text-ink-secondary">
         {error.message || "Please refresh and try again."}
       </p>
       <div className="mt-6 flex justify-center">

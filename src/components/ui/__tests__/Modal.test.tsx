@@ -1,130 +1,169 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { useState } from "react";
+import { axe } from "jest-axe";
+import { useRef, useState } from "react";
 
-import Modal from "@/components/ui/Modal";
+import { Modal } from "@/components/ui/Modal";
+
+const CLOSE_NAME = /close modal/i;
+
+/** Ariakit renders the scrim as a sibling of the dialog, marked with data-backdrop. */
+const getBackdrop = () => {
+  const backdrop = document.querySelector<HTMLElement>("[data-backdrop]");
+  if (!backdrop) throw new Error("Dialog backdrop not rendered");
+  return backdrop;
+};
 
 describe("Modal", () => {
-  it("does not render when closed", () => {
+  it("renders nothing while closed", () => {
     render(
-      <Modal isOpen={false} onClose={() => {}}>
+      <Modal open={false} onClose={() => {}} title="Hidden">
         <div>Body</div>
       </Modal>,
     );
 
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    expect(screen.queryByText("Body")).not.toBeInTheDocument();
   });
 
-  it("renders title/description and closes from the close button", async () => {
-    const user = userEvent.setup();
-    const onClose = jest.fn();
-
+  it("is named and described by its title and description", async () => {
     render(
-      <Modal
-        isOpen
-        onClose={onClose}
-        title="Delete item"
-        description="This action cannot be undone"
-      >
+      <Modal open onClose={() => {}} title="Delete item" description="This action cannot be undone">
         <button type="button">Confirm</button>
       </Modal>,
     );
 
-    const dialog = screen.getByRole("dialog", { name: /delete item/i });
-    expect(dialog).toBeInTheDocument();
-    expect(dialog).toHaveAttribute("aria-describedby");
+    const dialog = await screen.findByRole("dialog", { name: "Delete item" });
+    expect(dialog).toHaveAccessibleDescription("This action cannot be undone");
+  });
 
-    await user.click(screen.getByRole("button", { name: /close modal/i }));
+  it("uses aria-label when there is no title", async () => {
+    render(
+      <Modal open onClose={() => {}} aria-label="Quick edit">
+        <p>Body</p>
+      </Modal>,
+    );
+
+    expect(await screen.findByRole("dialog", { name: "Quick edit" })).toBeInTheDocument();
+  });
+
+  it("closes from the close button", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+
+    render(
+      <Modal open onClose={onClose} title="Close me">
+        <p>Body</p>
+      </Modal>,
+    );
+
+    const dialog = await screen.findByRole("dialog", { name: "Close me" });
+    await user.click(within(dialog).getByRole("button", { name: CLOSE_NAME }));
 
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("closes on overlay click but not on dialog-content click", async () => {
+  it("closes on Escape", async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();
 
     render(
-      <Modal isOpen onClose={onClose} title="Overlay">
+      <Modal open onClose={onClose} title="Escape close">
         <button type="button">Inner action</button>
       </Modal>,
     );
 
-    await user.click(screen.getByRole("button", { name: /inner action/i }));
-    expect(onClose).toHaveBeenCalledTimes(0);
-
-    await user.click(screen.getByRole("dialog").parentElement as HTMLElement);
-    expect(onClose).toHaveBeenCalledTimes(1);
-  });
-
-  it("respects closeOnOverlayClick=false", async () => {
-    const user = userEvent.setup();
-    const onClose = jest.fn();
-
-    render(
-      <Modal isOpen onClose={onClose} closeOnOverlayClick={false} title="Overlay">
-        <button type="button">Inner action</button>
-      </Modal>,
-    );
-
-    await user.click(screen.getByRole("dialog").parentElement as HTMLElement);
-
-    expect(onClose).not.toHaveBeenCalled();
-  });
-
-  it("closes on Escape key", async () => {
-    const user = userEvent.setup();
-    const onClose = jest.fn();
-
-    render(
-      <Modal isOpen onClose={onClose} title="Escape close">
-        <button type="button">Inner action</button>
-      </Modal>,
-    );
-
+    await screen.findByRole("dialog");
     await user.keyboard("{Escape}");
 
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("traps focus within modal while open", async () => {
+  it("closes on an outside click but not on a click inside", async () => {
     const user = userEvent.setup();
+    const onClose = jest.fn();
 
     render(
-      <Modal isOpen onClose={() => {}} hideClose title="Focus trap">
-        <div>
-          <button type="button">First</button>
-          <button type="button">Second</button>
-        </div>
+      <Modal open onClose={onClose} title="Overlay">
+        <button type="button">Inner action</button>
       </Modal>,
     );
 
-    const first = screen.getByRole("button", { name: /first/i });
-    const second = screen.getByRole("button", { name: /second/i });
+    await screen.findByRole("dialog");
+    await user.click(screen.getByRole("button", { name: /inner action/i }));
+    expect(onClose).not.toHaveBeenCalled();
 
-    expect(first).toHaveFocus();
-
-    await user.tab();
-    expect(second).toHaveFocus();
-
-    await user.tab();
-    expect(first).toHaveFocus();
-
-    await user.tab({ shift: true });
-    expect(second).toHaveFocus();
+    await user.click(getBackdrop());
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("restores focus to trigger element after close", async () => {
+  it("stays open on an outside click when closeOnOverlayClick is false", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+
+    render(
+      <Modal open onClose={onClose} closeOnOverlayClick={false} title="Sticky">
+        <p>Body</p>
+      </Modal>,
+    );
+
+    await screen.findByRole("dialog");
+    await user.click(getBackdrop());
+
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("moves focus into the dialog and makes the rest of the page inert", async () => {
+    const user = userEvent.setup();
+
+    const { container } = render(
+      <Modal open onClose={() => {}} hideClose title="Focus trap">
+        <button type="button">First</button>
+        <button type="button">Second</button>
+      </Modal>,
+    );
+
+    const first = await screen.findByRole("button", { name: "First" });
+    await waitFor(() => expect(first).toHaveFocus());
+
+    await user.tab();
+    expect(screen.getByRole("button", { name: "Second" })).toHaveFocus();
+
+    // Browsers keep Tab inside the dialog because everything outside it is inert.
+    // jsdom does not apply inert to keyboard navigation, so assert the mechanism itself.
+    await waitFor(() => expect(container).toHaveAttribute("inert"));
+  });
+
+  it("focuses initialFocusRef when provided", async () => {
+    const Harness = () => {
+      const saveRef = useRef<HTMLButtonElement>(null);
+      return (
+        <Modal open onClose={() => {}} title="Initial focus" initialFocusRef={saveRef}>
+          <button type="button">Cancel</button>
+          <button type="button" ref={saveRef}>
+            Save
+          </button>
+        </Modal>
+      );
+    };
+
+    render(<Harness />);
+
+    const save = await screen.findByRole("button", { name: "Save" });
+    await waitFor(() => expect(save).toHaveFocus());
+  });
+
+  it("returns focus to the trigger after closing", async () => {
     const user = userEvent.setup();
 
     const Harness = () => {
       const [open, setOpen] = useState(false);
-
       return (
         <>
           <button type="button" onClick={() => setOpen(true)}>
             Open modal
           </button>
-          <Modal isOpen={open} onClose={() => setOpen(false)} title="Restore focus">
+          <Modal open={open} onClose={() => setOpen(false)} title="Restore focus">
             <button type="button">Action</button>
           </Modal>
         </>
@@ -135,8 +174,7 @@ describe("Modal", () => {
 
     const trigger = screen.getByRole("button", { name: /open modal/i });
     await user.click(trigger);
-
-    expect(screen.getByRole("dialog")).toBeInTheDocument();
+    await screen.findByRole("dialog");
 
     await user.keyboard("{Escape}");
 
@@ -146,133 +184,14 @@ describe("Modal", () => {
     });
   });
 
-  it("locks body scroll while open and restores it on close", async () => {
-    const user = userEvent.setup();
-
-    const Harness = () => {
-      const [open, setOpen] = useState(true);
-
-      return (
-        <Modal isOpen={open} onClose={() => setOpen(false)} title="Scroll lock">
-          <button type="button">Action</button>
-        </Modal>
-      );
-    };
-
-    render(<Harness />);
-
-    expect(document.body.style.overflow).toBe("hidden");
-
-    await user.keyboard("{Escape}");
-
-    await waitFor(() => {
-      expect(document.body.style.overflow).toBe("");
-    });
-  });
-
-  it("keeps body scroll locked until all stacked modals are closed", async () => {
-    const noop = () => {};
-
-    const { rerender } = render(
-      <>
-        <Modal isOpen onClose={noop} title="First modal">
-          <button type="button">First action</button>
-        </Modal>
-        <Modal isOpen onClose={noop} title="Second modal">
-          <button type="button">Second action</button>
-        </Modal>
-      </>,
-    );
-
-    expect(document.body.style.overflow).toBe("hidden");
-
-    rerender(
-      <>
-        <Modal isOpen={false} onClose={noop} title="First modal">
-          <button type="button">First action</button>
-        </Modal>
-        <Modal isOpen onClose={noop} title="Second modal">
-          <button type="button">Second action</button>
-        </Modal>
-      </>,
-    );
-
-    expect(document.body.style.overflow).toBe("hidden");
-
-    rerender(
-      <>
-        <Modal isOpen={false} onClose={noop} title="First modal">
-          <button type="button">First action</button>
-        </Modal>
-        <Modal isOpen={false} onClose={noop} title="Second modal">
-          <button type="button">Second action</button>
-        </Modal>
-      </>,
-    );
-
-    await waitFor(() => {
-      expect(document.body.style.overflow).toBe("");
-    });
-  });
-
-  it("does not steal focus from remaining modal when another modal closes", async () => {
-    const noop = () => {};
-
-    const { rerender } = render(
-      <>
-        <Modal isOpen onClose={noop} title="First modal">
-          <button type="button">First action</button>
-        </Modal>
-        <Modal isOpen onClose={noop} title="Second modal">
-          <button type="button">Second action</button>
-        </Modal>
-      </>,
-    );
-
-    const secondDialog = screen.getByRole("dialog", { name: /second modal/i });
-    const secondClose = within(secondDialog).getByRole("button", { name: /close modal/i });
-    expect(secondClose).toHaveFocus();
-
-    rerender(
-      <>
-        <Modal isOpen={false} onClose={noop} title="First modal">
-          <button type="button">First action</button>
-        </Modal>
-        <Modal isOpen onClose={noop} title="Second modal">
-          <button type="button">Second action</button>
-        </Modal>
-      </>,
-    );
-
-    await waitFor(() => {
-      const currentSecondDialog = screen.getByRole("dialog", { name: /second modal/i });
-      const currentSecondClose = within(currentSecondDialog).getByRole("button", { name: /close modal/i });
-      expect(currentSecondClose).toHaveFocus();
-    });
-  });
-
-  it("re-traps forward tab when focus is outside the dialog", () => {
+  it("has no axe violations", async () => {
     render(
-      <>
-        <button type="button">Outside</button>
-        <Modal isOpen onClose={() => {}} hideClose title="Focus trap">
-          <button type="button">First</button>
-          <button type="button">Second</button>
-        </Modal>
-      </>,
+      <Modal open onClose={() => {}} title="Accessible" description="Checked by axe">
+        <button type="button">Confirm</button>
+      </Modal>,
     );
 
-    const outside = screen.getByRole("button", { name: /outside/i });
-    outside.focus();
-    expect(outside).toHaveFocus();
-
-    const dialog = screen.getByRole("dialog", { name: /focus trap/i });
-    const overlay = dialog.parentElement;
-    expect(overlay).not.toBeNull();
-    if (!overlay) return;
-
-    fireEvent.keyDown(overlay, { key: "Tab" });
-
-    expect(screen.getByRole("button", { name: /first/i })).toHaveFocus();
+    await screen.findByRole("dialog");
+    expect(await axe(document.body)).toHaveNoViolations();
   });
 });

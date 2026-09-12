@@ -1,10 +1,10 @@
 import type { ComponentType, ReactNode } from "react";
-import { memo } from "react";
 
 import { cn } from "@/lib/cn";
 
 type IconWeight = "thin" | "light" | "regular" | "bold" | "fill" | "duotone";
-type ToneText = "default" | "muted" | "success" | "warning" | "danger";
+type IconLabelTone = "default" | "muted" | "success" | "warning" | "danger";
+type IconLabelSize = "sm" | "md";
 
 export type IconProps = {
   size?: number | string;
@@ -12,43 +12,27 @@ export type IconProps = {
   className?: string;
 };
 
-interface IconLabelProps {
+export type IconLabelProps = {
   label: ReactNode;
   icon: ComponentType<IconProps>;
-  size?: "sm" | "md";
-  tone?: ToneText;
+  size?: IconLabelSize;
+  /**
+   * Success and warning tints fail text contrast on light surfaces, so for those
+   * tones only the icon is coloured and the label stays neutral.
+   */
+  tone?: IconLabelTone;
   className?: string;
-  iconClassName?: string;
-}
+};
 
-const toneToText = {
-  default: "text-ink",
-  muted: "text-ink-secondary",
-  success: "text-status-success",
-  warning: "text-status-warning",
-  danger: "text-status-error",
-} as const;
-
-const sizeToText = { sm: "text-xs", md: "text-sm" } as const;
-const sizeToIcon = { sm: 14, md: 16 } as const;
-
-export const IconLabelBase = ({
+export const IconLabel = ({
   icon: Icon,
   label,
   size = "md",
   tone = "muted",
   className,
-  iconClassName,
 }: IconLabelProps) => (
-  <span className={cn("inline-flex items-center font-semibold", sizeToText[size], toneToText[tone], className)}>
-    <Icon size={sizeToIcon[size]} weight="bold" className={cn("mr-1", iconClassName)} aria-hidden />
+  <span data-size={size} data-tone={tone} className={cn("icon-label", className)}>
+    <Icon weight="bold" aria-hidden />
     <span>{label}</span>
   </span>
 );
-
-IconLabelBase.displayName = "IconLabel";
-
-const IconLabel = memo(IconLabelBase);
-IconLabel.displayName = "IconLabel";
-
-export default IconLabel;

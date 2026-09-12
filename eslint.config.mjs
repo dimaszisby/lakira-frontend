@@ -21,6 +21,37 @@ import parserTs from "@typescript-eslint/parser";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
+/* Enforce our memo pattern (disallow inline anonymous components in memo).
+ * Shared by every block that sets no-restricted-syntax, because a later block
+ * replaces the rule's whole option list rather than adding to it. */
+const memoComponentSelectors = [
+  // default export: React.memo(() => ...)
+  {
+    selector:
+      'ExportDefaultDeclaration > CallExpression[callee.object.name="React"][callee.property.name="memo"] > ArrowFunctionExpression',
+    message: "Name the component first, then wrap with memo at export.",
+  },
+  // default export: memo(() => ...)
+  {
+    selector:
+      'ExportDefaultDeclaration > CallExpression[callee.name="memo"] > ArrowFunctionExpression',
+    message: "Name the component first, then wrap with memo at export.",
+  },
+  // const X = memo(() => ...);
+  {
+    selector:
+      'VariableDeclarator[init.type="CallExpression"][init.callee.name="memo"] > ArrowFunctionExpression',
+    message: "Avoid inline anonymous components inside memo(). Define the component (named) first.",
+  },
+];
+
+/* A colour utility with an opacity modifier, e.g. "bg-surface/60". esquery regexes
+ * cannot contain a literal slash, hence \x2F. */
+const OPACITY_TINT_PATTERN =
+  "/\\b(bg|text|border|ring|divide|outline|fill|stroke|from|via|to|shadow|placeholder)-[a-z0-9-]+\\x2F[0-9]+/";
+const TINT_MESSAGE =
+  "Opacity tints belong in a token recipe (src/styles/tokens/components), not a class string.";
+
 const config = [
   // What to ignore
   {
@@ -140,31 +171,17 @@ const config = [
 
       /* --- Enforce our memo pattern (disallow inline anonymous in memo) --- */
       // Prefer: define component first, then wrap at export: export default memo(Component)
-      "no-restricted-syntax": [
-        "error",
-        // default export: React.memo(() => ...)
-        {
-          selector:
-            'ExportDefaultDeclaration > CallExpression[callee.object.name="React"][callee.property.name="memo"] > ArrowFunctionExpression',
-          message: "Name the component first, then wrap with memo at export.",
-        },
-        // default export: memo(() => ...)
-        {
-          selector:
-            'ExportDefaultDeclaration > CallExpression[callee.name="memo"] > ArrowFunctionExpression',
-          message: "Name the component first, then wrap with memo at export.",
-        },
-        // const X = memo(() => ...);
-        {
-          selector:
-            'VariableDeclarator[init.type="CallExpression"][init.callee.name="memo"] > ArrowFunctionExpression',
-          message:
-            "Avoid inline anonymous components inside memo(). Define the component (named) first.",
-        },
-      ],
+      "no-restricted-syntax": ["error", ...memoComponentSelectors],
 
       /* --- React Fast Refresh safety --- */
-      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      // Next.js route files must export these alongside the component.
+      "react-refresh/only-export-components": [
+        "warn",
+        {
+          allowConstantExport: true,
+          allowExportNames: ["metadata", "generateMetadata", "viewport", "generateViewport"],
+        },
+      ],
 
       /* --- A11y + Tailwind ergonomics --- */
       "jsx-a11y/alt-text": "warn",
@@ -235,18 +252,43 @@ const config = [
     },
   },
 
+  /* Shared UI primitives: styling lives in token and recipe CSS, never in the component.
+   * See .claude/rules/styling.md. Colours outside the token set are already impossible
+   * (tailwind.config.mjs replaces the default palette); these rules close the rest. */
+  {
+    files: ["src/components/ui/**/*.tsx"],
+    ignores: ["src/components/ui/**/__tests__/**"],
+    settings: {
+      tailwindcss: { callees: ["cn", "clsx", "classnames"] },
+    },
+    rules: {
+      "tailwindcss/no-arbitrary-value": "error",
+      "no-restricted-syntax": [
+        "error",
+        ...memoComponentSelectors,
+        { selector: `Literal[value=${OPACITY_TINT_PATTERN}]`, message: TINT_MESSAGE },
+        { selector: `TemplateElement[value.raw=${OPACITY_TINT_PATTERN}]`, message: TINT_MESSAGE },
+        {
+          selector:
+            "JSXAttribute[name.name='style'] > JSXExpressionContainer > ObjectExpression > Property[key.type='Identifier']",
+          message:
+            'Inline styles in UI primitives may only set CSS custom properties (e.g. { "--swatch": hex }) that a recipe reads.',
+        },
+      ],
+    },
+  },
+
   /* Known layer inversions, quarantined.
    *
    * These files live in `components` but reach up into `features`/`services`.
    * The boundary rule was inert until 2026-08-17 (src/components/** was never
    * mapped in boundaries/elements), so this debt accumulated unseen.
    *
-   * Two distinct problems, both tracked in
-   * docs/internal/todos/2026-08-17-todo-claude-code-setup.md:
-   *   - CategorySelect and Visualization are feature components misfiled under
-   *     ui/; they should move into their feature modules.
-   *   - withAuth, HydrateUser, Header and Sidebar are app-shell concerns that
-   *     need auth state; they belong under src/app/ or need state injected.
+   * Tracked in docs/internal/todos/2026-08-17-todo-claude-code-setup.md:
+   * withAuth, HydrateUser, Header and Sidebar are app-shell concerns that need
+   * auth state; they belong under src/app/ or need state injected.
+   * (CategorySelect and Visualization moved into their feature modules on
+   * 2026-09-11 and are no longer exempt.)
    *
    * Do not add to this list. New code must satisfy the boundary rule.
    */
@@ -256,8 +298,6 @@ const config = [
       "src/components/layout/Header.tsx",
       "src/components/layout/Sidebar.tsx",
       "src/components/providers/HydrateUser.tsx",
-      "src/components/ui/CategorySelect.tsx",
-      "src/components/ui/Visualization.tsx",
     ],
     rules: {
       "boundaries/element-types": "off",

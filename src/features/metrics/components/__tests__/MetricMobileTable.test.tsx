@@ -5,8 +5,7 @@ import { MetricMobileTableBase } from "@/features/metrics/components/MetricMobil
 import type { MetricPreviewVM } from "@/features/metrics/view-models";
 
 jest.mock("@/ui/SwipeableCard", () => ({
-  __esModule: true,
-  default: ({
+  SwipeableCard: ({
     actions,
     children,
   }: {

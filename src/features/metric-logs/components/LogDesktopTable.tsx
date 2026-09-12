@@ -1,8 +1,9 @@
 import { memo } from "react";
 
 import type { MetricLogVM } from "@/features/metric-logs/view-models";
+import { cn } from "@/lib/cn";
 import type { TableColumn } from "@/ui/Table";
-import { TableBase } from "@/ui/Table";
+import { Table } from "@/ui/Table";
 
 import type { LogTableProps } from "./table-config";
 
@@ -35,24 +36,20 @@ export const LogDesktopTableBase = ({
   sortBy,
   sortOrder,
   onSort,
-  onEdit,
-  onDelete,
   onRowClick,
   className,
 }: LogTableProps) => {
   return (
-    <TableBase<MetricLogVM>
+    <Table<MetricLogVM>
       data={logs}
       columns={columns}
       sortBy={sortBy}
       sortOrder={sortOrder}
       onSort={onSort}
       rowKey={(cat) => cat.id}
-      onEdit={onEdit}
-      onDelete={onDelete}
       onRowClick={onRowClick}
-      className={className}
-      ariaLabel="Metric logs table"
+      className={cn("hidden sm:block", className)}
+      aria-label="Metric logs table"
       emptyMessage="No logs available"
       // Optionally: custom row component for editing/deleting per row
       // renderRow={(category) => <MetricCategoryTableRow key={category.id} category={category} />}

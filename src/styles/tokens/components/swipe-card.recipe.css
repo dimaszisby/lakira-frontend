@@ -1,0 +1,122 @@
+@layer components {
+  .swipe-card {
+    position: relative;
+    width: 100%;
+    overflow: clip;
+    border-radius: var(--radius-md);
+    user-select: none;
+  }
+
+  .swipe-card-surface {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border: 1px solid hsl(var(--swipe-card-border));
+    border-radius: var(--radius-md);
+    background-color: hsl(var(--swipe-card-bg));
+    cursor: grab;
+  }
+
+  .swipe-card-surface:active {
+    cursor: grabbing;
+  }
+
+  .swipe-card-content {
+    flex: 1 1 0%;
+    min-width: 0;
+  }
+
+  .swipe-card-toggle {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: var(--target-icon-button);
+    height: var(--target-icon-button);
+    border-radius: var(--radius-xs);
+    color: hsl(var(--swipe-toggle-fg));
+    cursor: pointer;
+  }
+
+  .swipe-card-toggle svg {
+    width: var(--icon-md);
+    height: var(--icon-md);
+  }
+
+  .swipe-card-toggle:hover {
+    background-color: hsl(var(--interactive-hover));
+    color: hsl(var(--text));
+  }
+
+  .swipe-card-toggle:focus-visible {
+    outline: var(--focus-ring-width) solid hsl(var(--ring));
+    outline-offset: 0;
+  }
+
+  .swipe-card-toggle:disabled {
+    cursor: not-allowed;
+    opacity: var(--disabled-opacity);
+  }
+
+  /* Revealed behind the surface as it slides left */
+  .swipe-card-actions {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    z-index: 0;
+    display: flex;
+  }
+
+  .swipe-card-action {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--swipe-action-width);
+    height: 100%;
+    background-color: hsl(var(--swipe-action-bg, var(--swipe-action-bg-neutral)));
+    color: hsl(var(--swipe-action-fg));
+    transition:
+      filter var(--duration-normal) var(--ease-standard),
+      transform var(--duration-normal) var(--ease-standard);
+  }
+
+  .swipe-card-action svg {
+    width: var(--icon-lg);
+    height: var(--icon-lg);
+  }
+
+  .swipe-card-action:hover {
+    filter: brightness(0.95);
+  }
+
+  .swipe-card-action:active {
+    transform: scale(0.95);
+  }
+
+  .swipe-card-action:focus-visible {
+    outline: var(--focus-ring-width) solid hsl(var(--ring));
+    outline-offset: calc(var(--focus-ring-width) * -1);
+  }
+
+  .swipe-card-action:disabled {
+    cursor: not-allowed;
+    opacity: var(--disabled-opacity);
+  }
+
+  .swipe-card-action[data-tone="info"] {
+    --swipe-action-bg: var(--swipe-action-bg-info);
+  }
+
+  .swipe-card-action[data-tone="danger"] {
+    --swipe-action-bg: var(--swipe-action-bg-danger);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .swipe-card-action {
+      transition: none;
+    }
+  }
+}

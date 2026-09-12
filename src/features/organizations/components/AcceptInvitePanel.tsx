@@ -6,9 +6,9 @@ import { useEffect, useMemo, useRef } from "react";
 import { useAcceptInviteMutation } from "@/features/organizations/hooks/accept-invite.mutation";
 import { authRoutes } from "@/lib/routes";
 import { handleApiError } from "@/services/api/handleApiError";
-import Button from "@/ui/Button";
-import Card, { CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
-import ErrorMessage from "@/ui/ErrorMessage";
+import { Button } from "@/ui/Button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
+import { ErrorMessage } from "@/ui/ErrorMessage";
 
 type Props = {
   /** Invitation token from the emailed link. */

@@ -12,11 +12,11 @@ import { authRoutes } from "@/lib/routes";
 import { handleApiError } from "@/services/api/handleApiError";
 import { loginUserSchema } from "@/types/api/zod-user.schema";
 import type { LoginRequestDTO } from "@/types/dtos/user.dto";
-import Button from "@/ui/Button";
-import Card, { CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
-import ErrorMessage from "@/ui/ErrorMessage";
+import { Button } from "@/ui/Button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
+import { ErrorMessage } from "@/ui/ErrorMessage";
 import { FormField } from "@/ui/FormField";
-import TextField from "@/ui/TextField";
+import { TextField } from "@/ui/TextField";
 
 const LoginForm = () => {
   const router = useRouter();
@@ -88,8 +88,8 @@ const LoginForm = () => {
             <FormField.Control>
               <TextField
                 placeholder="e.g., john.doe@example.com"
-                registration={register("email")}
-                hasError={!!errors.email}
+                {...register("email")}
+                invalid={!!errors.email}
                 disabled={isBusyInputs}
                 clearable
                 required
@@ -103,8 +103,8 @@ const LoginForm = () => {
             <FormField.Control>
               <TextField
                 placeholder="Enter your password"
-                registration={register("password")}
-                hasError={!!errors.password}
+                {...register("password")}
+                invalid={!!errors.password}
                 disabled={isBusyInputs}
                 clearable
                 required

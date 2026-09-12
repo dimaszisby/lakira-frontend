@@ -4,8 +4,6 @@ import { useRouter } from "next/navigation";
 import { Plus } from "phosphor-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import Card, { CardHeader } from "@/components/ui/Card";
-import ListModeToggle from "@/components/ui/ListModeToggle";
 import MetricTable from "@/features/metrics/components/MetricTable";
 import { mobileColumns } from "@/features/metrics/components/table-config";
 import {
@@ -33,12 +31,14 @@ import { sanitizeErrorMessage } from "@/lib/sanitizeErrorMessage";
 import { makeOnColumnSort } from "@/lib/sort/makeOnColumnSort";
 import { handleApiError } from "@/services/api/handleApiError";
 import { useMetricListSearchState } from "@/src/features/metrics/hooks/list.search-state";
-import Button from "@/ui/Button";
-import EmptyDataIndicator from "@/ui/EmptyDataIndicator";
+import { Button } from "@/ui/Button";
+import { Card, CardHeader } from "@/ui/Card";
+import { EmptyDataIndicator } from "@/ui/EmptyDataIndicator";
+import { ListModeToggle } from "@/ui/ListModeToggle";
 import { Pagination } from "@/ui/Pagination";
-import SearchInput from "@/ui/SearchInput";
-import SkeletonLoader from "@/ui/SkeletonLoader";
-import SortChipGroup from "@/ui/SortChipGroup";
+import { SearchInput } from "@/ui/SearchInput";
+import { SkeletonLoader } from "@/ui/SkeletonLoader";
+import { SortChipGroup } from "@/ui/SortChipGroup";
 
 type MetricsPageClientProps = {
   initialParams: MetricListSearchParams;
@@ -330,7 +330,7 @@ const MetricsPageClient = ({ initialParams }: MetricsPageClientProps) => {
       {header}
 
       {isInitialLoading ? (
-        <SkeletonLoader count={10} className="h-10" />
+        <SkeletonLoader count={10} itemClassName="h-10" />
       ) : isEmpty ? (
         <EmptyDataIndicator
           title="No Data Available"

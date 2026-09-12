@@ -1,82 +1,73 @@
 "use client";
 
+import { Dialog, DialogDescription, DialogDismiss, DialogHeading } from "@ariakit/react";
 import { X } from "phosphor-react";
 import type { ReactNode, RefObject } from "react";
-import { useEffect, useId, useRef } from "react";
+import { useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 
 import { cn } from "@/lib/cn";
 
 import type { CardSize, CardVariant } from "./Card";
-import Card, { CardContent, CardDescription, CardHeader, CardTitle } from "./Card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./Card";
 
-type Size = CardSize;
-type Variant = CardVariant;
-
-const FOCUSABLE_SELECTOR =
-  'a[href], area[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
-let bodyScrollLockCount = 0;
-let bodyOverflowBeforeLock = "";
-
-function getFocusableElements(container: HTMLElement) {
-  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
-    (element) =>
-      !element.hasAttribute("disabled") &&
-      !element.hasAttribute("hidden") &&
-      element.getAttribute("aria-hidden") !== "true",
-  );
-}
-
-function lockBodyScroll() {
-  if (bodyScrollLockCount === 0) {
-    bodyOverflowBeforeLock = document.body.style.overflow;
-  }
-
-  bodyScrollLockCount += 1;
-  document.body.style.overflow = "hidden";
-}
-
-function unlockBodyScroll() {
-  if (bodyScrollLockCount === 0) return;
-
-  bodyScrollLockCount -= 1;
-  if (bodyScrollLockCount === 0) {
-    document.body.style.overflow = bodyOverflowBeforeLock;
-  }
-}
-
-function shouldRestoreFocus(target: HTMLElement) {
-  if (!target.isConnected) return false;
-
-  const openDialogs = Array.from(
-    document.querySelectorAll<HTMLElement>('[role="dialog"][aria-modal="true"]'),
-  );
-
-  if (openDialogs.length === 0) return true;
-
-  return openDialogs.some((dialog) => dialog.contains(target));
-}
-
-export interface ModalProps {
+export type ModalProps = {
+  open: boolean;
+  onClose: () => void;
   title?: string;
   description?: string;
-  ariaLabel?: string;
-  isOpen: boolean;
-  onClose: () => void;
+  /** Accessible name when there is no visible title. */
+  "aria-label"?: string;
   children: ReactNode;
   hideClose?: boolean;
-  size?: Size;
-  variant?: Variant;
+  size?: CardSize;
+  variant?: CardVariant;
   className?: string;
   closeOnOverlayClick?: boolean;
   initialFocusRef?: RefObject<HTMLElement | null>;
-}
+};
 
-const Modal = ({
+const DIALOG_ROOT_ID = "dialog-root";
+
+/** One long-lived container for every dialog, created on first use. */
+const getDialogRoot = (doc: Document) => {
+  let root = doc.getElementById(DIALOG_ROOT_ID);
+  if (!root) {
+    root = doc.createElement("div");
+    root.id = DIALOG_ROOT_ID;
+    doc.body.appendChild(root);
+  }
+  return root;
+};
+
+const subscribeToNothing = () => () => {};
+
+/** False on the server and during hydration, true once rendering on the client. */
+const useIsClient = () =>
+  useSyncExternalStore(
+    subscribeToNothing,
+    () => true,
+    () => false,
+  );
+
+/**
+ * A modal dialog built on Ariakit: it traps focus, locks page scroll, closes on
+ * Escape or an outside click, and returns focus to where it came from.
+ *
+ * The dialog is portalled by React rather than by Ariakit. Ariakit's portal renders
+ * the dialog in place for one commit and then moves it into its portal node, which
+ * remounts everything inside. Forms relying on mount-time registration lose state
+ * that way: MetricSettingsForm (react-hook-form with shouldUnregister) showed no
+ * Priority and stale watched values. Rendering straight into a container mounts the
+ * content once, and the container sits under <body>, so transformed ancestors such
+ * as the mobile sidebar cannot clip the fixed-position dialog.
+ */
+export const Modal = ({
+  open,
+  onClose,
   title,
   description,
-  ariaLabel,
-  isOpen,
-  onClose,
+  "aria-label": ariaLabel,
   children,
   hideClose = false,
   size = "md",
@@ -85,127 +76,40 @@ const Modal = ({
   closeOnOverlayClick = true,
   initialFocusRef,
 }: ModalProps) => {
-  const dialogRef = useRef<HTMLElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
+  const isClient = useIsClient();
+  if (!isClient) return null;
 
-  const titleId = useId();
-  const descriptionId = useId();
-
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const activeElement = document.activeElement;
-    previousFocusRef.current = activeElement instanceof HTMLElement ? activeElement : null;
-
-    lockBodyScroll();
-
-    const dialog = dialogRef.current;
-    if (dialog) {
-      const focusable = getFocusableElements(dialog);
-      const preferredInitial = initialFocusRef?.current;
-      const focusTarget =
-        preferredInitial && dialog.contains(preferredInitial)
-          ? preferredInitial
-          : focusable[0] ?? dialog;
-
-      focusTarget.focus();
-    }
-
-    return () => {
-      unlockBodyScroll();
-      const previousFocus = previousFocusRef.current;
-      if (!previousFocus) return;
-
-      requestAnimationFrame(() => {
-        if (!shouldRestoreFocus(previousFocus)) return;
-        previousFocus.focus();
-      });
-    };
-  }, [initialFocusRef, isOpen]);
-
-  if (!isOpen) return null;
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-      onClick={(event) => {
-        if (!closeOnOverlayClick) return;
-        if (event.target !== event.currentTarget) return;
-        onClose();
-      }}
-      onKeyDown={(event) => {
-        if (event.key === "Escape") {
-          event.preventDefault();
-          onClose();
-          return;
-        }
-
-        if (event.key !== "Tab") return;
-
-        const dialog = dialogRef.current;
-        if (!dialog) return;
-
-        const focusable = getFocusableElements(dialog);
-        if (focusable.length === 0) {
-          event.preventDefault();
-          dialog.focus();
-          return;
-        }
-
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        const activeElement = document.activeElement;
-        const active = activeElement instanceof HTMLElement ? activeElement : null;
-
-        if (event.shiftKey) {
-          if (!active || !dialog.contains(active) || active === first) {
-            event.preventDefault();
-            last.focus();
-          }
-          return;
-        }
-
-        if (!active || !dialog.contains(active) || active === last) {
-          event.preventDefault();
-          first.focus();
-        }
-      }}
+  return createPortal(
+    <Dialog
+      open={open}
+      onClose={onClose}
+      unmountOnHide
+      portal={false}
+      hideOnInteractOutside={closeOnOverlayClick}
+      // Ariakit reads the ref lazily once the dialog content has mounted.
+      initialFocus={initialFocusRef as RefObject<HTMLElement> | undefined}
+      backdrop={<div className="dialog-backdrop" />}
+      aria-label={title ? undefined : ariaLabel}
+      render={<Card as="section" size={size} variant={variant} elevation="md" />}
+      className={cn("dialog", className)}
     >
-      <Card
-        as="section"
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={title ? titleId : undefined}
-        aria-label={!title ? ariaLabel : undefined}
-        aria-describedby={description ? descriptionId : undefined}
-        tabIndex={-1}
-        variant={variant}
-        size={size}
-        className={cn("relative mx-auto w-full max-w-xl", className)}
-      >
-        {!hideClose ? (
-          <button
-            type="button"
-            className="text-ink-muted absolute right-4 top-4 rounded-md p-2 transition hover:text-ink"
-            onClick={onClose}
-            aria-label="Close modal"
-          >
-            <X size={20} />
-          </button>
-        ) : null}
+      {hideClose ? null : (
+        <DialogDismiss className="dialog-dismiss" aria-label="Close modal">
+          <X aria-hidden />
+        </DialogDismiss>
+      )}
 
-        {title || description ? (
-          <CardHeader className={cn(!hideClose ? "pr-10" : undefined)}>
-            {title ? <CardTitle id={titleId}>{title}</CardTitle> : null}
-            {description ? <CardDescription id={descriptionId}>{description}</CardDescription> : null}
-          </CardHeader>
-        ) : null}
+      {title || description ? (
+        <CardHeader className={hideClose ? undefined : "dialog-header-with-dismiss"}>
+          {title ? <DialogHeading render={<CardTitle />}>{title}</DialogHeading> : null}
+          {description ? (
+            <DialogDescription render={<CardDescription />}>{description}</DialogDescription>
+          ) : null}
+        </CardHeader>
+      ) : null}
 
-        {children ? <CardContent>{children}</CardContent> : null}
-      </Card>
-    </div>
+      {children ? <CardContent>{children}</CardContent> : null}
+    </Dialog>,
+    getDialogRoot(document),
   );
 };
-
-export default Modal;

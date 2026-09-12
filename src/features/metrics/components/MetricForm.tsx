@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDebounce } from "react-use";
 
+import CategorySelect from "@/features/metric-categories/components/CategorySelect";
 import type { MetricFormInitial, MetricFormInputs } from "@/features/metrics";
 import { metricFormSchema } from "@/features/metrics";
 import {
@@ -15,13 +16,12 @@ import {
   useUpdateMetric,
 } from "@/features/metrics/hooks";
 import { cn } from "@/lib/cn";
-import Button from "@/ui/Button";
-import CategorySelect from "@/ui/CategorySelect";
-import ErrorMessage from "@/ui/ErrorMessage";
+import { Button } from "@/ui/Button";
+import { ErrorMessage } from "@/ui/ErrorMessage";
 import { FormField } from "@/ui/FormField";
-import Modal from "@/ui/Modal";
-import TextArea from "@/ui/TextArea";
-import TextField from "@/ui/TextField";
+import { Modal } from "@/ui/Modal";
+import { TextArea } from "@/ui/TextArea";
+import { TextField } from "@/ui/TextField";
 
 interface Props {
   onClose: () => void;
@@ -175,7 +175,7 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
   const inputBg = "bg-surface2";
 
   return (
-    <Modal title={formTitle} isOpen onClose={handleCloseClick}>
+    <Modal title={formTitle} open onClose={handleCloseClick}>
       <form
         noValidate
         className="mx-auto p-4 lg:p-6"
@@ -190,8 +190,8 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
             <FormField.Control>
               <TextField
                 placeholder="e.g., Daily Steps"
-                registration={register("name")}
-                hasError={!!errors.name}
+                {...register("name")}
+                invalid={!!errors.name}
                 disabled={isBusyInputs}
                 clearable
                 required
@@ -205,8 +205,8 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
             <FormField.Control>
               <TextField
                 placeholder="e.g., km, reps, hours"
-                registration={register("defaultUnit")}
-                hasError={!!errors.defaultUnit}
+                {...register("defaultUnit")}
+                invalid={!!errors.defaultUnit}
                 disabled={isBusyInputs}
                 clearable
                 required
@@ -238,8 +238,8 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
             <FormField.Control>
               <TextArea
                 placeholder="e.g., Track muscle growth over time"
-                registration={register("description")}
-                hasError={!!errors.description}
+                {...register("description")}
+                invalid={!!errors.description}
                 disabled={isBusyInputs}
                 rows={5}
                 maxLength={255}

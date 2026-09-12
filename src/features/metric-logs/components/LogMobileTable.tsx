@@ -1,8 +1,9 @@
+import { PencilSimple, Trash } from "phosphor-react";
 import { memo } from "react";
 
 import type { MetricLogVM } from "@/features/metric-logs/view-models";
 import { cn } from "@/lib/cn";
-import SwipeableCard from "@/ui/SwipeableCard";
+import { SwipeableCard } from "@/ui/SwipeableCard";
 
 import LogMobileCard from "./LogMobileCard";
 import type { LogTableProps } from "./table-config";
@@ -27,15 +28,15 @@ export const LogMobileTableBase = ({
                 actions={[
                   {
                     label: "Edit",
-                    color: "bg-status-info",
+                    tone: "info",
                     onClick: () => onEdit?.(item),
-                    icon: <span>✏️</span>,
+                    icon: <PencilSimple weight="bold" aria-hidden />,
                   },
                   {
                     label: "Delete",
-                    color: "bg-status-error",
+                    tone: "danger",
                     onClick: () => onDelete?.(item),
-                    icon: <span>🗑️</span>,
+                    icon: <Trash weight="bold" aria-hidden />,
                   },
                 ]}
               >

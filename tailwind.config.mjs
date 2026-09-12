@@ -8,6 +8,57 @@ const config = {
     "./src/**/*.{ts,tsx,jsx,js,mdx}",
   ],
   theme: {
+    /* Colours replace Tailwind's default palette instead of extending it, so only
+     * semantic tokens exist: `bg-white` or `text-gray-400` generate no CSS at all.
+     * Raw colour values live in src/styles/tokens/palette.css. */
+    colors: {
+      transparent: "transparent",
+      current: "currentColor",
+      inherit: "inherit",
+
+      /* Semantic colors (HSL bodies → allow alpha) */
+      bg: "hsl(var(--bg) / <alpha-value>)",
+      surface: "hsl(var(--surface) / <alpha-value>)",
+      surface2: "hsl(var(--surface-2) / <alpha-value>)",
+      brand: {
+        primary: "hsl(var(--core-primary) / <alpha-value>)",
+        secondary: "hsl(var(--core-secondary) / <alpha-value>)",
+        accent: "hsl(var(--core-accent) / <alpha-value>)",
+      },
+      "on-brand": "hsl(var(--on-brand-fg) / <alpha-value>)",
+      ink: {
+        DEFAULT: "hsl(var(--text) / <alpha-value>)",
+        emphasis: "hsl(var(--text-emphasis) / <alpha-value>)",
+        secondary: "hsl(var(--text-secondary) / <alpha-value>)",
+        tertiary: "hsl(var(--text-tertiary) / <alpha-value>)",
+        inverted: "hsl(var(--text-inverted) / <alpha-value>)",
+        error: "hsl(var(--text-error) / <alpha-value>)",
+      },
+      border: "hsl(var(--border) / <alpha-value>)",
+      ring: "hsl(var(--ring) / <alpha-value>)",
+      status: {
+        error: {
+          bg: "hsl(var(--status-error-bg) / <alpha-value>)",
+          DEFAULT: "hsl(var(--status-error) / <alpha-value>)",
+          emphasis: "hsl(var(--status-error-emphasis) / <alpha-value>)",
+        },
+        success: {
+          bg: "hsl(var(--status-success-bg) / <alpha-value>)",
+          DEFAULT: "hsl(var(--status-success) / <alpha-value>)",
+          emphasis: "hsl(var(--status-success-emphasis) / <alpha-value>)",
+        },
+        warning: {
+          bg: "hsl(var(--status-warning-bg) / <alpha-value>)",
+          DEFAULT: "hsl(var(--status-warning) / <alpha-value>)",
+          emphasis: "hsl(var(--status-warning-emphasis) / <alpha-value>)",
+        },
+        info: {
+          bg: "hsl(var(--status-info-bg) / <alpha-value>)",
+          DEFAULT: "hsl(var(--status-info) / <alpha-value>)",
+          emphasis: "hsl(var(--status-info-emphasis) / <alpha-value>)",
+        },
+      },
+    },
     extend: {
       fontFamily: {
         // display = Quicksand, ui = Plus Jakarta Sans
@@ -52,50 +103,6 @@ const config = {
       letterSpacing: {
         // keep LS=0% by default; if you later want eyebrow/overline variants, add:
         // 'overline': '0.08em',
-      },
-
-      colors: {
-        /* Semantic colors (HSL bodies → allow alpha) */
-        bg: "hsl(var(--bg) / <alpha-value>)",
-        surface: "hsl(var(--surface) / <alpha-value>)",
-        surface2: "hsl(var(--surface-2) / <alpha-value>)",
-        brand: {
-          primary: "hsl(var(--core-primary) / <alpha-value>)",
-          secondary: "hsl(var(--core-secondary) / <alpha-value>)",
-          accent: "hsl(var(--core-accent) / <alpha-value>)",
-        },
-        ink: {
-          DEFAULT: "hsl(var(--text) / <alpha-value>)",
-          emphasis: "hsl(var(--text-emphasis) / <alpha-value>)",
-          secondary: "hsl(var(--text-secondary) / <alpha-value>)",
-          tertiary: "hsl(var(--text-tertiary) / <alpha-value>)",
-          inverted: "hsl(var(--text-inverted) / <alpha-value>)",
-          error: "hsl(var(--text-error) / <alpha-value>)",
-        },
-        border: "hsl(var(--border) / <alpha-value>)",
-        ring: "hsl(var(--ring) / <alpha-value>)",
-        status: {
-          error: {
-            bg: "hsl(var(--status-error-bg) / <alpha-value>)",
-            DEFAULT: "hsl(var(--status-error) / <alpha-value>)",
-            emphasis: "hsl(var(--status-error-emphasis) / <alpha-value>)",
-          },
-          success: {
-            bg: "hsl(var(--status-success-bg) / <alpha-value>)",
-            DEFAULT: "hsl(var(--status-success) / <alpha-value>)",
-            emphasis: "hsl(var(--status-success-emphasis) / <alpha-value>)",
-          },
-          warning: {
-            bg: "hsl(var(--status-warning-bg) / <alpha-value>)",
-            DEFAULT: "hsl(var(--status-warning) / <alpha-value>)",
-            emphasis: "hsl(var(--status-warning-emphasis) / <alpha-value>)",
-          },
-          info: {
-            bg: "hsl(var(--status-info-bg) / <alpha-value>)",
-            DEFAULT: "hsl(var(--status-info) / <alpha-value>)",
-            emphasis: "hsl(var(--status-info-emphasis) / <alpha-value>)",
-          },
-        },
       },
     },
   },

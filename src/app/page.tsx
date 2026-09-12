@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { APP_NAME } from "@/constants/app";
 import { authRoutes } from "@/lib/routes";
-import Button from "@/ui/Button";
+import { Button } from "@/ui/Button";
 
 type HomePageProps = {
   searchParams?: Promise<{

@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-import Button from "@/ui/Button";
+import { Button } from "@/ui/Button";
 
 /**
  * Last-resort error boundary. Replaces the root layout when a render throws

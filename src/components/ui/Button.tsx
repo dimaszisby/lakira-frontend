@@ -1,93 +1,64 @@
-"use client";
-
-import React from "react";
+import type { ComponentProps, ReactNode } from "react";
 
 import { cn } from "@/lib/cn";
 
-type Size = "sm" | "md" | "lg";
-type Variant = "primary" | "secondary" | "tertiary" | "destructive" | "neutral" | "ghost" | "link";
+import { Spinner } from "./Spinner";
 
-export type ButtonProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "children"> & {
-  children?: React.ReactNode;
-  leftIcon?: React.ReactNode;
-  rightIcon?: React.ReactNode;
-  size?: Size;
-  variant?: Variant;
+type ButtonSize = "sm" | "md" | "lg";
+type ButtonVariant = "primary" | "secondary" | "tertiary" | "destructive" | "ghost";
+
+export type ButtonProps = ComponentProps<"button"> & {
+  leftIcon?: ReactNode;
+  rightIcon?: ReactNode;
+  size?: ButtonSize;
+  variant?: ButtonVariant;
+  /** Stretch to the container width. */
   block?: boolean;
+  /** Disables the button and shows a spinner in place of `leftIcon`. */
   loading?: boolean;
 };
 
-const Spinner = () => {
+const hasText = (value: unknown) => typeof value === "string" && value.trim().length > 0;
+
+export const Button = ({
+  children,
+  leftIcon,
+  rightIcon,
+  size = "md",
+  variant = "primary",
+  block = false,
+  loading = false,
+  disabled,
+  className,
+  type = "button",
+  ...props
+}: ButtonProps) => {
+  if (process.env.NODE_ENV !== "production") {
+    const isIconOnly = !children && Boolean(leftIcon || rightIcon);
+    if (isIconOnly && !hasText(props["aria-label"]) && !hasText(props["aria-labelledby"])) {
+      console.warn("[Button] Icon-only buttons must have an aria-label for accessibility.");
+    }
+  }
+
+  const leading = loading ? (
+    <Spinner size="sm" />
+  ) : leftIcon ? (
+    <span className="inline-flex">{leftIcon}</span>
+  ) : null;
+
   return (
-    <span
-      aria-hidden
-      className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent"
-    />
+    <button
+      type={type}
+      disabled={disabled || loading}
+      aria-busy={loading || undefined}
+      data-variant={variant}
+      data-size={size}
+      className={cn("button", block ? "w-full" : "w-auto", className)}
+      {...props}
+    >
+      {leading}
+      {children ? <span className="truncate">{children}</span> : null}
+      {rightIcon ? <span className="inline-flex">{rightIcon}</span> : null}
+    </button>
   );
 };
-
-const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    {
-      children,
-      leftIcon,
-      rightIcon,
-      size = "md",
-      variant = "primary",
-      block,
-      loading = false,
-      disabled,
-      className,
-      type = "button",
-      ...rest
-    },
-    ref,
-  ) => {
-    const isDisabled = disabled || loading;
-    const isIconOnly = !children && !!(leftIcon || rightIcon);
-    const hasAriaLabel =
-      typeof rest["aria-label"] === "string" && rest["aria-label"].trim().length > 0;
-    const hasAriaLabelledBy =
-      typeof rest["aria-labelledby"] === "string" && rest["aria-labelledby"].trim().length > 0;
-
-    if (process.env.NODE_ENV !== "production") {
-      if (isIconOnly && !hasAriaLabel && !hasAriaLabelledBy) {
-        console.warn("[Button] Icon-only buttons must have an aria-label for accessibility.");
-      }
-    }
-
-    return (
-      <button
-        ref={ref}
-        type={type}
-        disabled={isDisabled}
-        aria-disabled={isDisabled || undefined}
-        aria-busy={loading || undefined}
-        data-variant={variant}
-        data-size={size}
-        className={cn(
-          "button",
-          "focus-visible:outline-none focus-visible:ring-2 ring-ring",
-          block ? "w-full" : "w-auto",
-          className,
-        )}
-        {...rest}
-      >
-        {loading ? (
-          <span className="mr-2 inline-flex">
-            <Spinner />
-          </span>
-        ) : leftIcon ? (
-          <span className="mr-2 inline-flex">{leftIcon}</span>
-        ) : null}
-
-        {children ? <span className="truncate">{children}</span> : null}
-
-        {rightIcon ? <span className="ml-2 inline-flex">{rightIcon}</span> : null}
-      </button>
-    );
-  },
-);
-Button.displayName = "Button";
-
-export default Button;

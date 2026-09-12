@@ -27,14 +27,14 @@ import { isDummyActionsEnabled } from "@/lib/env";
 import { metricCategoryRoutes } from "@/lib/routes";
 import { makeOnColumnSort } from "@/lib/sort/makeOnColumnSort";
 import { useMetricCategorySearchState } from "@/src/features/metric-categories/hooks/useMetricCategorySearchState";
-import Button from "@/ui/Button";
-import Card, { CardHeader, CardTitle } from "@/ui/Card";
-import EmptyDataIndicator from "@/ui/EmptyDataIndicator";
-import ListModeToggle from "@/ui/ListModeToggle";
+import { Button } from "@/ui/Button";
+import { Card, CardHeader, CardTitle } from "@/ui/Card";
+import { EmptyDataIndicator } from "@/ui/EmptyDataIndicator";
+import { ListModeToggle } from "@/ui/ListModeToggle";
 import { Pagination } from "@/ui/Pagination";
-import SearchInput from "@/ui/SearchInput";
-import SkeletonLoader from "@/ui/SkeletonLoader";
-import SortChipGroup from "@/ui/SortChipGroup";
+import { SearchInput } from "@/ui/SearchInput";
+import { SkeletonLoader } from "@/ui/SkeletonLoader";
+import { SortChipGroup } from "@/ui/SortChipGroup";
 
 const PAGE_SIZE = 50;
 
@@ -299,7 +299,7 @@ const MetricCategoriesPageClient = ({ initialParams }: MetricCategoriesPageClien
       {header}
 
       {isInitialLoading ? (
-        <SkeletonLoader count={8} className="h-10" />
+        <SkeletonLoader count={8} itemClassName="h-10" />
       ) : isEmpty ? (
         <EmptyDataIndicator
           title="No Categories Yet"

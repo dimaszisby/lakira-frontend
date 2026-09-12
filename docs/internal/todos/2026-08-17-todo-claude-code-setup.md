@@ -200,7 +200,7 @@ So 108 of the 126 were the rule table itself being wrong — routes and features
 
 The 18 real inversions sit in six files, quarantined with a documented `boundaries/element-types: "off"` block at the bottom of `eslint.config.mjs`:
 
-- `src/components/ui/CategorySelect.tsx`, `src/components/ui/Visualization.tsx` — feature components misfiled under `ui/`; they should move into their feature modules.
+- `src/components/ui/CategorySelect.tsx`, `src/components/ui/Visualization.tsx` — feature components misfiled under `ui/`; they should move into their feature modules. **Done 2026-09-11:** moved to `src/features/metric-categories/components/` and `src/features/data-visualizations/components/`, and removed from the quarantine ([ADR-0016](../../explanation/decisions/adr-0016-ui-primitives-conventions-ariakit-and-centralised-styling.md)).
 - `src/components/hoc/withAuth.tsx`, `src/components/providers/HydrateUser.tsx`, `src/components/layout/Header.tsx`, `src/components/layout/Sidebar.tsx` — app-shell concerns needing auth state; they belong under `src/app/` or need state injected.
 
 Lint is at **0 errors, 43 warnings** (the pre-existing warning backlog).

@@ -13,9 +13,9 @@ import { cn } from "@/lib/cn";
 import { authRoutes } from "@/lib/routes";
 import { logoutUser } from "@/services/api/auth.api";
 import { userAtom } from "@/services/state/atoms";
-import Button from "@/ui/Button";
-import Card from "@/ui/Card";
-import Modal from "@/ui/Modal";
+import { Button } from "@/ui/Button";
+import { Card } from "@/ui/Card";
+import { Modal } from "@/ui/Modal";
 
 import SideBarNavigationItems from "./SideBarNavigationItems";
 import type { SidebarProps } from "./type";
@@ -30,7 +30,7 @@ const SidebarContentWrapper = ({ includeCloseButton, onClose, children }: Sideba
   <div className="flex h-full flex-col">
     <div className="flex items-center justify-between pb-8">
       <div className="flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary text-sm font-bold text-white">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary text-sm font-bold text-on-brand">
           L
         </div>
         <p className="text-lg font-semibold text-ink">{APP_NAME}</p>
@@ -144,7 +144,7 @@ const Sidebar = ({ navItems, pathname, onLinkClick, isMobileOpen, onClose }: Sid
       <Modal
         title="Logout"
         description="Are you sure you want to log out?"
-        isOpen={logoutModalOpen}
+        open={logoutModalOpen}
         onClose={() => setLogoutModalOpen(false)}
         className="mx-auto w-full max-w-md"
       >

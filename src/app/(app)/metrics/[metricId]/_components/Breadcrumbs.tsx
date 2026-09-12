@@ -4,7 +4,7 @@ import Link from "next/link";
 import { memo } from "react";
 
 import { metricCategoryRoutes, metricRoutes } from "@/lib/routes";
-import Card from "@/ui/Card";
+import { Card } from "@/ui/Card";
 
 import { useMetricDetail } from "./MetricDetailContext";
 

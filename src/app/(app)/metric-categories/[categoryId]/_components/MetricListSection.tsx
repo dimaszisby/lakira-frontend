@@ -25,12 +25,12 @@ import { useRouteParams } from "@/hooks/useRouteParams";
 import { metricRoutes } from "@/lib/routes";
 import { makeOnColumnSort } from "@/lib/sort/makeOnColumnSort";
 import { useCategoryMetricSearchState } from "@/src/features/metrics/hooks/category-metric.search-state";
-import Button from "@/ui/Button";
-import EmptyDataIndicator from "@/ui/EmptyDataIndicator";
+import { Button } from "@/ui/Button";
+import { EmptyDataIndicator } from "@/ui/EmptyDataIndicator";
 import { Pagination } from "@/ui/Pagination";
-import SearchInput from "@/ui/SearchInput";
-import SkeletonLoader from "@/ui/SkeletonLoader";
-import SortChipGroup from "@/ui/SortChipGroup";
+import { SearchInput } from "@/ui/SearchInput";
+import { SkeletonLoader } from "@/ui/SkeletonLoader";
+import { SortChipGroup } from "@/ui/SortChipGroup";
 
 type MetricListSectionProps = {
   initialParams: MetricListSearchParams;
@@ -206,7 +206,7 @@ const MetricListSection = ({ initialParams }: MetricListSectionProps) => {
       />
 
       {isLoading ? (
-        <SkeletonLoader count={10} className="h-10" />
+        <SkeletonLoader count={10} itemClassName="h-10" />
       ) : isEmpty ? (
         <EmptyDataIndicator
           title="No Metrics"

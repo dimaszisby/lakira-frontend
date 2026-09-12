@@ -1,44 +1,37 @@
 import type { ReactNode } from "react";
-import { memo } from "react";
 
 import { cn } from "@/lib/cn";
 
-type Size = "lg" | "md" | "sm";
+type DataLabelSize = "sm" | "md" | "lg";
 
-interface Props {
+export type DataLabelProps = {
   title: string;
   value: string | number | boolean | null;
-  size?: Size;
-  className?: string;
+  size?: DataLabelSize;
+  /** Custom content shown instead of `value`. */
   renderValue?: ReactNode;
-}
-
-const VALUE_SIZE: Record<Size, string> = {
-  lg: "font-bold text-h4",
-  md: "text-body1",
-  sm: "text-body2",
+  className?: string;
 };
 
-function formatValue(value: Props["value"]) {
+const formatValue = (value: DataLabelProps["value"]) => {
   if (value === null) return "";
   if (typeof value === "boolean") return value ? "True" : "False";
   return String(value);
-}
-
-export const DataLabelBase = ({ title, value, className, size = "md", renderValue }: Props) => {
-  return (
-    <div className={cn("flex flex-col gap-2", className)}>
-      <p className="text-overline text-ink-secondary">{title}</p>
-      {renderValue ? (
-        <div className="w-full text-ink">{renderValue}</div>
-      ) : (
-        <span className={cn("w-full text-ink", VALUE_SIZE[size])}>{formatValue(value)}</span>
-      )}
-    </div>
-  );
 };
-DataLabelBase.displayName = "DataLabel";
 
-const DataLabel = memo(DataLabelBase);
-DataLabel.displayName = "DataLabel";
-export default DataLabel;
+export const DataLabel = ({
+  title,
+  value,
+  size = "md",
+  renderValue,
+  className,
+}: DataLabelProps) => (
+  <div data-size={size} className={cn("data-label", className)}>
+    <p className="data-label-title text-overline">{title}</p>
+    {renderValue ? (
+      <div className="data-label-value">{renderValue}</div>
+    ) : (
+      <span className="data-label-value data-label-text">{formatValue(value)}</span>
+    )}
+  </div>
+);

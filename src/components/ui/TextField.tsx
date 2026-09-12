@@ -1,161 +1,135 @@
 "use client";
 
 import { Eye, EyeSlash, XCircle } from "phosphor-react";
-import * as React from "react";
-import type { UseFormRegisterReturn } from "react-hook-form";
+import type { ChangeEvent, ComponentProps, ReactNode } from "react";
+import { useRef, useState } from "react";
 
 import { cn } from "@/lib/cn";
+import { composeRefs } from "@/lib/compose-refs";
 
-import InputChrome from "./InputChrome";
+import { InputChrome } from "./InputChrome";
 
-type Size = "sm" | "md" | "lg";
+type TextFieldSize = "sm" | "md" | "lg";
 
-export type TextFieldProps = Omit<
-  React.InputHTMLAttributes<HTMLInputElement>,
-  "size" | "children" | "onChange"
-> & {
-  id?: string;
-  label?: string;
-  registration?: UseFormRegisterReturn;
-  size?: Size;
-  leftAddon?: React.ReactNode;
-  rightAddon?: React.ReactNode;
-  hasError?: boolean;
+export type TextFieldProps = Omit<ComponentProps<"input">, "size"> & {
+  size?: TextFieldSize;
+  leftAddon?: ReactNode;
+  rightAddon?: ReactNode;
+  invalid?: boolean;
+  /** Shows a clear button while the field has a value. */
   clearable?: boolean;
-  revealToggle?: boolean; // if type=password, show reveal toggle
-  onChange?: React.ChangeEventHandler<HTMLInputElement>;
+  /** Shows a show/hide toggle for `type="password"`. Defaults to on for passwords. */
+  revealToggle?: boolean;
+  /** Applied to the field shell; `className` goes to the input itself. */
   wrapperClassName?: string;
 };
 
-const TextField = ({
-  id,
-  registration,
+const hasLength = (value: ComponentProps<"input">["value"]) =>
+  value !== undefined && value !== null && String(value).length > 0;
+
+export const TextField = ({
+  ref,
   size = "md",
   leftAddon,
   rightAddon,
-  hasError,
+  invalid = false,
   disabled,
   type = "text",
-  placeholder,
   clearable = false,
   revealToggle = type === "password",
-  className,
   wrapperClassName,
+  className,
+  value,
+  defaultValue,
   onChange,
-  onBlur,
-  ...rest
+  "aria-invalid": ariaInvalid,
+  ...props
 }: TextFieldProps) => {
-  const inputRef = React.useRef<HTMLInputElement>(null);
-  const [showPwd, setShowPwd] = React.useState(false);
-  const [hasValue, setHasValue] = React.useState<boolean>(Boolean(rest.defaultValue ?? rest.value));
-  const registrationRef = registration?.ref as
-    | ((instance: HTMLInputElement | null) => void)
-    | React.MutableRefObject<HTMLInputElement | null>
-    | undefined;
-  const registrationOnChange = registration?.onChange;
-  const registrationOnBlur = registration?.onBlur;
-  const registrationName = registration?.name;
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [hasTypedValue, setHasTypedValue] = useState(() => hasLength(defaultValue));
 
-  // keep hasValue in sync if parent controls the value
-  React.useEffect(() => {
-    const el = inputRef.current;
-    if (el) setHasValue(el.value.length > 0);
-  }, [rest.value]);
+  const isControlled = value !== undefined;
+  const hasValue = isControlled ? hasLength(value) : hasTypedValue;
+  const isInvalid = invalid || ariaInvalid === true || ariaInvalid === "true";
+  const canRevealPassword = revealToggle && type === "password";
+  const showClear = clearable && hasValue;
 
-  const handleInputRef = React.useCallback(
-    (node: HTMLInputElement | null) => {
-      inputRef.current = node;
-      if (!registrationRef) return;
-      if (typeof registrationRef === "function") {
-        registrationRef(node);
-        return;
-      }
-      registrationRef.current = node;
-    },
-    [registrationRef],
-  );
-
-  const handleInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setHasValue(e.currentTarget.value.length > 0);
-    if (registrationOnChange) {
-      void registrationOnChange(e);
-    }
-    onChange?.(e);
+  // react-hook-form writes default values and reset() values straight to the
+  // DOM node without a change event. The composed ref runs on every commit,
+  // after register()'s ref has written the value, so read the node there.
+  const syncFromNode = (node: HTMLInputElement | null) => {
+    if (node && !isControlled) setHasTypedValue(node.value.length > 0);
   };
 
-  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
-    if (registrationOnBlur) {
-      void registrationOnBlur(e);
-    }
-    onBlur?.(e);
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    if (!isControlled) setHasTypedValue(event.currentTarget.value.length > 0);
+    onChange?.(event);
   };
 
+  // Going through the native value setter fires a real input event, so both a
+  // controlled parent and react-hook-form observe the cleared value.
   const clear = () => {
-    const el = inputRef.current;
-    if (!el) return;
-    const setter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set;
-    setter?.call(el, "");
-    el.dispatchEvent(new Event("input", { bubbles: true }));
-    el.focus();
+    const input = inputRef.current;
+    if (!input) return;
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")?.set?.call(input, "");
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.focus();
   };
 
-  const effectiveRight = (
-    <>
-      {rightAddon}
-      {clearable && hasValue ? (
-        <button
-          type="button"
-          onClick={clear}
-          disabled={disabled}
-          className="rounded-md p-1 text-ink-tertiary hover:bg-surface2/60 hover:text-ink-emphasis focus-visible:ring-2 focus-visible:ring-ring"
-          title="Clear"
-          aria-label="Clear input"
-        >
-          <XCircle size={18} />
-        </button>
-      ) : null}
-      {revealToggle && type === "password" ? (
-        <button
-          type="button"
-          onClick={() => setShowPwd((s) => !s)}
-          disabled={disabled}
-          className="rounded-md p-1 text-ink-tertiary hover:bg-surface2/60 hover:text-ink-emphasis focus-visible:ring-2 focus-visible:ring-ring"
-          title={showPwd ? "Hide password" : "Show password"}
-          aria-label={showPwd ? "Hide password" : "Show password"}
-        >
-          {showPwd ? <EyeSlash size={18} /> : <Eye size={18} />}
-        </button>
-      ) : null}
-    </>
-  );
+  const trailing =
+    rightAddon || showClear || canRevealPassword ? (
+      <>
+        {rightAddon}
+        {showClear ? (
+          <button
+            type="button"
+            className="input-icon-button"
+            onClick={clear}
+            disabled={disabled}
+            aria-label="Clear input"
+            title="Clear"
+          >
+            <XCircle aria-hidden />
+          </button>
+        ) : null}
+        {canRevealPassword ? (
+          <button
+            type="button"
+            className="input-icon-button"
+            onClick={() => setIsPasswordVisible((visible) => !visible)}
+            disabled={disabled}
+            aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+            title={isPasswordVisible ? "Hide password" : "Show password"}
+          >
+            {isPasswordVisible ? <EyeSlash aria-hidden /> : <Eye aria-hidden />}
+          </button>
+        ) : null}
+      </>
+    ) : null;
+
+  const inputType = canRevealPassword && isPasswordVisible ? "text" : type;
 
   return (
     <InputChrome
-      hasError={hasError}
-      disabled={disabled}
       size={size}
+      invalid={isInvalid}
+      disabled={disabled}
       leftAddon={leftAddon}
-      rightAddon={effectiveRight}
+      rightAddon={trailing}
       className={wrapperClassName}
     >
       <input
-        id={id}
-        ref={handleInputRef}
-        type={revealToggle && type === "password" ? (showPwd ? "text" : "password") : type}
-        placeholder={placeholder}
+        {...props}
+        ref={composeRefs(inputRef, ref, syncFromNode)}
+        type={inputType}
+        value={value}
+        defaultValue={defaultValue}
         disabled={disabled}
-        className={cn(
-          "block w-full border-none bg-transparent text-ink outline-none placeholder:text-ink-tertiary",
-          size === "sm" ? "text-sm" : size === "lg" ? "text-lg" : "text-base",
-          className,
-        )}
-        name={registrationName}
-        {...rest}
-        onBlur={handleBlur}
-        onChange={handleInput}
+        aria-invalid={isInvalid || undefined}
+        onChange={handleChange}
+        className={cn("input-control", className)}
       />
     </InputChrome>
   );
 };
-
-export default TextField;

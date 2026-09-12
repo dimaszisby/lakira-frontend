@@ -6,9 +6,9 @@ import { withAuth } from "@/components/hoc/withAuth";
 import { APP_NAME } from "@/constants/app";
 import EmailVerificationNotice from "@/features/auth/components/EmailVerificationNotice";
 import { useAuthProfileQuery } from "@/features/auth/hooks/profile.query";
-import Button from "@/ui/Button";
-import Card, { CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
-import ErrorMessage from "@/ui/ErrorMessage";
+import { Button } from "@/ui/Button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
+import { ErrorMessage } from "@/ui/ErrorMessage";
 
 const AccountPageBase = () => {
   const { data, isLoading, isFetching, isError, error, refetch } = useAuthProfileQuery();
@@ -21,7 +21,7 @@ const AccountPageBase = () => {
   if (isLoading && !data) {
     return (
       <section className="flex min-h-[50vh] items-center justify-center">
-        <p className="text-ink-muted text-base" aria-live="polite">
+        <p className="text-base text-ink-secondary" aria-live="polite">
           Loading your account&hellip;
         </p>
       </section>
@@ -58,7 +58,7 @@ const AccountPageBase = () => {
     <section className="mx-auto flex max-w-3xl flex-col gap-6">
       <header>
         <h1 className="text-3xl font-semibold text-ink">Account</h1>
-        <p className="text-ink-muted text-sm">
+        <p className="text-sm text-ink-secondary">
           View your profile details and manage your account visibility.
         </p>
       </header>
@@ -75,19 +75,19 @@ const AccountPageBase = () => {
         <CardContent>
           <dl className="divide-y divide-surface2 text-sm">
             <div className="flex items-center justify-between py-3">
-              <dt className="text-ink-muted">Username</dt>
+              <dt className="text-ink-secondary">Username</dt>
               <dd className="font-medium text-ink">{data.username}</dd>
             </div>
             <div className="flex items-center justify-between py-3">
-              <dt className="text-ink-muted">Email</dt>
+              <dt className="text-ink-secondary">Email</dt>
               <dd className="font-medium text-ink">{data.email}</dd>
             </div>
             <div className="flex items-center justify-between py-3">
-              <dt className="text-ink-muted">Role</dt>
+              <dt className="text-ink-secondary">Role</dt>
               <dd className="font-medium capitalize text-ink">{data.role}</dd>
             </div>
             <div className="flex items-center justify-between py-3">
-              <dt className="text-ink-muted">Profile Visibility</dt>
+              <dt className="text-ink-secondary">Profile Visibility</dt>
               <dd className="font-medium text-ink">
                 {data.isPublicProfile ? "Public" : "Private"}
               </dd>

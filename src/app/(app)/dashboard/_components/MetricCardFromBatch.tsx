@@ -6,7 +6,7 @@ import MetricChart from "@/features/data-visualizations/components/MetricChart";
 import type { DashboardVizItem } from "@/features/data-visualizations/types";
 import CategoryChip from "@/features/metric-categories/components/CategoryChip";
 import { toCategoryUI } from "@/features/metric-categories/presenters/toCategoryUI";
-import Card, { CardHeader, CardTitle } from "@/ui/Card";
+import { Card, CardHeader, CardTitle } from "@/ui/Card";
 
 const MetricCardFromBatch = memo(function MetricCardFromBatch({
   item,

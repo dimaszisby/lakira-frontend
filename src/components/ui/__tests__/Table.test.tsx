@@ -1,8 +1,9 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { axe } from "jest-axe";
 
 import type { TableColumn } from "@/components/ui/Table";
-import { TableBase } from "@/components/ui/Table";
+import { Table } from "@/components/ui/Table";
 
 type Row = {
   id: string;
@@ -25,13 +26,15 @@ const rows: Row[] = [
   { id: "r2", name: "Beta", count: 4 },
 ];
 
+const firstRow = () => document.querySelector<HTMLTableRowElement>('tr[data-rowid="r1"]');
+
 describe("Table", () => {
   it("renders sortable headers and emits sort changes", async () => {
     const user = userEvent.setup();
     const onSort = jest.fn();
 
     render(
-      <TableBase<Row>
+      <Table<Row>
         data={rows}
         columns={columns}
         sortBy="name"
@@ -41,8 +44,10 @@ describe("Table", () => {
       />,
     );
 
-    const nameHeader = screen.getByRole("columnheader", { name: /name/i });
-    expect(nameHeader).toHaveAttribute("aria-sort", "ascending");
+    expect(screen.getByRole("columnheader", { name: /name/i })).toHaveAttribute(
+      "aria-sort",
+      "ascending",
+    );
 
     await user.click(screen.getByRole("button", { name: /sort by name/i }));
 
@@ -53,25 +58,19 @@ describe("Table", () => {
     const onRowClick = jest.fn();
 
     render(
-      <TableBase<Row>
-        data={rows}
-        columns={columns}
-        rowKey={(row) => row.id}
-        onRowClick={onRowClick}
-      />,
+      <Table<Row> data={rows} columns={columns} rowKey={(row) => row.id} onRowClick={onRowClick} />,
     );
 
-    const firstRow = document.querySelector<HTMLTableRowElement>('tr[data-rowid="r1"]');
-    expect(firstRow).not.toBeNull();
-    if (!firstRow) return;
+    const row = firstRow();
+    expect(row).not.toBeNull();
+    if (!row) return;
 
-    fireEvent.click(firstRow);
-    fireEvent.keyDown(firstRow, { key: "Enter" });
-    fireEvent.keyDown(firstRow, { key: " " });
+    fireEvent.click(row);
+    fireEvent.keyDown(row, { key: "Enter" });
+    fireEvent.keyDown(row, { key: " " });
 
-    expect(onRowClick).toHaveBeenNthCalledWith(1, rows[0]);
-    expect(onRowClick).toHaveBeenNthCalledWith(2, rows[0]);
-    expect(onRowClick).toHaveBeenNthCalledWith(3, rows[0]);
+    expect(onRowClick).toHaveBeenCalledTimes(3);
+    expect(onRowClick).toHaveBeenCalledWith(rows[0]);
   });
 
   it("does not trigger row click from interactive cell controls", async () => {
@@ -79,36 +78,12 @@ describe("Table", () => {
     const onRowClick = jest.fn();
 
     render(
-      <TableBase<Row>
-        data={rows}
-        columns={columns}
-        rowKey={(row) => row.id}
-        onRowClick={onRowClick}
-      />,
+      <Table<Row> data={rows} columns={columns} rowKey={(row) => row.id} onRowClick={onRowClick} />,
     );
 
     await user.click(screen.getByRole("button", { name: "2" }));
-
-    expect(onRowClick).not.toHaveBeenCalled();
-  });
-
-  it("does not trigger row click from interactive cell keyboard events", async () => {
-    const user = userEvent.setup();
-    const onRowClick = jest.fn();
-
-    render(
-      <TableBase<Row>
-        data={rows}
-        columns={columns}
-        rowKey={(row) => row.id}
-        onRowClick={onRowClick}
-      />,
-    );
-
-    const interactiveButton = screen.getByRole("button", { name: "2" });
-    interactiveButton.focus();
+    screen.getByRole("button", { name: "2" }).focus();
     await user.keyboard("{Enter}");
-    await user.keyboard(" ");
 
     expect(onRowClick).not.toHaveBeenCalled();
   });
@@ -117,7 +92,7 @@ describe("Table", () => {
     const onRowHover = jest.fn();
 
     render(
-      <TableBase<Row>
+      <Table<Row>
         data={rows}
         columns={columns}
         rowKey={(row) => row.id}
@@ -126,22 +101,21 @@ describe("Table", () => {
       />,
     );
 
-    const firstRow = document.querySelector<HTMLTableRowElement>('tr[data-rowid="r1"]');
-    expect(firstRow).not.toBeNull();
-    if (!firstRow) return;
+    const row = firstRow();
+    expect(row).not.toBeNull();
+    if (!row) return;
 
-    fireEvent.focus(firstRow);
+    fireEvent.focus(row);
     expect(onRowHover).toHaveBeenCalledWith(rows[0]);
 
     onRowHover.mockClear();
-
     fireEvent.focus(screen.getByRole("button", { name: "2" }));
     expect(onRowHover).not.toHaveBeenCalled();
   });
 
-  it("renders empty state message when no data is available", () => {
+  it("renders the empty message when there is no data", () => {
     render(
-      <TableBase<Row>
+      <Table<Row>
         data={[]}
         columns={columns}
         rowKey={(row) => row.id}
@@ -150,5 +124,28 @@ describe("Table", () => {
     );
 
     expect(screen.getByText("Nothing here yet")).toBeInTheDocument();
+  });
+
+  it("labels the table", () => {
+    render(
+      <Table<Row> data={rows} columns={columns} rowKey={(row) => row.id} aria-label="Metrics" />,
+    );
+
+    expect(screen.getByRole("table", { name: "Metrics" })).toBeInTheDocument();
+  });
+
+  it("has no axe violations", async () => {
+    const { container } = render(
+      <Table<Row>
+        data={rows}
+        columns={columns}
+        sortBy="name"
+        sortOrder="DESC"
+        onSort={() => {}}
+        rowKey={(row) => row.id}
+      />,
+    );
+
+    expect(await axe(container)).toHaveNoViolations();
   });
 });

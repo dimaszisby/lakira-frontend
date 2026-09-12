@@ -1,37 +1,47 @@
 "use client";
 
-import { motion, useAnimation, useMotionValue } from "framer-motion";
+import { motion, useAnimation, useMotionValue, useReducedMotion } from "framer-motion";
+import { DotsThreeVertical } from "phosphor-react";
 import type { ReactNode } from "react";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { cn } from "@/lib/cn";
+
+export type SwipeActionTone = "neutral" | "info" | "danger";
 
 export type SwipeAction = {
   id?: string;
   label: string;
   onClick: () => void;
-  color?: string;
-  className?: string;
+  tone?: SwipeActionTone;
   icon?: ReactNode;
   disabled?: boolean;
 };
 
-type SwipeableCardProps = {
+export type SwipeableCardProps = {
   children: ReactNode;
   actions: SwipeAction[];
   open?: boolean;
   defaultOpen?: boolean;
   onOpenChange?: (open: boolean) => void;
   onClose?: () => void;
+  /** Applied to the sliding surface. */
   className?: string;
   actionsAriaLabel?: string;
   disabled?: boolean;
 };
 
 const SWIPE_THRESHOLD = 0.4;
+/** Pixel width of one action; matches `--swipe-action-width`. */
 const ACTION_WIDTH = 64;
+const SPRING = { type: "spring", stiffness: 500, damping: 35 } as const;
+const INSTANT = { duration: 0 } as const;
 
-export const SwipeableCardBase = ({
+/**
+ * A card that slides left to reveal actions. Swiping is never the only way in:
+ * a "More actions" button toggles the same panel for keyboard and single-pointer users.
+ */
+export const SwipeableCard = ({
   children,
   actions,
   open,
@@ -42,15 +52,19 @@ export const SwipeableCardBase = ({
   actionsAriaLabel = "Swipe actions",
   disabled = false,
 }: SwipeableCardProps) => {
+  const actionsId = useId();
   const hasActions = actions.length > 0;
-  const actionAreaWidth = hasActions ? actions.length * ACTION_WIDTH : 0;
+  const actionAreaWidth = actions.length * ACTION_WIDTH;
   const isControlled = typeof open === "boolean";
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
-  const isOpen = isControlled ? !!open : internalOpen;
+  const isOpen = typeof open === "boolean" ? open : internalOpen;
+  const prefersReducedMotion = useReducedMotion();
 
   const x = useMotionValue(0);
   const controls = useAnimation();
-  const containerRef = useRef<HTMLDivElement | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const actionsRef = useRef<HTMLDivElement>(null);
+  const toggleRef = useRef<HTMLButtonElement>(null);
   const isDraggingRef = useRef(false);
   const dragResetTimeoutRef = useRef<number | null>(null);
 
@@ -80,9 +94,7 @@ export const SwipeableCardBase = ({
 
   useEffect(
     () => () => {
-      if (dragResetTimeoutRef.current != null) {
-        window.clearTimeout(dragResetTimeoutRef.current);
-      }
+      if (dragResetTimeoutRef.current !== null) window.clearTimeout(dragResetTimeoutRef.current);
     },
     [],
   );
@@ -102,71 +114,40 @@ export const SwipeableCardBase = ({
   return (
     <div
       ref={containerRef}
-      className="relative w-full select-none overflow-clip rounded-2xl antialiased"
+      data-open={isOpen}
+      className="swipe-card"
       onKeyDown={(event) => {
-        if (event.key === "Escape" && isOpen) {
-          event.preventDefault();
-          closePanel();
-        }
+        if (event.key !== "Escape" || !isOpen) return;
+        event.preventDefault();
+        const focusWasInActions = actionsRef.current?.contains(document.activeElement) ?? false;
+        closePanel();
+        if (focusWasInActions) toggleRef.current?.focus();
       }}
     >
-      <div
-        className="absolute inset-y-0 right-0 z-0 flex h-full"
-        role="group"
-        aria-label={actionsAriaLabel}
-      >
-        {actions.map((action, index) => (
-          <button
-            key={action.id ?? `${action.label}-${index}`}
-            type="button"
-            aria-label={action.label}
-            aria-hidden={!isOpen}
-            tabIndex={isOpen ? 0 : -1}
-            disabled={action.disabled}
-            onClick={() => {
-              action.onClick();
-              closePanel();
-            }}
-            className={cn(
-              "relative flex h-full w-16 items-center justify-center text-2xl text-ink",
-              action.color ?? "bg-status-error",
-              action.className,
-              "transition-all duration-200 hover:brightness-95 active:scale-95 disabled:opacity-60",
-            )}
-          >
-            {action.icon ?? action.label}
-          </button>
-        ))}
-      </div>
-
       <motion.div
-        className={cn(
-          "relative z-10 rounded-2xl border border-border bg-surface p-4",
-          "cursor-grab touch-pan-x active:cursor-grabbing",
-          className,
-        )}
+        className={cn("swipe-card-surface", className)}
         drag={disabled || !hasActions ? false : "x"}
         dragDirectionLock
         dragConstraints={{ left: -actionAreaWidth, right: 0 }}
         dragElastic={0.15}
+        // eslint-disable-next-line no-restricted-syntax -- framer-motion drives the drag offset through a MotionValue, not CSS
         style={{ x }}
         animate={controls}
-        transition={{ type: "spring", stiffness: 500, damping: 35 }}
+        transition={prefersReducedMotion ? INSTANT : SPRING}
         onDragStart={() => {
           isDraggingRef.current = true;
         }}
         onDragEnd={(_, info) => {
-          if (!hasActions || disabled || actionAreaWidth <= 0) {
+          if (!hasActions || disabled) {
             closePanel();
             return;
           }
 
           const percentDragged = Math.abs(info.offset.x) / actionAreaWidth;
-          const shouldOpen = info.offset.x < 0 && percentDragged > SWIPE_THRESHOLD;
-          if (shouldOpen) openPanel();
+          if (info.offset.x < 0 && percentDragged > SWIPE_THRESHOLD) openPanel();
           else closePanel();
 
-          if (dragResetTimeoutRef.current != null) {
+          if (dragResetTimeoutRef.current !== null) {
             window.clearTimeout(dragResetTimeoutRef.current);
           }
           dragResetTimeoutRef.current = window.setTimeout(() => {
@@ -174,29 +155,57 @@ export const SwipeableCardBase = ({
           }, 120);
         }}
         onClickCapture={(event) => {
-          if (isDraggingRef.current) {
+          // A drag ending over the card must not click it, and a tap while open only closes.
+          if (isDraggingRef.current || isOpen) {
             event.preventDefault();
             event.stopPropagation();
-            return;
-          }
-
-          if (isOpen) {
-            event.preventDefault();
-            event.stopPropagation();
-            closePanel();
+            if (!isDraggingRef.current) closePanel();
           }
         }}
-        data-open={isOpen}
       >
-        {children}
+        <div className="swipe-card-content">{children}</div>
+
+        {hasActions ? (
+          <button
+            ref={toggleRef}
+            type="button"
+            className="swipe-card-toggle"
+            aria-expanded={isOpen}
+            aria-controls={actionsId}
+            aria-label={isOpen ? "Hide actions" : "More actions"}
+            disabled={disabled}
+            onClick={openPanel}
+          >
+            <DotsThreeVertical weight="bold" aria-hidden />
+          </button>
+        ) : null}
       </motion.div>
+
+      <div
+        ref={actionsRef}
+        id={actionsId}
+        role="group"
+        aria-label={actionsAriaLabel}
+        inert={!isOpen}
+        className="swipe-card-actions"
+      >
+        {actions.map((action, index) => (
+          <button
+            key={action.id ?? `${action.label}-${index}`}
+            type="button"
+            aria-label={action.label}
+            disabled={action.disabled}
+            data-tone={action.tone ?? "neutral"}
+            className="swipe-card-action"
+            onClick={() => {
+              action.onClick();
+              closePanel();
+            }}
+          >
+            {action.icon ?? action.label}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };
-
-SwipeableCardBase.displayName = "SwipeableCard";
-
-const SwipeableCard = memo(SwipeableCardBase);
-SwipeableCard.displayName = "SwipeableCard";
-
-export default SwipeableCard;

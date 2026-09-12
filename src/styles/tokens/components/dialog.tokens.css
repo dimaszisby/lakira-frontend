@@ -1,0 +1,9 @@
+/* Tokens for Modal (Ariakit Dialog rendered through Card). */
+@layer base {
+  :root {
+    --dialog-max-width: 36rem;
+    --dialog-inset: var(--space-4);
+    --dialog-backdrop: var(--overlay);
+    --dialog-dismiss-fg: var(--text-secondary);
+  }
+}

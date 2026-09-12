@@ -13,7 +13,7 @@ This playbook is the execution flow for building or refactoring UI components in
 3. Define accessibility behavior
    - Semantic element, keyboard paths, focus behavior, ARIA state.
 4. Choose styling strategy
-   - Utility-only, token recipe, or CSS module.
+   - Primitives in `ui/`: a token + recipe pair. Feature components: semantic utilities.
 5. Implement states
    - Default, hover, active, focus-visible, disabled, loading/error.
 6. Add tests
@@ -49,55 +49,52 @@ Before coding, fill this brief in PR description or issue:
 ## 3. Implementation Skeleton (TypeScript)
 
 ```tsx
-"use client";
+import type { ComponentProps } from "react";
 
-import * as React from "react";
-import { cn } from "@/src/lib/cn";
+import { cn } from "@/lib/cn";
 
 type Size = "sm" | "md" | "lg";
 type Variant = "primary" | "secondary";
 
-export type ExampleProps = Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "children"> & {
-  children?: React.ReactNode;
+export type ExampleButtonProps = ComponentProps<"button"> & {
   size?: Size;
   variant?: Variant;
   loading?: boolean;
 };
 
-const ExampleButton = React.forwardRef<HTMLButtonElement, ExampleProps>(
-  (
-    { children, size = "md", variant = "primary", loading = false, className, disabled, ...rest },
-    ref,
-  ) => {
-    const isDisabled = disabled || loading;
-
-    return (
-      <button
-        ref={ref}
-        type="button"
-        disabled={isDisabled}
-        aria-disabled={isDisabled || undefined}
-        aria-busy={loading || undefined}
-        data-size={size}
-        data-variant={variant}
-        className={cn("example-button", className)}
-        {...rest}
-      >
-        {children}
-      </button>
-    );
-  },
+export const ExampleButton = ({
+  ref,
+  children,
+  size = "md",
+  variant = "primary",
+  loading = false,
+  className,
+  disabled,
+  ...rest
+}: ExampleButtonProps) => (
+  <button
+    ref={ref}
+    type="button"
+    disabled={disabled || loading}
+    aria-busy={loading || undefined}
+    data-size={size}
+    data-variant={variant}
+    className={cn("example-button", className)}
+    {...rest}
+  >
+    {children}
+  </button>
 );
-
-ExampleButton.displayName = "ExampleButton";
-
-export default ExampleButton;
 ```
 
 Notes:
 
-- Keep skeleton simple.
-- Move complexity to typed maps and recipe CSS when needed.
+- `ref` is a prop (React 19), exports are named, and there is no `"use client"` because the file
+  has no hooks or handlers. See [ADR-0016](../../explanation/decisions/adr-0016-ui-primitives-conventions-ariakit-and-centralised-styling.md).
+- Every variant, size and state style lives in `example-button.recipe.css`, keyed by the `data-*`
+  attributes. Nothing visual is decided in TSX.
+- An interactive widget beyond a button (dialog, listbox, popover, radio group) is built on Ariakit,
+  not by hand.
 
 ---
 

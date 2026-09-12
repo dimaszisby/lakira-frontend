@@ -1,60 +1,55 @@
-import type { ReactNode } from "react";
+import { CaretDown, CaretUp } from "phosphor-react";
+import type { ComponentProps, ReactNode } from "react";
 
+import type { SortOrder as SortDirection } from "@/generics/sort";
 import { cn } from "@/lib/cn";
 
-export type SortOrder = "ASC" | "DESC" | null;
+/** A sort direction, or `null` for "not sorted by this column". */
+export type SortOrder = SortDirection | null;
 
-type SortChipProps = {
+export type SortChipProps = Omit<ComponentProps<"button">, "onClick" | "children"> & {
   label: string;
   sortOrder: SortOrder;
   onClick: () => void;
-  customChildren?: ReactNode;
-  className?: string;
-  disabled?: boolean;
-  ariaLabel?: string;
+  /** Replaces the default label and direction icon. */
+  children?: ReactNode;
 };
 
-const SortChip = ({
+const directionText = (sortOrder: SortDirection) =>
+  sortOrder === "ASC" ? "ascending" : "descending";
+
+export const SortChip = ({
   label,
   sortOrder,
   onClick,
-  customChildren,
-  className,
+  children,
   disabled = false,
-  ariaLabel,
+  className,
+  "aria-label": ariaLabel,
+  ...props
 }: SortChipProps) => {
   const isActive = sortOrder !== null;
-  const directionText = sortOrder === "ASC" ? "ascending" : "descending";
-  const computedAriaLabel =
-    ariaLabel ?? (isActive ? `${label} sorted ${directionText}` : `${label} not sorted`);
+  const accessibleName =
+    ariaLabel ?? (isActive ? `${label} sorted ${directionText(sortOrder)}` : `${label} not sorted`);
+  const DirectionIcon = sortOrder === "ASC" ? CaretUp : CaretDown;
 
   return (
     <button
       type="button"
+      {...props}
       onClick={onClick}
       disabled={disabled}
       aria-pressed={isActive}
-      aria-label={computedAriaLabel}
-      className={cn(
-        "inline-flex items-center gap-1 rounded-2xl border border-border px-3 py-2 text-sm font-medium transition-colors",
-        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-        "disabled:cursor-not-allowed disabled:opacity-50",
-        isActive
-          ? "bg-surface text-brand-primary shadow-sm"
-          : "bg-surface2 text-ink-secondary hover:bg-surface hover:text-ink",
-        className,
-      )}
+      aria-label={accessibleName}
+      data-state={isActive ? "active" : "inactive"}
+      className={cn("chip", className)}
     >
-      {customChildren ? (
-        customChildren
-      ) : (
+      {children ?? (
         <>
           <span>{label}</span>
-          {sortOrder ? <span className="text-xs">{sortOrder === "ASC" ? "▲" : "▼"}</span> : null}
+          {isActive ? <DirectionIcon weight="bold" aria-hidden /> : null}
         </>
       )}
     </button>
   );
 };
-
-export default SortChip;

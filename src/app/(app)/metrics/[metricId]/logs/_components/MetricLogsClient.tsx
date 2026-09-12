@@ -23,13 +23,13 @@ import { useDebouncedValue } from "@/hooks/useDebouncedValue";
 import { isDummyActionsEnabled } from "@/lib/env";
 import { metricRoutes } from "@/lib/routes";
 import { makeOnColumnSort } from "@/lib/sort/makeOnColumnSort";
-import Button from "@/ui/Button";
-import Card, { CardHeader, CardTitle } from "@/ui/Card";
-import EmptyDataIndicator from "@/ui/EmptyDataIndicator";
+import { Button } from "@/ui/Button";
+import { Card, CardHeader, CardTitle } from "@/ui/Card";
+import { EmptyDataIndicator } from "@/ui/EmptyDataIndicator";
 import { Pagination } from "@/ui/Pagination";
-import SearchInput from "@/ui/SearchInput";
-import SkeletonLoader from "@/ui/SkeletonLoader";
-import SortChipGroup from "@/ui/SortChipGroup";
+import { SearchInput } from "@/ui/SearchInput";
+import { SkeletonLoader } from "@/ui/SkeletonLoader";
+import { SortChipGroup } from "@/ui/SortChipGroup";
 
 import { useMetricDetail } from "../../_components/MetricDetailContext";
 
@@ -68,6 +68,7 @@ const MetricLogsClient = ({ initialParams }: MetricLogsClientProps) => {
   }, [limit, sortParam, params.q, metricId]);
 
   const pages = useMetricLogListCursorPage({ ...queryParams, enabled: true });
+  const { page: currentPage, setPage } = pages;
 
   useEffect(() => {
     const nextQ = debouncedSearch.trim();
@@ -76,9 +77,9 @@ const MetricLogsClient = ({ initialParams }: MetricLogsClientProps) => {
   }, [debouncedSearch, params, replaceParams]);
 
   useEffect(() => {
-    if (pages.page === params.page) return;
-    pages.setPage(params.page);
-  }, [pages.page, params.page, pages.setPage]);
+    if (currentPage === params.page) return;
+    setPage(params.page);
+  }, [currentPage, params.page, setPage]);
 
   const handleParamsChange = useCallback(
     (next: Partial<MetricLogListSearchParams>) => {
@@ -186,7 +187,7 @@ const MetricLogsClient = ({ initialParams }: MetricLogsClientProps) => {
       </CardHeader>
 
       {loading ? (
-        <SkeletonLoader count={10} className="h-10" />
+        <SkeletonLoader count={10} itemClassName="h-10" />
       ) : empty ? (
         <EmptyDataIndicator
           title="No Data Available"

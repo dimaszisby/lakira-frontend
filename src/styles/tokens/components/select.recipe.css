@@ -1,0 +1,21 @@
+/* Select reuses .input-shell and .picker-trigger for the trigger and .popover/.listbox
+ * for the options; only the open/closed arrow is specific to it. */
+@layer components {
+  .select-arrow {
+    flex-shrink: 0;
+    width: var(--icon-sm);
+    height: var(--icon-sm);
+    color: hsl(var(--text-secondary));
+    transition: transform var(--duration-fast) var(--ease-standard);
+  }
+
+  .picker-trigger[aria-expanded="true"] .select-arrow {
+    transform: rotate(180deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .select-arrow {
+      transition: none;
+    }
+  }
+}

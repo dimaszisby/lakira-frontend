@@ -2,6 +2,7 @@ import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { http, HttpResponse } from "msw";
+import { StrictMode } from "react";
 
 import MetricSettingsForm from "@/features/metric-settings/components/MetricSettingsForm";
 import type { MetricSettingsExtendedVM } from "@/features/metric-settings/view-models";
@@ -340,6 +341,31 @@ describe("MetricSettingsForm integration", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it("shows the saved priority as selected when the form opens", async () => {
+    // StrictMode matches `next dev` (reactStrictMode: true), where the double
+    // effect run exposed a stale watched value.
+    renderWithProviders(
+      <StrictMode>
+        <MetricSettingsForm
+          metricId={metricId}
+          initialSettings={{
+            ...existingSettings,
+            displayOptions: {
+              ...existingSettings.displayOptions,
+              showOnDashboard: true,
+              priority: 1,
+            },
+          }}
+          onClose={jest.fn()}
+        />
+      </StrictMode>,
+    );
+    await settleAsyncUpdates();
+
+    expect(await screen.findByRole("radio", { name: "1" })).toBeChecked();
+    expect(screen.getByRole("radio", { name: "2" })).not.toBeChecked();
+  });
+
   it("resets displayed defaults when initialSettings prop changes", async () => {
     const onClose = jest.fn();
     const { rerender } = renderWithProviders(
@@ -362,11 +388,7 @@ describe("MetricSettingsForm integration", () => {
     };
 
     rerender(
-      <MetricSettingsForm
-        metricId={metricId}
-        initialSettings={nextSettings}
-        onClose={onClose}
-      />,
+      <MetricSettingsForm metricId={metricId} initialSettings={nextSettings} onClose={onClose} />,
     );
 
     expect(await screen.findByDisplayValue("99")).toBeInTheDocument();
@@ -387,7 +409,9 @@ describe("MetricSettingsForm integration", () => {
       <MetricSettingsForm metricId="" initialSettings={null} onClose={jest.fn()} />,
     );
 
-    expect(screen.getByText(/metric id is required to manage metric settings/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/metric id is required to manage metric settings/i),
+    ).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /^add$/i })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: /^save$/i })).not.toBeInTheDocument();
   });

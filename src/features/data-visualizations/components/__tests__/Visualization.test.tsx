@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-import Visualization from "@/components/ui/Visualization";
+import Visualization from "@/features/data-visualizations/components/Visualization";
 
 const mockUseMetricVisualization = jest.fn();
 const mockReplace = jest.fn();
@@ -27,18 +27,10 @@ jest.mock("@/features/data-visualizations/components/GranularityPicker", () => (
   __esModule: true,
   default: ({ value, onChange }: { value: string; onChange: (next: string) => void }) => (
     <div>
-      <button
-        data-testid={GRANULARITY_PICKER_TEST_ID}
-        type="button"
-        onClick={() => onChange("1w")}
-      >
+      <button data-testid={GRANULARITY_PICKER_TEST_ID} type="button" onClick={() => onChange("1w")}>
         granularity-{value}
       </button>
-      <button
-        data-testid="granularity-picker-invalid"
-        type="button"
-        onClick={() => onChange("7d")}
-      >
+      <button data-testid="granularity-picker-invalid" type="button" onClick={() => onChange("7d")}>
         invalid-bucket
       </button>
     </div>
@@ -261,7 +253,9 @@ describe("Visualization", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId(GRANULARITY_PICKER_TEST_ID)).toHaveTextContent("granularity-1w");
-      expect(screen.getByTestId(TIME_RANGE_PICKER_REL_TEST_ID)).toHaveTextContent("range-relative-7d");
+      expect(screen.getByTestId(TIME_RANGE_PICKER_REL_TEST_ID)).toHaveTextContent(
+        "range-relative-7d",
+      );
     });
   });
 });

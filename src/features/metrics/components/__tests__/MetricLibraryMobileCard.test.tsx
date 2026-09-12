@@ -25,8 +25,7 @@ jest.mock("@/features/metric-categories/presenters/toCategoryUI", () => ({
 }));
 
 jest.mock("@/ui/IconLabel", () => ({
-  __esModule: true,
-  default: ({ label, tone }: { label: unknown; tone: string }) => (
+  IconLabel: ({ label, tone }: { label: unknown; tone: string }) => (
     <span data-testid={`icon-label-${tone}`}>{String(label)}</span>
   ),
 }));
@@ -81,7 +80,9 @@ describe("MetricLibraryMobileCard", () => {
   it("updates rendered content when metric fields change with same id", () => {
     const { rerender } = render(<MetricLibraryMobileCardBase metric={sampleMetric} />);
     expect(screen.getByText("Sleep Quality")).toBeInTheDocument();
-    const initialLabels = screen.getAllByTestId(MUTED_ICON_LABEL_TEST_ID).map((el) => el.textContent);
+    const initialLabels = screen
+      .getAllByTestId(MUTED_ICON_LABEL_TEST_ID)
+      .map((el) => el.textContent);
     expect(initialLabels).toEqual(expect.arrayContaining(["hrs"]));
 
     rerender(

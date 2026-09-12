@@ -576,55 +576,6 @@
           "timeFrameEnabled": false
         }
       },
-      "DashboardVisualizationQueryParams": {
-        "additionalProperties": false,
-        "properties": {
-          "bucket": {
-            "default": "1d",
-            "enum": [
-              "1h",
-              "1d",
-              "1w",
-              "1m",
-              "1y"
-            ],
-            "type": "string"
-          },
-          "end": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "fill": {
-            "default": "none",
-            "enum": [
-              "none",
-              "zero",
-              "nan"
-            ],
-            "type": "string"
-          },
-          "last": {
-            "pattern": "^[1-9][0-9]*(h|d|w|m|y)$",
-            "type": "string"
-          },
-          "limit": {
-            "maximum": 48,
-            "minimum": 1,
-            "type": "integer"
-          },
-          "start": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "tz": {
-            "default": "Asia/Jakarta",
-            "minLength": 1,
-            "pattern": "^([A-Za-z_]+(?:\\/[A-Za-z0-9_+-]+)+|UTC)$",
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
       "DashboardVisualizationResponse": {
         "properties": {
           "items": {
@@ -792,23 +743,6 @@
         ],
         "type": "object"
       },
-      "Error": {
-        "properties": {
-          "message": {
-            "example": "Error message",
-            "type": "string"
-          },
-          "status": {
-            "example": "fail",
-            "type": "string"
-          }
-        },
-        "required": [
-          "status",
-          "message"
-        ],
-        "type": "object"
-      },
       "ForgotPasswordRequest": {
         "properties": {
           "email": {
@@ -877,50 +811,6 @@
             "type": "integer"
           }
         },
-        "type": "object"
-      },
-      "GetTrendRequest": {
-        "properties": {
-          "params": {
-            "properties": {
-              "metricId": {
-                "$ref": "#/components/schemas/Uuid"
-              }
-            },
-            "required": [
-              "metricId"
-            ],
-            "type": "object"
-          },
-          "query": {
-            "properties": {
-              "endDate": {
-                "example": "2023-01-31T23:59:59Z",
-                "format": "date-time",
-                "type": "string"
-              },
-              "interval": {
-                "enum": [
-                  "daily",
-                  "weekly",
-                  "monthly"
-                ],
-                "example": "daily",
-                "type": "string"
-              },
-              "startDate": {
-                "example": "2023-01-01T00:00:00Z",
-                "format": "date-time",
-                "type": "string"
-              }
-            },
-            "type": "object"
-          }
-        },
-        "required": [
-          "params",
-          "query"
-        ],
         "type": "object"
       },
       "LoginRequest": {
@@ -1163,50 +1053,6 @@
         ],
         "type": "object"
       },
-      "MetricCategoryCursorQueryParams": {
-        "properties": {
-          "after": {
-            "type": "string"
-          },
-          "filter": {
-            "properties": {
-              "name": {
-                "minLength": 1,
-                "pattern": "^.*\\S.*$",
-                "type": "string"
-              }
-            },
-            "type": "object"
-          },
-          "includeTotal": {
-            "type": "boolean"
-          },
-          "limit": {
-            "maximum": 100,
-            "minimum": 1,
-            "type": "integer"
-          },
-          "q": {
-            "minLength": 1,
-            "pattern": "^.*\\S.*$",
-            "type": "string"
-          },
-          "sort": {
-            "enum": [
-              "createdAt",
-              "-createdAt",
-              "updatedAt",
-              "-updatedAt",
-              "name",
-              "-name",
-              "metricCount",
-              "-metricCount"
-            ],
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
       "MetricCategoryCursorResponse": {
         "properties": {
           "filter": {
@@ -1257,59 +1103,6 @@
         ],
         "type": "object"
       },
-      "MetricCategoryListResponse": {
-        "items": {
-          "$ref": "#/components/schemas/MetricCategory"
-        },
-        "type": "array"
-      },
-      "MetricCursorQueryParams": {
-        "properties": {
-          "after": {
-            "type": "string"
-          },
-          "filter": {
-            "properties": {
-              "categoryId": {
-                "$ref": "#/components/schemas/Uuid"
-              },
-              "name": {
-                "minLength": 1,
-                "pattern": "^.*\\S.*$",
-                "type": "string"
-              }
-            },
-            "type": "object"
-          },
-          "includeTotal": {
-            "type": "boolean"
-          },
-          "limit": {
-            "maximum": 100,
-            "minimum": 1,
-            "type": "integer"
-          },
-          "q": {
-            "minLength": 1,
-            "pattern": "^.*\\S.*$",
-            "type": "string"
-          },
-          "sort": {
-            "enum": [
-              "createdAt",
-              "-createdAt",
-              "updatedAt",
-              "-updatedAt",
-              "name",
-              "-name",
-              "logCount",
-              "-logCount"
-            ],
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
       "MetricCursorResponse": {
         "properties": {
           "filter": {
@@ -1358,34 +1151,6 @@
           "sort",
           "limit"
         ],
-        "type": "object"
-      },
-      "MetricDetailQueryParams": {
-        "properties": {
-          "include": {
-            "anyOf": [
-              {
-                "enum": [
-                  "flat",
-                  "full"
-                ],
-                "type": "string"
-              },
-              {
-                "example": "settings,category",
-                "pattern": "^(settings|category|logs)(,(settings|category|logs))*$",
-                "type": "string"
-              }
-            ],
-            "default": "flat"
-          },
-          "logsLimit": {
-            "default": 20,
-            "maximum": 200,
-            "minimum": 1,
-            "type": "integer"
-          }
-        },
         "type": "object"
       },
       "MetricDetailResponse": {
@@ -1453,31 +1218,6 @@
           }
         ]
       },
-      "MetricIdQuery": {
-        "properties": {
-          "metricId": {
-            "$ref": "#/components/schemas/Uuid"
-          }
-        },
-        "type": "object"
-      },
-      "MetricIdRequiredQuery": {
-        "properties": {
-          "metricId": {
-            "$ref": "#/components/schemas/Uuid"
-          }
-        },
-        "required": [
-          "metricId"
-        ],
-        "type": "object"
-      },
-      "MetricListResponse": {
-        "items": {
-          "$ref": "#/components/schemas/Metric"
-        },
-        "type": "array"
-      },
       "MetricLog": {
         "properties": {
           "createdAt": {
@@ -1524,52 +1264,6 @@
           "createdAt",
           "updatedAt"
         ],
-        "type": "object"
-      },
-      "MetricLogCursorQueryParams": {
-        "properties": {
-          "after": {
-            "type": "string"
-          },
-          "filter": {
-            "properties": {
-              "logValue": {
-                "minimum": 0,
-                "type": "number"
-              },
-              "metricId": {
-                "$ref": "#/components/schemas/Uuid"
-              }
-            },
-            "type": "object"
-          },
-          "includeTotal": {
-            "type": "boolean"
-          },
-          "limit": {
-            "maximum": 100,
-            "minimum": 1,
-            "type": "integer"
-          },
-          "q": {
-            "minLength": 1,
-            "pattern": "^.*\\S.*$",
-            "type": "string"
-          },
-          "sort": {
-            "enum": [
-              "createdAt",
-              "-createdAt",
-              "updatedAt",
-              "-updatedAt",
-              "logValue",
-              "-logValue",
-              "loggedAt",
-              "-loggedAt"
-            ],
-            "type": "string"
-          }
-        },
         "type": "object"
       },
       "MetricLogCursorResponse": {
@@ -1621,12 +1315,6 @@
           "limit"
         ],
         "type": "object"
-      },
-      "MetricLogListResponse": {
-        "items": {
-          "$ref": "#/components/schemas/MetricLog"
-        },
-        "type": "array"
       },
       "MetricLogStatsResponse": {
         "properties": {
@@ -1861,49 +1549,6 @@
         ],
         "type": "object"
       },
-      "MetricSettingsCursorQueryParams": {
-        "properties": {
-          "after": {
-            "type": "string"
-          },
-          "filter": {
-            "properties": {
-              "isActive": {
-                "type": "boolean"
-              },
-              "metricId": {
-                "$ref": "#/components/schemas/Uuid"
-              }
-            },
-            "type": "object"
-          },
-          "includeTotal": {
-            "type": "boolean"
-          },
-          "limit": {
-            "maximum": 100,
-            "minimum": 1,
-            "type": "integer"
-          },
-          "q": {
-            "minLength": 1,
-            "pattern": "^.*\\S.*$",
-            "type": "string"
-          },
-          "sort": {
-            "enum": [
-              "createdAt",
-              "-createdAt",
-              "updatedAt",
-              "-updatedAt",
-              "isActive",
-              "-isActive"
-            ],
-            "type": "string"
-          }
-        },
-        "type": "object"
-      },
       "MetricSettingsCursorResponse": {
         "properties": {
           "filter": {
@@ -1953,12 +1598,6 @@
           "limit"
         ],
         "type": "object"
-      },
-      "MetricSettingsListResponse": {
-        "items": {
-          "$ref": "#/components/schemas/MetricSettings"
-        },
-        "type": "array"
       },
       "RateLimitError": {
         "properties": {
@@ -2582,44 +2221,6 @@
         "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$",
         "type": "string"
       },
-      "ValidationError": {
-        "properties": {
-          "errors": {
-            "items": {
-              "properties": {
-                "field": {
-                  "example": "body.email",
-                  "type": "string"
-                },
-                "message": {
-                  "example": "Invalid email format",
-                  "type": "string"
-                }
-              },
-              "required": [
-                "field",
-                "message"
-              ],
-              "type": "object"
-            },
-            "type": "array"
-          },
-          "message": {
-            "example": "Validation failed",
-            "type": "string"
-          },
-          "status": {
-            "example": "fail",
-            "type": "string"
-          }
-        },
-        "required": [
-          "status",
-          "message",
-          "errors"
-        ],
-        "type": "object"
-      },
       "VerifyEmailRequest": {
         "properties": {
           "token": {
@@ -2631,50 +2232,6 @@
         "required": [
           "token"
         ],
-        "type": "object"
-      },
-      "VisualizationQueryParams": {
-        "additionalProperties": false,
-        "properties": {
-          "bucket": {
-            "default": "1d",
-            "enum": [
-              "1h",
-              "1d",
-              "1w",
-              "1m",
-              "1y"
-            ],
-            "type": "string"
-          },
-          "end": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "fill": {
-            "default": "none",
-            "enum": [
-              "none",
-              "zero",
-              "nan"
-            ],
-            "type": "string"
-          },
-          "last": {
-            "pattern": "^[1-9][0-9]*(h|d|w|m|y)$",
-            "type": "string"
-          },
-          "start": {
-            "format": "date-time",
-            "type": "string"
-          },
-          "tz": {
-            "default": "Asia/Jakarta",
-            "minLength": 1,
-            "pattern": "^([A-Za-z_]+(?:\\/[A-Za-z0-9_+-]+)+|UTC)$",
-            "type": "string"
-          }
-        },
         "type": "object"
       },
       "VisualizationResponse": {

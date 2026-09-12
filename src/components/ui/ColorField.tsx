@@ -1,260 +1,208 @@
 "use client";
 
+import { Popover, PopoverDisclosure, PopoverProvider } from "@ariakit/react";
 import { Check, Palette, PencilSimpleLine } from "phosphor-react";
-import React, { useEffect, useId, useRef, useState } from "react";
+import type { ComponentProps, CSSProperties } from "react";
+import { useId, useRef, useState } from "react";
 
 import { COLOR_FIELD_PRESET_HEXES, DEFAULT_COLOR_HEX } from "@/constants/color-presets";
-import { cn } from "@/lib/cn";
 
-export type ColorFieldProps = {
+import { Button } from "./Button";
+import { InputChrome } from "./InputChrome";
+import { TextField } from "./TextField";
+
+export type ColorFieldProps = Pick<
+  ComponentProps<"input">,
+  "aria-label" | "aria-describedby" | "aria-invalid" | "aria-errormessage"
+> & {
   id?: string;
-  value: string | null; // "#RRGGBB" | null
+  /** A `#RRGGBB` hex string, or null for "use the default colour". */
+  value: string | null;
   onChange: (hex: string | null) => void;
   disabled?: boolean;
   placeholder?: string;
   defaultColor?: string;
+  /** Applied to the field shell. */
   className?: string;
-  "aria-label"?: string;
 };
 
 const HEX_RE = /^#([0-9A-Fa-f]{6})$/;
 const HEX_SHORT_RE = /^#([0-9A-Fa-f]{3})$/;
 
-function toValidHex(input: string | null | undefined): string | null {
+const toValidHex = (input: string | null | undefined): string | null => {
   if (!input) return null;
-  const v = input.trim();
-  if (HEX_RE.test(v)) return v.toUpperCase();
-  if (HEX_SHORT_RE.test(v)) {
-    const r = v[1];
-    const g = v[2];
-    const b = v[3];
-    return ("#" + r + r + g + g + b + b).toUpperCase();
+  const trimmed = input.trim();
+  if (HEX_RE.test(trimmed)) return trimmed.toUpperCase();
+  if (HEX_SHORT_RE.test(trimmed)) {
+    const [, r, g, b] = trimmed;
+    return `#${r}${r}${g}${g}${b}${b}`.toUpperCase();
   }
   return null;
-}
+};
 
-function normalizeHex(input: string | null | undefined, fallback: string) {
-  return toValidHex(input) ?? toValidHex(fallback) ?? DEFAULT_COLOR_HEX;
-}
+const normalizeHex = (input: string | null | undefined, fallback: string) =>
+  toValidHex(input) ?? toValidHex(fallback) ?? DEFAULT_COLOR_HEX;
 
-function toDraftHexInput(rawInput: string): string {
+const toDraftHexInput = (rawInput: string) => {
   const raw = rawInput.toUpperCase().replace(/\s/g, "");
-  if (!raw) return "";
-  return `#${raw.replace(/^#+/, "").replace(/#/g, "")}`;
-}
+  return raw ? `#${raw.replace(/#/g, "")}` : "";
+};
 
-const ColorField = ({
+/** The swatch colour is user data, so it reaches the recipe as a custom property. */
+const swatchStyle = (hex: string) => ({ "--swatch": hex }) as CSSProperties;
+
+export const ColorField = ({
   id,
   value,
   onChange,
-  disabled,
+  disabled = false,
   placeholder = DEFAULT_COLOR_HEX,
   defaultColor = DEFAULT_COLOR_HEX,
   className,
-  ...aria
+  "aria-label": ariaLabel,
+  ...ariaProps
 }: ColorFieldProps) => {
-  const uid = useId();
-  const inputId = id ?? `color-input-${uid}`;
+  const fallbackId = useId();
+  const inputId = id ?? `color-input-${fallbackId}`;
   const current = normalizeHex(value, defaultColor);
+
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState(current);
-  const [isEditingInput, setIsEditingInput] = useState(false);
-  const popoverRef = useRef<HTMLDivElement>(null);
-  const btnRef = useRef<HTMLButtonElement>(null);
-  const nativeRef = useRef<HTMLInputElement>(null);
-
-  // click outside to close
-  useEffect(() => {
-    if (!open) return;
-    const onDocClick = (e: MouseEvent) => {
-      const t = e.target as Node;
-      if (!popoverRef.current || !btnRef.current) return;
-      if (popoverRef.current.contains(t) || btnRef.current.contains(t)) return;
-      setOpen(false);
-    };
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
-  }, [open]);
+  const [isEditing, setIsEditing] = useState(false);
+  const nativePickerRef = useRef<HTMLInputElement>(null);
+  const draftHex = toValidHex(draft);
 
   const commitHex = (hex: string) => {
     const normalized = toValidHex(hex);
-    if (normalized) {
-      onChange(normalized);
-      setDraft(normalized);
-      setOpen(false);
-    }
+    if (!normalized) return;
+    onChange(normalized);
+    setDraft(normalized);
+    setOpen(false);
   };
 
-  const triggerNativePicker = () => {
-    if (nativeRef.current && !disabled) {
-      nativeRef.current.click();
-    }
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) setDraft(current);
+    setOpen(nextOpen);
   };
 
   return (
-    <div className={cn("relative")}>
-      <label htmlFor={inputId} className="sr-only">
-        Color
-      </label>
+    <PopoverProvider open={open} setOpen={handleOpenChange}>
+      {ariaLabel ? null : (
+        <label htmlFor={inputId} className="sr-only">
+          Color
+        </label>
+      )}
 
-      {/* Field shell */}
-      <div
-        className={cn(
-          "flex h-12 items-center gap-3 rounded-2xl border border-border bg-surface px-2 py-2 shadow-sm",
-          "focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/30",
-          disabled && "cursor-not-allowed opacity-60",
-          className,
-        )}
-        aria-disabled={disabled || undefined}
+      <InputChrome
+        disabled={disabled}
+        className={className}
+        leftAddon={
+          <span aria-hidden="true" className="color-swatch" style={swatchStyle(current)} />
+        }
+        rightAddon={
+          <PopoverDisclosure
+            className="input-icon-button"
+            disabled={disabled}
+            aria-label="Open color picker"
+            title="Open color picker"
+          >
+            <PencilSimpleLine weight="duotone" aria-hidden />
+          </PopoverDisclosure>
+        }
       >
-        {/* Swatch */}
-        <span
-          className="inline-block aspect-square h-8 rounded-xl shadow-sm ring-1 ring-black/5"
-          style={{ backgroundColor: current }}
-          aria-hidden="true"
-        />
-
-        {/* Hex text (editable) */}
         <input
           id={inputId}
           type="text"
           inputMode="text"
           maxLength={7}
-          value={isEditingInput ? draft : current}
-          onFocus={() => {
-            setIsEditingInput(true);
-            setDraft(current);
-          }}
-          onChange={(e) =>
-            setDraft(toDraftHexInput(e.target.value))
-          }
-          onBlur={() => {
-            const normalized = toValidHex(draft);
-            if (normalized) onChange(normalized);
-            setDraft(normalized ?? current);
-            setIsEditingInput(false);
-          }}
+          value={isEditing ? draft : current}
           placeholder={placeholder}
           disabled={disabled}
-          className={cn(
-            "w-full border-none bg-transparent text-base font-medium text-ink outline-none placeholder:text-ink-tertiary",
-          )}
-          aria-invalid={isEditingInput ? !toValidHex(draft) : false}
-          {...aria}
+          aria-label={ariaLabel}
+          aria-invalid={isEditing ? !draftHex : undefined}
+          {...ariaProps}
+          onFocus={() => {
+            setIsEditing(true);
+            setDraft(current);
+          }}
+          onChange={(event) => setDraft(toDraftHexInput(event.target.value))}
+          onBlur={() => {
+            if (draftHex) onChange(draftHex);
+            setDraft(draftHex ?? current);
+            setIsEditing(false);
+          }}
+          className="input-control color-field-input"
         />
+      </InputChrome>
 
-        {/* Edit (opens popover) */}
-        <button
-          type="button"
-          ref={btnRef}
-          onClick={() => !disabled && setOpen((s) => !s)}
-          onMouseDown={() => setDraft(current)}
-          className={cn(
-            "grid place-items-center rounded-lg p-2 outline-none transition hover:bg-surface2/60 focus-visible:ring-2 focus-visible:ring-ring",
-            disabled && "pointer-events-none",
-          )}
-          aria-haspopup="dialog"
-          aria-expanded={open}
-          aria-controls={`${inputId}-popover`}
-          title="Open color picker"
-        >
-          <PencilSimpleLine size={20} weight="duotone" className="text-ink-secondary" />
-        </button>
-      </div>
-
-      {/* Popover */}
-      {open ? (
-        <div
-          id={`${inputId}-popover`}
-          role="dialog"
-          aria-label="Choose color"
-          ref={popoverRef}
-          className="absolute z-50 mt-2 w-72 rounded-xl border border-border bg-surface p-3 shadow-lg"
-        >
-          <div className="mb-4 flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span
-                className="h-5 w-5 rounded ring-1 ring-black/5"
-                style={{ backgroundColor: draft }}
-              />
-              <span className="text-sm text-ink-secondary">Preview</span>
-            </div>
-            <button
-              type="button"
-              className={cn(
-                "inline-flex items-center gap-1 rounded-lg px-2 py-1 text-sm font-medium",
-                toValidHex(draft)
-                  ? "bg-brand-primary text-ink-inverted hover:bg-brand-primary/90"
-                  : "cursor-not-allowed bg-surface2 text-ink-tertiary",
-              )}
-              onClick={() => commitHex(draft)}
-              disabled={!toValidHex(draft)}
-              title="Use this color"
-            >
-              <Check size={16} /> Apply
-            </button>
-          </div>
-
-          {/* Quick palette */}
-          <div className="mb-4 grid grid-cols-6 gap-2">
-            {COLOR_FIELD_PRESET_HEXES.map((c) => (
-              <button
-                key={c}
-                type="button"
-                onClick={() => {
-                  setDraft(c.toUpperCase());
-                  commitHex(c);
-                }}
-                className="h-8 w-8 rounded-lg ring-1 ring-black/5 hover:ring-2 hover:ring-ring"
-                style={{ backgroundColor: c }}
-                aria-label={`Choose ${c}`}
-              />
-            ))}
-          </div>
-
-          {/* Hex editor */}
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={draft}
-              onChange={(e) => setDraft(toDraftHexInput(e.target.value))}
-              maxLength={7}
-              className={cn(
-                "flex-1 rounded-lg border border-border bg-surface2 px-3 py-2 font-mono text-sm text-ink outline-none",
-                toValidHex(draft)
-                  ? "focus:ring-2 focus:ring-ring/40"
-                  : "ring-2 ring-status-error/20",
-              )}
-              placeholder="#RRGGBB"
-              aria-label="Hex value"
-            />
-            <button
-              type="button"
-              onClick={triggerNativePicker}
-              className="flex-none rounded-lg border border-border bg-surface2 px-3 py-2 text-sm text-ink-secondary hover:bg-surface2/80"
-              title="Advanced picker"
-            >
-              <Palette size={20} className="text-ink-secondary" />
-            </button>
-            {/* Hidden native input to get OS color dialog when needed */}
-            <input
-              ref={nativeRef}
-              type="color"
-              value={toValidHex(draft) ?? current}
-              onChange={(e) => setDraft(e.target.value.toUpperCase())}
-              onBlur={() => {
-                const normalized = toValidHex(draft);
-                if (normalized) commitHex(normalized);
-              }}
-              className="sr-only"
+      <Popover gutter={8} unmountOnHide aria-label="Choose color" className="popover color-picker">
+        <div className="color-picker-header">
+          <span className="color-picker-preview">
+            <span
               aria-hidden="true"
-              tabIndex={-1}
+              className="color-swatch"
+              data-size="sm"
+              style={swatchStyle(draftHex ?? current)}
             />
-          </div>
+            Preview
+          </span>
+          <Button
+            size="sm"
+            leftIcon={<Check aria-hidden />}
+            disabled={!draftHex}
+            onClick={() => commitHex(draft)}
+          >
+            Apply
+          </Button>
         </div>
-      ) : null}
-    </div>
+
+        <div role="group" aria-label="Preset colors" className="color-presets">
+          {COLOR_FIELD_PRESET_HEXES.map((hex) => (
+            <button
+              key={hex}
+              type="button"
+              aria-label={`Choose ${hex}`}
+              aria-pressed={draftHex === hex.toUpperCase()}
+              className="color-preset"
+              style={swatchStyle(hex)}
+              onClick={() => commitHex(hex)}
+            />
+          ))}
+        </div>
+
+        <div className="color-picker-editor">
+          <TextField
+            size="sm"
+            aria-label="Hex value"
+            value={draft}
+            maxLength={7}
+            invalid={!draftHex}
+            placeholder="#RRGGBB"
+            onChange={(event) => setDraft(toDraftHexInput(event.target.value))}
+            className="font-mono"
+            wrapperClassName="flex-1"
+          />
+          <Button
+            variant="secondary"
+            size="sm"
+            leftIcon={<Palette aria-hidden />}
+            aria-label="Open system color picker"
+            onClick={() => nativePickerRef.current?.click()}
+          />
+          <input
+            ref={nativePickerRef}
+            type="color"
+            tabIndex={-1}
+            aria-hidden="true"
+            className="sr-only"
+            value={draftHex ?? current}
+            onChange={(event) => setDraft(event.target.value.toUpperCase())}
+            onBlur={() => {
+              if (draftHex) commitHex(draftHex);
+            }}
+          />
+        </div>
+      </Popover>
+    </PopoverProvider>
   );
 };
-
-export default ColorField;

@@ -2,7 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import type * as React from "react";
 
-import CategorySelect from "@/components/ui/CategorySelect";
+import CategorySelect from "@/features/metric-categories/components/CategorySelect";
 import { CATEGORY_DEFAULTS } from "@/features/metric-categories/constants";
 
 const mockUseCategoryTypeahead = jest.fn();

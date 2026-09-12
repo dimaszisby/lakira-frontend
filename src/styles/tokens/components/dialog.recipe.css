@@ -1,0 +1,65 @@
+@layer components {
+  .dialog-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    background-color: hsl(var(--dialog-backdrop) / var(--overlay-opacity));
+  }
+
+  /* Centred with fixed insets and auto margins; scrolls when taller than the viewport. */
+  .dialog {
+    position: fixed;
+    inset: var(--dialog-inset);
+    z-index: calc(var(--z-modal) + 1);
+    width: auto;
+    max-width: var(--dialog-max-width);
+    height: fit-content;
+    max-height: calc(100dvh - 2 * var(--dialog-inset));
+    margin: auto;
+    overflow-y: auto;
+  }
+
+  .dialog:focus-visible {
+    outline: none;
+  }
+
+  .dialog-dismiss {
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-4);
+    display: grid;
+    place-items: center;
+    width: var(--target-icon-button);
+    height: var(--target-icon-button);
+    border-radius: var(--radius-xs);
+    color: hsl(var(--dialog-dismiss-fg));
+    transition:
+      background-color var(--duration-fast) var(--ease-standard),
+      color var(--duration-fast) var(--ease-standard);
+  }
+
+  .dialog-dismiss svg {
+    width: var(--icon-md);
+    height: var(--icon-md);
+  }
+
+  .dialog-dismiss:focus-visible {
+    outline: var(--focus-ring-width) solid hsl(var(--ring));
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .dialog-dismiss:hover {
+    background-color: hsl(var(--interactive-hover));
+    color: hsl(var(--text));
+  }
+
+  .dialog-header-with-dismiss {
+    padding-inline-end: 2.5rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dialog-dismiss {
+      transition: none;
+    }
+  }
+}

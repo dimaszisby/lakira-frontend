@@ -5,9 +5,9 @@ import { Bell, Calendar, PencilSimple, Presentation, Target } from "phosphor-rea
 import { memo } from "react";
 
 import { metricRoutes } from "@/lib/routes";
-import Button from "@/ui/Button";
-import Card, { CardContent, CardHeader, CardTitle } from "@/ui/Card";
-import DataLabel from "@/ui/DataLabel";
+import { Button } from "@/ui/Button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/ui/Card";
+import { DataLabel } from "@/ui/DataLabel";
 import { formatHuman } from "@/utils/date-io";
 import { safeLabel } from "@/utils/label";
 

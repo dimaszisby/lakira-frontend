@@ -1,0 +1,13 @@
+/* Tokens for Pagination. */
+@layer base {
+  :root {
+    --pager-button-size: 2.25rem; /* 36px */
+    --pager-button-bg: var(--surface);
+    --pager-button-fg: var(--text-secondary);
+    --pager-button-border: var(--border-control);
+    --pager-button-bg-hover: var(--interactive-hover);
+    --pager-current: var(--interactive-selected-bg);
+    --pager-current-fg: var(--interactive-selected-fg);
+    --pager-muted-fg: var(--text-secondary);
+  }
+}

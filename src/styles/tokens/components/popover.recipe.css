@@ -1,0 +1,72 @@
+@layer components {
+  .popover {
+    z-index: var(--z-popover);
+    padding: var(--popover-padding);
+    border: 1px solid hsl(var(--popover-border));
+    border-radius: var(--popover-radius);
+    background-color: hsl(var(--popover-bg));
+    box-shadow: var(--elevation-popover);
+    color: hsl(var(--listbox-item-fg));
+  }
+
+  .popover:focus-visible {
+    outline: none;
+  }
+
+  /* A scrolling list of options inside a popover */
+  .listbox {
+    max-height: var(--popover-max-height);
+    padding: var(--space-1);
+    overflow-y: auto;
+  }
+
+  .listbox-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-xs);
+    color: hsl(var(--listbox-item-fg));
+    cursor: pointer;
+    scroll-margin-block: var(--space-1);
+  }
+
+  .listbox-item svg {
+    flex-shrink: 0;
+    width: var(--icon-sm);
+    height: var(--icon-sm);
+  }
+
+  .listbox-item[aria-disabled="true"],
+  .listbox-item:disabled {
+    cursor: not-allowed;
+    opacity: var(--disabled-opacity);
+  }
+
+  .listbox-item[data-active-item],
+  .listbox-item:hover:not(:disabled) {
+    background-color: hsl(var(--listbox-item-active-bg));
+  }
+
+  .listbox-item[aria-selected="true"],
+  .listbox-item[data-selected] {
+    background-color: hsl(var(--listbox-item-selected) / var(--selected-tint-alpha));
+    color: hsl(var(--listbox-item-selected-fg));
+  }
+
+  .listbox-item[aria-selected="true"][data-active-item],
+  .listbox-item[data-selected][data-active-item] {
+    background-color: hsl(var(--listbox-item-selected) / calc(var(--selected-tint-alpha) * 1.6));
+  }
+
+  .listbox-item-check {
+    margin-inline-start: auto;
+  }
+
+  .listbox-empty {
+    padding: var(--space-3);
+    color: hsl(var(--listbox-item-muted-fg));
+    font-size: theme("fontSize.body2");
+    line-height: 1.25rem;
+  }
+}

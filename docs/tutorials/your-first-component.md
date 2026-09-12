@@ -113,47 +113,48 @@ silently dropped — no error, just an unstyled badge.
 `src/components/ui/Badge.tsx`:
 
 ```tsx
-import type { HTMLAttributes } from "react";
-import React from "react";
+import type { ComponentProps } from "react";
 
 import { cn } from "@/lib/cn";
 
 export type BadgeVariant = "neutral" | "success" | "danger";
 export type BadgeSize = "sm" | "md";
 
-type BadgeProps = HTMLAttributes<HTMLSpanElement> & {
+export type BadgeProps = ComponentProps<"span"> & {
   variant?: BadgeVariant;
   size?: BadgeSize;
 };
 
-const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
-  ({ variant = "neutral", size = "md", className, ...rest }, ref) => (
-    <span
-      ref={ref}
-      className={cn("badge", className)}
-      data-variant={variant}
-      data-size={size}
-      {...rest}
-    />
-  ),
+export const Badge = ({
+  ref,
+  variant = "neutral",
+  size = "md",
+  className,
+  ...rest
+}: BadgeProps) => (
+  <span
+    ref={ref}
+    className={cn("badge", className)}
+    data-variant={variant}
+    data-size={size}
+    {...rest}
+  />
 );
-
-Badge.displayName = "Badge";
-
-export default Badge;
 ```
 
-Four rules are doing work here:
+Five rules are doing work here:
 
 - **Arrow function.** `react/function-component-definition` errors on `function` declarations.
+- **`ref` is a prop.** React 19 passes it through, so there is no `forwardRef` and no `displayName`.
+  `ComponentProps<"span">` already types it.
+- **Named export.** Every primitive in `ui/` is imported as `import { Badge } from "@/ui/Badge"`.
 - **`cn()`, never string concatenation.** `cn()` is clsx plus tailwind-merge; concatenating defeats
   the conflict resolution that lets a caller override a utility.
-- **Variants are `data-*`, not classes.** CSS owns the mapping.
-- **`displayName` on a `forwardRef`.** Without it the component shows as `Anonymous` in tests and
-  DevTools.
+- **Variants are `data-*`, not classes.** CSS owns the mapping. ESLint rejects arbitrary values,
+  opacity tints such as `bg-brand-primary/15`, and non-custom-property `style` keys in `ui/`, so a
+  styling decision has nowhere to go but the recipe.
 
-If you wrap this in `memo()`, name the component first and wrap at export —
-`export default memo(() => …)` is a lint error under three separate `no-restricted-syntax` selectors.
+Server-compatible by default: this file has no hooks or handlers, so it needs no `"use client"`.
 
 ## 5. Tests
 
@@ -163,7 +164,7 @@ If you wrap this in `memo()`, name the component first and wrap at export —
 import { render, screen } from "@testing-library/react";
 import { axe } from "jest-axe";
 
-import Badge from "@/components/ui/Badge";
+import { Badge } from "@/ui/Badge";
 
 describe("Badge", () => {
   it("renders with default recipe data attributes", () => {

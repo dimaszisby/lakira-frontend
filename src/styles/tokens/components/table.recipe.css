@@ -1,0 +1,98 @@
+@layer components {
+  .data-table-wrap {
+    overflow-x: auto;
+    border: 1px solid hsl(var(--data-table-border));
+    border-radius: var(--radius-sm);
+    background-color: hsl(var(--data-table-bg));
+    box-shadow: var(--elevation-control);
+    font-size: theme("fontSize.body2");
+    line-height: 1.25rem;
+  }
+
+  .data-table {
+    min-width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  .data-table thead {
+    background-color: hsl(var(--data-table-head-bg));
+  }
+
+  .data-table th {
+    padding: var(--space-3) var(--space-4);
+    color: hsl(var(--data-table-head-fg));
+    font-size: theme("fontSize.caption");
+    font-weight: 600;
+    letter-spacing: 0.025em;
+    line-height: 1rem;
+    text-transform: uppercase;
+  }
+
+  .data-table tbody {
+    background-color: hsl(var(--data-table-body-bg));
+  }
+
+  .data-table tbody > tr + tr {
+    border-top: 1px solid hsl(var(--data-table-border));
+  }
+
+  .data-table td {
+    padding: var(--space-2) var(--space-4);
+    color: hsl(var(--data-table-cell-fg));
+  }
+
+  .data-table-row {
+    transition: background-color var(--duration-fast) var(--ease-standard);
+  }
+
+  .data-table-row:hover {
+    background-color: hsl(var(--data-table-row-hover));
+  }
+
+  .data-table-row[data-interactive] {
+    cursor: pointer;
+  }
+
+  .data-table-row[data-interactive]:focus-visible {
+    outline: var(--focus-ring-width) solid hsl(var(--ring));
+    outline-offset: calc(var(--focus-ring-width) * -1);
+  }
+
+  .data-table-sort-button {
+    width: 100%;
+    border-radius: 2px;
+    color: inherit;
+    text-align: inherit;
+    text-transform: inherit;
+  }
+
+  .data-table-sort-button:hover {
+    text-decoration: underline;
+  }
+
+  .data-table-sort-button:focus-visible {
+    outline: var(--focus-ring-width) solid hsl(var(--ring));
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .data-table-sort-button svg {
+    display: inline-block;
+    width: var(--data-table-sort-icon-size);
+    height: var(--data-table-sort-icon-size);
+    margin-inline-start: var(--space-1);
+    vertical-align: middle;
+  }
+
+  .data-table-empty {
+    padding: var(--space-6) var(--space-4);
+    color: hsl(var(--data-table-empty-fg));
+    text-align: center;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .data-table-row {
+      transition: none;
+    }
+  }
+}

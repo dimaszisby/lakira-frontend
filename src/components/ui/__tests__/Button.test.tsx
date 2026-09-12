@@ -1,17 +1,18 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { axe } from "jest-axe";
+import { createRef } from "react";
 
-import Button from "@/components/ui/Button";
+import { Button } from "@/components/ui/Button";
 
 describe("Button", () => {
-  it("renders with button type by default", () => {
+  it("renders with type button by default", () => {
     render(<Button>Save</Button>);
 
-    const button = screen.getByRole("button", { name: /save/i });
-    expect(button).toHaveAttribute("type", "button");
+    expect(screen.getByRole("button", { name: /save/i })).toHaveAttribute("type", "button");
   });
 
-  it("disables and sets aria-busy while loading", () => {
+  it("disables and marks busy while loading", () => {
     render(<Button loading>Saving</Button>);
 
     const button = screen.getByRole("button", { name: /saving/i });
@@ -29,7 +30,26 @@ describe("Button", () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it("warns in development for icon-only button without accessible name", () => {
+  it("forwards ref as a prop", () => {
+    const ref = createRef<HTMLButtonElement>();
+    render(<Button ref={ref}>Save</Button>);
+
+    expect(ref.current).toBe(screen.getByRole("button", { name: /save/i }));
+  });
+
+  it("exposes variant and size to the recipe", () => {
+    render(
+      <Button variant="secondary" size="sm">
+        Cancel
+      </Button>,
+    );
+
+    const button = screen.getByRole("button", { name: /cancel/i });
+    expect(button).toHaveAttribute("data-variant", "secondary");
+    expect(button).toHaveAttribute("data-size", "sm");
+  });
+
+  it("warns in development for an icon-only button without an accessible name", () => {
     const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
 
     render(<Button leftIcon={<span aria-hidden>+</span>} />);
@@ -40,12 +60,22 @@ describe("Button", () => {
     warnSpy.mockRestore();
   });
 
-  it("does not warn for icon-only button with aria-label", () => {
+  it("does not warn for an icon-only button with an aria-label", () => {
     const warnSpy = jest.spyOn(console, "warn").mockImplementation(() => {});
 
     render(<Button leftIcon={<span aria-hidden>+</span>} aria-label="Create" />);
 
     expect(warnSpy).not.toHaveBeenCalled();
     warnSpy.mockRestore();
+  });
+
+  it("has no axe violations", async () => {
+    const { container } = render(
+      <Button loading leftIcon={<span aria-hidden>+</span>}>
+        Save
+      </Button>,
+    );
+
+    expect(await axe(container)).toHaveNoViolations();
   });
 });

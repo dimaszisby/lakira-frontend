@@ -1,0 +1,14 @@
+/* Tokens for DateTimePicker (trigger, calendar grid, time row). */
+@layer base {
+  :root {
+    --picker-icon-fg: var(--core-primary);
+    --picker-placeholder-fg: var(--text-placeholder);
+    --calendar-width: 22rem;
+    --calendar-day-size: 2.25rem;
+    --calendar-muted-fg: var(--text-secondary);
+    --calendar-day-hover-bg: var(--interactive-hover);
+    --calendar-day-selected-bg: var(--interactive-selected-bg);
+    --calendar-day-selected-fg: var(--on-brand-fg);
+    --calendar-divider: var(--border);
+  }
+}

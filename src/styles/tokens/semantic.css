@@ -8,14 +8,17 @@
     --surface: var(--gray-50);
     --surface-2: var(--gray-100);
     --text: var(--gray-900);
+
+    /* Equal to --text: h5/h6 and .text-button already render this way */
+    --text-emphasis: var(--text);
     --text-secondary: var(--gray-700);
     --text-tertiary: var(--gray-600);
     --text-inverted: var(--gray-white);
-    --text-error: var(--accent-vividcoral-500);
+    --text-error: var(--accent-vividcoral-700); /* 4.68:1 on surface */
 
     /* Borders & ring */
     --border: var(--gray-300);
-    --ring: var(--secondary-origamiblue-500);
+    --ring: var(--secondary-origamiblue-700); /* ≥ 3:1 on bg, surface, surface-2 */
 
     /* Status */
     --status-error-bg: var(--accent-vividcoral-100);
@@ -33,6 +36,16 @@
 
     /* IO */
     --input-bg: var(--gray-100);
+    --border-control: var(--gray-500);
+    --text-placeholder: var(--text-secondary);
+    --text-info: var(--info-700); /* 8.44:1 on the info tint */
+
+    /* Interaction */
+    --overlay: var(--gray-black);
+    --interactive-hover: var(--surface-2);
+    --interactive-selected-bg: var(--core-primary);
+    --interactive-selected-fg: var(--text);
+    --on-brand-fg: var(--gray-900);
   }
 
   /* Dark overrides */
@@ -46,9 +59,11 @@
     --text-inverted: var(--gray-800);
     --text-error: var(--accent-vividcoral-100);
     --border: var(--gray-700);
-    --ring: var(--secondary-origamiblue-500);
+    --ring: var(--secondary-origamiblue-100); /* ≥ 3:1 on bg, surface, surface-2 */
 
     /* status tokens can stay; override if needed */
     --input-bg: var(--gray-800);
+    --border-control: var(--gray-400);
+    --text-info: var(--info-500); /* info-700 is a dark grey, unreadable on dark surfaces */
   }
 }

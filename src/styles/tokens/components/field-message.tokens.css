@@ -1,0 +1,10 @@
+/* Tokens for ErrorMessage and the error line inside FormField. */
+@layer base {
+  :root {
+    --field-message-fg: var(--text-error);
+    --field-message-tint: var(--status-error);
+    --field-message-solid-bg: var(--status-error);
+    --field-message-solid-fg: var(--gray-900); /* 4.50:1 on the coral fill; white is 3.13 */
+    --field-message-icon-size: var(--icon-sm);
+  }
+}

@@ -4,9 +4,9 @@ import { useMemo } from "react";
 
 import { useResendVerificationMutation } from "@/features/auth/hooks/resend-verification.mutation";
 import { handleApiError } from "@/services/api/handleApiError";
-import Button from "@/ui/Button";
-import Card, { CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
-import ErrorMessage from "@/ui/ErrorMessage";
+import { Button } from "@/ui/Button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
+import { ErrorMessage } from "@/ui/ErrorMessage";
 
 type Props = {
   /** When the address was confirmed, or null while unverified. */

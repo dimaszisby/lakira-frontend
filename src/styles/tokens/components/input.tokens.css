@@ -1,0 +1,33 @@
+/* Tokens for the shared field shell: InputChrome → TextField, TextArea, and the
+ * trigger of SearchInput, Select, DateTimePicker, ColorField and CategorySelect. */
+@layer base {
+  :root {
+    --input-shell-bg: var(--surface);
+    --input-shell-fg: var(--text);
+    --input-border: var(--border-control);
+    --input-border-hover: var(--text-tertiary);
+    --input-border-focus: var(--ring);
+    --input-border-invalid: var(--status-error);
+    --input-placeholder: var(--text-placeholder);
+    --input-addon-fg: var(--text-secondary);
+    --input-disabled-bg: var(--surface-2);
+
+    /* Sizes: heights and radii follow the shared control scale; padding stays
+     * tighter than buttons so text lines up with the field edge. */
+    --input-px-sm: 0.75rem;
+    --input-px-md: 1rem;
+    --input-px-lg: 1.25rem;
+    --input-py-multiline-sm: 0.5rem;
+    --input-py-multiline-md: 0.625rem;
+    --input-py-multiline-lg: 0.75rem;
+    --input-gap-sm: var(--control-gap-sm);
+    --input-gap-md: var(--control-gap-md);
+    --input-gap-lg: var(--control-gap-md);
+
+    /* Icon buttons inside the field (clear, reveal password) */
+    --input-icon-button-size: var(--target-icon-button);
+    --input-icon-button-fg: var(--text-secondary);
+    --input-icon-button-fg-hover: var(--text);
+    --input-icon-button-bg-hover: var(--interactive-hover);
+  }
+}

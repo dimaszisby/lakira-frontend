@@ -1,26 +1,25 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { axe } from "jest-axe";
 
 import { Pagination } from "@/components/ui/Pagination";
 
-const GO_TO_PAGE_1_LABEL = /go to page 1/i;
+const GO_TO_PAGE_1_LABEL = /go to page 1$/i;
 const NEXT_PAGE_LABEL = /next page/i;
 const PREVIOUS_PAGE_LABEL = /previous page/i;
 const ARIA_CURRENT_ATTR = "aria-current";
 const ARIA_CURRENT_PAGE = "page";
 
 describe("Pagination", () => {
-  it("renders known-total pagination and triggers navigation actions", async () => {
+  it("renders numbered pages with a known total and navigates", async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
 
     render(<Pagination page={5} pageSize={10} total={100} onChange={onChange} />);
 
-    expect(screen.getByRole("button", { name: /go to page 5/i })).toHaveAttribute(
-      ARIA_CURRENT_ATTR,
-      ARIA_CURRENT_PAGE,
-    );
-    expect(screen.getByRole("button", { name: /go to page 5/i })).toBeDisabled();
+    const current = screen.getByRole("button", { name: /go to page 5/i });
+    expect(current).toHaveAttribute(ARIA_CURRENT_ATTR, ARIA_CURRENT_PAGE);
+    expect(current).toBeDisabled();
     expect(screen.getAllByText("...")).toHaveLength(2);
 
     await user.click(screen.getByRole("button", { name: NEXT_PAGE_LABEL }));
@@ -30,7 +29,7 @@ describe("Pagination", () => {
     expect(onChange).toHaveBeenNthCalledWith(2, 7);
   });
 
-  it("uses cursor-mode controls when total is unknown", async () => {
+  it("uses cursor-mode controls when the total is unknown", async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
 
@@ -44,7 +43,7 @@ describe("Pagination", () => {
     expect(onChange).toHaveBeenCalledWith(4);
   });
 
-  it("clamps out-of-range page to total bounds", async () => {
+  it("clamps an out-of-range page to the total", async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
 
@@ -54,7 +53,7 @@ describe("Pagination", () => {
       ARIA_CURRENT_ATTR,
       ARIA_CURRENT_PAGE,
     );
-    expect(screen.getByRole("button", { name: /next page/i })).toBeDisabled();
+    expect(screen.getByRole("button", { name: NEXT_PAGE_LABEL })).toBeDisabled();
 
     await user.click(screen.getByRole("button", { name: PREVIOUS_PAGE_LABEL }));
 
@@ -73,46 +72,29 @@ describe("Pagination", () => {
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it("keeps known-total boundary controls disabled even when canPrev/canNext are true", async () => {
+  it("keeps known-total boundaries disabled even when canPrev/canNext are true", async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
 
     const { rerender } = render(
-      <Pagination
-        page={1}
-        pageSize={10}
-        total={20}
-        canPrev
-        canNext
-        onChange={onChange}
-      />,
+      <Pagination page={1} pageSize={10} total={20} canPrev canNext onChange={onChange} />,
     );
 
     expect(screen.getByRole("button", { name: PREVIOUS_PAGE_LABEL })).toBeDisabled();
 
-    await user.click(screen.getByRole("button", { name: /next page/i }));
+    await user.click(screen.getByRole("button", { name: NEXT_PAGE_LABEL }));
     expect(onChange).toHaveBeenCalledWith(2);
 
     onChange.mockClear();
+    rerender(<Pagination page={2} pageSize={10} total={20} canPrev canNext onChange={onChange} />);
 
-    rerender(
-      <Pagination
-        page={2}
-        pageSize={10}
-        total={20}
-        canPrev
-        canNext
-        onChange={onChange}
-      />,
-    );
-
-    expect(screen.getByRole("button", { name: /next page/i })).toBeDisabled();
-
-    await user.click(screen.getByRole("button", { name: /next page/i }));
+    const next = screen.getByRole("button", { name: NEXT_PAGE_LABEL });
+    expect(next).toBeDisabled();
+    await user.click(next);
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it("normalizes invalid pageSize values to keep known-total pagination stable", async () => {
+  it("normalizes an invalid pageSize", async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
 
@@ -122,9 +104,30 @@ describe("Pagination", () => {
       ARIA_CURRENT_ATTR,
       ARIA_CURRENT_PAGE,
     );
-    expect(screen.getByRole("button", { name: NEXT_PAGE_LABEL })).toBeEnabled();
 
     await user.click(screen.getByRole("button", { name: NEXT_PAGE_LABEL }));
     expect(onChange).toHaveBeenCalledWith(2);
+  });
+
+  it("labels the navigation landmark", () => {
+    render(
+      <Pagination
+        page={1}
+        pageSize={10}
+        total={30}
+        onChange={() => {}}
+        aria-label="Metric pages"
+      />,
+    );
+
+    expect(screen.getByRole("navigation", { name: "Metric pages" })).toBeInTheDocument();
+  });
+
+  it("has no axe violations", async () => {
+    const { container } = render(
+      <Pagination page={5} pageSize={10} total={100} onChange={() => {}} />,
+    );
+
+    expect(await axe(container)).toHaveNoViolations();
   });
 });

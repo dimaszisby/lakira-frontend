@@ -36,7 +36,7 @@ const BottomNavigationBar: React.FC<NavigationListProps> = ({
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
                   "flex flex-col items-center rounded-xl px-2 py-1 text-xs font-medium transition",
-                  isActive ? "text-brand-primary" : "text-ink-muted hover:text-ink",
+                  isActive ? "text-brand-primary" : "text-ink-secondary hover:text-ink",
                 )}
               >
                 <item.icon size={20} />
