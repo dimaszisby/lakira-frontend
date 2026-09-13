@@ -3,7 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useAtom, useSetAtom } from "jotai";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { fetchUserProfile } from "@/src/services/api/auth.api";
 import type { UserAtom } from "@/src/services/state/atoms";
@@ -18,16 +18,25 @@ export function withAuth<P extends object>(Wrapped: React.ComponentType<P>): Rea
     const router = useRouter();
     const queryClient = useQueryClient();
 
-    // prevent re-running the bootstrapper in StrictMode
-    const startedRef = useRef(false);
-
     // local flag to avoid rendering while we decide/redirect
     const [checking, setChecking] = useState(true);
 
+    // There is deliberately no `startedRef` guard here. One was added to stop
+    // the bootstrapper running twice under StrictMode, and it deadlocked the
+    // component against the cleanup it shares the effect with:
+    //
+    //   1. first pass runs, sets the ref, starts `bootstrap`
+    //   2. StrictMode's cleanup sets that pass's `cancelled = true`
+    //   3. second pass returns early on the ref, so nothing restarts
+    //   4. the in-flight `bootstrap` reaches `finally`, sees `cancelled`, and
+    //      skips `setChecking(false)`
+    //
+    // Nothing ever cleared `checking`, so `/account` showed its spinner
+    // forever in `next dev`. Letting the effect re-run is the idiomatic fix:
+    // each pass owns its own `cancelled`, so the second pass completes and the
+    // first pass's late response is correctly ignored. The cost is one extra
+    // profile fetch in development, which is exactly what StrictMode is for.
     useEffect(() => {
-      if (startedRef.current) return;
-      startedRef.current = true;
-
       let cancelled = false;
 
       const bootstrap = async () => {

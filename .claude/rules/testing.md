@@ -78,7 +78,21 @@ Cypress, `cypress/e2e/**/*.cy.ts`. `cy.loginAsTestUser()` and `cy.setInvalidAuth
 
 ## Coverage
 
-`jest.config.ts` thresholds are placeholders (3/2/3/3 %), as are the per-folder goals in `coverage-goals.json` (2–5 %), and `scripts/coverage-checklist.mjs` only fails with `--strict`, which nothing passes. **Coverage is reported to Codecov but gates nothing.** Do not cite the threshold as evidence a change is tested.
+**Coverage gates, and has since 2026-08-27.** `jest.config.ts` sets global thresholds of 29 % statements / 29 % branches / 26 % functions / 29 % lines, ratcheted to just below measured coverage so a real regression fails while normal fluctuation does not. Per-folder goals live in `coverage-goals.json`:
+
+| Path | Statement goal |
+| --- | --- |
+| `src/components/ui` | 80 % |
+| `src/lib` | 65 % |
+| `src/utils` | 50 % |
+| `src/features/metric-categories` | 30 % |
+| `src/features/metrics` | 15 % |
+
+`npm run coverage:check` carries `--strict` in the script itself, and `.github/workflows/test.yml` runs it — so a folder falling below its goal fails CI.
+
+**Never lower a threshold to make a build pass.** Raise them as suites grow.
+
+(This section previously described all of it as placeholders — 3/2/3/3 % with `--strict` passed by nothing — and said coverage "gates nothing". That was true until 2026-08-27 and wrong afterwards; corrected 2026-09-13.)
 
 The genuinely untested areas, in rough priority order: `src/services/**` (the whole API and error layer), every feature `hooks/` directory, and all `mappers.ts` / `keys.ts` / `cache.ts` files. `src/components/ui/` is well covered — 28 files, roughly one per primitive.
 
