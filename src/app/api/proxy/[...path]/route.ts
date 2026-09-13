@@ -1,9 +1,19 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-import { REFRESH_COOKIE_NAME, SESSION_COOKIE_NAME } from "@/constants/app";
+import {
+  REFRESH_COOKIE_NAME,
+  REFRESH_COOKIE_PATH,
+  REFRESH_MAX_AGE_SECONDS,
+  SESSION_COOKIE_NAME,
+} from "@/constants/app";
 import { isPublicApiPath } from "@/lib/auth-paths";
-import { applyRefreshedSession, refreshAccessToken } from "@/lib/auth-refresh";
+import {
+  applyRefreshedSession,
+  captureRefreshCookie,
+  clearSessionCookies,
+  refreshAccessToken,
+} from "@/lib/auth-refresh";
 import { getApiBaseUrl } from "@/lib/env";
 import { logger } from "@/lib/logger";
 
@@ -95,13 +105,23 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
     }
   }
 
+  // Read before the header is stripped. `/auth/login` issues the refresh cookie
+  // here, and this is the only point it passes through: login runs
+  // `POST /api/proxy/auth/login` from the browser, so a cookie dropped here is
+  // gone. That is what it used to be — the header was deleted wholesale, the
+  // refresh cookie never existed on this origin, and every session ended when
+  // its 15-minute access token did.
+  const issuedRefreshToken = captureRefreshCookie(response.headers);
+
   const responseHeaders = new Headers(response.headers);
   ["content-encoding", "transfer-encoding", "content-length"].forEach((header) =>
     responseHeaders.delete(header),
   );
 
-  // Never let the backend's own Set-Cookie through: its refresh cookie is
-  // scoped to the backend's path and would be dead on this origin.
+  // The backend's own Set-Cookie still never goes through verbatim: it is
+  // scoped to `Path=/api/v1/auth/refresh`, a path this origin does not serve,
+  // so the browser would store a cookie it never sends back. The value is
+  // re-issued below against this origin instead.
   responseHeaders.delete("set-cookie");
 
   const proxied = new NextResponse(response.body, {
@@ -112,6 +132,27 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
   // Rotation means the refresh token changes on every use. Persisting the new
   // pair is what keeps the next refresh working.
   if (refreshed) applyRefreshedSession(proxied.cookies, refreshed);
+
+  // Last writer wins, and an upstream-issued cookie is newer than a rotation
+  // performed before the request was sent.
+  if (issuedRefreshToken) {
+    proxied.cookies.set(REFRESH_COOKIE_NAME, issuedRefreshToken, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: true,
+      path: REFRESH_COOKIE_PATH,
+      maxAge: REFRESH_MAX_AGE_SECONDS,
+    });
+  }
+
+  // A 401 that refresh could not rescue means the session is finished. Leaving
+  // the cookies in place is what trapped users: the token was dead, every call
+  // 401'd, and `/login` bounced back to the dashboard because a cookie existed.
+  // Clearing here means the next navigation reaches the login form.
+  if (response.status === 401 && !refreshed && token && !isPublicApiPath(rawSegments)) {
+    logger.info("proxy.session.cleared", { path: targetPath });
+    clearSessionCookies(proxied.cookies);
+  }
 
   return proxied;
 }

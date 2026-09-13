@@ -71,7 +71,7 @@ expect(await axe(container)).toHaveNoViolations();
 
 ## Where the gaps are
 
-In rough priority order, the untested surface: `src/services/**` (the entire API and error layer — `normalizeApiError`, `handleApiError`, the retry policy), `src/app/api/**` (proxy and auth route handlers), `middleware.ts`, every feature `hooks/` directory, and all `mappers.ts` / `keys.ts` / `cache.ts` files. `src/components/ui/` is already well covered.
+In rough priority order, the untested surface: `src/services/**` (the entire API and error layer — `normalizeApiError`, `handleApiError`, the retry policy), every feature `hooks/` directory, and all `mappers.ts` / `keys.ts` / `cache.ts` files. `src/components/ui/` is already well covered.
 
 The proxy, the auth routes, and the error layer are the highest-risk untested code in the repo. If asked where to start, start there.
 

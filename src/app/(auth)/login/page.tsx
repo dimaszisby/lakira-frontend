@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 
 import { SESSION_COOKIE_NAME } from "@/constants/app";
 import LoginForm from "@/features/auth/components/LoginForm";
+import { isSessionTokenUsable } from "@/lib/jwt";
 import { authRoutes } from "@/lib/routes";
 
 export const metadata: Metadata = {
@@ -19,9 +20,13 @@ type LoginPageProps = {
 const LoginPage = async ({ searchParams }: LoginPageProps) => {
   const resolvedSearchParams = (await searchParams) ?? {};
   const cookieStore = await cookies();
-  const token = cookieStore.get(SESSION_COOKIE_NAME);
+  const token = cookieStore.get(SESSION_COOKIE_NAME)?.value;
 
-  if (token?.value) {
+  // Presence is not usability. Redirecting on a cookie that merely exists trapped
+  // anyone holding a token the backend rejects: every call 401'd, and "log in
+  // again" bounced straight back to the dashboard without ever showing the form.
+  // `isSessionTokenUsable` is the same check `src/proxy.ts` makes.
+  if (isSessionTokenUsable(token)) {
     redirect(authRoutes.afterAuth(resolvedSearchParams.returnUrl));
   }
 

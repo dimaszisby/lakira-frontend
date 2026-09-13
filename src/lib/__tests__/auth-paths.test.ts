@@ -38,19 +38,24 @@ describe("isProtectedAppPath", () => {
   });
 });
 
-describe("middleware matcher stays in sync", () => {
+describe("proxy matcher stays in sync", () => {
   // Next.js requires config.matcher to be statically analysable, so it cannot
   // be derived from PROTECTED_APP_PATHS at runtime — a computed value fails the
   // build with "matcher needs to be a static string or array of static
   // strings". This test is what keeps the literal honest instead.
   //
   // The matcher is read as source text rather than imported: importing
-  // middleware.ts pulls in next/server, which needs web globals the jsdom test
+  // src/proxy.ts pulls in next/server, which needs web globals the jsdom test
   // environment does not provide.
+  //
+  // The path matters as much as the contents. Next 16 renamed the `middleware`
+  // convention to `proxy` and wants the file beside `app` — `src/` here. This
+  // file was at the repository root under the old name, so the gate never ran
+  // at all; `readFileSync` throwing is what would catch a move back.
   const readMatcherFromSource = (): string[] => {
-    const source = readFileSync(path.join(process.cwd(), "middleware.ts"), "utf8");
+    const source = readFileSync(path.join(process.cwd(), "src", "proxy.ts"), "utf8");
     const block = /matcher:\s*\[([^\]]*)\]/.exec(source);
-    if (!block) throw new Error("could not find config.matcher in middleware.ts");
+    if (!block) throw new Error("could not find config.matcher in src/proxy.ts");
     return [...block[1].matchAll(/"([^"]+)"/g)].map((match) => match[1]);
   };
 

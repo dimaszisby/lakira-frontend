@@ -63,6 +63,6 @@ This keeps server route handlers and browser-side API calls aligned.
 - `.github/workflows/test.yml`
 - `package.json`
 - `src/app/api/proxy/[...path]/route.ts`
-- `src/app/api/auth/login/route.ts`
+- `src/app/api/auth/revive/route.ts`
 - `src/services/api/api.ts`
 - `next.config.ts`

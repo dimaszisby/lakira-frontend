@@ -80,7 +80,7 @@ Cypress, `cypress/e2e/**/*.cy.ts`. `cy.loginAsTestUser()` and `cy.setInvalidAuth
 
 `jest.config.ts` thresholds are placeholders (3/2/3/3 %), as are the per-folder goals in `coverage-goals.json` (2–5 %), and `scripts/coverage-checklist.mjs` only fails with `--strict`, which nothing passes. **Coverage is reported to Codecov but gates nothing.** Do not cite the threshold as evidence a change is tested.
 
-The genuinely untested areas, in rough priority order: `src/services/**` (the whole API and error layer), `src/app/api/**` (proxy and auth route handlers), `middleware.ts`, every feature `hooks/` directory, and all `mappers.ts` / `keys.ts` / `cache.ts` files. `src/components/ui/` is well covered — 28 files, roughly one per primitive.
+The genuinely untested areas, in rough priority order: `src/services/**` (the whole API and error layer), every feature `hooks/` directory, and all `mappers.ts` / `keys.ts` / `cache.ts` files. `src/components/ui/` is well covered — 28 files, roughly one per primitive.
 
 ## Rules
 

@@ -1,7 +1,7 @@
 ---
 paths:
   - next.config.ts
-  - middleware.ts
+  - src/proxy.ts
   - src/app/api/**
   - src/services/api/**
   - src/features/auth/**
@@ -14,13 +14,26 @@ Audit history: [`docs/internal/audits/security/`](../../docs/internal/audits/sec
 
 ## Auth and session
 
-The session is a single **httpOnly** cookie, `lakira_token`: `sameSite: lax`, `secure: true`, 7-day max age, path `/`. Set and cleared by `src/app/api/auth/*`.
+The session is a **pair** of httpOnly cookies, both `secure: true`:
+
+| Cookie | SameSite | Path | Max age | Holds |
+|---|---|---|---|---|
+| `lakira_token` | `lax` | `/` | 30 days | the 15-minute access token |
+| `lakira_refresh` | `strict` | `/api` | 30 days | the refresh token, re-scoped from the backend's own path |
+
+The cookie's max age deliberately outlives the token inside it: expiry is decided by the `exp` claim, and the cookie has to survive long enough for the refresh flow to have something to work with.
+
+`lakira_refresh` is narrow on purpose. Only a request to `/api/*` carries it, which keeps rotation in the two places whose `Set-Cookie` actually reaches the browser — the proxy and `/api/auth/*`. Widening it to `/` would let a server component rotate the token during SSR and silently discard the new value.
+
+**Clear them together.** A surviving refresh cookie mints a new access token, so clearing one of the pair does not end a session. `clearSessionCookies` in `src/lib/auth-refresh.ts` is the only correct way to do it; a clear that omits an attribute the setter used does not match the stored cookie at all.
 
 Non-negotiables:
 
 - **The token never touches JavaScript.** Not `localStorage`, not `sessionStorage`, not a non-httpOnly cookie, not a global. If a component appears to need the token, it needs a server route instead.
 - **The bearer header is injected by the proxy**, from the cookie. Feature code never sets `Authorization`.
-- `middleware.ts` gate-checks the cookie for the paths in `PROTECTED_APP_PATHS` (`src/lib/auth-paths.ts`), validating the token's `exp` claim rather than merely its presence. Adding a protected top-level route means adding it to that list **and** to `config.matcher` in `middleware.ts` — Next.js requires the matcher to be a static literal, so it cannot be derived. A test asserts the two stay in sync.
+- **`src/proxy.ts`** is the edge gate — Next 16 renamed the `middleware` convention to `proxy`, and the file must sit beside `app`, which here means `src/`. It was `middleware.ts` at the repository root until 2026-09-12, satisfying neither condition, so **Next never loaded it and the gate did not run**; `src/app/(app)/layout.tsx` redirecting too is what hid it. It cookie-gates the paths in `PROTECTED_APP_PATHS` (`src/lib/auth-paths.ts`), validating the token's `exp` claim rather than merely its presence. Adding a protected top-level route means adding it to that list **and** to `config.matcher` — Next.js requires the matcher to be a static literal, so it cannot be derived. A test asserts the two stay in sync, and reads the file by path so a move back fails.
+- **Test a session cookie for usability, never for presence.** `/login` and `/register` redirected on any cookie at all until 2026-09-12, so a token the backend rejected trapped the user: every call 401'd and "log in again" bounced back to the dashboard without showing the form. Use `isSessionTokenUsable` (`src/lib/jwt.ts`), which is what the middleware uses.
+- **A 401 that refresh cannot rescue clears the session.** Leaving a rejected token in place is the other half of that trap.
 
 `secure: true` is unconditional, so the cookie will not be set over plain `http`. That is intentional; work around it in local dev with the documented setup rather than by weakening the flag.
 

@@ -6,6 +6,9 @@ import type { UserAtom } from "../state/atoms.js";
 import api from "./api";
 import { handleApiError } from "./handleApiError";
 
+/** Same-origin session route, not a backend path. */
+const LOGOUT_ENDPOINT = "/api/auth/logout";
+
 /**
  * * Register
  * Registers a new user with the provided data.
@@ -55,14 +58,17 @@ export const fetchUserProfile = async (): Promise<UserAtom | null> => {
 
 /**
  * Logs out the user.
- * @returns A confirmation message from the API.
+ *
+ * Deliberately *not* an `api` (proxy) call. Going through `/api/proxy` revoked
+ * the refresh family upstream and left both cookies on this origin untouched —
+ * the proxy strips `Set-Cookie`, and the route that deletes them was never
+ * reached. `/api/auth/logout` does the upstream revocation and the local clear
+ * together, which is the only combination that actually ends a session.
  */
-export const logoutUser = async (): Promise<ApiResponse<{ message: string }>> => {
-  try {
-    const response = await api.post<ApiResponse<{ message: string }>>("/auth/logout");
-    return response.data;
-  } catch (error) {
-    console.error("API Error in logoutUser:", error);
-    throw new Error(handleApiError(error).join(", "));
+export const logoutUser = async (): Promise<void> => {
+  const response = await fetch(LOGOUT_ENDPOINT, { method: "POST" });
+
+  if (!response.ok) {
+    throw new Error("Logout failed");
   }
 };

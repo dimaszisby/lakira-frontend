@@ -58,7 +58,7 @@ export const SESSION_COOKIE_OPTIONS = {
  * tokens — so this is *not* how long a session is usable. It is how long the
  * browser keeps presenting the cookie, which must outlive the token so the
  * refresh flow has something to work with. Expiry is decided by the token's
- * `exp` claim, checked in `middleware.ts`.
+ * `exp` claim, checked in `src/proxy.ts`.
  *
  * Matched to the backend's refresh-token lifetime (30 days): once the refresh
  * token is gone, a stored access token is worthless.

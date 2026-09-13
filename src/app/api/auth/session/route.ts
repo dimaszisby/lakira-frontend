@@ -6,6 +6,7 @@ import {
   SESSION_COOKIE_OPTIONS,
   SESSION_MAX_AGE_SECONDS,
 } from "@/constants/app";
+import { clearSessionCookies } from "@/lib/auth-refresh";
 import { getApiBaseUrl } from "@/lib/env";
 import { decodeJwtPayload, isJwtExpired } from "@/lib/jwt";
 import { logger } from "@/lib/logger";
@@ -83,7 +84,16 @@ export async function POST(request: Request) {
   return NextResponse.json({ ok: true });
 }
 
+/**
+ * Clear the session without calling the backend.
+ *
+ * Both cookies go, not just the access token: a surviving refresh cookie can
+ * mint a new access token, so clearing one of the pair does not end a session.
+ * Prefer `POST /api/auth/logout` for a user-initiated sign-out — it revokes the
+ * token family upstream as well.
+ */
 export async function DELETE() {
-  (await cookies()).set(SESSION_COOKIE_NAME, "", { ...SESSION_COOKIE_OPTIONS, maxAge: 0 });
-  return NextResponse.json({ ok: true });
+  const response = NextResponse.json({ ok: true });
+  clearSessionCookies(response.cookies);
+  return response;
 }
