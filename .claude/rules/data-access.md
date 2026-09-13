@@ -65,7 +65,8 @@ The chain is `withApiErrorHandling` → `handleApiError` → `normalizeApiError`
 
 Two things to know:
 
-- `src/services/api/auth.api.ts` is legacy — raw try/catch with `console.error` instead of `withApiErrorHandling`. Do not copy it; converting it is welcome.
+- `src/services/api/auth.api.ts` was converted to `withApiErrorHandling` on 2026-09-13. It had caught the Axios error and rethrown `new Error(handleApiError(error).join(", "))`, which discarded the response — the forms then normalized that plain `Error` a second time, hit the `status == null` branch, and rendered **every** auth failure as "We couldn't reach the server". Never flatten an error into a string before the point of display: `withApiErrorHandling` logs and reports, then rethrows the original so one `handleApiError` call at the UI can read the status.
+- `fetchUserProfile` still returns `null` rather than throwing, deliberately — callers treat "no profile" and "could not load it" alike.
 - The backend's own docs flag that 4xx/5xx bodies are under-specified in the OpenAPI spec, and its global error handler can emit shapes the spec does not describe. Treat `normalizeApiError` as the compatibility layer and add cases there rather than defensively in features.
 
 Backend rate limits you will hit: 100/15min per IP globally, 50/15min per user, 30/1min on analytics. A 429 is `retryable`.

@@ -16,6 +16,9 @@ jest.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams("returnUrl=/metrics"),
 }));
 
+const REGISTER_ENDPOINT = "/api/proxy/auth/register";
+const TEST_EMAIL = "john@example.com";
+
 describe("RegisterForm integration", () => {
   beforeEach(() => {
     mockPush.mockReset();
@@ -27,7 +30,7 @@ describe("RegisterForm integration", () => {
     const sessionPayloadSpy = jest.fn();
 
     server.use(
-      http.post("/api/proxy/auth/register", async ({ request }) => {
+      http.post(REGISTER_ENDPOINT, async ({ request }) => {
         const body = await request.json();
         registerPayloadSpy(body);
 
@@ -39,7 +42,7 @@ describe("RegisterForm integration", () => {
             user: {
               id: "user-1",
               username: "john",
-              email: "john@example.com",
+              email: TEST_EMAIL,
               role: "user",
               isPublicProfile: true,
               createdAt: "2026-01-01T00:00:00.000Z",
@@ -58,7 +61,7 @@ describe("RegisterForm integration", () => {
     renderWithProviders(<RegisterForm />);
 
     await user.type(screen.getByLabelText(/username/i), "john");
-    await user.type(screen.getByLabelText(/email/i), "john@example.com");
+    await user.type(screen.getByLabelText(/email/i), TEST_EMAIL);
     await user.type(screen.getByPlaceholderText(/enter your password/i), "password123");
     await user.type(screen.getByPlaceholderText(/confirm your password/i), "password123");
     await user.click(screen.getByRole("button", { name: /register/i }));
@@ -70,7 +73,7 @@ describe("RegisterForm integration", () => {
     expect(registerPayloadSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         username: "john",
-        email: "john@example.com",
+        email: TEST_EMAIL,
         password: "password123",
         passwordConfirmation: "password123",
         isPublicProfile: true,
@@ -85,7 +88,7 @@ describe("RegisterForm integration", () => {
     renderWithProviders(<RegisterForm />);
 
     await user.type(screen.getByLabelText(/username/i), "john");
-    await user.type(screen.getByLabelText(/email/i), "john@example.com");
+    await user.type(screen.getByLabelText(/email/i), TEST_EMAIL);
     await user.type(screen.getByPlaceholderText(/enter your password/i), "password123");
     await user.type(screen.getByPlaceholderText(/confirm your password/i), "password321");
 
@@ -99,7 +102,7 @@ describe("RegisterForm integration", () => {
 
     try {
       server.use(
-        http.post("/api/proxy/auth/register", () =>
+        http.post(REGISTER_ENDPOINT, () =>
           HttpResponse.json(
             {
               status: "fail",
@@ -114,13 +117,49 @@ describe("RegisterForm integration", () => {
       renderWithProviders(<RegisterForm />);
 
       await user.type(screen.getByLabelText(/username/i), "john");
-      await user.type(screen.getByLabelText(/email/i), "john@example.com");
+      await user.type(screen.getByLabelText(/email/i), TEST_EMAIL);
       await user.type(screen.getByPlaceholderText(/enter your password/i), "password123");
       await user.type(screen.getByPlaceholderText(/confirm your password/i), "password123");
       await user.click(screen.getByRole("button", { name: /register/i }));
 
       expect(await screen.findByRole("alert")).toBeInTheDocument();
       expect(mockPush).not.toHaveBeenCalled();
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
+
+  /**
+   * Same defect as LoginForm: `auth.api.ts` flattened the Axios error, the form
+   * normalized the plain `Error` a second time, and every failure rendered as a
+   * connection problem. Asserted on the text, since the existing failure test
+   * only checks that an alert exists.
+   */
+  it("reports a rate limit as a rate limit, not a connection failure", async () => {
+    const user = userEvent.setup();
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      server.use(
+        http.post(REGISTER_ENDPOINT, () =>
+          HttpResponse.json(
+            { status: 429, message: "Too many requests, please try again later." },
+            { status: 429 },
+          ),
+        ),
+      );
+
+      renderWithProviders(<RegisterForm />);
+
+      await user.type(screen.getByLabelText(/username/i), "john");
+      await user.type(screen.getByLabelText(/email/i), TEST_EMAIL);
+      await user.type(screen.getByPlaceholderText(/enter your password/i), "password123");
+      await user.type(screen.getByPlaceholderText(/confirm your password/i), "password123");
+      await user.click(screen.getByRole("button", { name: /register/i }));
+
+      const alert = await screen.findByRole("alert");
+      expect(alert).toHaveTextContent(/too many attempts/i);
+      expect(alert).not.toHaveTextContent(/couldn't reach the server/i);
     } finally {
       consoleErrorSpy.mockRestore();
     }
