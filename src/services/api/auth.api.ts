@@ -4,55 +4,65 @@ import { unwrap, unwrapOrNull } from "@/types/generics/ApiResponse";
 
 import type { UserAtom } from "../state/atoms.js";
 import api from "./api";
-import { handleApiError } from "./handleApiError";
+import { withApiErrorHandling } from "./withApiErrorHandling";
 
 /** Same-origin session route, not a backend path. */
 const LOGOUT_ENDPOINT = "/api/auth/logout";
 
 /**
- * * Register
- * Registers a new user with the provided data.
- * Uses a generic type to make this function reusable for different auth responses.
- * @returns An API response containing a token and user data.
+ * Auth calls.
+ *
+ * ## Why these rethrow rather than flatten
+ *
+ * `registerUser` and `loginUser` used to catch the Axios error and rethrow
+ * `new Error(handleApiError(error).join(", "))`. That discarded the response:
+ * the replacement is a plain `Error` carrying only a string, with no `status`.
+ *
+ * The forms then called `handleApiError` a *second* time on that plain Error,
+ * and `normalizeApiError` fell through to its non-Axios branch with
+ * `status: undefined` — which `friendlyMessageFor` renders as "We couldn't
+ * reach the server. Check your connection and try again."
+ *
+ * So every auth failure read as a network problem. A wrong password, a 429 from
+ * the rate limiter, a 500 — all three told the user to check their connection,
+ * and the correct message the first call had already produced was thrown away.
+ * Seen on 2026-09-13 against a rate-limited local backend: the browser logged
+ * `status: 429` while the form showed the connection error.
+ *
+ * `withApiErrorHandling` logs and reports, then rethrows the **original** error,
+ * so the one `handleApiError` call at the point of display sees a real
+ * `AxiosError` and maps the status. This is what every other feature `api.ts`
+ * already does.
  */
-export const registerUser = async (userData: CreateUserRequestDTO): Promise<AuthResponseDTO> => {
-  try {
-    const response = await api.post<ApiResponse<AuthResponseDTO>>("/auth/register", userData);
 
-    return unwrap(response);
-  } catch (error) {
-    console.error("API Error in registerUser:", error);
-    throw new Error(handleApiError(error).join(", "));
-  }
-};
+export const registerUser = (userData: CreateUserRequestDTO): Promise<AuthResponseDTO> =>
+  withApiErrorHandling(
+    () => api.post<ApiResponse<AuthResponseDTO>>("/auth/register", userData).then(unwrap),
+    "registerUser",
+  );
+
+export const loginUser = (credentials: LoginRequestDTO): Promise<AuthResponseDTO> =>
+  withApiErrorHandling(
+    () => api.post<ApiResponse<AuthResponseDTO>>("/auth/login", credentials).then(unwrap),
+    "loginUser",
+  );
 
 /**
- * Logs in the user with the provided credentials.
- * @returns An API response containing a token and user data.
- */
-export const loginUser = async (credentials: LoginRequestDTO): Promise<AuthResponseDTO> => {
-  try {
-    const response = await api.post<ApiResponse<AuthResponseDTO>>("/auth/login", credentials);
-
-    return unwrap(response);
-  } catch (error) {
-    console.error("API Error in loginUser:", error);
-    throw new Error(handleApiError(error).join(", "));
-  }
-};
-
-/**
- * Fetches the user profile of the currently logged-in user.
- * Returns `null` if the request fails instead of throwing an error.
+ * Fetches the profile of the logged-in user.
+ *
+ * Returns `null` on failure rather than throwing — callers treat "no profile"
+ * and "could not load the profile" alike, and an unauthenticated read here is
+ * routine rather than exceptional.
  */
 export const fetchUserProfile = async (): Promise<UserAtom | null> => {
   try {
     const response = await api.get<ApiResponse<UserAtom>>("/auth/profile");
-
-    return unwrapOrNull(response); // returns `null` instead of undefined or throwing an error
+    return unwrapOrNull(response);
   } catch (error) {
-    console.error("API Error in fetchUserProfile:", error);
-    return null; // ✅ Always return `null` when an error occurs
+    if (process.env.NODE_ENV !== "production") {
+      console.error("[API ERROR] fetchUserProfile:", error);
+    }
+    return null;
   }
 };
 
