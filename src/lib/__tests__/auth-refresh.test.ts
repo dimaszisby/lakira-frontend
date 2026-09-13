@@ -6,7 +6,13 @@
 
 import { REFRESH_COOKIE_NAME, REFRESH_COOKIE_PATH, SESSION_COOKIE_NAME } from "@/constants/app";
 
-import { applyRefreshedSession, captureRefreshCookie, refreshAccessToken } from "../auth-refresh";
+import {
+  applyRefreshedSession,
+  captureRefreshCookie,
+  clearSessionCookies,
+  refreshAccessToken,
+  resetRefreshCoalescing,
+} from "../auth-refresh";
 
 const b64 = (value: object) =>
   Buffer.from(JSON.stringify(value))
@@ -59,6 +65,12 @@ describe("captureRefreshCookie", () => {
 
 describe("refreshAccessToken", () => {
   const originalFetch = global.fetch;
+
+  // Results are remembered per token value so a straggler cannot replay a
+  // redemption. Without a reset, a token value reused by the next case would
+  // be answered from that memory instead of hitting the mock.
+  beforeEach(resetRefreshCoalescing);
+
   afterEach(() => {
     global.fetch = originalFetch;
     jest.restoreAllMocks();
@@ -174,5 +186,147 @@ describe("applyRefreshedSession", () => {
     const writer = makeWriter();
     applyRefreshedSession(writer, { token: "t", refreshToken: null });
     expect(writer.calls.some((c) => c.name === REFRESH_COOKIE_NAME)).toBe(false);
+  });
+});
+
+describe("refreshAccessToken coalescing", () => {
+  const originalFetch = global.fetch;
+
+  beforeEach(resetRefreshCoalescing);
+  afterEach(() => {
+    global.fetch = originalFetch;
+    jest.restoreAllMocks();
+  });
+
+  /**
+   * The backend revokes the whole token family when an already-redeemed refresh
+   * token is presented again. A page that fires several queries at once hits
+   * exactly that: they all 401 together on the same expired access token, and
+   * every redemption after the first reads as replay. One round trip per token
+   * is the thing being asserted — not a saved request, a session that survives.
+   */
+  it("redeems a token once when several callers arrive together", async () => {
+    const token = makeToken();
+    const spy = jest.fn().mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(() => resolve(okResponse(token, [`${REFRESH_COOKIE_NAME}=rotated`])), 0);
+        }),
+    );
+    global.fetch = spy as unknown as typeof fetch;
+
+    const results = await Promise.all([
+      refreshAccessToken("shared"),
+      refreshAccessToken("shared"),
+      refreshAccessToken("shared"),
+    ]);
+
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(results).toEqual([
+      { token, refreshToken: "rotated" },
+      { token, refreshToken: "rotated" },
+      { token, refreshToken: "rotated" },
+    ]);
+  });
+
+  it("replays the result for a caller still holding the superseded token", async () => {
+    // A request that left the browser before the rotated cookie came back still
+    // carries the old value. Redeeming it again is the replay the backend
+    // punishes, so the recorded answer is returned instead.
+    const token = makeToken();
+    const spy = jest
+      .fn()
+      .mockResolvedValue(
+        okResponse(token, [`${REFRESH_COOKIE_NAME}=rotated`]),
+      ) as unknown as typeof fetch;
+    global.fetch = spy;
+
+    const first = await refreshAccessToken("stale");
+    const straggler = await refreshAccessToken("stale");
+
+    expect(spy).toHaveBeenCalledTimes(1);
+    expect(straggler).toEqual(first);
+  });
+
+  it("remembers a rejection too, so a burst cannot hammer the backend", async () => {
+    const spy = jest.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      json: async () => ({ status: "fail" }),
+      headers: headersWithSetCookie([]),
+    }) as unknown as typeof fetch;
+    global.fetch = spy;
+
+    expect(await refreshAccessToken("revoked")).toBeNull();
+    expect(await refreshAccessToken("revoked")).toBeNull();
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps distinct tokens apart", async () => {
+    const token = makeToken();
+    const spy = jest.fn().mockResolvedValue(okResponse(token)) as unknown as typeof fetch;
+    global.fetch = spy;
+
+    await Promise.all([refreshAccessToken("one"), refreshAccessToken("two")]);
+    expect(spy).toHaveBeenCalledTimes(2);
+  });
+
+  it("starts a fresh redemption once the grace window has passed", async () => {
+    jest.useFakeTimers();
+    try {
+      const token = makeToken();
+      const spy = jest.fn().mockResolvedValue(okResponse(token)) as unknown as typeof fetch;
+      global.fetch = spy;
+
+      await refreshAccessToken("aging");
+      jest.setSystemTime(Date.now() + 31_000);
+      await refreshAccessToken("aging");
+
+      expect(spy).toHaveBeenCalledTimes(2);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+});
+
+describe("clearSessionCookies", () => {
+  const makeWriter = () => {
+    const calls: Array<{ name: string; value: string; options: Record<string, unknown> }> = [];
+    return {
+      calls,
+      set: (name: string, value: string, options: Record<string, unknown>) => {
+        calls.push({ name, value, options });
+      },
+    };
+  };
+
+  it("clears both cookies, not just the access token", () => {
+    // A surviving refresh cookie mints a new access token, so clearing one of
+    // the pair does not end a session.
+    const writer = makeWriter();
+    clearSessionCookies(writer);
+    expect(writer.calls.map((c) => c.name).sort()).toEqual(
+      [REFRESH_COOKIE_NAME, SESSION_COOKIE_NAME].sort(),
+    );
+    expect(writer.calls.every((c) => c.value === "")).toBe(true);
+    expect(writer.calls.every((c) => c.options.maxAge === 0)).toBe(true);
+  });
+
+  it("repeats the attributes each cookie was set with", () => {
+    // A clear that omits an attribute the setter used does not match the stored
+    // cookie, so the browser keeps it and the session stays live.
+    const writer = makeWriter();
+    clearSessionCookies(writer);
+
+    const session = writer.calls.find((c) => c.name === SESSION_COOKIE_NAME);
+    expect(session?.options).toMatchObject({ httpOnly: true, secure: true, path: "/" });
+
+    const refresh = writer.calls.find((c) => c.name === REFRESH_COOKIE_NAME);
+    expect(refresh?.options).toMatchObject({
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      path: REFRESH_COOKIE_PATH,
+    });
   });
 });

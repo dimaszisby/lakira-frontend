@@ -16,7 +16,7 @@
 /**
  * Top-level page routes that require a session.
  *
- * `middleware.ts` derives its `config.matcher` from this list, so the two can no
+ * `src/proxy.ts` derives its `config.matcher` from this list, so the two can no
  * longer drift. Adding a protected section means adding it here only.
  */
 export const PROTECTED_APP_PATHS = [
@@ -27,7 +27,7 @@ export const PROTECTED_APP_PATHS = [
   "/organization",
 ] as const;
 
-/** Matcher patterns for `middleware.ts`, derived so they cannot drift. */
+/** Matcher patterns for `src/proxy.ts`, derived so they cannot drift. */
 export const PROTECTED_APP_MATCHERS = PROTECTED_APP_PATHS.map((path) => `${path}/:path*`);
 
 export const isProtectedAppPath = (pathname: string): boolean =>

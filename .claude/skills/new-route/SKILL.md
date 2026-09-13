@@ -74,7 +74,7 @@ export default SegmentLayout;
 - Server-side prefetches for protected routes need `getServerAuthHeaders()` or they 401 silently.
 - Closing a modal with `router.back()` restores the cached RSC tree — pair it with `router.refresh()` or the list behind it shows stale data.
 - `useRouter` and other client hooks cannot live in a file that is still a server component. Put them in the `_components/` client child.
-- If the route is protected, add its top-level segment to the matcher in `middleware.ts`. The gate is not inferred from the folder structure.
+- If the route is protected, add its top-level segment to `PROTECTED_APP_PATHS` in `src/lib/auth-paths.ts` **and** to `config.matcher` in `src/proxy.ts`. The gate is not inferred from the folder structure, and Next requires the matcher to be a static literal so it cannot be derived.
 
 ## Verify
 

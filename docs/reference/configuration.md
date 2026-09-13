@@ -17,7 +17,7 @@ It has two segments:
 | Export                               | Segment                       | Safe to import from                                |
 | ------------------------------------ | ----------------------------- | -------------------------------------------------- |
 | `clientEnv`, `isDummyActionsEnabled` | Public — `NEXT_PUBLIC_*` only | Anywhere                                           |
-| `getApiBaseUrl()`                    | Server                        | Route handlers, server components, `middleware.ts` |
+| `getApiBaseUrl()`                    | Server                        | Route handlers, server components, `src/proxy.ts`  |
 | `resolveAppOrigin()`                 | Server                        | Route handlers, server components, metadata routes |
 
 Parsing is lenient on purpose: every field is optional and nothing throws at module load, because

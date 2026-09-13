@@ -40,6 +40,12 @@ Prefer `API_URL`: it is server-only, so it never ships to the browser. See
 3. Forwards all headers except `connection`, `content-length`, and `host`.
 4. Streams the request and response bodies (`duplex: "half"`), so uploads are not buffered.
 5. Uses `redirect: "manual"` — upstream redirects are passed through, not followed.
+6. On a `401`, redeems the refresh cookie once and retries. If that fails, clears both session
+   cookies so the next navigation reaches the login form rather than looping on a dead token.
+7. Strips the backend's `Set-Cookie`, but first captures `lakira_refresh` out of it and re-issues
+   it scoped to this origin's `/api`. Login runs as `POST /api/proxy/auth/login`, so this is the
+   only point that cookie passes through — dropping it wholesale, as the proxy used to, is what
+   ended every session when its 15-minute access token expired.
 
 **Auth enforcement denies by default.** A request with no token gets a `401` without reaching the
 backend, unless its full path is one of the public auth entry points in `PUBLIC_API_PATHS`
@@ -62,15 +68,28 @@ Adding a backend resource needs no change here: it is protected from the moment 
 
 ## Middleware
 
-`middleware.ts` cookie-gates the page routes, separately from the proxy:
+`src/proxy.ts` cookie-gates the page routes, separately from the API proxy. (Next 16 renamed the `middleware` convention to `proxy`; it is unrelated to `src/app/api/proxy`. The file has to sit beside `app` — `src/` here — and until 2026-09-12 it was `middleware.ts` at the repository root, so it never ran.)
 
 ```
 /dashboard  ·  /metrics  ·  /metric-categories  ·  /account
 ```
 
 matched as `/<path>/:path*`. The gate checks the token's `exp` claim, not merely that a cookie
-exists, and clears a stale cookie on the way out. An unauthenticated request is redirected to
-`/login?returnUrl=<target>`.
+exists. A request with no cookie at all is redirected to `/login?returnUrl=<target>`.
+
+An expired token is **not** sent to `/login`. The backend pairs a 15-minute access token with a
+30-day refresh token, so expiry is routine rather than the end of a session. The refresh cookie is
+scoped to `/api` and a page navigation therefore does not carry it, which leaves the gate
+unable to read it, let alone redeem it — so the request is redirected to `/api/auth/revive`
+instead, which sits under that path and can. That route rotates the token, writes both cookies and
+continues to `returnUrl`; when the refresh token is gone it clears both cookies and falls through
+to `/login`. Every exit is a usable session or the login form, so the redirect terminates.
+
+Widening the refresh cookie to `/` instead would break rotation. `getServerAuthHeaders()` forwards
+every cookie it can see, so a server component rendering through the proxy would start redeeming
+refresh tokens on navigation — and its `Set-Cookie` goes to an internal fetch and is discarded, so
+the rotated value would never reach the browser. The next request would present the superseded
+token, which the backend reads as replay and answers by revoking the whole family.
 
 ## SSR must forward the cookie
 

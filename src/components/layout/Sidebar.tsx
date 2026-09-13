@@ -1,7 +1,5 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
 import { SignOut, X } from "phosphor-react";
 import type { ReactNode } from "react";
@@ -9,10 +7,9 @@ import { useCallback, useState } from "react";
 import { toast } from "react-hot-toast";
 
 import { APP_NAME } from "@/constants/app";
+import { useLogoutUserMutation } from "@/features/auth/hooks/logout.mutation";
 import { cn } from "@/lib/cn";
 import { authRoutes } from "@/lib/routes";
-import { logoutUser } from "@/services/api/auth.api";
-import { userAtom } from "@/services/state/atoms";
 import { Button } from "@/ui/Button";
 import { Card } from "@/ui/Card";
 import { Modal } from "@/ui/Modal";
@@ -52,23 +49,30 @@ const SidebarContentWrapper = ({ includeCloseButton, onClose, children }: Sideba
 
 const Sidebar = ({ navItems, pathname, onLinkClick, isMobileOpen, onClose }: SidebarProps) => {
   const router = useRouter();
-  const queryClient = useQueryClient();
-  const [, setUser] = useAtom(userAtom);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
-  const { mutate: handleLogout, status } = useMutation({
-    mutationFn: logoutUser,
-    onSuccess: () => {
-      setUser(null);
-      queryClient.setQueryData(["userProfile"], null);
+  // The feature hook, not a second inline mutation. The one this replaced
+  // posted to the backend through the proxy and cleared nothing on this origin,
+  // so "Logged out successfully" was followed by `/login` redirecting back to
+  // the dashboard on a cookie that had never been removed.
+  const { logoutUser, isPending } = useLogoutUserMutation(
+    () => {
       toast.success("Logged out successfully");
       router.push(authRoutes.login());
     },
-    onError: (error) => {
+    (error) => {
       console.error("Logout failed:", error);
       toast.error("Logout failed. Please try again.");
     },
-  });
+  );
+
+  // `onClick` may not be async — see `no-misused-promises` in
+  // `.claude/rules/code-style.md`. The rejection is swallowed here rather than
+  // left floating: `onError` above is what reports a failure to the user, and
+  // an uncaught `mutateAsync` rejection would surface as an unhandled promise.
+  const handleLogout = useCallback(() => {
+    logoutUser().catch(() => undefined);
+  }, [logoutUser]);
 
   const handleNavigationSelection = useCallback(() => {
     if (isMobileOpen) {
@@ -160,12 +164,12 @@ const Sidebar = ({ navItems, pathname, onLinkClick, isMobileOpen, onClose }: Sid
 
           <Button
             variant="destructive"
-            onClick={() => handleLogout()}
-            disabled={status === "pending"}
+            onClick={handleLogout}
+            disabled={isPending}
             className="w-full"
             aria-label="Confirm logout"
           >
-            {status === "pending" ? "Logging Out..." : "Log Out"}
+            {isPending ? "Logging Out..." : "Log Out"}
           </Button>
         </div>
       </Modal>

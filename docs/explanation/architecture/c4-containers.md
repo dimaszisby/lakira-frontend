@@ -13,7 +13,7 @@ graph TB
     end
 
     subgraph next["Next.js server"]
-        mw["middleware.ts<br/><i>cookie gate</i>"]
+        mw["src/proxy.ts<br/><i>cookie gate</i>"]
         page["App Router<br/><i>(app) / (auth)</i>"]
         proxy["/api/proxy/[...path]"]
         auth["/api/auth/*"]
@@ -54,7 +54,7 @@ and the drift is silent.
 
 ## Two ways in
 
-- **`middleware.ts`** cookie-gates `/dashboard`, `/metrics`, `/metric-categories`, `/account` and
+- **`src/proxy.ts`** cookie-gates `/dashboard`, `/metrics`, `/metric-categories`, `/account` and
   redirects to `/login?returnUrl=…`. It runs before any page code.
 - **The proxy** enforces auth again on the first path segment of API calls. Belt and braces: the
   middleware protects pages, the proxy protects data.

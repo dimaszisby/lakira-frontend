@@ -9,7 +9,7 @@
  * enforced when the proxy forwards the bearer token.
  *
  * What this buys is a cheap liveness check at the edge. Previously
- * `middleware.ts` tested only that a cookie *existed*, so an expired or
+ * `src/proxy.ts` tested only that a cookie *existed*, so an expired or
  * malformed token sailed through the gate and failed later as an opaque API
  * error instead of a clean redirect to the login page.
  *

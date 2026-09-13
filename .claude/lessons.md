@@ -39,3 +39,11 @@ Updated after any correction per `.claude/rules/workflow.md`.
 Treat the app's identity (palette values, brand mapping, fonts, type scale) as fixed input. A consistency pass unifies how primitives use it; it never changes it.
 
 **Why**: A cleanup without enforcement is a snapshot, and it drifts the same way the OpenAPI copy did. A consistency pass that touches the identity is a redesign, and nobody asked for one.
+
+## [2026-09-12] The edge session gate had never run
+
+**Mistake**: `middleware.ts` sat at the repository root while `app` is at `src/app`, and Next 16 renamed the convention to `proxy`. Next therefore never loaded it. Four rule files, two reference docs and a C4 diagram all described it as the thing gating protected routes. It was found only by returning a marker header from it and finding the header absent from the response.
+
+**Rule**: a gate that fails *open into another gate* produces no symptom, so prove it runs before trusting it. When a file is loaded by convention rather than by import — middleware/proxy, instrumentation, route handlers, config — the name and the directory are both part of the contract, and a framework major version can change either. Check the version's own docs in `node_modules/next/dist/docs/`, as `CLAUDE.md` says, rather than reaching for what the convention used to be.
+
+**Why**: `src/app/(app)/layout.tsx` redirects unauthenticated users too, so the app *looked* gated. What the fallback could not do was carry a `returnUrl`, and it only runs once rendering has started. The consequence was invisible until a feature — reviving an expired session — actually depended on the gate. This is the same shape as the 2026-08-17 `boundaries` lesson: a rule documented as mechanically enforced, with nothing checking the mechanism. The matcher-sync test now reads `src/proxy.ts` by path, so a move back fails the suite.

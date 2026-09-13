@@ -6,7 +6,7 @@ paths:
   - src/features/**/keys.ts
   - src/features/**/cache.ts
   - src/app/api/**
-  - middleware.ts
+  - src/proxy.ts
 ---
 
 # Data Access
@@ -33,9 +33,15 @@ component → TanStack Query hook → feature api.ts → axios (src/services/api
 
 This used to be an allowlist of *protected* segments, which was a denylist by omission: `analytics/*` and `admin/_ping` both proxied unauthenticated even though the contract marks them secured.
 
-`src/app/api/auth/*` handles login/logout/session directly rather than through the proxy. That is correct, not a bypass: the proxy exists so the **browser** never reaches the backend, and these are already server routes — routing them through the proxy would make the server call itself.
+`src/app/api/auth/*` handles logout, session and revival directly rather than through the proxy. That is correct, not a bypass: the proxy exists so the **browser** never reaches the backend, and these are already server routes — routing them through the proxy would make the server call itself. Login is the exception and goes through the proxy like any other call; the route that duplicated it was deleted on 2026-09-12 having never been reachable.
 
-`middleware.ts` gate-checks the same cookie for the paths in `PROTECTED_APP_PATHS` and redirects to `/login?returnUrl=…`. It **validates the token's `exp` claim**, not just its presence, and clears a stale cookie on the way out. The signature is deliberately not verified there — that needs the backend's secret, and the backend re-checks every proxied request.
+The proxy also **captures `lakira_refresh` out of the backend's `Set-Cookie` and re-issues it against `/api` on this origin**, and clears both cookies on a 401 that refresh could not rescue. It strips the header otherwise: the backend scopes its cookie to `Path=/api/v1/auth/refresh`, which this origin does not serve.
+
+`middleware.ts` gate-checks the same cookie for the paths in `PROTECTED_APP_PATHS`. It **validates the token's `exp` claim**, not just its presence. The signature is deliberately not verified there — that needs the backend's secret, and the backend re-checks every proxied request.
+
+An **expired** token is redirected to `/api/auth/revive`, not to `/login`: the refresh cookie lives on `/api` and a page navigation does not carry it, so only a route under that path can redeem it. Revival rotates the token and continues to `returnUrl`, or clears both cookies and falls through to `/login`. Only a request with no cookie at all goes straight to `/login?returnUrl=…`. See `docs/reference/routes-and-proxy.md` for why widening the cookie's path instead would break rotation.
+
+**Refreshing is coalesced, and that is a correctness requirement.** The backend revokes the entire token family when an already-redeemed refresh token is presented again, so a page firing several queries at once would log the user out the moment its access token expired — every redemption after the first reads as replay. `refreshAccessToken` shares one round trip between concurrent callers and replays the result for 30 seconds afterwards, for requests that left the browser before the rotated cookie arrived. The state is per process; several instances behind a load balancer can still collide.
 
 ### Server-side fetches
 
