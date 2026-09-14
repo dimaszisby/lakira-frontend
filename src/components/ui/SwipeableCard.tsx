@@ -1,7 +1,7 @@
 "use client";
 
+import { DotsThreeVertical } from "@phosphor-icons/react";
 import { motion, useAnimation, useMotionValue, useReducedMotion } from "framer-motion";
-import { DotsThreeVertical } from "phosphor-react";
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FloppyDisk, Lightning, Trash } from "phosphor-react";
+import { FloppyDisk, Lightning, Trash } from "@phosphor-icons/react";
 import { useCallback, useEffect, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 

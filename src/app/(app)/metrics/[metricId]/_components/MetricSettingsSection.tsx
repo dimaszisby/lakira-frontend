@@ -1,7 +1,7 @@
 "use client";
 
+import { Bell, Calendar, PencilSimple, Presentation, Target } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
-import { Bell, Calendar, PencilSimple, Presentation, Target } from "phosphor-react";
 import { memo } from "react";
 
 import { metricRoutes } from "@/lib/routes";

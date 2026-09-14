@@ -1,4 +1,4 @@
-import { PencilSimple, Trash } from "phosphor-react";
+import { PencilSimple, Trash } from "@phosphor-icons/react";
 import { memo } from "react";
 
 import type { MetricCategoryVM } from "@/features/metric-categories/view-models";

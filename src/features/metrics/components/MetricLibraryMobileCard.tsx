@@ -1,7 +1,7 @@
 "use client";
 
+import { CalendarBlank, Eye, Tag } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
-import { CalendarBlank, Eye, Tag } from "phosphor-react";
 import { memo, useCallback, useEffect, useRef } from "react";
 
 import CategoryChip from "@/features/metric-categories/components/CategoryChip";

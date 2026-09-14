@@ -1,7 +1,7 @@
 "use client";
 
+import { PencilSimple } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
-import { PencilSimple } from "phosphor-react";
 
 import { serializeCategoryListSearchParams } from "@/features/metric-categories/listSearchParams";
 import { useRouteParams } from "@/hooks/useRouteParams";

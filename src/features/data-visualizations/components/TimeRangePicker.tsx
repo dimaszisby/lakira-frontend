@@ -1,6 +1,6 @@
 "use client";
 
-import { CaretDown, PencilSimple } from "phosphor-react";
+import { CaretDown, PencilSimple } from "@phosphor-icons/react";
 import { useEffect, useRef } from "react";
 
 import { cn } from "@/lib/cn";

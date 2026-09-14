@@ -1,7 +1,7 @@
 "use client";
 
 import { Popover, PopoverDisclosure, PopoverProvider } from "@ariakit/react";
-import { Check, Palette, PencilSimpleLine } from "phosphor-react";
+import { Check, Palette, PencilSimpleLine } from "@phosphor-icons/react";
 import type { ComponentProps, CSSProperties } from "react";
 import { useId, useRef, useState } from "react";
 

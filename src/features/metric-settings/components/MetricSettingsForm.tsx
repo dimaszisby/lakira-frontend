@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { FloppyDisk, Tag, TrendUp } from "phosphor-react";
+import { FloppyDisk, Tag, TrendUp } from "@phosphor-icons/react";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 

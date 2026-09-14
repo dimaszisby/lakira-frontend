@@ -1,4 +1,4 @@
-import { CaretDown, CaretUp } from "phosphor-react";
+import { CaretDown, CaretUp } from "@phosphor-icons/react";
 import type { ComponentProps, ReactNode } from "react";
 
 import type { SortOrder as SortDirection } from "@/generics/sort";

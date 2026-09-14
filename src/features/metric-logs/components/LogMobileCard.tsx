@@ -1,4 +1,4 @@
-import { Lightning } from "phosphor-react";
+import { Lightning } from "@phosphor-icons/react";
 import { memo, useCallback } from "react";
 
 import type { MetricLogVM } from "@/features/metric-logs/view-models";

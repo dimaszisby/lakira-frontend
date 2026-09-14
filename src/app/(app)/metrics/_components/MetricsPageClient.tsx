@@ -1,7 +1,7 @@
 "use client";
 
+import { Plus } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
-import { Plus } from "phosphor-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import MetricTable from "@/features/metrics/components/MetricTable";

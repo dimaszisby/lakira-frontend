@@ -1,6 +1,6 @@
 "use client";
 
-import { CaretDown, CaretUp } from "phosphor-react";
+import { CaretDown, CaretUp } from "@phosphor-icons/react";
 import type { FocusEvent, KeyboardEvent, MouseEvent, ReactNode } from "react";
 import { Fragment } from "react";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { X } from "phosphor-react";
+import { X } from "@phosphor-icons/react";
 import type { ChangeEvent, ComponentProps, KeyboardEvent } from "react";
 import { useRef } from "react";
 

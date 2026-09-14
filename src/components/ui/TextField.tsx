@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, EyeSlash, XCircle } from "phosphor-react";
+import { Eye, EyeSlash, XCircle } from "@phosphor-icons/react";
 import type { ChangeEvent, ComponentProps, ReactNode } from "react";
 import { useRef, useState } from "react";
 
