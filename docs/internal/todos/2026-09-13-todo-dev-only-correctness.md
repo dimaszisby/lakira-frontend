@@ -24,7 +24,7 @@ Nothing ever cleared `checking`, so the spinner stayed up.
 
 **These tests do not reproduce the race, and that was established rather than assumed.** Three
 attempts failed. Instrumenting the original showed jsdom orders it
-`effect → finally → cleanup → effect`: the bootstrapper always settles *before* the cleanup, even
+`effect → finally → cleanup → effect`: the bootstrapper always settles _before_ the cleanup, even
 with a promise held open across the remount, because jsdom schedules the cleanup after the
 microtask queue drains. A browser runs it in the same commit, which is why `/account` hung in
 `next dev` and not in the suite. The tests therefore pass against the broken component; they cover
@@ -64,21 +64,23 @@ Said thresholds were placeholders (3/2/3/3 %) and that coverage "gates nothing".
 
 ## Verification
 
-| Gate | Result |
-| --- | --- |
-| `lint` | 0 errors, 19 warnings (`dev` baseline 21; deleting `theme.ts` cleared two) |
-| `lint:css` | clean |
-| `typecheck` | clean |
-| `test:unit` | 76 suites, 638 tests |
-| `test:integration` | 18 suites, 91 tests (was 17 / 87) |
-| `coverage:check --strict` | all goals met; `src/utils` 70.04 % (was 55.33 %) |
+| Gate                      | Result                                                                     |
+| ------------------------- | -------------------------------------------------------------------------- |
+| `lint`                    | 0 errors, 19 warnings (`dev` baseline 21; deleting `theme.ts` cleared two) |
+| `lint:css`                | clean                                                                      |
+| `typecheck`               | clean                                                                      |
+| `test:unit`               | 76 suites, 638 tests                                                       |
+| `test:integration`        | 18 suites, 91 tests (was 17 / 87)                                          |
+| `coverage:check --strict` | all goals met; `src/utils` 70.04 % (was 55.33 %)                           |
 
 ## Status
 
-**Code and automated gates complete. One item outstanding: `/account` has not yet been confirmed in
-the browser**, because the race is only observable there and the backend was unavailable while this
-branch was written. Do that before merging: load `/account` in `next dev` and confirm it renders
-rather than sitting on "Loading your account…".
+**Complete.** Code, automated gates, and the browser check.
+
+`/account` was confirmed in `next dev` on 2026-09-15, once the backend port conflict was resolved:
+it renders the profile on both a redirect from login and a hard direct load, with no
+"Loading your account…" spinner. That was the only evidence available for this fix, since the suite
+cannot stage the race.
 
 ## Follow-ups
 
