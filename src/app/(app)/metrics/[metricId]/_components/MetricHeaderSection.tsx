@@ -1,7 +1,7 @@
 "use client";
 
+import { Eye, EyeSlash, PencilSimple } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeSlash, PencilSimple } from "phosphor-react";
 import { memo } from "react";
 
 import CategoryChip from "@/features/metric-categories/components/CategoryChip";

@@ -1,7 +1,7 @@
 "use client";
 
+import { SignOut, X } from "@phosphor-icons/react";
 import { useRouter } from "next/navigation";
-import { SignOut, X } from "phosphor-react";
 import type { ReactNode } from "react";
 import { useCallback, useState } from "react";
 import { toast } from "react-hot-toast";

@@ -1,6 +1,6 @@
 "use client";
 
-import { Minus, Plus } from "phosphor-react";
+import { Minus, Plus } from "@phosphor-icons/react";
 import type { ComponentProps, CSSProperties, KeyboardEvent, PointerEvent } from "react";
 import { useRef, useState } from "react";
 

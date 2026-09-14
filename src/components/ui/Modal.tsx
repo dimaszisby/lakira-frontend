@@ -1,7 +1,7 @@
 "use client";
 
 import { Dialog, DialogDescription, DialogDismiss, DialogHeading } from "@ariakit/react";
-import { X } from "phosphor-react";
+import { X } from "@phosphor-icons/react";
 import type { ReactNode, RefObject } from "react";
 import { useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";

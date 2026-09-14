@@ -7,7 +7,7 @@ import {
   SelectPopover,
   SelectProvider,
 } from "@ariakit/react";
-import { CaretDown } from "phosphor-react";
+import { CaretDown } from "@phosphor-icons/react";
 import type { ComponentProps, ReactNode } from "react";
 
 import { cn } from "@/lib/cn";

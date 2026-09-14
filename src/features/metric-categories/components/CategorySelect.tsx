@@ -7,7 +7,7 @@ import {
   ComboboxPopover,
   useComboboxStore,
 } from "@ariakit/react";
-import { Plus, X } from "phosphor-react";
+import { Plus, X } from "@phosphor-icons/react";
 import type { ComponentProps, CSSProperties, Ref } from "react";
 import { useEffect, useId, useRef, useState } from "react";
 

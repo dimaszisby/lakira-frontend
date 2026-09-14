@@ -10,7 +10,7 @@ import {
   PopoverHeading,
   PopoverProvider,
 } from "@ariakit/react";
-import { CalendarBlank, CaretLeft, CaretRight, Clock } from "phosphor-react";
+import { CalendarBlank, CaretLeft, CaretRight, Clock } from "@phosphor-icons/react";
 import type { KeyboardEvent, RefObject } from "react";
 import { useEffect, useId, useRef, useState } from "react";
 

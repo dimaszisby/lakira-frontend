@@ -1,6 +1,6 @@
 "use client";
 
-import { CaretDown } from "phosphor-react";
+import { CaretDown } from "@phosphor-icons/react";
 import type { SelectHTMLAttributes } from "react";
 
 import { cn } from "@/lib/cn";

@@ -1,4 +1,4 @@
-import { Eye, EyeSlash } from "phosphor-react";
+import { Eye, EyeSlash } from "@phosphor-icons/react";
 
 import CategoryChip from "@/features/metric-categories/components/CategoryChip";
 import { toCategoryUI } from "@/features/metric-categories/presenters/toCategoryUI";

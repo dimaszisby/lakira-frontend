@@ -1,4 +1,4 @@
-import { ChartBar, Folder, SquaresFour, UserCircle, UsersThree } from "phosphor-react";
+import { ChartBar, Folder, SquaresFour, UserCircle, UsersThree } from "@phosphor-icons/react";
 
 import { authRoutes, dashboardRoute, metricCategoryRoutes, metricRoutes } from "@/lib/routes";
 

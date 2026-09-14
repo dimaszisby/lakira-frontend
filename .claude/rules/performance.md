@@ -46,7 +46,7 @@ npm run perf:lighthouse && npm run perf:web-vitals
 - **Client-component creep.** A `"use client"` at the top of a layout pulls its whole subtree into the client bundle. Push the boundary as deep as possible: server components fetch, client components interact. This is the largest single lever in an App Router codebase.
 - **Chart.js.** `chart.js` + `react-chartjs-2` + the date adapter are heavy and only needed on visualisation routes. Load them with `next/dynamic` and `ssr: false`; never import them into shared layout code.
 - **`framer-motion`** is likewise heavy. Prefer CSS transitions — `--btn-transition` and friends exist in `scales.css` — and reserve Framer for animation that CSS genuinely cannot express.
-- **Icons.** `phosphor-react` should be imported per-icon, never as a namespace.
+- **Icons.** `@phosphor-icons/react` should be imported per-icon, never as a namespace. (It replaced the unmaintained `phosphor-react` on 2026-09-15; the icon names are unchanged, so imports differ only in the package specifier.)
 - **Fonts.** Two Google fonts are already loaded via `next/font` with `display: "swap"`. A third needs a justification.
 - **`date-fns`** — import the specific function, not the package root.
 
