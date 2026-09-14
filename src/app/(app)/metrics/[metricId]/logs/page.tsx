@@ -1,5 +1,6 @@
-import MetricLogsClient from "./_components/MetricLogsClient";
 import { DEFAULT_METRIC_LOG_LIST_PARAMS, parseMetricLogSearchParams } from "@/features/metric-logs/listSearchParams";
+
+import MetricLogsClient from "./_components/MetricLogsClient";
 
 type MetricLogsPageProps = {
   params: Promise<{ metricId: string }>;

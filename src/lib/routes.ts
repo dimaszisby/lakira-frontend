@@ -85,6 +85,18 @@ export const authRoutes = {
     buildPath("/verify-email", token ? { token } : undefined),
 };
 
+/**
+ * The dynamic-segment value that means "create" rather than an existing record.
+ *
+ * `…/new` and `…/:id` are served by the same route wherever both open in a
+ * modal, because a parallel slot cannot hold two interceptors that match the
+ * same segment. See `metrics/[metricId]/logs/[logId]/page.tsx` for the full
+ * explanation; `metric-categories/[categoryId]/metrics/[metricId]/page.tsx`
+ * carries the same arrangement for the same reason.
+ */
+export const NEW_RECORD_SEGMENT = "new";
+
+
 export const metricRoutes = {
   list: (params?: QueryParams) => buildPath("/metrics", params),
   detail: (metricId: string) => `/metrics/${metricId}`,
@@ -98,7 +110,7 @@ export const metricRoutes = {
     new: () => "/metrics/new",
     edit: (metricId: string) => `/metrics/${metricId}/edit`,
     log: (metricId: string, logId?: string) =>
-      `/metrics/${metricId}/logs/${logId ?? "new"}`,
+      `/metrics/${metricId}/logs/${logId ?? NEW_RECORD_SEGMENT}`,
   },
 };
 

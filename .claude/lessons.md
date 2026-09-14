@@ -47,3 +47,19 @@ Treat the app's identity (palette values, brand mapping, fonts, type scale) as f
 **Rule**: a gate that fails *open into another gate* produces no symptom, so prove it runs before trusting it. When a file is loaded by convention rather than by import — middleware/proxy, instrumentation, route handlers, config — the name and the directory are both part of the contract, and a framework major version can change either. Check the version's own docs in `node_modules/next/dist/docs/`, as `CLAUDE.md` says, rather than reaching for what the convention used to be.
 
 **Why**: `src/app/(app)/layout.tsx` redirects unauthenticated users too, so the app *looked* gated. What the fallback could not do was carry a `returnUrl`, and it only runs once rendering has started. The consequence was invisible until a feature — reviving an expired session — actually depended on the gate. This is the same shape as the 2026-08-17 `boundaries` lesson: a rule documented as mechanically enforced, with nothing checking the mechanism. The matcher-sync test now reads `src/proxy.ts` by path, so a move back fails the suite.
+
+## [2026-09-15] Re-adding a path that `git mv` or `git rm` already staged breaks the handover
+
+**Mistake**: Twice in one session I handed the user a staging-plus-commit command naming a path that `git mv` or `git rm` had already staged — `middleware.ts` after a rename, then `src/utils/theme.ts` after a delete. Both times git answered `fatal: pathspec '...' did not match any files`, the `&&` stopped the commit, and the user had to come back. The second time I had even told them re-naming it was "harmless", which was wrong.
+
+**Rule**: `git mv` and `git rm` stage the result in the index *and* remove the path from the working tree, so a later add has nothing to match and errors out. Never name those paths again. **Dry-run every handover command** with `--dry-run` and read the exit code before pasting it.
+
+**Why**: the handover command is the one artifact the user runs verbatim. Reasoning about whether it will work is worth nothing next to actually running it in dry-run mode, which costs one call. Same lesson as the OpenAPI snapshot and the `boundaries` rule: verify the mechanism, do not trust the reasoning.
+
+## [2026-09-15] A test that passes before the fix is not a regression test
+
+**Mistake**: For the `withAuth` StrictMode deadlock I wrote four tests, watched them pass, and nearly handed them over as proof. They passed against the *broken* component too. Three attempts to make them fail — including holding a promise open across the remount — all failed, and only instrumenting the original showed why: jsdom orders the effect as `effect -> finally -> cleanup -> effect`, settling the bootstrapper before the cleanup, while a browser runs cleanup in the same commit.
+
+**Rule**: after writing a regression test, **restore the unfixed file from `HEAD` and watch the test fail**. If it cannot be made to fail, say so in the test file and in the PR, and verify the fix another way — do not let a green suite stand in for evidence it never had.
+
+**Why**: the bug being fixed had survived a suite that asserted `role="alert"` existed without asserting what it said. A test written to that same standard would have shipped the next one.
