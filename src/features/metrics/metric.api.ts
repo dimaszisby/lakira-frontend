@@ -16,8 +16,8 @@ import type { RequestOpts } from "@/types/generics/RequestOpts";
 
 import { normalizeIncludes } from "./keys";
 import type { MetricCursorPage, MetricFilterViaCursor, MetricSortParamViaCursor } from "./sort";
-import { DEFAULT_METRIC_SORT, DEFAULT_METRIC_SORT_OFFSET, METRICS_PAGE_SIZE } from "./sort";
-import type { IncludeKey, MetricsListParams } from "./types";
+import { DEFAULT_METRIC_SORT } from "./sort";
+import type { IncludeKey } from "./types";
 
 export type ListMetricParams = CursorListParams<MetricSortParamViaCursor, MetricFilterViaCursor>;
 
@@ -29,45 +29,6 @@ export type ListMetricParams = CursorListParams<MetricSortParamViaCursor, Metric
  * @throws {Error} - If the API request fails.
  * @TODO: Implement caching, pagination, and ETag to improve performance.
  */
-export async function getMetricLibraryList(
-  params: MetricsListParams,
-  opts: RequestOpts = {},
-): Promise<PaginatedMetricListResponseDTO> {
-  return withApiErrorHandling(async () => {
-    const {
-      page = 1,
-      limit = METRICS_PAGE_SIZE,
-      sortBy = DEFAULT_METRIC_SORT_OFFSET.sortBy,
-      sortOrder = DEFAULT_METRIC_SORT_OFFSET.sortOrder,
-      q,
-      name,
-      categoryId,
-      isPublic,
-    } = params ?? {};
-
-    const query = buildQueryString({
-      page,
-      limit,
-      sortBy,
-      sortOrder,
-      q,
-      name,
-      categoryId,
-      isPublic,
-    });
-
-    const response = await api.get<ApiResponse<PaginatedMetricListResponseDTO>>(
-      `/metrics${query}`,
-      {
-        signal: opts.signal,
-        headers: opts.headers,
-      },
-    );
-
-    return unwrap(response);
-  }, "getMetricLibraryList");
-}
-
 // GET ALL via Cursor
 export async function getMetricLibraryViaCursor(
   {

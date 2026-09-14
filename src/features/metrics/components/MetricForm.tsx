@@ -12,7 +12,7 @@ import { metricFormSchema } from "@/features/metrics";
 import {
   useCreateMetric,
   useDeleteMetric,
-  useMetricsListViaOffset,
+  useMetricNameLookup,
   useUpdateMetric,
 } from "@/features/metrics/hooks";
 import { cn } from "@/lib/cn";
@@ -68,18 +68,9 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
   const [debouncedName, setDebouncedName] = useState(nameValue);
   useDebounce(() => setDebouncedName(nameValue.trim()), 400, [nameValue]);
 
-  const duplicateCheckParams = useMemo(
-    () => ({
-      page: 1,
-      limit: 1,
-      name: debouncedName || undefined,
-    }),
-    [debouncedName],
-  );
-
   // Only fetch when user typed 2+ chars
   const shouldCheckDup = debouncedName.length >= 2;
-  const { metrics: dupCandidates = [] } = useMetricsListViaOffset(duplicateCheckParams, {
+  const { candidates: dupCandidates } = useMetricNameLookup(debouncedName, {
     enabled: shouldCheckDup,
     staleTime: 5_000,
   });
