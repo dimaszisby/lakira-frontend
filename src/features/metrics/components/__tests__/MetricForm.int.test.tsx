@@ -38,17 +38,35 @@ function mockCategoryTypeahead() {
   );
 }
 
-function mockDuplicateMetricLookup() {
+/**
+ * The duplicate lookup, on the contract the backend actually serves.
+ *
+ * This mock previously read `?name=` and answered `{ metrics: [...] }` — the
+ * offset shape. That is exactly why the bug survived: `GET /metrics` moved to
+ * cursor pagination behind a `.strict()` schema and rejects `name`, `page`,
+ * `sortBy` and `sortOrder`, so in the real app the request 400'd on every
+ * keystroke and no duplicate was ever found. A mock that answers a request the
+ * server refuses will keep a broken feature green forever.
+ *
+ * Captures the query so a test can assert the request shape, not just the
+ * outcome.
+ */
+function mockDuplicateMetricLookup(onQuery?: (params: URLSearchParams) => void) {
   return http.get(metricsEndpoint, ({ request }) => {
     const url = new URL(request.url);
-    const name = url.searchParams.get("name")?.trim().toLowerCase();
-    const isDuplicate = name === "dup metric";
+    onQuery?.(url.searchParams);
+
+    // `filter[name]` is a LIKE on the server, so return the row for any
+    // substring match and let the form decide whether it is an exact conflict.
+    const filterName = url.searchParams.get("filter[name]")?.trim().toLowerCase() ?? "";
+    const matches =
+      filterName.length > 0 && duplicateMetricName.toLowerCase().includes(filterName);
 
     return HttpResponse.json({
       status: "success",
       message: "ok",
       data: {
-        metrics: isDuplicate
+        items: matches
           ? [
               {
                 id: "metric-dup",
@@ -64,7 +82,8 @@ function mockDuplicateMetricLookup() {
               },
             ]
           : [],
-        total: isDuplicate ? 1 : 0,
+        sort: "-createdAt",
+        limit: 10,
       },
     });
   });
@@ -334,6 +353,42 @@ describe("MetricForm integration", () => {
     } finally {
       consoleErrorSpy.mockRestore();
     }
+  });
+
+  /**
+   * The outcome test above passes with any mock that answers. This one pins the
+   * request, which is what the backend rejected: `GET /metrics` validates with a
+   * `.strict()` cursor schema, so `name`, `page`, `sortBy` and `sortOrder` come
+   * back as `Unrecognized key(s)` and the lookup 400s on every keystroke.
+   */
+  it("looks up duplicates on the cursor contract, not the removed offset one", async () => {
+    const user = userEvent.setup();
+    const queries: URLSearchParams[] = [];
+
+    server.use(
+      mockCategoryTypeahead(),
+      mockDuplicateMetricLookup((params) => queries.push(params)),
+    );
+
+    renderWithProviders(<MetricForm initialMetric={null} onClose={jest.fn()} />);
+    await waitForCategoryTypeaheadIdle();
+
+    await user.type(screen.getByLabelText(/metric name/i), duplicateMetricName);
+    await waitFor(() => expect(queries.length).toBeGreaterThan(0));
+
+    const lookup = queries[queries.length - 1];
+
+    // The name goes through the filter the server understands.
+    expect(lookup.get("filter[name]")).toBe(duplicateMetricName);
+
+    // None of the keys the strict schema refuses.
+    for (const rejected of ["name", "page", "sortBy", "sortOrder"]) {
+      expect(lookup.get(rejected)).toBeNull();
+    }
+
+    // More than one candidate, because `filter[name]` is a LIKE: asking for a
+    // single row could return "Sleep Quality" while an exact "Sleep" exists.
+    expect(Number(lookup.get("limit"))).toBeGreaterThan(1);
   });
 
   it("shows duplicate-name validation and prevents submit", async () => {

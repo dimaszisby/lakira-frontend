@@ -1,5 +1,5 @@
 import type { MetricFilterViaCursor, MetricSortParamViaCursor } from "./sort";
-import type { IncludeKey, MetricsListParams } from "./types";
+import type { IncludeKey } from "./types";
 
 /**
  * Canonical include normalizer (sorted CSV to match server cache keys)
@@ -10,18 +10,6 @@ export function normalizeIncludes(includes: IncludeKey[] = []): string | undefin
   if (normalized.length === 0) return undefined; // "flat" on server
   return normalized.join(","); // e.g., "category,logs,settings"
 }
-
-// helpers to keep keys stable
-const normalizeList = (p: MetricsListParams) => ({
-  page: p.page ?? 1,
-  limit: p.limit ?? 20,
-  sortBy: p.sortBy ?? "createdAt",
-  sortOrder: p.sortOrder ?? "DESC",
-  q: p.q ?? undefined,
-  name: p.name ?? undefined,
-  categoryId: p.categoryId ?? undefined,
-  isPublic: p.isPublic ?? undefined,
-});
 
 const normalizeCursor = (p: {
   limit: number;
@@ -59,14 +47,19 @@ const normalizeCursor = (p: {
 export const metricsKeys = {
   all: (organizationId: string) => ["metrics", organizationId] as const,
 
-  // Offset lists (legacy)
+  // Retained for `invalidateMetricLists` and the tenant-scoping test. The
+  // offset `list(...)` key was removed with the offset endpoint it keyed.
   lists: (organizationId: string) => [...metricsKeys.all(organizationId), "list"] as const,
-  list: (organizationId: string, params: MetricsListParams) =>
-    [...metricsKeys.lists(organizationId), normalizeList(params)] as const,
 
   // Cursor lists (current)
   cursor: {
     root: (organizationId: string) => [...metricsKeys.all(organizationId), "cursor"] as const,
+    /**
+     * Candidates for a name-uniqueness check. Separate from `pages` so a
+     * keystroke-driven lookup cannot evict the list the user is looking at.
+     */
+    nameLookup: (organizationId: string, name: string) =>
+      [...metricsKeys.cursor.root(organizationId), "name-lookup", name.trim().toLowerCase()] as const,
     pages: (
       organizationId: string,
       p: {
