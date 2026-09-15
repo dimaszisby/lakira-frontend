@@ -60,6 +60,24 @@ const config = {
       },
     },
     extend: {
+      /* Spacing 1-7 resolves through the scale tokens, so changing
+       * `--space-4` in scales.css moves `p-4`, `gap-4` and `mt-4` with it.
+       * Everything else (`8`, `12`, `0.5`, `px`, …) keeps Tailwind's default,
+       * which is why this extends rather than replaces the scale.
+       *
+       * No pixel moves today: 1-6 are byte-identical to Tailwind's defaults,
+       * and 7 differs (2rem against 1.75rem) but no `*-7` utility is used
+       * anywhere — verified before the change. The value is that the tokens
+       * are now the single source for the range they cover. */
+      spacing: {
+        1: "var(--space-1)",
+        2: "var(--space-2)",
+        3: "var(--space-3)",
+        4: "var(--space-4)",
+        5: "var(--space-5)",
+        6: "var(--space-6)",
+        7: "var(--space-7)",
+      },
       fontFamily: {
         // display = Quicksand, ui = Plus Jakarta Sans
         display: ["var(--font-quicksand)", "system-ui", "sans-serif"],
