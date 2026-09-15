@@ -18,6 +18,7 @@ import { Line } from "react-chartjs-2";
 
 import { cn } from "@/lib/cn";
 
+import { chartHeightStyle } from "../chartHeightStyle";
 import type { VizResponse } from "../types";
 import { isAllMissing, seriesToXY, toTimeUnit } from "../viz-helpers";
 
@@ -48,12 +49,12 @@ const MetricChart = ({ data, goalValue, height = 260, className }: Props) => {
         className={cn(
           "bg-surface2",
           "flex h-full items-center justify-center rounded-xl",
-          "text-sm text-ink-secondary",
+          "chart-box text-sm text-ink-secondary",
           className,
         )}
         role="status"
         aria-live="polite"
-        style={{ height }}
+        style={chartHeightStyle(height)}
       >
         No data
       </div>
@@ -119,8 +120,8 @@ const MetricChart = ({ data, goalValue, height = 260, className }: Props) => {
     <div
       role="img"
       aria-label={`Metric chart for ${metricIdLabel}`}
-      className={className}
-      style={{ height }}
+      className={cn("chart-box", className)}
+      style={chartHeightStyle(height)}
     >
       <Line data={{ datasets }} options={options} />
     </div>

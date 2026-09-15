@@ -115,7 +115,7 @@ const Sidebar = ({ navItems, pathname, onLinkClick, isMobileOpen, onClose }: Sid
       <div className="lg:hidden" aria-live="polite">
         <div
           className={cn(
-            "fixed inset-0 z-40 bg-ink/40 transition-opacity duration-200",
+            "chrome-scrim fixed inset-0 z-40 transition-opacity duration-200",
             isMobileOpen ? "opacity-100" : "pointer-events-none opacity-0",
           )}
           aria-hidden="true"

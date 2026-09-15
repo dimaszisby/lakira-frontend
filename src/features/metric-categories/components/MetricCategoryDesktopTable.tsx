@@ -1,5 +1,6 @@
 import { memo } from "react";
 
+import { categoryColorStyle } from "@/features/metric-categories/categoryColorStyle";
 import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
 import { cn } from "@/lib/cn";
 import type { TableColumn } from "@/ui/Table";
@@ -33,8 +34,8 @@ const columns: TableColumn<MetricCategoryVM>[] = [
     renderCell: (cat) => (
       <span className="inline-flex items-center justify-center">
         <span
-          className="inline-block h-5 w-5 rounded-full border border-border"
-          style={{ backgroundColor: cat.color }}
+          className="category-color-bg inline-block h-5 w-5 rounded-full border border-border"
+          style={categoryColorStyle(cat.color)}
           aria-hidden="true"
         />
         <span className="sr-only">{`Color ${cat.color}`}</span>

@@ -17,7 +17,7 @@ const BottomNavigationBar: React.FC<NavigationListProps> = ({
   return (
     <nav
       className={cn(
-        "fixed inset-x-0 bottom-0 z-30 flex border-t border-surface2 bg-bg/95 px-2 py-2 shadow-lg shadow-ink/10 backdrop-blur",
+        "chrome-bar fixed inset-x-0 bottom-0 z-30 flex border-t border-surface2 px-2 py-2 backdrop-blur",
         "lg:hidden",
         className,
       )}

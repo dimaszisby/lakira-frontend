@@ -66,11 +66,17 @@ These are mechanically enforced:
 
 - **Only token colours exist.** `tailwind.config.mjs` defines `theme.colors` in place of Tailwind's palette, so `bg-white` or `text-gray-400` generates no CSS at all.
 - **No raw colours in CSS outside `palette.css`.** Stylelint enforces `color-no-hex`, `color-named: "never"` and `function-disallowed-list: ["rgb", "rgba"]`; `scales.css` may use `rgb()` for shadow colours.
-- **In `src/components/ui/**`,** ESLint rejects:
-  - arbitrary values (`tailwindcss/no-arbitrary-value`, which also checks strings passed to `cn()`);
+- **Everywhere a component is written** — `src/components/ui`, `src/components/layout`, `src/features`, `src/app` — ESLint rejects:
   - colour utilities with an opacity modifier;
   - inline `style` keys that are not CSS custom properties.
+
+  These two protect the token system's actual jurisdiction, colour. An ad-hoc tint produces a colour that exists in no token, so nothing can check its contrast and dark mode cannot override it independently; a non-custom-property inline style puts styling in the markup where no recipe can reach it. Widened from `ui/` on 2026-09-15.
+
+- **In `src/components/ui/**` only,** ESLint additionally rejects arbitrary values (`tailwindcss/no-arbitrary-value`, which also checks strings passed to `cn()`). This stays scoped to the primitives deliberately: a primitive has no business reaching for an escape hatch, but a page may legitimately need `min-h-[50vh]`, `grid-rows-[auto_1fr_auto]` or `[scrollbar-width:none]` — viewport units, grid templates and raw CSS properties the token system does not model. Those are not token bypasses; there is no token they could have used.
+
   An exception needs a disable comment with a reason, like SwipeableCard's framer-motion `x`.
+
+- **Dynamic values reach CSS as custom properties.** When a value is genuinely data — a user's category colour, a computed chart height — pass it as a custom property and let a recipe read it: `style={categoryColorStyle(color)}` with `.category-color-bg`, or `chartHeightStyle(px)` with `.chart-box`. Mind the units: React appends `px` to a bare number for `style={{ height }}`, but a custom property is an opaque string and needs `${n}px` written out.
 
 These are enforced by review:
 

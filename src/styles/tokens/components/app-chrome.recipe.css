@@ -1,0 +1,10 @@
+@layer components {
+  .chrome-bar {
+    background-color: var(--chrome-bar-bg);
+    box-shadow: 0 10px 15px -3px var(--chrome-bar-shadow);
+  }
+
+  .chrome-scrim {
+    background-color: var(--chrome-scrim-bg);
+  }
+}

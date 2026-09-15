@@ -1,0 +1,8 @@
+/* The colour is user data — a category's chosen swatch — so it cannot be a
+ * token. It arrives as the `--category-color` custom property, which is the one
+ * thing an inline style is allowed to set; the styling itself stays here. */
+@layer components {
+  .category-color-bg {
+    background-color: var(--category-color, transparent);
+  }
+}

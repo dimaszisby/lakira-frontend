@@ -1,5 +1,6 @@
 import { memo } from "react";
 
+import { categoryColorStyle } from "@/features/metric-categories/categoryColorStyle";
 import { CATEGORY_DEFAULTS } from "@/features/metric-categories/constants";
 import type { MetricCategoryUI } from "@/features/metric-categories/view-models";
 import { cn } from "@/lib/cn";
@@ -44,8 +45,9 @@ export const CategoryChipBase = ({ category, variant = "primary", className }: P
         "inline-flex items-center rounded-md px-2 py-1 text-sm font-medium",
         textTone,
         fallbackCategory ? "border border-border bg-surface2" : "border border-transparent",
+        !fallbackCategory && "category-color-bg",
       )}
-      style={{ backgroundColor: bgColor }}
+      style={categoryColorStyle(bgColor)}
       title={category.name}
     >
       {category.name}
