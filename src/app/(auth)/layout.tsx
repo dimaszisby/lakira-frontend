@@ -8,7 +8,7 @@ const AuthSegmentLayout = ({ children }: { children: ReactNode }) => {
     <div className="grid min-h-dvh grid-rows-[auto_1fr_auto]">
       <Header />
       <main className="grid place-items-center p-4">{children}</main>
-      <footer className="text-ink-600 p-4 text-center">
+      <footer className="p-4 text-center text-ink-secondary">
         © {new Date().getFullYear()} {APP_NAME}
       </footer>
     </div>

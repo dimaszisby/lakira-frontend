@@ -16,8 +16,8 @@ const MetricDetailError = ({
   }, [error]);
 
   return (
-    <section className="border-destructive/20 bg-destructive/5 rounded-xl border p-8 text-center">
-      <h2 className="text-destructive text-2xl font-semibold">Unable to load metric</h2>
+    <section className="rounded-xl border border-status-error bg-surface p-8 text-center">
+      <h2 className="text-2xl font-semibold text-ink-error">Unable to load metric</h2>
       <p className="mt-2 text-sm text-ink-secondary">
         {error.message || "Please refresh and try again."}
       </p>

@@ -51,7 +51,7 @@ const SkeletonGrid = () => {
   return (
     <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
       {Array.from({ length: 6 }).map((_, i) => (
-        <div key={i} className="bg-card h-64 rounded-2xl border p-3 shadow-sm">
+        <div key={i} className="h-64 rounded-2xl border bg-surface p-3 shadow-sm">
           <div className="h-full animate-pulse rounded-md bg-surface2" />
         </div>
       ))}
@@ -61,9 +61,9 @@ const SkeletonGrid = () => {
 
 const ErrorState = ({ message }: { message: string }) => {
   return (
-    <div className="rounded-xl border p-6 text-center">
+    <div className="rounded-xl border border-status-error p-6 text-center">
       <p className="text-base font-medium">Something went wrong</p>
-      <p className="text-destructive mt-1 text-sm">{message}</p>
+      <p className="mt-1 text-sm text-ink-error">{message}</p>
     </div>
   );
 };
@@ -72,7 +72,7 @@ const EmptyState = () => {
   return (
     <div className="rounded-xl border p-6 text-center">
       <p className="text-base font-medium">No dashboard metrics yet</p>
-      <p className="text-muted-foreground mt-1 text-sm">
+      <p className="mt-1 text-sm text-ink-secondary">
         Mark some metrics to show on the dashboard in their settings.
       </p>
     </div>
