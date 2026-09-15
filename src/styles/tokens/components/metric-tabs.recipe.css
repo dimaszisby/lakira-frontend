@@ -1,0 +1,17 @@
+@layer components {
+  .metric-tab-rail {
+    border-bottom-color: var(--tab-rail-border);
+  }
+
+  .metric-tab-active {
+    background-color: var(--tab-active-bg);
+  }
+
+  .metric-tab-inactive {
+    border-color: var(--tab-inactive-border);
+  }
+
+  .metric-tab-divider {
+    background-color: var(--tab-divider);
+  }
+}

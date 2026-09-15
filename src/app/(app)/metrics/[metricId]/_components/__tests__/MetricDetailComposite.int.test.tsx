@@ -121,7 +121,9 @@ describe("Metric detail composite integration", () => {
     expect(screen.getByText("Display Options")).toBeInTheDocument();
 
     const logsTab = screen.getByRole("link", { name: /^logs$/i });
-    expect(logsTab).toHaveClass("bg-brand-primary/10");
+    // The active tint moved into metric-tabs.recipe.css; the class names the
+    // state, and the recipe owns the colour.
+    expect(logsTab).toHaveClass("metric-tab-active");
     expect(logsTab).toHaveAttribute("href", `/metrics/${metricId}/logs`);
   });
 

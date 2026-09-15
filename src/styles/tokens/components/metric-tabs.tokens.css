@@ -1,0 +1,14 @@
+/* Tokens for the metric detail tab rail.
+ *
+ * These are tints of existing semantic colours. They live here rather than as
+ * `/10` and `/70` suffixes in a class string so the resulting colour is named,
+ * can be checked for contrast, and can be overridden per theme — none of which
+ * is possible for an alpha chosen inline. */
+@layer base {
+  :root {
+    --tab-rail-border: hsl(var(--border) / 80%);
+    --tab-active-bg: hsl(var(--core-primary) / 10%);
+    --tab-inactive-border: hsl(var(--border) / 70%);
+    --tab-divider: hsl(var(--border) / 70%);
+  }
+}

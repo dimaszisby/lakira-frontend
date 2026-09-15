@@ -1,0 +1,6 @@
+/* Chart height is computed per instance and passed as `--chart-height`. */
+@layer components {
+  .chart-box {
+    height: var(--chart-height, auto);
+  }
+}

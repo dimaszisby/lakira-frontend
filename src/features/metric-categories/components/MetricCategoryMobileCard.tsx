@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { memo, useCallback } from "react";
 
+import { categoryColorStyle } from "@/features/metric-categories/categoryColorStyle";
 import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
 import { metricCategoryRoutes } from "@/lib/routes";
 
@@ -38,8 +39,8 @@ export const MetricCategoryMobileCardBase = ({ category, onClick }: Props) => {
 
           <span className="flex flex-row items-center gap-2">
             <span
-              className="relative inline-block h-5 w-5 rounded-full border border-border"
-              style={{ backgroundColor: color }}
+              className="category-color-bg relative inline-block h-5 w-5 rounded-full border border-border"
+              style={categoryColorStyle(color)}
               aria-hidden="true"
             />
           </span>

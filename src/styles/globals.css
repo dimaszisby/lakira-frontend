@@ -39,6 +39,12 @@
 @import url("./tokens/components/color-field.recipe.css");
 @import url("./tokens/components/select.recipe.css");
 @import url("./tokens/components/category-select.recipe.css");
+@import url("./tokens/components/metric-tabs.tokens.css");
+@import url("./tokens/components/metric-tabs.recipe.css");
+@import url("./tokens/components/app-chrome.tokens.css");
+@import url("./tokens/components/app-chrome.recipe.css");
+@import url("./tokens/components/category-color.recipe.css");
+@import url("./tokens/components/chart.recipe.css");
 
 @tailwind base;
 @tailwind components;

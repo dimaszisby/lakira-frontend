@@ -1,0 +1,10 @@
+/* Tokens for the app shell's translucent chrome — the mobile bottom bar and the
+ * sidebar scrim. Both are deliberately semi-transparent; naming the tints keeps
+ * them out of class strings and adjustable per theme. */
+@layer base {
+  :root {
+    --chrome-bar-bg: hsl(var(--bg) / 95%);
+    --chrome-bar-shadow: hsl(var(--text) / 10%);
+    --chrome-scrim-bg: hsl(var(--text) / 40%);
+  }
+}

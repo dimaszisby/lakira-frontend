@@ -262,7 +262,33 @@ const config = [
       tailwindcss: { callees: ["cn", "clsx", "classnames"] },
     },
     rules: {
+      /* Primitives have no business reaching for an escape hatch: everything
+       * they need is a token. This stays scoped to `ui/` deliberately — a page
+       * may legitimately need `min-h-[50vh]` or `[scrollbar-width:none]`, which
+       * are viewport units and raw CSS properties the token system does not
+       * model, not colour or spacing bypasses. */
       "tailwindcss/no-arbitrary-value": "error",
+    },
+  },
+
+  /* Token discipline, everywhere a component is written.
+   *
+   * These two rules protect the token system's actual jurisdiction — colour —
+   * so they apply far wider than the primitives. An ad-hoc tint produces a
+   * colour that exists in no token, so nothing can check its contrast and dark
+   * mode cannot override it independently; a non-custom-property inline style
+   * puts styling in the markup where no recipe can reach it.
+   *
+   * Widened from `ui/` on 2026-09-15. See .claude/rules/styling.md. */
+  {
+    files: [
+      "src/components/ui/**/*.tsx",
+      "src/components/layout/**/*.tsx",
+      "src/features/**/*.tsx",
+      "src/app/**/*.tsx",
+    ],
+    ignores: ["src/**/__tests__/**"],
+    rules: {
       "no-restricted-syntax": [
         "error",
         ...memoComponentSelectors,
@@ -272,7 +298,7 @@ const config = [
           selector:
             "JSXAttribute[name.name='style'] > JSXExpressionContainer > ObjectExpression > Property[key.type='Identifier']",
           message:
-            'Inline styles in UI primitives may only set CSS custom properties (e.g. { "--swatch": hex }) that a recipe reads.',
+            'Inline styles may only set CSS custom properties (e.g. { "--swatch": hex }) that a recipe reads.',
         },
       ],
     },
