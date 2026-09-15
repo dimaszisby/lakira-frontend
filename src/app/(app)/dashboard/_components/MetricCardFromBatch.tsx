@@ -50,7 +50,7 @@ const MetricCardFromBatch = memo(function MetricCardFromBatch({
         <MetricChart data={data} goalValue={null} />
       </div>
 
-      <div className="text-muted-foreground flex gap-4 text-xs">
+      <div className="flex gap-4 text-xs text-ink-secondary">
         <span>avg: {item.stats.average ?? "—"}</span>
         <span>min: {item.stats.min ?? "—"}</span>
         <span>max: {item.stats.max ?? "—"}</span>
