@@ -147,3 +147,35 @@ Follow-ups, not done here:
 - `public/scripts/theme-init.js` reads `lakira.theme`, but next-themes stores the choice under its default key `theme`, so the pre-paint script can apply the wrong theme.
 - `src/utils/theme.ts` is unused, and its `resetTheme` re-stores the theme, so it never returns to following the system. Delete it or fix it.
 - `.claude/rules/testing.md` still describes coverage thresholds as 3/2/3/3 % placeholders that gate nothing; `CLAUDE.md` and CI say otherwise.
+
+## What these follow-ups turned out to be (2026-09-15)
+
+All thirteen were worked in PRs #18–#26. Each has its own todo file under `docs/internal/todos/`.
+Recorded here because **three of the diagnoses above did not survive investigation**, and anyone
+reading this list should know that before trusting the rest of it.
+
+- **`/metrics/:id/logs/new` "Page not found"** — no `/metric-logs/new` fetch happens anywhere. The
+  404 was the _session_ bug below: `[metricId]/layout.tsx` turns any fetch failure into
+  `notFound()`. The real defect was a malformed route interception — `@modal` held `(.)new` and
+  `(.)[logId]`, two interceptors matching the same segment, so Next built `…/logs/(.)(.)new` and
+  threw. It hid behind a fallback to a full page load, so the modal still appeared. (#21)
+- **Sessions dying at 15 minutes** — `/api/auth/login` was dead code; nothing imported it. Login
+  runs through `/api/proxy/auth/login`, and the proxy discarded the backend's `Set-Cookie`. Fixing
+  it also required coalescing refresh, since the backend revokes the whole token family on replay
+  and parallel queries would otherwise 401 together. (#18)
+- **Mapping `--space-*` changing `*-7` app-wide** — no `*-7` utility exists in the codebase and none
+  is generated in the build. The change moved no pixel. (#26)
+- **The theme key mismatch** was real but **latent**: nothing calls `useTheme` or `setTheme`, so no
+  stored theme was ever written. There is no theme switcher in the UI. (#20)
+
+Two findings worth carrying forward, neither on this list:
+
+- **The edge session gate had never run.** `middleware.ts` sat at the repository root while `app` is
+  at `src/app`, and Next 16 renamed the convention to `proxy`. It is now `src/proxy.ts`. (#18)
+- **Four phantom colour classes across six sites**, including both route error boundaries, which had
+  been rendering with no error styling at all. `tailwind.config.mjs` replaces Tailwind's palette, so
+  a class naming an undefined colour generates no CSS — silently. Guarded now by
+  `src/styles/__tests__/colour-classes.test.ts`. (#24)
+
+**Still open: the Button contrast item.** It is a brand decision rather than a task — measurements
+are in this file's contrast section above, and nothing was changed.
