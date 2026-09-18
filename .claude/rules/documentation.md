@@ -60,6 +60,20 @@ Promote it to a kit if it grows into an initiative.
 
 **A document in one of the four shipped quadrants is a single file.** Do not scaffold a kit around it.
 
+## A kit is the spec, and the checklist is the tickets
+
+Do not invent a `specs/` folder or a parallel ticket file. The kit already is both:
+
+| Workflow step | Kit file              |
+| ------------- | --------------------- |
+| spec          | `<slug>-plan.md`      |
+| tickets       | `<slug>-checklist.md` |
+| decision log  | `decisions.md`        |
+| entry point   | `README.md`           |
+
+The kit directory slug is the task's identity — it is also the branch name and the `refs:` footer on
+every commit. See `.claude/rules/workflow.md` § the kit slug is the traceability spine.
+
 ## Decisions and ADRs
 
 A kit's `decisions.md` is a **working log**. A decision that constrains how the system is built — and
@@ -75,6 +89,23 @@ with a new one rather than editing it. `Proposed` means written down and *not im
 
 See [`docs/explanation/decisions/README.md`](../../docs/explanation/decisions/README.md) for the
 format and the next free number.
+
+## Write the decision when it is made, not at the end
+
+A `decisions.md` entry is written **at the moment the decision is taken** — during planning for the
+forks already visible, mid-implementation the moment an unplanned one is settled. Never backfilled
+at the end of the task.
+
+A record written after the code works is a rationalization. The rejected options and the reason for
+rejecting them are exactly what is wanted when someone traces the headache back months later, and
+they are exactly what is forgotten first.
+
+The final `docs` step of the task flow is for reference pages, how-to guides, and generated
+artifacts. It is **not** the slot for backfilling decisions.
+
+Promotion runs on the opposite clock. Promote at the **end** of the task, against the criteria above
+— by then it is clear whether the decision survived implementation, and a record promoted before
+that is one you would have to supersede rather than edit.
 
 ## Finished initiatives are a record, not a spec
 
