@@ -6,13 +6,67 @@ Use plan mode for any non-trivial task — 3+ steps, or anything involving an ar
 
 If something goes sideways mid-execution, **stop and re-plan immediately**. Do not push through a plan that has stopped matching reality.
 
+## Task flow
+
+One ordering for non-trivial work. Each step leaves a trace the next step can find.
+
+```
+plan → size the kit → branch → plan.md → checklist.md → ⏸ approve
+     → implement (+ decisions.md entry at each decision) → gates → review → fix
+     → docs → hand over commit → hand over PR
+```
+
+Sizing is the kit table in `.claude/rules/documentation.md`. **Say which size you picked before
+starting.** A single-commit fix that demands a plan, a checklist, and an ADR gets bypassed once and
+then always — the single-commit and ephemeral rows are the escape hatch, and using them is correct.
+
+If a small sweep turns out to change a component's public props, a data contract, a dependency, or
+an auth/routing boundary, stop and re-size rather than carrying on under the lighter rules.
+
+This ordering is the whole of it. Do not run a second, parallel checklist alongside it.
+
+## The kit slug is the traceability spine
+
+Every artifact of a task carries the same slug, so a line of code can be walked backwards to the
+decision that put it there.
+
+```
+colorfield-tokenization
+  → kit      docs/internal/initiatives/colorfield-tokenization/
+  → plan     …/colorfield-tokenization-plan.md
+  → tickets  …/colorfield-tokenization-checklist.md
+  → log      …/decisions.md
+  → ADR      docs/explanation/decisions/adr-0018-<slug>.md, linking back to the kit
+  → branch   feature/colorfield-tokenization
+  → commits  feat(ui): tokenize ColorField  …  refs: colorfield-tokenization
+  → PR       body links the kit README and every ADR the work promoted
+```
+
+Kit dir, plan filename, checklist filename, and branch name use the **same slug**. A promoted ADR
+links back to the kit; the kit's `decisions.md` entry links forward to the ADR. Both directions, or
+the artifacts exist without being able to find each other — which is the failure this convention
+exists to prevent.
+
+Ephemeral todos are exempt: the dated filename is their identity.
+
+## Stop after the checklist
+
+Plan plus checklist is the cheapest place to discover the wrong thing is being built. Present both,
+wait for approval, then run implementation through to review without further check-ins unless
+something forces a re-size.
+
 ## Branching
 
 **Always branch off `dev`, never off `main`.** Promotion is `feature/* → dev → main`. This repo has no `staging` branch — do not reference one.
 
+Fetch and pull first, or the branch starts from a stale `dev`:
+
 ```bash
-git switch dev && git switch -c feature/<slug>
+git fetch origin dev && git switch dev && git pull --ff-only origin dev
+git switch -c feature/<slug>
 ```
+
+If `dev` has uncommitted local changes that the pull would conflict with, stop and tell the user — do not stash, reset, or force the pull.
 
 Every subagent prompt for implementation work must say `branch off dev`.
 
@@ -28,17 +82,40 @@ End every completed task with a ready-to-use PR message:
 
 - Title in Conventional Commits form (`feat(scope): …`, `fix(scope): …`, `docs: …`, `chore(scope): …`).
 - Body covering what changed and why, and how it was verified.
-- The `Co-Authored-By` trailer.
+- Links to the kit README and every ADR the work promoted.
 
 Note that this repo's commit history is only partly conventional — the older half is free-form (`update …`, `add …`), and there is no commitlint or husky. Write conventional messages anyway; that is the direction the recent history moved in.
 
-## Verification before done
+## Gates are named, not asserted
 
-**Never mark a task complete without proving it works.** Run the gates, read the output, report what actually happened. If tests fail, say so and paste the failure. If a step was skipped, say which and why.
+**Never mark a task complete without proving it works.** Run the gates and report each **by name**
+with its result. A gate that was skipped is reported as skipped, not omitted. If a gate fails, say so
+and paste the failure. "Tests pass" is not a status.
+
+| Gate         | Command                                            | When                                    |
+| ------------ | -------------------------------------------------- | --------------------------------------- |
+| lint         | `npm run lint`                                     | always                                  |
+| css lint     | `npm run lint:css`                                 | always; the gate that matters on styles |
+| typecheck    | `npm run typecheck`                                | always                                  |
+| format       | `npm run format`                                   | always (`prettier --check .`)           |
+| unit tests   | `npm run test:unit` (`npm run test:unit:ci` + `npm run coverage:check` when coverage is in scope) | always |
+| integration  | `npm run test:integration`                         | data access or routing changed          |
+| spec drift   | `npm run api:spec:check` / `npm run api:types:check` | the backend contract or `src/types/dtos/**` is in play |
+| build        | `npm run build`                                    | always                                  |
+| e2e          | `npm run test:e2e`                                 | before a release, or a user-facing flow changed end to end |
+
+`/pre-push` runs these in CI's own order and is the canonical local sequence — use it rather than
+inventing an order here. `npm run format` is not a CI job; `.claude/hooks/format-on-edit.sh` normally
+keeps it green, which is why a failure there is worth reading rather than fixing blind.
+
+For anything touching routing, auth, or caching, check `docs/internal/incidents/` first — four logged postmortems cover exactly those areas, and their causes recur.
 
 The bar: would a staff engineer approve this as-is?
 
-For anything touching routing, auth, or caching, check `docs/internal/incidents/` first — four logged postmortems cover exactly those areas, and their causes recur.
+## Review before docs
+
+Review can invalidate an implementation choice, and documentation written before that lands gets
+written twice. Order is gates → review → fix → docs.
 
 ## Subagents
 
@@ -52,17 +129,9 @@ After **any** correction from the user, append the pattern to `.claude/lessons.m
 
 Read `.claude/lessons.md` at session start. Iterate on it until the mistake rate drops. A lesson that stabilises — one that keeps proving true — should be promoted into the relevant `.claude/rules/*.md` file and removed from the lessons log.
 
-## Task management
+## Ephemeral todos
 
-For any multi-step task:
-
-1. Plan it.
-2. Write `docs/internal/todos/YYYY-MM-DD-todo-<kebab-title>.md` with checkable items.
-3. Verify the plan against the code before executing.
-4. Track progress by checking items off as they land.
-5. Explain what changed and why.
-6. Append a `## Status` review section to the **same** todo file when done.
-7. Capture any corrections in `.claude/lessons.md`.
+Work that sizes to the ephemeral row gets one `docs/internal/todos/YYYY-MM-DD-todo-<kebab-title>.md` with checkable items instead of a kit. Check items off as they land, and append a `## Status` review section to the **same** file when done.
 
 Todo files are tracked in git but user-controlled — deletable without a follow-up PR. If one grows into a real initiative, promote it to a kit under the relevant domain folder (see `.claude/rules/documentation.md`).
 
