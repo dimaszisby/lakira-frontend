@@ -16,7 +16,7 @@ Current FE runtime expects:
 
 Notes:
 
-- `/api/auth/login` route uses `API_URL` directly.
+- Login goes through `/api/proxy/auth/login` like any other call; the route that duplicated it was deleted on 2026-09-12, having never been reachable.
 - `/api/proxy/[...path]` resolves upstream as `API_URL` -> `NEXT_PUBLIC_API_BASE_URL` -> `http://localhost:8001/api/v1` (development only; production throws when neither is set).
 
 ## 3. FE/BE Release Dependency Rule
@@ -59,6 +59,7 @@ Reason:
 
 - `.github/workflows/test.yml`
 - `src/app/api/proxy/[...path]/route.ts`
-- `src/app/api/auth/login/route.ts`
+- `src/app/api/auth/session/route.ts`, `src/app/api/auth/revive/route.ts`, `src/app/api/auth/logout/route.ts`
+- `src/proxy.ts`
 - `src/services/api/api.ts`
 - `next.config.ts`

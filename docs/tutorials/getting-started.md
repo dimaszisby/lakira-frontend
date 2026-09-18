@@ -82,7 +82,7 @@ Open <http://localhost:3000>. You land on the Lakira landing page, with **Login*
 The first request to any route compiles it on demand, so it can take up to a minute in dev. That is
 Next building the route, not the backend — subsequent requests to the same route are instant.
 
-Try <http://localhost:3000/dashboard> and you are bounced to `/login`. `middleware.ts` cookie-gates
+Try <http://localhost:3000/dashboard> and you are bounced to `/login`. `src/proxy.ts` cookie-gates
 `/dashboard`, `/metrics`, `/metric-categories`, and `/account`, and you have no session yet. The
 landing page and the auth pages are not gated.
 
