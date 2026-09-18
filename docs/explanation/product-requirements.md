@@ -240,28 +240,28 @@ The product is built with Next.js App Router, React 19, TypeScript, TanStack Que
 
 ## 6. Information Architecture and Route Inventory
 
-| Route | Auth Required | Purpose |
-| --- | --- | --- |
-| `/` | No | Landing page with Login/Register CTAs |
-| `/login` | No | User login |
-| `/register` | No | User registration |
-| `/dashboard` | Yes | Dashboard cards + trend snapshots |
-| `/metrics` | Yes | Metric library list |
-| `/metrics/new` | Yes | Create metric (page/modal intercept) |
-| `/metrics/[metricId]` | Yes | Metric overview |
-| `/metrics/[metricId]/edit` | Yes | Edit metric (page/modal intercept) |
-| `/metrics/[metricId]/logs` | Yes | Metric log list |
-| `/metrics/[metricId]/logs/new` | Yes | Create log (page/modal intercept) |
-| `/metrics/[metricId]/logs/[logId]` | Yes | Edit log (page/modal intercept) |
-| `/metrics/[metricId]/settings` | Yes | Metric settings read view |
-| `/metrics/[metricId]/settings/edit` | Yes | Edit metric settings (page/modal intercept) |
-| `/metric-categories` | Yes | Category library list |
-| `/metric-categories/new` | Yes | Create category (page/modal intercept) |
-| `/metric-categories/[categoryId]` | Yes | Category detail + metrics list |
-| `/metric-categories/[categoryId]/edit` | Yes | Edit category (page/modal intercept) |
-| `/metric-categories/[categoryId]/metrics/new` | Yes | Create metric from category context |
-| `/metric-categories/[categoryId]/metrics/[metricId]` | Yes | Edit metric from category context |
-| `/account` | Yes | Profile display |
+| Route                                                | Auth Required | Purpose                                     |
+| ---------------------------------------------------- | ------------- | ------------------------------------------- |
+| `/`                                                  | No            | Landing page with Login/Register CTAs       |
+| `/login`                                             | No            | User login                                  |
+| `/register`                                          | No            | User registration                           |
+| `/dashboard`                                         | Yes           | Dashboard cards + trend snapshots           |
+| `/metrics`                                           | Yes           | Metric library list                         |
+| `/metrics/new`                                       | Yes           | Create metric (page/modal intercept)        |
+| `/metrics/[metricId]`                                | Yes           | Metric overview                             |
+| `/metrics/[metricId]/edit`                           | Yes           | Edit metric (page/modal intercept)          |
+| `/metrics/[metricId]/logs`                           | Yes           | Metric log list                             |
+| `/metrics/[metricId]/logs/new`                       | Yes           | Create log (page/modal intercept)           |
+| `/metrics/[metricId]/logs/[logId]`                   | Yes           | Edit log (page/modal intercept)             |
+| `/metrics/[metricId]/settings`                       | Yes           | Metric settings read view                   |
+| `/metrics/[metricId]/settings/edit`                  | Yes           | Edit metric settings (page/modal intercept) |
+| `/metric-categories`                                 | Yes           | Category library list                       |
+| `/metric-categories/new`                             | Yes           | Create category (page/modal intercept)      |
+| `/metric-categories/[categoryId]`                    | Yes           | Category detail + metrics list              |
+| `/metric-categories/[categoryId]/edit`               | Yes           | Edit category (page/modal intercept)        |
+| `/metric-categories/[categoryId]/metrics/new`        | Yes           | Create metric from category context         |
+| `/metric-categories/[categoryId]/metrics/[metricId]` | Yes           | Edit metric from category context           |
+| `/account`                                           | Yes           | Profile display                             |
 
 ---
 
@@ -270,42 +270,52 @@ The product is built with Next.js App Router, React 19, TypeScript, TanStack Que
 ### 7.1 Core Entities
 
 1. User
+
 - `id`, `username`, `email`, `role`, `isPublicProfile`, timestamps.
 
 2. Metric Category
+
 - `id`, `name`, `color`, `icon`, `metricCount`, timestamps.
 
 3. Metric
+
 - `id`, `name`, `defaultUnit`, `description`, `isPublic`, `categoryId`, `originalMetricId`, timestamps.
 
 4. Metric Log
+
 - `id`, `metricId`, `logValue`, `loggedAt`, `type(manual|automatic)`, timestamps.
 
 5. Metric Settings
+
 - `id`, `metricId`, `goalEnabled`, `goalType`, `goalValue`, `timeFrameEnabled`, `startDate`, `deadlineDate`, `alertEnabled`, `alertThresholds`, `displayOptions`, timestamps.
 
 ### 7.2 Validation Highlights
 
 1. Auth
+
 - Username min 3 chars.
 - Email format enforced.
 - Password min 6 chars.
 - Password and confirmation must match.
 
 2. Metric
+
 - Name required.
 - Default unit required.
 
 3. Metric Category
+
 - Name required.
 - Color/icon required with defaults.
 
 4. Metric Log
+
 - `metricId` must be UUID.
 - `logValue` must be non-negative.
 - `loggedAt` required.
 
 5. Metric Settings
+
 - If `goalEnabled=true`, `goalType` and `goalValue` are required.
 - If `timeFrameEnabled=true`, both dates are required and `deadlineDate > startDate`.
 - `alertThresholds` constrained to integer 0-100.
@@ -323,12 +333,14 @@ The product is built with Next.js App Router, React 19, TypeScript, TanStack Que
 ### 8.2 Resource Endpoints Consumed by Frontend
 
 1. Auth
+
 - `POST /auth/register`
 - `POST /auth/login`
 - `GET /auth/profile`
 - `POST /auth/logout`
 
 2. Metrics
+
 - `GET /metrics`
 - `GET /metrics/:metricId`
 - `POST /metrics`
@@ -337,6 +349,7 @@ The product is built with Next.js App Router, React 19, TypeScript, TanStack Que
 - `POST /metrics/dummy` (dev/test utility)
 
 3. Metric Categories
+
 - `GET /metric-categories`
 - `GET /metric-categories/:categoryId`
 - `POST /metric-categories`
@@ -345,6 +358,7 @@ The product is built with Next.js App Router, React 19, TypeScript, TanStack Que
 - `POST /metric-categories/dummy` (dev/test utility)
 
 4. Metric Logs
+
 - `GET /metric-logs`
 - `GET /metric-logs/:logId`
 - `POST /metric-logs`
@@ -353,6 +367,7 @@ The product is built with Next.js App Router, React 19, TypeScript, TanStack Que
 - `POST /metric-logs/:metricId/dummy` (dev/test utility)
 
 5. Metric Settings
+
 - `GET /metric-settings`
 - `GET /metric-settings/:settingsId`
 - `POST /metric-settings`
@@ -362,6 +377,7 @@ The product is built with Next.js App Router, React 19, TypeScript, TanStack Que
 - `PATCH /metric-settings/:settingsId/display`
 
 6. Analytics
+
 - `GET /analytics/dashboard`
 - `GET /analytics/metrics/:metricId`
 
@@ -374,16 +390,19 @@ The product is built with Next.js App Router, React 19, TypeScript, TanStack Que
 Current enforced thresholds (via scripts and CI):
 
 1. Lighthouse categories (selected routes)
+
 - Performance >= 70
 - Accessibility >= 90
 - Best Practices >= 90
 
 2. Lab Web Vitals thresholds
+
 - LCP <= 3600ms
 - CLS <= 0.15
 - INP <= 300ms
 
 3. Bundle thresholds
+
 - Total JS <= 3,000,000 bytes
 - Largest chunk <= 300,000 bytes
 
@@ -469,7 +488,7 @@ Scheduled/manual `frontend-performance` runs:
 3. Metric settings delete capability exists in API hooks but is not exposed in current UI.
 4. Account page is read-only (no profile update form/workflow).
 5. E2E coverage is minimal compared to unit/integration coverage.
-6. Legacy/internal routes and utilities exist (`/api/auth/login`, `/api/auth/logout`, legacy `useAuth` hook) but are not primary production flow paths.
+6. `src/hooks/useAuth.ts` is legacy and unreachable — nothing imports it, and it imports `useRouter` from `next/router`, a Pages Router API the App Router does not provide. The parallel `/api/auth/login` route was deleted on 2026-09-12.
 
 ---
 
@@ -479,6 +498,7 @@ Scheduled/manual `frontend-performance` runs:
 
 1. `API_URL` or `NEXT_PUBLIC_API_BASE_URL` for backend proxy target.
 2. Optional app-origin env vars used by API base URL resolution for server-side requests:
+
 - `NEXT_PUBLIC_APP_URL`
 - `NEXT_PUBLIC_SITE_URL`
 - `NEXT_PUBLIC_VERCEL_URL`
@@ -487,6 +507,7 @@ Scheduled/manual `frontend-performance` runs:
 ### 13.2 Optional Feature Flags
 
 1. `NEXT_PUBLIC_ENABLE_DUMMY_ACTIONS=true`
+
 - Enables dummy data generation actions in list UIs.
 - Intended for non-production/testing usage.
 

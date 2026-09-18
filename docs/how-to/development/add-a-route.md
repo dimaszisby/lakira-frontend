@@ -22,8 +22,10 @@ export const tagRoutes = {
 };
 ```
 
-If the route should be cookie-gated, add it to `PROTECTED_PATHS` **and** the `matcher` in
-`middleware.ts`. Both — the matcher decides whether middleware runs at all.
+If the route should be cookie-gated, add it to `PROTECTED_APP_PATHS` in `src/lib/auth-paths.ts`
+**and** the `matcher` in `src/proxy.ts`. Both — the matcher decides whether the gate runs at all.
+(Next 16 renamed the `middleware` convention to `proxy`, and the file must sit beside `app`, so it
+lives at `src/proxy.ts`.)
 
 ## `searchParams` and `params` are promises
 

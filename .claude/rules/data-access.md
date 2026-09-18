@@ -37,7 +37,7 @@ This used to be an allowlist of *protected* segments, which was a denylist by om
 
 The proxy also **captures `lakira_refresh` out of the backend's `Set-Cookie` and re-issues it against `/api` on this origin**, and clears both cookies on a 401 that refresh could not rescue. It strips the header otherwise: the backend scopes its cookie to `Path=/api/v1/auth/refresh`, which this origin does not serve.
 
-`middleware.ts` gate-checks the same cookie for the paths in `PROTECTED_APP_PATHS`. It **validates the token's `exp` claim**, not just its presence. The signature is deliberately not verified there — that needs the backend's secret, and the backend re-checks every proxied request.
+`src/proxy.ts` gate-checks the same cookie for the paths in `PROTECTED_APP_PATHS`. It **validates the token's `exp` claim**, not just its presence. The signature is deliberately not verified there — that needs the backend's secret, and the backend re-checks every proxied request.
 
 An **expired** token is redirected to `/api/auth/revive`, not to `/login`: the refresh cookie lives on `/api` and a page navigation does not carry it, so only a route under that path can redeem it. Revival rotates the token and continues to `returnUrl`, or clears both cookies and falls through to `/login`. Only a request with no cookie at all goes straight to `/login?returnUrl=…`. See `docs/reference/routes-and-proxy.md` for why widening the cookie's path instead would break rotation.
 
