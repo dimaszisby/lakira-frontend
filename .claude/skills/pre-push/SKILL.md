@@ -14,18 +14,20 @@ Run the gates CI runs, in CI's order, locally. Stop at the first failure — the
 npm run lint            # 1
 npm run lint:css        # 2
 npm run typecheck       # 3
-npm run test:unit       # 4
-npm run test:integration # 5
-npm run api:spec:check  # 6
-npm run api:types:check # 7
-npm run build           # 8
+npm run format          # 4
+npm run test:unit       # 5
+npm run test:integration # 6
+npm run api:spec:check  # 7
+npm run api:types:check # 8
+npm run build           # 9
 ```
 
 Notes on reading the output:
 
 - **Gate 1** emits a large pre-existing warning backlog. Only errors fail. Do not report the warning count as a failure — but do check that none of the warnings are in files this branch touched.
-- **Gates 6 and 7** failing means the backend shipped a contract change, not that this branch is broken. Report it as drift and point at `/sync-api-types`.
-- **Gate 8** is the slowest. If gates 1–7 are green and the diff is test-only, say so and let the user decide whether to skip it.
+- **Gate 4** is `prettier --check`. It fails whole, not per-file, and `npm run format:fix` resolves it — never hand-format. It runs last of the four static gates in CI for the same reason it sits here: a formatting slip must not mask a type error.
+- **Gates 7 and 8** failing means the backend shipped a contract change, not that this branch is broken. Report it as drift and point at `/sync-api-types`.
+- **Gate 9** is the slowest. If gates 1–8 are green and the diff is test-only, say so and let the user decide whether to skip it.
 
 E2E is deliberately not in this list — it needs a running app and takes minutes. Run it separately when the change touches a user journey:
 
@@ -41,10 +43,11 @@ Pre-push validation
   ✓ lint
   ✓ lint:css
   ✓ typecheck
+  ✓ format
   ✓ test:unit          (142 passed)
   ✗ test:integration   (1 failed — MetricsPageClient.int.test.tsx)
 
-Result: BLOCKED at gate 5
+Result: BLOCKED at gate 6
 ```
 
 Then the actual failure output, and a one-line diagnosis.

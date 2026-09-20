@@ -16,7 +16,7 @@ concurrency:
 
 jobs:
   checks:
-    name: Lint and Typecheck
+    name: Static checks
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -40,6 +40,12 @@ jobs:
 
       - name: Run typecheck
         run: npm run typecheck
+
+      # Last of the four deliberately: a formatting failure is auto-fixable and
+      # says nothing about correctness, so it must not mask a lint or type error
+      # in the same run. Steps are serial and stop at the first failure.
+      - name: Run format check
+        run: npm run format
 
   unit:
     name: Unit tests
