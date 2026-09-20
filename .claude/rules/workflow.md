@@ -36,7 +36,7 @@ colorfield-tokenization
   → plan     …/colorfield-tokenization-plan.md
   → tickets  …/colorfield-tokenization-checklist.md
   → log      …/decisions.md
-  → ADR      docs/explanation/decisions/adr-0018-<slug>.md, linking back to the kit
+  → ADR      docs/explanation/decisions/adr-NNNN-<slug>.md, linking back to the kit
   → branch   feature/colorfield-tokenization
   → commits  feat(ui): tokenize ColorField  …  refs: colorfield-tokenization
   → PR       body links the kit README and every ADR the work promoted
@@ -54,6 +54,9 @@ Ephemeral todos are exempt: the dated filename is their identity.
 Plan plus checklist is the cheapest place to discover the wrong thing is being built. Present both,
 wait for approval, then run implementation through to review without further check-ins unless
 something forces a re-size.
+
+What makes a plan approvable is the Definition of Ready in `.claude/rules/documentation.md` — chiefly
+that acceptance criteria are stated and no `[NEEDS CLARIFICATION]` marker is left unresolved.
 
 ## Branching
 
