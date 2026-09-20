@@ -150,7 +150,7 @@ Every primitive draws these from `src/styles/tokens/scales.css` and `semantic.cs
 | `popover` (`.popover`, `.listbox`, `.listbox-item`)                                                    | Select, DateTimePicker, ColorField, CategorySelect                                              |
 | `dialog`                                                                                               | Modal (content keeps `.card`)                                                                   |
 | `feedback` (`.spinner`, `.skeleton`, `.empty-state`, …)                                                | Spinner, FullScreenSpinner, SkeletonLoader, EmptyDataIndicator, IconLabel, DataLabel            |
-| `segmented`                                                                                            | SegmentedControl, ListModeToggle                                                                |
+| `segmented`                                                                                            | SegmentedControl, ListModeToggle, ThemeSwitcher                                                 |
 | `switch`, `slider`, `chip`, `pager`, `table`, `calendar`, `color-field`, `swipe-card`, `field-message` | one primitive each                                                                              |
 
 ---
