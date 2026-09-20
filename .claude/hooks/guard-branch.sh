@@ -20,11 +20,11 @@ fi
 
 case "$BRANCH" in
   main)
-    echo "Blocked: you are on 'main'. Branch off dev first: git switch dev && git switch -c feature/<slug>" >&2
+    echo "Blocked: you are on 'main'. Branch off dev first: git switch dev && git switch -c feat/<slug>" >&2
     exit 2
     ;;
   dev)
-    echo "Note: editing directly on 'dev'. Consider 'git switch -c feature/<slug>' so this work lands via a PR." >&2
+    echo "Note: editing directly on 'dev'. Consider 'git switch -c feat/<slug>' so this work lands via a PR." >&2
     exit 0
     ;;
 esac
