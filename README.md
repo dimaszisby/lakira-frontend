@@ -96,7 +96,7 @@ surface the backend exposes.
 
 ## Contributing
 
-Branch off `dev`, never `main`. Promotion is `feature/* → dev → main`; there is no `staging` branch.
+Branch off `dev`, never `main`. Promotion is `feat/* → dev → main`; there is no `staging` branch.
 
 Full guide: [`CONTRIBUTING.md`](CONTRIBUTING.md). Security policy: [`SECURITY.md`](SECURITY.md).
 

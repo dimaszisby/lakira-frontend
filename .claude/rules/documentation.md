@@ -280,7 +280,7 @@ A pointer, not a summary of the other three files.
 # <Title>
 
 **Status:** <what phase, what is blocking>
-**Slug:** `<slug>` · **Branch:** `feature/<slug>`
+**Slug:** `<slug>` · **Branch:** `feat/<slug>`
 
 - [Plan](<slug>-plan.md) — goals, acceptance criteria, phases
 - [Checklist](<slug>-checklist.md) — work items, acceptance, gates
@@ -290,19 +290,17 @@ A pointer, not a summary of the other three files.
 ### What differs from `lakira-backend`, on purpose
 
 This kit format is shared with `lakira-backend`: same documents, same mandatory sections, same
-`D-NN` numbering, same Definition of Ready. Four things differ deliberately, each matching its own
-repo's history. **Do not unify them.**
+`D-NN` numbering, same Definition of Ready, same `feat/` branch prefix. Three things differ
+deliberately, each reflecting a genuinely different system. **Do not unify them.**
 
-| Difference        | Here                                              | `lakira-backend`          |
-| ----------------- | ------------------------------------------------- | ------------------------- |
-| Gate commands     | this repo's scripts                               | that repo's scripts       |
-| Branch prefix     | `feature/`                                        | `feat/`                   |
-| Promotion style   | entry keeps its body, gains a banner              | entry collapses to a stub |
-| Accessibility     | a conditional plan section                        | no equivalent             |
+| Difference      | Here                                 | `lakira-backend`          |
+| --------------- | ------------------------------------ | ------------------------- |
+| Gate commands   | this repo's scripts                  | that repo's scripts       |
+| Promotion style | entry keeps its body, gains a banner | entry collapses to a stub |
+| Accessibility   | a conditional plan section           | no equivalent             |
 
-The branch prefix matches real history — 7 merged `feature/` branches here alongside 8 `fix/`,
-5 `docs/`, 4 `chore/` and 3 `refactor/`; `feature/` was never used in `lakira-backend`. Per-repo
-consistency with real history beats cross-repo uniformity.
+The branch prefix was a fourth row until 2026-09-20, when this repo retired `feature/` for `feat/`
+— see `.claude/rules/workflow.md` § Branching. Do not re-diverge it.
 
 **The promotion row is the one that would do real damage if "fixed".** Collapsing entries to stubs
 here would destroy 14 original logs, in a repo whose

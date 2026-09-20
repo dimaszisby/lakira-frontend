@@ -5,10 +5,12 @@
 All changes flow through a promotion chain — never PR directly into `main`:
 
 ```
-feature/<name>  →  dev  →  main
+feat/<name>  →  dev  →  main
 ```
 
-- **feature branches**: branch off `dev`, target `dev` in your PR.
+- **feature branches**: branch off `dev`, target `dev` in your PR. The prefix is a Conventional
+  Commit type — `feat/`, `fix/`, `docs/`, `chore/`, `refactor/` — matching the commit type and the
+  PR title. Branches merged before 2026-09-20 use `feature/` and keep their names.
 - **dev → main**: promoted after the full pipeline is green.
 
 This repo has **no `staging` branch** — the backend has one, the frontend does not. Do not

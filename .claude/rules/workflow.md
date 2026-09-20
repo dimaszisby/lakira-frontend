@@ -37,7 +37,7 @@ colorfield-tokenization
   → tickets  …/colorfield-tokenization-checklist.md
   → log      …/decisions.md
   → ADR      docs/explanation/decisions/adr-NNNN-<slug>.md, linking back to the kit
-  → branch   feature/colorfield-tokenization
+  → branch   feat/colorfield-tokenization
   → commits  feat(ui): tokenize ColorField  …  refs: colorfield-tokenization
   → PR       body links the kit README and every ADR the work promoted
 ```
@@ -60,13 +60,15 @@ that acceptance criteria are stated and no `[NEEDS CLARIFICATION]` marker is lef
 
 ## Branching
 
-**Always branch off `dev`, never off `main`.** Promotion is `feature/* → dev → main`. This repo has no `staging` branch — do not reference one.
+**Always branch off `dev`, never off `main`.** Promotion is `feat/* → dev → main`. This repo has no `staging` branch — do not reference one.
+
+The prefix is a Conventional Commit type — `feat/`, `fix/`, `docs/`, `chore/`, `refactor/` — so the branch, the commit type and the PR title are one vocabulary. `feature/` was the one holdover and was retired on 2026-09-20. The 6 merged `feature/` branches keep their names: history is immutable, and mixed history is the normal state after a convention changes.
 
 Fetch and pull first, or the branch starts from a stale `dev`:
 
 ```bash
 git fetch origin dev && git switch dev && git pull --ff-only origin dev
-git switch -c feature/<slug>
+git switch -c feat/<slug>
 ```
 
 If `dev` has uncommitted local changes that the pull would conflict with, stop and tell the user — do not stash, reset, or force the pull.
