@@ -110,8 +110,12 @@ and paste the failure. "Tests pass" is not a status.
 | e2e          | `npm run test:e2e`                                 | before a release, or a user-facing flow changed end to end |
 
 `/pre-push` runs these in CI's own order and is the canonical local sequence — use it rather than
-inventing an order here. `npm run format` is not a CI job; `.claude/hooks/format-on-edit.sh` normally
-keeps it green, which is why a failure there is worth reading rather than fixing blind.
+inventing an order here.
+
+**Every gate in this table runs in CI**, `format` included as of 2026-09-20 — it is the last step of
+the `checks` job, so a formatting failure cannot mask a lint or type error in the same run. Nothing
+here depends on anyone remembering: `.claude/hooks/format-on-edit.sh` only reformats files an agent
+edits, which is why the repo reached 93 unformatted files before the gate existed.
 
 For anything touching routing, auth, or caching, check `docs/internal/incidents/` first — four logged postmortems cover exactly those areas, and their causes recur.
 
