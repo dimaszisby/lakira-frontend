@@ -3,8 +3,6 @@
 One decision per file, numbered globally and ordered by the date the decision was made.
 Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architecture-decisions).
 
-**16 records.** 12 accepted, 4 superseded.
-
 ## Reading these
 
 - **Status is the first thing to check.** `Proposed` means the decision was written down but is
@@ -14,6 +12,12 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 - **`Origin` points at where the decision was made.** ADR-0001…0014 come from the kit under
   [`../../internal/initiatives/components-overhaul/`](../../internal/initiatives/components-overhaul/),
   whose `decisions.md` remains the full working log. Later records link their own origin.
+- **The `Origin` column is deliberately mixed.** Kit-local decisions were numbered `ADR-NNN` inside
+  their own kit until 2026-09-20, which is what the existing values record; from that date a kit
+  numbers them `D-NN`, so new rows read `D-03`. The old values were correct when written and are
+  immutable — **do not "tidy" the column into one style.** A mixed column is what a convention
+  change looks like afterwards, not an inconsistency. See
+  [`.claude/rules/documentation.md`](../../../.claude/rules/documentation.md) § Decisions and ADRs.
 
 ## Records
 
@@ -57,10 +61,16 @@ The full log remains at
 
 ## Adding one
 
-Take the next free number — **ADR-0017** — copy the shape of an existing record, and open with
-`Status: Proposed`. Flip it to `Accepted` in the same PR that implements it. A registry full of
-stale `Proposed` entries is worse than no registry, because readers cannot tell intent from fact.
+Take the next free number — the highest in the Records table above, plus one — copy the shape
+of an existing record, and open with `Status: Proposed`. **Derive from that table; never restate
+it.** A count or a next-number written out by hand is correct once and silently wrong afterwards,
+because nobody recounts a header they are not editing — which is why this file no longer carries a
+record tally. Flip it to `Accepted` in the same PR
+that implements it. A registry full of stale `Proposed` entries is worse than no registry, because
+readers cannot tell intent from fact.
 
-A decision made inside an initiative kit starts life in that kit's `decisions.md`. Promote it here
-only if it would still matter to someone who never saw the initiative, and leave a pointer behind.
+A decision made inside an initiative kit starts life in that kit's `decisions.md` as a `D-NN` entry.
+Promote it here only if it would still matter to someone who never saw the initiative, and leave a
+pointer behind. A promotion therefore reads `D-03 → ADR-NNNN`, and the new row's `Origin` cell
+carries the `D-NN`.
 See [`../documentation-standards.md`](../documentation-standards.md).
