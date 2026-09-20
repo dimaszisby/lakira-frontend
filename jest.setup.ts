@@ -41,6 +41,28 @@ if (typeof Element !== "undefined" && !("checkVisibility" in Element.prototype))
   });
 }
 
+// jsdom does not implement matchMedia. `next-themes` calls it to resolve the
+// "system" theme, so any suite rendering ThemeProvider throws without this.
+// Reports "no preference" for every query, which resolves system to light —
+// tests that care about the resolved theme should set it explicitly.
+if (typeof window !== "undefined" && !window.matchMedia) {
+  Object.defineProperty(window, "matchMedia", {
+    configurable: true,
+    writable: true,
+    value: (query: string): MediaQueryList =>
+      ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false,
+      }) as unknown as MediaQueryList,
+  });
+}
+
 // jsdom has no `inert`. Without it Ariakit falls back to a polyfill that replaces
 // `element.focus`, which collides with user-event's own focus patching and throws.
 // Reflecting the attribute lets Ariakit take its standard path.

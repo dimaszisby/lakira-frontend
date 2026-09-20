@@ -39,6 +39,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0014](./adr-0014-modal-shared-scroll-lock-coordination.md)                     | Modal shared scroll-lock coordination                     | **Superseded** | 2026-03-12 | `ADR-062` |
 | [ADR-0015](./adr-0015-cache-keys-are-organization-scoped.md)                        | Cache keys are organization-scoped                        | Accepted       | 2026-08-29 | `ADR-004` |
 | [ADR-0016](./adr-0016-ui-primitives-conventions-ariakit-and-centralised-styling.md) | UI primitives: conventions, Ariakit, centralised styling  | Accepted       | 2026-09-11 | todo      |
+| [ADR-0017](./adr-0017-accept-the-button-contrast-deviations.md)                     | Accept the Button contrast deviations                     | Accepted       | 2026-09-20 | `D-03`    |
 
 ## Where the other decisions went
 

@@ -9,6 +9,7 @@ import { useAuthProfileQuery } from "@/features/auth/hooks/profile.query";
 import { Button } from "@/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
 import { ErrorMessage } from "@/ui/ErrorMessage";
+import { ThemeSwitcher } from "@/ui/ThemeSwitcher";
 
 const AccountPageBase = () => {
   const { data, isLoading, isFetching, isError, error, refetch } = useAuthProfileQuery();
@@ -106,6 +107,18 @@ const AccountPageBase = () => {
               {isFetching ? "Refreshing…" : "Refresh profile"}
             </Button>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Appearance</CardTitle>
+          <CardDescription>
+            Choose how {APP_NAME} looks. The choice is remembered on this device.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ThemeSwitcher />
         </CardContent>
       </Card>
     </section>

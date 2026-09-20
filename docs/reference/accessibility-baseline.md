@@ -183,6 +183,15 @@ Guideline:
 
 - New color combinations must be checked against the token palette.
 
+**Known deviation — Button colour tokens.** Buttons do not meet the above. Every light-mode variant
+fails SC 1.4.3 (worst 1.61:1 at secondary hover), destructive also fails in dark mode (3.16:1), and
+every button boundary fails SC 1.4.11 against every light-mode surface (1.64–3.00:1). This is
+accepted, not outstanding work: the tokens are fixed brand identity and no repoint within the
+existing ramps reaches AA. Measurements, rejected options and the reversal condition are in
+[ADR-0017](../explanation/decisions/adr-0017-accept-the-button-contrast-deviations.md). Note that
+`jest-axe` does not catch it — colour contrast is not evaluated in jsdom — so a green integration
+suite is not evidence here.
+
 <!-- SPECIAL NOTE: Add explicit link/reference to `color-palette.md` and any contrast checks you perform (e.g., tooling or Figma plugins). -->
 
 ### 6.2 Don’t Use Color Alone
