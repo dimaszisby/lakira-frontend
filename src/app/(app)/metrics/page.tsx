@@ -16,7 +16,10 @@ type MetricsPageProps = {
 
 const MetricsPage = async ({ searchParams }: MetricsPageProps) => {
   const resolvedSearchParams = (await searchParams) ?? {};
-  const initialParams = parseMetricListSearchParams(resolvedSearchParams, DEFAULT_METRIC_LIST_PARAMS);
+  const initialParams = parseMetricListSearchParams(
+    resolvedSearchParams,
+    DEFAULT_METRIC_LIST_PARAMS,
+  );
 
   return <MetricsPageClient initialParams={initialParams} />;
 };

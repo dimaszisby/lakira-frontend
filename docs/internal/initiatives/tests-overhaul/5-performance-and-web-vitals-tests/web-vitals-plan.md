@@ -62,12 +62,15 @@ Data contract (minimum fields):
 ## 4. Rollout Phases
 
 1. Phase 1 - capture only:
+
 - Collect metrics without enforcing thresholds.
 
 2. Phase 2 - visibility:
+
 - Create dashboard/report for percentile tracking (p75 baseline).
 
 3. Phase 3 - enforcement:
+
 - Add alerting or CI/release checks for sustained regressions.
 
 ---

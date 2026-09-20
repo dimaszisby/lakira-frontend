@@ -1,10 +1,14 @@
-import { dehydrate,HydrationBoundary, QueryClient } from "@tanstack/react-query";
+import { dehydrate, HydrationBoundary, QueryClient } from "@tanstack/react-query";
 
 import { getDashboardVisualizations } from "@/features/data-visualizations/api";
 import { DASHBOARD_VIZ_LIMIT } from "@/features/data-visualizations/dashboardConfig";
 import { parseDashboardFilters } from "@/features/data-visualizations/dashboardFilters";
 import { vizKeys } from "@/features/data-visualizations/keys";
-import { buildVizQuery, DEFAULT_FILL, DEFAULT_TZ } from "@/features/data-visualizations/viz-helpers";
+import {
+  buildVizQuery,
+  DEFAULT_FILL,
+  DEFAULT_TZ,
+} from "@/features/data-visualizations/viz-helpers";
 import { getServerAuthHeaders, getServerOrganizationId } from "@/services/api/serverHeaders";
 import DashboardContent from "@/src/app/(app)/dashboard/_components/DashboardContent";
 
@@ -19,7 +23,7 @@ type DashboardPageProps = {
 const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
   const resolvedSearchParams = (await searchParams) ?? {};
   const resolveValue = (value?: string | string[]) =>
-    Array.isArray(value) ? value[0] ?? null : value ?? null;
+    Array.isArray(value) ? (value[0] ?? null) : (value ?? null);
 
   const filters = parseDashboardFilters({
     bucket: resolveValue(resolvedSearchParams.bucket),

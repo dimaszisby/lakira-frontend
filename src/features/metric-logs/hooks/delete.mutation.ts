@@ -19,7 +19,10 @@ type DeleteVars = {
   metricId: string;
 };
 
-export function useDeleteMetricLog(onSuccess?: (deletedId: string) => void, onErrorCb?: (error: Error) => void) {
+export function useDeleteMetricLog(
+  onSuccess?: (deletedId: string) => void,
+  onErrorCb?: (error: Error) => void,
+) {
   const qc = useQueryClient();
   const organizationId = useOrganizationId();
   const { mutateAsync, isError, isSuccess, error, isPending } = useMutation<

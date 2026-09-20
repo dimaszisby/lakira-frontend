@@ -20,13 +20,13 @@ const config: Config = {
     "^@/styles/(.*)$": "<rootDir>/src/styles/$1",
     "^@/components/(.*)$": "<rootDir>/src/components/$1",
     "^@/ui/(.*)$": "<rootDir>/src/components/ui/$1",
-    "\\.(css|pcss)$": "identity-obj-proxy"
+    "\\.(css|pcss)$": "identity-obj-proxy",
   },
   testPathIgnorePatterns: [
     "<rootDir>/node_modules/",
     "<rootDir>/.next/",
     "<rootDir>/cypress/",
-    "<rootDir>/dist/"
+    "<rootDir>/dist/",
   ],
   transformIgnorePatterns: ["/node_modules/(?!(msw|@mswjs|until-async)/)"],
   testEnvironmentOptions: {
@@ -37,7 +37,7 @@ const config: Config = {
     "!src/**/*.d.ts",
     "!src/**/index.{ts,tsx}",
     "!src/**/stories.{ts,tsx}",
-    "!src/styles/**"
+    "!src/styles/**",
   ],
   coverageReporters: ["text", "lcov", "json-summary"],
   // Ratcheted to just below measured coverage on 2026-08-27
@@ -51,17 +51,17 @@ const config: Config = {
       statements: 29,
       branches: 29,
       functions: 26,
-      lines: 29
-    }
+      lines: 29,
+    },
   },
   transform: {
     "^.+\\.(t|j)sx?$": [
       "ts-jest",
       {
-        tsconfig: "<rootDir>/tsconfig.jest.json"
-      }
-    ]
-  }
+        tsconfig: "<rootDir>/tsconfig.jest.json",
+      },
+    ],
+  },
 };
 
 export default config;

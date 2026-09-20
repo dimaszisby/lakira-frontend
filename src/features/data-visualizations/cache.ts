@@ -1,6 +1,5 @@
 import type { QueryClient } from "@tanstack/react-query";
 
-
 const VIZ_KEY_ROOT = "viz";
 
 /**

@@ -1,7 +1,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import { http,HttpResponse } from "msw";
+import { http, HttpResponse } from "msw";
 
 import MetricCategoryForm from "@/features/metric-categories/components/MetricCategoryForm";
 import { CATEGORY_DEFAULTS } from "@/features/metric-categories/constants";
@@ -88,7 +88,9 @@ describe("MetricCategoryForm integration", () => {
       }),
     );
 
-    renderWithProviders(<MetricCategoryForm onClose={onClose} initialCategory={existingCategory} />);
+    renderWithProviders(
+      <MetricCategoryForm onClose={onClose} initialCategory={existingCategory} />,
+    );
 
     const nameInput = screen.getByLabelText(/category name/i);
     await user.clear(nameInput);

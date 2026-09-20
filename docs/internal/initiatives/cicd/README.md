@@ -46,37 +46,44 @@ Concurrency:
 Jobs:
 
 1. `checks`
+
 - `npm ci`
 - `npm run lint`
 - `npm run lint:css`
 - `npm run typecheck`
 
 2. `unit` (needs `checks`)
+
 - `npm ci`
 - `npm run test:unit:ci` (Jest unit suite via `jest.unit.config.ts`, excludes `*.int.test.ts(x)`)
 - Uploads coverage to Codecov (`CODECOV_TOKEN`)
 - Uploads coverage artifact
 
 3. `integration` (needs `unit`)
+
 - `npm ci`
 - `npm run test:integration` (Jest integration suite via `jest.integration.config.ts`)
 
 4. `build` (needs `integration`)
+
 - `npm ci`
 - `npm run build`
 - Uploads `.next` artifact
 
 5. `e2e` (needs `build`)
+
 - Downloads `.next` artifact
 - Starts Next.js (`next start`)
 - Runs `npm run test:e2e` (Cypress headless)
 - Uploads Cypress videos/screenshots
 
 6. `security`
+
 - `npm ci`
 - `npm run security:scan`
 
 7. `secret-scan`
+
 - Full-history checkout
 - Gitleaks scan
 
@@ -92,6 +99,7 @@ Triggers:
 Job:
 
 1. `performance`
+
 - `npm ci`
 - `npm run build`
 - `npm run perf:bundle-size`

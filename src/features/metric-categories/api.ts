@@ -20,10 +20,7 @@ import type {
 } from "./sort";
 import { DEFAULT_METRIC_CATEGORY_SORT } from "./sort";
 
-export type ListCategoryParams = CursorListParams<
-  MetricCategorySortParam,
-  MetricCategoryFilter
->;
+export type ListCategoryParams = CursorListParams<MetricCategorySortParam, MetricCategoryFilter>;
 
 // * ========== Queries ==========
 
@@ -52,10 +49,10 @@ export async function listMetricCategories(
       includeTotal,
     });
 
-    const res = await api.get<ApiResponse<MetricCategoryCursorPage>>(
-      `/metric-categories${query}`,
-      { signal: opts.signal, headers: opts.headers },
-    );
+    const res = await api.get<ApiResponse<MetricCategoryCursorPage>>(`/metric-categories${query}`, {
+      signal: opts.signal,
+      headers: opts.headers,
+    });
 
     return unwrap(res);
   }, "listMetricCategories");
@@ -159,10 +156,13 @@ export const deleteMetricCategory = async (
   opts: RequestOpts = {},
 ): Promise<MetricCategoryResponseDTO> =>
   withApiErrorHandling(async () => {
-    const res = await api.delete<ApiResponse<MetricCategoryResponseDTO>>(`/metric-categories/${id}`, {
-      signal: opts.signal,
-      headers: opts.headers,
-    });
+    const res = await api.delete<ApiResponse<MetricCategoryResponseDTO>>(
+      `/metric-categories/${id}`,
+      {
+        signal: opts.signal,
+        headers: opts.headers,
+      },
+    );
     return unwrap(res);
   }, "deleteMetricCategory");
 

@@ -224,7 +224,9 @@ describe("MetricLogForm integration", () => {
   });
 
   it("has no critical accessibility violations on initial render", async () => {
-    const { container } = renderWithProviders(<MetricLogForm metricId={metricId} onClose={jest.fn()} />);
+    const { container } = renderWithProviders(
+      <MetricLogForm metricId={metricId} onClose={jest.fn()} />,
+    );
     await settleAsyncUpdates();
     const results = await axe(container);
     expect(results).toHaveNoViolations();
@@ -262,7 +264,9 @@ describe("MetricLogForm integration", () => {
 
       await user.click(screen.getByRole("button", { name: /^delete log$/i }));
 
-      expect(await screen.findByRole("alert")).toHaveTextContent(/request failed with status code 500/i);
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        /request failed with status code 500/i,
+      );
       expect(onClose).not.toHaveBeenCalled();
     } finally {
       consoleErrorSpy.mockRestore();

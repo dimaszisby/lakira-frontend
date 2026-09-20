@@ -66,17 +66,16 @@ npx jest --config jest.integration.config.ts path/to/file.int.test.tsx
 
 ## API contract
 
-| Command                      | What it does                                                                 |
-| ---------------------------- | ---------------------------------------------------------------------------- |
+| Command                      | What it does                                                                  |
+| ---------------------------- | ----------------------------------------------------------------------------- |
 | `npm run api:spec:sync`      | Refetch `docs/reference/api/lakira-backend-openapi.json` from lakira-backend. |
-| `npm run api:spec:check`     | Fail if the local snapshot differs from the backend's.                       |
-| `npm run api:types:generate` | Regenerate `src/types/api/generated/lakira-backend.d.ts` from the snapshot.  |
-| `npm run api:types:check`    | Fail if the committed types differ from a fresh generation.                  |
+| `npm run api:spec:check`     | Fail if the local snapshot differs from the backend's.                        |
+| `npm run api:types:generate` | Regenerate `src/types/api/generated/lakira-backend.d.ts` from the snapshot.   |
+| `npm run api:types:check`    | Fail if the committed types differ from a fresh generation.                   |
 
 ---
 
 ## Known-broken
-
 
 ## Generated artifacts — never hand-edit
 

@@ -35,7 +35,14 @@ export function useMetricsListPaginationViaCursor(params: {
   const { page, after, setPage, updateNextCursor, canPrev, canNextUsing } = pager;
 
   const query = useQuery<MetricCursorPageDTO, unknown, MetricCursorPageVM>({
-    queryKey: metricsKeys.cursor.pages(organizationId, { limit, sort, q, filter, page, includeTotal: true }),
+    queryKey: metricsKeys.cursor.pages(organizationId, {
+      limit,
+      sort,
+      q,
+      filter,
+      page,
+      includeTotal: true,
+    }),
     queryFn: () => getMetricLibraryViaCursor({ limit, sort, q, filter, after, includeTotal: true }),
 
     select: makePageItemsSelect(toMetricPreviewVM),

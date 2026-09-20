@@ -177,9 +177,7 @@ describe("LoginForm integration", () => {
       const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
 
       try {
-        server.use(
-          http.post(LOGIN_ENDPOINT, () => new HttpResponse(null, { status: 500 })),
-        );
+        server.use(http.post(LOGIN_ENDPOINT, () => new HttpResponse(null, { status: 500 })));
 
         renderWithProviders(<LoginForm />);
         await submit(user);

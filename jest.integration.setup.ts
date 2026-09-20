@@ -33,9 +33,15 @@ if (!globalThis.BroadcastChannel) {
   globalThis.BroadcastChannel = BroadcastChannelMock as unknown as typeof BroadcastChannel;
 }
 
-const { Blob, File, FormData, Headers, Request, Response, fetch } = require(
-  "next/dist/compiled/@edge-runtime/primitives/fetch.js",
-);
+const {
+  Blob,
+  File,
+  FormData,
+  Headers,
+  Request,
+  Response,
+  fetch,
+} = require("next/dist/compiled/@edge-runtime/primitives/fetch.js");
 
 Object.assign(globalThis, {
   fetch,

@@ -6,5 +6,6 @@
  */
 export const organizationKeys = {
   all: (organizationId: string) => ["organizations", organizationId] as const,
-  members: (organizationId: string) => [...organizationKeys.all(organizationId), "members"] as const,
+  members: (organizationId: string) =>
+    [...organizationKeys.all(organizationId), "members"] as const,
 };

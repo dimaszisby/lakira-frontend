@@ -10,11 +10,7 @@ const BOOLEAN_MAP: Record<string, string> = {
 const isObject = (value: QueryValue): value is { [key: string]: QueryValue } =>
   typeof value === "object" && value !== null && !Array.isArray(value);
 
-const serialize = (
-  key: string,
-  value: QueryValue,
-  entries: Array<[string, string]>,
-): void => {
+const serialize = (key: string, value: QueryValue, entries: Array<[string, string]>): void => {
   if (value === undefined || value === null) return;
 
   if (Array.isArray(value)) {
@@ -31,8 +27,7 @@ const serialize = (
     return;
   }
 
-  const stringValue =
-    typeof value === "boolean" ? BOOLEAN_MAP[String(value)] : String(value);
+  const stringValue = typeof value === "boolean" ? BOOLEAN_MAP[String(value)] : String(value);
   entries.push([key, stringValue]);
 };
 
@@ -81,8 +76,7 @@ export const authRoutes = {
   // link. It is single-use and short-lived; the backend rejects a spent one.
   resetPassword: (token?: string | null) =>
     buildPath("/reset-password", token ? { token } : undefined),
-  verifyEmail: (token?: string | null) =>
-    buildPath("/verify-email", token ? { token } : undefined),
+  verifyEmail: (token?: string | null) => buildPath("/verify-email", token ? { token } : undefined),
 };
 
 /**
@@ -96,14 +90,11 @@ export const authRoutes = {
  */
 export const NEW_RECORD_SEGMENT = "new";
 
-
 export const metricRoutes = {
   list: (params?: QueryParams) => buildPath("/metrics", params),
   detail: (metricId: string) => `/metrics/${metricId}`,
-  overview: (metricId: string, params?: QueryParams) =>
-    buildPath(`/metrics/${metricId}`, params),
-  logs: (metricId: string, params?: QueryParams) =>
-    buildPath(`/metrics/${metricId}/logs`, params),
+  overview: (metricId: string, params?: QueryParams) => buildPath(`/metrics/${metricId}`, params),
+  logs: (metricId: string, params?: QueryParams) => buildPath(`/metrics/${metricId}/logs`, params),
   settings: (metricId: string, params?: QueryParams) =>
     buildPath(`/metrics/${metricId}/settings`, params),
   modal: {

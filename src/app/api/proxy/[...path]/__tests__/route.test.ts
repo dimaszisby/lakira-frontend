@@ -94,7 +94,10 @@ describe("the refresh cookie the backend issues on login", () => {
   it("is left alone when the backend issues none", async () => {
     global.fetch = jest.fn().mockResolvedValue(upstream(200)) as unknown as typeof fetch;
 
-    const response = await GET(request("metrics", { [SESSION_COOKIE_NAME]: "t" }), context("metrics"));
+    const response = await GET(
+      request("metrics", { [SESSION_COOKIE_NAME]: "t" }),
+      context("metrics"),
+    );
 
     expect(setCookies(response)[REFRESH_COOKIE_NAME]).toBeUndefined();
   });

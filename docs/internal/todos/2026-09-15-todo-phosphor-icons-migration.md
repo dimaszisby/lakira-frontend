@@ -29,15 +29,15 @@ resolution artifact of the package's exports map, not a real result. Worth knowi
 
 ## Verification
 
-| Gate | Result |
-| --- | --- |
-| `lint` | 0 errors, 17 warnings — exactly the `dev` baseline |
-| `lint:css` | clean |
-| `typecheck` | clean |
-| `test:unit` | 77 suites, 646 tests |
-| `test:integration` | 18 suites, 92 tests |
-| `coverage:check --strict` | all goals met |
-| `build` | passes |
+| Gate                      | Result                                             |
+| ------------------------- | -------------------------------------------------- |
+| `lint`                    | 0 errors, 17 warnings — exactly the `dev` baseline |
+| `lint:css`                | clean                                              |
+| `typecheck`               | clean                                              |
+| `test:unit`               | 77 suites, 646 tests                               |
+| `test:integration`        | 18 suites, 92 tests                                |
+| `coverage:check --strict` | all goals met                                      |
+| `build`                   | passes                                             |
 
 Icons confirmed rendering in `next dev` with a cleared `.next`: sidebar navigation glyphs, the `+`
 on Create Metric, category folder icons, the eye-slash on Private rows, and Sign Out.

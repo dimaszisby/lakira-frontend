@@ -1,0 +1,18 @@
+# Revisions to skip when running `git blame`.
+#
+# Mass reformats bury authorship: without this file, `git blame` on any of the
+# 86 swept files attributes every line to the formatting commit rather than to
+# whoever wrote the code.
+#
+# Use it with:
+#     git blame --ignore-revs-file .git-blame-ignore-revs <file>
+#
+# Or once, per clone, to make it automatic:
+#     git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# One full-length SHA per line, newest last, with a comment naming the change.
+# A SHA can only be added *after* the commit exists, so a reformat lands first
+# and its SHA is appended in the commit that follows.
+
+# chore: sweep the repo to Prettier's output (2026-09-20)
+35bc294fd11a44a09a39e04c1603dae0e5abe1eb

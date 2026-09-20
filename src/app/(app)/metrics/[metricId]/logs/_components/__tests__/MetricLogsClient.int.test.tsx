@@ -1,7 +1,7 @@
 import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import { http,HttpResponse } from "msw";
+import { http, HttpResponse } from "msw";
 
 import { MetricDetailProvider } from "@/app/(app)/metrics/[metricId]/_components/MetricDetailContext";
 import MetricLogsClient from "@/app/(app)/metrics/[metricId]/logs/_components/MetricLogsClient";

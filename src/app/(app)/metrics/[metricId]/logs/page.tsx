@@ -1,4 +1,7 @@
-import { DEFAULT_METRIC_LOG_LIST_PARAMS, parseMetricLogSearchParams } from "@/features/metric-logs/listSearchParams";
+import {
+  DEFAULT_METRIC_LOG_LIST_PARAMS,
+  parseMetricLogSearchParams,
+} from "@/features/metric-logs/listSearchParams";
 
 import MetricLogsClient from "./_components/MetricLogsClient";
 
@@ -10,7 +13,10 @@ type MetricLogsPageProps = {
 const MetricLogsPage = async ({ params, searchParams }: MetricLogsPageProps) => {
   await params;
   const resolvedSearchParams = (await searchParams) ?? {};
-  const initialParams = parseMetricLogSearchParams(resolvedSearchParams, DEFAULT_METRIC_LOG_LIST_PARAMS);
+  const initialParams = parseMetricLogSearchParams(
+    resolvedSearchParams,
+    DEFAULT_METRIC_LOG_LIST_PARAMS,
+  );
 
   return <MetricLogsClient initialParams={initialParams} />;
 };

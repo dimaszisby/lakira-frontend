@@ -59,7 +59,11 @@ export const metricsKeys = {
      * keystroke-driven lookup cannot evict the list the user is looking at.
      */
     nameLookup: (organizationId: string, name: string) =>
-      [...metricsKeys.cursor.root(organizationId), "name-lookup", name.trim().toLowerCase()] as const,
+      [
+        ...metricsKeys.cursor.root(organizationId),
+        "name-lookup",
+        name.trim().toLowerCase(),
+      ] as const,
     pages: (
       organizationId: string,
       p: {

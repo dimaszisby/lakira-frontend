@@ -22,13 +22,7 @@ const MetricLogFormDialog = ({ metricId, initialLog }: MetricLogFormDialogProps)
     }, 0);
   }, [router]);
 
-  return (
-    <MetricLogForm
-      metricId={metricId}
-      initialLog={initialLog}
-      onClose={handleClose}
-    />
-  );
+  return <MetricLogForm metricId={metricId} initialLog={initialLog} onClose={handleClose} />;
 };
 
 export default MetricLogFormDialog;

@@ -15,11 +15,7 @@ type MetricCategoryLayoutProps = {
   }>;
 };
 
-const MetricCategoryLayout = async ({
-  children,
-  modal,
-  params,
-}: MetricCategoryLayoutProps) => {
+const MetricCategoryLayout = async ({ children, modal, params }: MetricCategoryLayoutProps) => {
   const { categoryId } = await params;
   const serverHeaders = await getServerAuthHeaders();
   const category = await getMetricCategoryById(categoryId, { headers: serverHeaders }).catch(

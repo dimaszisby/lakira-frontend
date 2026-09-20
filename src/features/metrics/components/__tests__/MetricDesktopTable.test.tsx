@@ -43,12 +43,7 @@ describe("MetricDesktopTable", () => {
     const onSort = jest.fn();
 
     render(
-      <MetricDesktopTableBase
-        metrics={metrics}
-        sortBy="name"
-        sortOrder="ASC"
-        onSort={onSort}
-      />,
+      <MetricDesktopTableBase metrics={metrics} sortBy="name" sortOrder="ASC" onSort={onSort} />,
     );
 
     await user.click(screen.getByRole("button", { name: /sort by name/i }));

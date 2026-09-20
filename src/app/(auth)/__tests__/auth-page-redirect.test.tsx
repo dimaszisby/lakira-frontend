@@ -20,7 +20,10 @@ jest.mock("next/navigation", () => ({
     throw new Error("NEXT_REDIRECT");
   }),
 }));
-jest.mock("@/features/auth/components/LoginForm", () => ({ __esModule: true, default: () => null }));
+jest.mock("@/features/auth/components/LoginForm", () => ({
+  __esModule: true,
+  default: () => null,
+}));
 jest.mock("@/features/auth/components/RegisterForm", () => ({
   __esModule: true,
   default: () => null,

@@ -28,29 +28,32 @@ Migration to Next.js 16 introduced two regressions that blocked the Metric Detai
 
 ## 3. Timeline
 
-| Time (local) | Event |
-|--------------|-------|
-| 10:05 | Navigated to `/metrics/e315...`; server threw `params is a Promise` error. |
-| 10:15 | Noted `/api/proxy/metrics/undefined` 401 responses and 404 fallback page. |
-| 10:40 | Added async `params` handling + cookie forwarding helper; confirmed `/metrics` renders locally. |
-| 11:05 | Hit `/metric-categories/fb101c...` and saw build error (`useRouter` in server component). |
-| 11:15 | Marked `MetricCategoryHeaderSection` as `"use client"` and reloaded successfully. |
+| Time (local) | Event                                                                                           |
+| ------------ | ----------------------------------------------------------------------------------------------- |
+| 10:05        | Navigated to `/metrics/e315...`; server threw `params is a Promise` error.                      |
+| 10:15        | Noted `/api/proxy/metrics/undefined` 401 responses and 404 fallback page.                       |
+| 10:40        | Added async `params` handling + cookie forwarding helper; confirmed `/metrics` renders locally. |
+| 11:05        | Hit `/metric-categories/fb101c...` and saw build error (`useRouter` in server component).       |
+| 11:15        | Marked `MetricCategoryHeaderSection` as `"use client"` and reloaded successfully.               |
 
 ---
 
 ## 4. Root Causes
 
 ### 4.1 Async `params` enforcement
+
 - **What changed:** Next 16 wraps `params` in a Promise to align streaming semantics.
 - **Where:** `src/app/(app)/metrics/[metricId]/layout.tsx`, `/logs/*.tsx`, `/edit/page.tsx`, category counterparts.
 - **Failure:** Accessing `params.metricId` synchronously triggered the runtime guard and prevented data fetching.
 
 ### 4.2 Server fetch without cookies
+
 - **What changed:** Axios moved behind `/api/proxy` which requires `lakira_token`.
 - **Where:** Metric detail layout, metric edit, log detail, category layout/edit, dashboard prefetch.
 - **Failure:** Server fetches did not forward cookies, so proxy refused with 401, cascading to `notFound()` and blank charts.
 
 ### 4.3 Client hook in server component
+
 - **What changed:** `MetricCategoryHeaderSection` relocated into the app router but kept `useRouter`.
 - **Failure:** Without `"use client"`, Next flagged the file and blocked the route compilation.
 

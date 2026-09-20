@@ -1,7 +1,7 @@
 import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import { http,HttpResponse } from "msw";
+import { http, HttpResponse } from "msw";
 
 import MetricCategoriesPageClient from "@/app/(app)/metric-categories/_components/MetricCategoriesPageClient";
 import type { MetricCategoryListSearchParams } from "@/features/metric-categories/listSearchParams";

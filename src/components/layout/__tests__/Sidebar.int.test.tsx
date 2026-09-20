@@ -93,7 +93,12 @@ describe("Sidebar integration", () => {
     );
 
     renderWithProviders(
-      <Sidebar navItems={navItems} pathname="/dashboard" isMobileOpen={false} onClose={jest.fn()} />,
+      <Sidebar
+        navItems={navItems}
+        pathname="/dashboard"
+        isMobileOpen={false}
+        onClose={jest.fn()}
+      />,
     );
 
     await user.click(screen.getAllByRole("button", { name: /logout/i })[0]);
@@ -109,7 +114,12 @@ describe("Sidebar integration", () => {
     server.use(http.post("/api/auth/logout", () => new HttpResponse(null, { status: 500 })));
 
     renderWithProviders(
-      <Sidebar navItems={navItems} pathname="/dashboard" isMobileOpen={false} onClose={jest.fn()} />,
+      <Sidebar
+        navItems={navItems}
+        pathname="/dashboard"
+        isMobileOpen={false}
+        onClose={jest.fn()}
+      />,
     );
 
     await user.click(screen.getAllByRole("button", { name: /logout/i })[0]);
