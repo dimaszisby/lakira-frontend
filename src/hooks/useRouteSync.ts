@@ -11,7 +11,10 @@ type RouteSyncOptions<T> = {
   buildHref?: (query: QueryParams) => string;
 };
 
-type RouteSyncHandler<T> = (next: T, options?: { method?: "replace" | "push"; scroll?: boolean }) => void;
+type RouteSyncHandler<T> = (
+  next: T,
+  options?: { method?: "replace" | "push"; scroll?: boolean },
+) => void;
 
 /**
  * Normalizes the "sync component state to URL search params" pattern.

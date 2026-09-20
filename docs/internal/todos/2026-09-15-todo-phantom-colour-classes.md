@@ -16,13 +16,13 @@ does not exist. The opacity-tint rule from ticket 8 would have walked straight p
 
 ## Four phantom colours, six sites
 
-| Class | Where | Effect |
-| --- | --- | --- |
+| Class                                                           | Where                                                 | Effect                                                                                                   |
+| --------------------------------------------------------------- | ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `bg-destructive/5`, `border-destructive/20`, `text-destructive` | `dashboard/error.tsx`, `metrics/[metricId]/error.tsx` | **both error boundaries rendered with no error styling at all** — no red border, no tint, no red heading |
-| `text-destructive` | `DashboardContent.tsx` `ErrorState` | error message rendered in body colour |
-| `text-muted-foreground` (a shadcn leftover) | `DashboardContent.tsx`, `MetricCardFromBatch.tsx` | secondary text rendered at full ink |
-| `text-ink-600` | `(auth)/layout.tsx` footer | footer rendered at full ink |
-| `bg-card` | `DashboardContent.tsx`, `dashboard/loading.tsx` | skeleton and grid cards had no background |
+| `text-destructive`                                              | `DashboardContent.tsx` `ErrorState`                   | error message rendered in body colour                                                                    |
+| `text-muted-foreground` (a shadcn leftover)                     | `DashboardContent.tsx`, `MetricCardFromBatch.tsx`     | secondary text rendered at full ink                                                                      |
+| `text-ink-600`                                                  | `(auth)/layout.tsx` footer                            | footer rendered at full ink                                                                              |
+| `bg-card`                                                       | `DashboardContent.tsx`, `dashboard/loading.tsx`       | skeleton and grid cards had no background                                                                |
 
 Verified against the built stylesheet, not inferred: every occurrence of `destructive` in the CSS is
 a **button token variable** (`--button-destructive-bg` and friends). No `.bg-destructive`,
@@ -56,13 +56,13 @@ a broken parse cannot pass vacuously — the failure mode from the 2026-08-17 `b
 
 ## Verification
 
-| Gate | Result |
-| --- | --- |
-| `lint` | 0 errors, 17 warnings — the `dev` baseline |
-| `lint:css` | clean |
-| `typecheck` | clean |
-| `test:unit` | 78 suites, 648 tests (was 77 / 646) |
-| `test:integration` | 18 suites, 92 tests |
+| Gate               | Result                                     |
+| ------------------ | ------------------------------------------ |
+| `lint`             | 0 errors, 17 warnings — the `dev` baseline |
+| `lint:css`         | clean                                      |
+| `typecheck`        | clean                                      |
+| `test:unit`        | 78 suites, 648 tests (was 77 / 646)        |
+| `test:integration` | 18 suites, 92 tests                        |
 
 Dashboard checked in the browser: the `avg / min / max / n` line that carried
 `text-muted-foreground` now renders in secondary ink.

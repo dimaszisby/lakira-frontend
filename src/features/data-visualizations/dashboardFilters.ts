@@ -28,7 +28,12 @@ export type DashboardSearchParams =
 
 const normalizeRawValue = (
   params: DashboardSearchParams,
-): { bucket?: string | null; range?: string | null; rangeStart?: string | null; rangeEnd?: string | null } => {
+): {
+  bucket?: string | null;
+  range?: string | null;
+  rangeStart?: string | null;
+  rangeEnd?: string | null;
+} => {
   if ("get" in params) {
     return {
       bucket: params.get("bucket"),

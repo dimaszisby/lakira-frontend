@@ -1,7 +1,7 @@
 "use client";
 
-import type {ReactNode} from "react";
-import { createContext,  useContext } from "react";
+import type { ReactNode } from "react";
+import { createContext, useContext } from "react";
 
 /**
  * The organization the current session is acting for.

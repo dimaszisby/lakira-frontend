@@ -13,7 +13,10 @@ type MetricCategoryDetailPageProps = {
 
 const MetricCategoryDetailPage = async ({ searchParams }: MetricCategoryDetailPageProps) => {
   const resolvedSearchParams = (await searchParams) ?? {};
-  const initialParams = parseMetricListSearchParams(resolvedSearchParams, DEFAULT_METRIC_LIST_PARAMS);
+  const initialParams = parseMetricListSearchParams(
+    resolvedSearchParams,
+    DEFAULT_METRIC_LIST_PARAMS,
+  );
   const rawReturnParams = Array.isArray(resolvedSearchParams.returnParams)
     ? resolvedSearchParams.returnParams[0]
     : resolvedSearchParams.returnParams;

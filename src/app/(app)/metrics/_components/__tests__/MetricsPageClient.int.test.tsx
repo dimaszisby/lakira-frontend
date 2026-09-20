@@ -1,7 +1,7 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import { http,HttpResponse } from "msw";
+import { http, HttpResponse } from "msw";
 
 import MetricsPageClient from "@/app/(app)/metrics/_components/MetricsPageClient";
 import type { MetricListSearchParams } from "@/features/metrics/listSearchParams";

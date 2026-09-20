@@ -23,10 +23,10 @@ the worst direction for a uniqueness check.
 
 Confirmed against the running backend rather than inferred:
 
-| Request | Status |
-| --- | --- |
-| `page=1&limit=1&sortBy=createdAt&sortOrder=DESC&name=Sleep` | **400** |
-| `limit=10&sort=-createdAt&filter[name]=Sleep` | **200**, returns `["Sleep"]` |
+| Request                                                     | Status                       |
+| ----------------------------------------------------------- | ---------------------------- |
+| `page=1&limit=1&sortBy=createdAt&sortOrder=DESC&name=Sleep` | **400**                      |
+| `limit=10&sort=-createdAt&filter[name]=Sleep`               | **200**, returns `["Sleep"]` |
 
 ## The fix
 
@@ -64,15 +64,15 @@ broken feature green indefinitely.
 
 ## Verification
 
-| Gate | Result |
-| --- | --- |
-| `lint` | 0 errors, 17 warnings (`dev` baseline 21) |
-| `lint:css` | clean |
-| `typecheck` | clean |
-| `test:unit` | 77 suites, 646 tests |
-| `test:integration` | 18 suites, 92 tests (was 91) |
-| `coverage:check --strict` | all goals met |
-| `build` | passes |
+| Gate                      | Result                                    |
+| ------------------------- | ----------------------------------------- |
+| `lint`                    | 0 errors, 17 warnings (`dev` baseline 21) |
+| `lint:css`                | clean                                     |
+| `typecheck`               | clean                                     |
+| `test:unit`               | 77 suites, 646 tests                      |
+| `test:integration`        | 18 suites, 92 tests (was 91)              |
+| `coverage:check --strict` | all goals met                             |
+| `build`                   | passes                                    |
 
 Plus the live request comparison above.
 

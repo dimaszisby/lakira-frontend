@@ -20,11 +20,7 @@ import { getServerAuthHeaders } from "@/services/api/serverHeaders";
  * `src/app/__tests__/parallel-route-interceptors.test.ts`, which is why that
  * test reads the directory tree rather than rendering anything.
  */
-const CategoryMetricDialogPage = async ({
-  params,
-}: {
-  params: Promise<{ metricId: string }>;
-}) => {
+const CategoryMetricDialogPage = async ({ params }: { params: Promise<{ metricId: string }> }) => {
   const { metricId } = await params;
 
   if (metricId === NEW_RECORD_SEGMENT) {

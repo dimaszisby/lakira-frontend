@@ -36,7 +36,9 @@ describe("POST /api/auth/logout", () => {
     // The bug this replaces: logout posted through the proxy, which strips
     // Set-Cookie, so nothing on this origin changed and `/login` redirected
     // back to the dashboard on the cookie that was never removed.
-    global.fetch = jest.fn().mockResolvedValue({ ok: true, status: 200 }) as unknown as typeof fetch;
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue({ ok: true, status: 200 }) as unknown as typeof fetch;
     withCookies({ [SESSION_COOKIE_NAME]: "access", [REFRESH_COOKIE_NAME]: "refresh" });
 
     const response = await POST();
@@ -67,7 +69,9 @@ describe("POST /api/auth/logout", () => {
     // A user who asks to be logged out is logged out. Refusing to clear would
     // leave the session fully usable, which is worse than a refresh token that
     // lives until it expires.
-    global.fetch = jest.fn().mockRejectedValue(new Error("ECONNREFUSED")) as unknown as typeof fetch;
+    global.fetch = jest
+      .fn()
+      .mockRejectedValue(new Error("ECONNREFUSED")) as unknown as typeof fetch;
     withCookies({ [SESSION_COOKIE_NAME]: "access", [REFRESH_COOKIE_NAME]: "refresh" });
 
     const response = await POST();

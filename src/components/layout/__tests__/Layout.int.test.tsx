@@ -57,7 +57,9 @@ describe("Layout integration", () => {
 
     expect(screen.getByRole("link", { name: /skip to content/i })).toHaveAttribute("href", "#main");
     expect(screen.getByRole("navigation", { name: /primary navigation/i })).toBeInTheDocument();
-    expect(screen.getByRole("navigation", { name: /primary sidebar navigation/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("navigation", { name: /primary sidebar navigation/i }),
+    ).toBeInTheDocument();
   });
 
   it("has no critical accessibility violations", async () => {

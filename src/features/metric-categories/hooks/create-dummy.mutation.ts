@@ -16,8 +16,7 @@ export const useCreateMetricCategoryDummy = (
     Error,
     GenerateDummyMetricCategoriesRequestDTO
   >({
-    mutationFn: (payload) =>
-      createMetricCategoryDummy(payload).then((res) => res.categories ?? []),
+    mutationFn: (payload) => createMetricCategoryDummy(payload).then((res) => res.categories ?? []),
     onSuccess,
     onError,
   });

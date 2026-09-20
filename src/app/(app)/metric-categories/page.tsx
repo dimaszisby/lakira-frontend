@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 
 import MetricCategoriesPageClient from "@/app/(app)/metric-categories/_components/MetricCategoriesPageClient";
-import { DEFAULT_CATEGORY_LIST_PARAMS, parseCategoryListSearchParams } from "@/features/metric-categories/listSearchParams";
+import {
+  DEFAULT_CATEGORY_LIST_PARAMS,
+  parseCategoryListSearchParams,
+} from "@/features/metric-categories/listSearchParams";
 
 export const metadata: Metadata = {
   title: "Metric Categories",

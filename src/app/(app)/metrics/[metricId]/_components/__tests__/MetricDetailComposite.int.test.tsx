@@ -109,7 +109,10 @@ describe("Metric detail composite integration", () => {
   it("renders metric detail sections and marks the current tab active", async () => {
     renderMetricDetailComposite(`/metrics/${metricId}/logs`);
 
-    expect(screen.getByRole("link", { name: /metric library/i })).toHaveAttribute("href", "/metrics");
+    expect(screen.getByRole("link", { name: /metric library/i })).toHaveAttribute(
+      "href",
+      "/metrics",
+    );
     expect(screen.getByRole("link", { name: /wellness/i })).toHaveAttribute(
       "href",
       "/metric-categories/cat-1",

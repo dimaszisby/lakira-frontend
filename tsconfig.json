@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -24,54 +20,22 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./*"
-      ],
-      "@/src/*": [
-        "./src/*"
-      ],
-      "@/app/*": [
-        "./src/app/*"
-      ],
-      "@/features/*": [
-        "./src/features/*"
-      ],
-      "@/validators/*": [
-        "./src/validators/*"
-      ],
-      "@/api/*": [
-        "./src/services/api/*"
-      ],
-      "@/hooks/*": [
-        "./src/hooks/*"
-      ],
-      "@/constants/*": [
-        "./src/constants/*"
-      ],
-      "@/types/*": [
-        "./src/types/*"
-      ],
-      "@/generics/*": [
-        "./src/generics/*"
-      ],
-      "@/services/*": [
-        "./src/services/*"
-      ],
-      "@/utils/*": [
-        "./src/utils/*"
-      ],
-      "@/lib/*": [
-        "./src/lib/*"
-      ],
-      "@/styles/*": [
-        "./src/styles/*"
-      ],
-      "@/components/*": [
-        "./src/components/*"
-      ],
-      "@/ui/*": [
-        "./src/components/ui/*"
-      ]
+      "@/*": ["./*"],
+      "@/src/*": ["./src/*"],
+      "@/app/*": ["./src/app/*"],
+      "@/features/*": ["./src/features/*"],
+      "@/validators/*": ["./src/validators/*"],
+      "@/api/*": ["./src/services/api/*"],
+      "@/hooks/*": ["./src/hooks/*"],
+      "@/constants/*": ["./src/constants/*"],
+      "@/types/*": ["./src/types/*"],
+      "@/generics/*": ["./src/generics/*"],
+      "@/services/*": ["./src/services/*"],
+      "@/utils/*": ["./src/utils/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/styles/*": ["./src/styles/*"],
+      "@/components/*": ["./src/components/*"],
+      "@/ui/*": ["./src/components/ui/*"]
     }
   },
   "include": [
@@ -81,9 +45,5 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],
-  "exclude": [
-    "node_modules",
-    "cypress",
-    "cypress.config.ts"
-  ]
+  "exclude": ["node_modules", "cypress", "cypress.config.ts"]
 }

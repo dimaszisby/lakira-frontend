@@ -35,20 +35,20 @@ Tier 2 components:
 
 ## Results
 
-| Component        | Tier | Score (/20) | Result | Notes |
-| ---------------- | ---- | ----------- | ------ | ----- |
+| Component        | Tier | Score (/20) | Result | Notes                                                           |
+| ---------------- | ---- | ----------- | ------ | --------------------------------------------------------------- |
 | Button           | T1   | 19          | PASS   | Single-source primitive, complete interaction + state coverage. |
-| FormField        | T1   | 19          | PASS   | Label/help/error associations and field semantics verified. |
-| InputChrome      | T1   | 18          | PASS   | Primitive shell states and contract coverage complete. |
-| TextField        | T1   | 19          | PASS   | Input/clear/reveal behavior and callback contract tested. |
-| TextArea         | T1   | 19          | PASS   | Counter/add-on/state paths covered with semantic assertions. |
-| Select           | T2   | 18          | PASS   | Trigger/listbox keyboard and option semantics covered. |
-| Modal            | T2   | 19          | PASS   | Focus handoff/restore and close behavior strongly covered. |
-| Toggle           | T2   | 18          | PASS   | Switch semantics and guarded state transitions verified. |
-| SegmentedControl | T2   | 18          | PASS   | Roving focus and keyboard wrap behavior covered. |
-| DateTimePicker   | T2   | 18          | PASS   | Calendar semantics and datetime selection flow tested. |
-| CategorySelect   | T2   | 18          | PASS   | Select/create/clear/loading behavior and defaults covered. |
-| ColorField       | T2   | 18          | PASS   | Hex normalization and preset/picker interactions covered. |
+| FormField        | T1   | 19          | PASS   | Label/help/error associations and field semantics verified.     |
+| InputChrome      | T1   | 18          | PASS   | Primitive shell states and contract coverage complete.          |
+| TextField        | T1   | 19          | PASS   | Input/clear/reveal behavior and callback contract tested.       |
+| TextArea         | T1   | 19          | PASS   | Counter/add-on/state paths covered with semantic assertions.    |
+| Select           | T2   | 18          | PASS   | Trigger/listbox keyboard and option semantics covered.          |
+| Modal            | T2   | 19          | PASS   | Focus handoff/restore and close behavior strongly covered.      |
+| Toggle           | T2   | 18          | PASS   | Switch semantics and guarded state transitions verified.        |
+| SegmentedControl | T2   | 18          | PASS   | Roving focus and keyboard wrap behavior covered.                |
+| DateTimePicker   | T2   | 18          | PASS   | Calendar semantics and datetime selection flow tested.          |
+| CategorySelect   | T2   | 18          | PASS   | Select/create/clear/loading behavior and defaults covered.      |
+| ColorField       | T2   | 18          | PASS   | Hex normalization and preset/picker interactions covered.       |
 
 Summary:
 

@@ -7,7 +7,8 @@ const root = process.cwd();
 const configPath = path.join(root, "scripts", "perf", "performance-thresholds.json");
 const config = JSON.parse(readFileSync(configPath, "utf8"));
 
-const baseUrl = process.env.PERF_BASE_URL || process.env.CYPRESS_BASE_URL || "http://127.0.0.1:3000";
+const baseUrl =
+  process.env.PERF_BASE_URL || process.env.CYPRESS_BASE_URL || "http://127.0.0.1:3000";
 const reportDir = path.join(root, "reports", "performance", "lighthouse");
 const categoryThresholds = config.lighthouse.categories;
 const routes = config.lighthouse.routes;

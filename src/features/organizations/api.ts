@@ -36,11 +36,9 @@ export const inviteMember = (
   withApiErrorHandling(
     () =>
       api
-        .post<ApiResponse<{ message?: string }>>(
-          `/organizations/${organizationId}/invites`,
-          input,
-          opts,
-        )
+        .post<
+          ApiResponse<{ message?: string }>
+        >(`/organizations/${organizationId}/invites`, input, opts)
         .then(unwrap),
     "inviteMember",
   );
@@ -53,7 +51,8 @@ export const inviteMember = (
  */
 export const updateMemberRole = (membershipId: string, role: MemberRole, opts?: RequestOpts) =>
   withApiErrorHandling(
-    () => api.patch<ApiResponse<Member>>(`/memberships/${membershipId}`, { role }, opts).then(unwrap),
+    () =>
+      api.patch<ApiResponse<Member>>(`/memberships/${membershipId}`, { role }, opts).then(unwrap),
     "updateMemberRole",
   );
 
@@ -66,6 +65,7 @@ export const removeMember = (membershipId: string, opts?: RequestOpts) =>
 /** Accept an invitation. The token arrives in an emailed link. */
 export const acceptInvite = (token: string, opts?: RequestOpts) =>
   withApiErrorHandling(
-    () => api.post<ApiResponse<{ message?: string }>>("/invites/accept", { token }, opts).then(unwrap),
+    () =>
+      api.post<ApiResponse<{ message?: string }>>("/invites/accept", { token }, opts).then(unwrap),
     "acceptInvite",
   );

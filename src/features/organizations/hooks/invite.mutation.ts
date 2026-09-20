@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import type {InviteMemberInput} from "../api";
+import type { InviteMemberInput } from "../api";
 import { inviteMember } from "../api";
 import { invalidateMembers } from "../cache";
 import { useOrganizationId } from "../context";

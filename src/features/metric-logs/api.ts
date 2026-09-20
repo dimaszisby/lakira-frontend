@@ -102,14 +102,11 @@ export const getMetricLogDetail = async (
   opts: RequestOpts = {},
 ): Promise<MetricLogResponseDTO> =>
   withApiErrorHandling(async () => {
-    const response = await api.get<ApiResponse<MetricLogResponseDTO>>(
-      `${BASE_URL}/${logId}`,
-      {
-        signal: opts.signal,
-        headers: opts.headers,
-        params: { metricId },
-      },
-    );
+    const response = await api.get<ApiResponse<MetricLogResponseDTO>>(`${BASE_URL}/${logId}`, {
+      signal: opts.signal,
+      headers: opts.headers,
+      params: { metricId },
+    });
     return unwrap(response);
   }, "getMetricLogDetail");
 

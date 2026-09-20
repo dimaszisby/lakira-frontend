@@ -2,7 +2,9 @@ import type { NextConfig } from "next";
 
 const apiOrigin = (() => {
   try {
-    return process.env.NEXT_PUBLIC_API_BASE_URL ? new URL(process.env.NEXT_PUBLIC_API_BASE_URL).origin : "";
+    return process.env.NEXT_PUBLIC_API_BASE_URL
+      ? new URL(process.env.NEXT_PUBLIC_API_BASE_URL).origin
+      : "";
   } catch {
     return "";
   }

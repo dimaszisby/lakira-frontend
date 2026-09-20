@@ -30,12 +30,7 @@ jest.mock("next/link", () => {
 
 describe("BottomNavigationBar integration", () => {
   it("renders navigation links and marks the active route", () => {
-    renderWithProviders(
-      <BottomNavigationBar
-        navItems={navItems}
-        pathname="/metrics"
-      />,
-    );
+    renderWithProviders(<BottomNavigationBar navItems={navItems} pathname="/metrics" />);
 
     const nav = screen.getByRole("navigation", { name: /primary navigation/i });
     expect(nav).toBeInTheDocument();
@@ -47,11 +42,7 @@ describe("BottomNavigationBar integration", () => {
     const onLinkClick = jest.fn();
 
     renderWithProviders(
-      <BottomNavigationBar
-        navItems={navItems}
-        pathname="/dashboard"
-        onLinkClick={onLinkClick}
-      />,
+      <BottomNavigationBar navItems={navItems} pathname="/dashboard" onLinkClick={onLinkClick} />,
     );
 
     await user.click(screen.getByRole("link", { name: /account/i }));
@@ -60,10 +51,7 @@ describe("BottomNavigationBar integration", () => {
 
   it("has no critical accessibility violations", async () => {
     const { container } = renderWithProviders(
-      <BottomNavigationBar
-        navItems={navItems}
-        pathname="/dashboard"
-      />,
+      <BottomNavigationBar navItems={navItems} pathname="/dashboard" />,
     );
 
     const results = await axe(container);

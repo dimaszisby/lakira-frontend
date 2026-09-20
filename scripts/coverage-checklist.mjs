@@ -66,9 +66,7 @@ Object.entries(goals).forEach(([prefix, target]) => {
   const met = stats.statements >= target;
   if (!met) unmet += 1;
   const status = met ? "✔" : "✖";
-  console.log(
-    `${status} ${prefix} → statements ${stats.statements.toFixed(2)}% (goal ${target}%)`,
-  );
+  console.log(`${status} ${prefix} → statements ${stats.statements.toFixed(2)}% (goal ${target}%)`);
 });
 
 console.log(

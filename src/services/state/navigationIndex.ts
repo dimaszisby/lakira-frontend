@@ -1,4 +1,3 @@
-
 import { atom } from "jotai";
 
 // This atom is used to manage Sidebar navigation index state

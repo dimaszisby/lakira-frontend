@@ -34,7 +34,12 @@ describe("MetricCategoryTable", () => {
 
   it("renders both desktop and mobile table variants", () => {
     render(
-      <MetricCategoryTableBase categories={categories} sortBy="name" sortOrder="ASC" onSort={() => {}} />,
+      <MetricCategoryTableBase
+        categories={categories}
+        sortBy="name"
+        sortOrder="ASC"
+        onSort={() => {}}
+      />,
     );
 
     expect(screen.getByTestId("desktop-table")).toBeInTheDocument();

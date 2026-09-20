@@ -62,22 +62,22 @@ That is the failure mode the 2026-08-17 `boundaries` lesson describes.
 
 Against the live backend, with a clean `.next` and a fresh dev server:
 
-| Path | Result |
-| --- | --- |
+| Path                                   | Result                                                              |
+| -------------------------------------- | ------------------------------------------------------------------- |
 | Create, intercepted (click "Add Logs") | modal over the list, list visible behind, **no interception error** |
-| Create, hard load `/logs/new` | "Add Log Entry", no Delete button |
-| Edit, hard load `/logs/:logId` | "Edit Log Entry" with the row's value and timestamp |
-| A log actually created through the UI | row appears in the table — the thing the ticket said was impossible |
+| Create, hard load `/logs/new`          | "Add Log Entry", no Delete button                                   |
+| Edit, hard load `/logs/:logId`         | "Edit Log Entry" with the row's value and timestamp                 |
+| A log actually created through the UI  | row appears in the table — the thing the ticket said was impossible |
 
-| Gate | Result |
-| --- | --- |
-| `lint` | 0 errors, 17 warnings (`dev` baseline 21) |
-| `lint:css` | clean |
-| `typecheck` | clean |
-| `test:unit` | 77 suites, 646 tests |
-| `test:integration` | 18 suites, 91 tests |
-| `coverage:check --strict` | all goals met |
-| `build` | passes; one interceptor per slot in the route list |
+| Gate                      | Result                                             |
+| ------------------------- | -------------------------------------------------- |
+| `lint`                    | 0 errors, 17 warnings (`dev` baseline 21)          |
+| `lint:css`                | clean                                              |
+| `typecheck`               | clean                                              |
+| `test:unit`               | 77 suites, 646 tests                               |
+| `test:integration`        | 18 suites, 91 tests                                |
+| `coverage:check --strict` | all goals met                                      |
+| `build`                   | passes; one interceptor per slot in the route list |
 
 ## Status
 
@@ -91,6 +91,6 @@ is covered; the missing affordance is a separate UI gap.
 
 - **No desktop edit affordance for logs** (above). Either wire `onRowClick`, or add an actions
   column.
-- **`metric-categories/[categoryId]/metrics/**` is unreachable.** Delete, or link it up.
+- **`metric-categories/[categoryId]/metrics/**` is unreachable.\*\* Delete, or link it up.
 - The original follow-up note's diagnosis for this ticket was wrong in both particulars. Worth
   remembering when reading the rest of that list.

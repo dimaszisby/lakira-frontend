@@ -225,6 +225,8 @@ describe("MetricChart", () => {
       />,
     );
 
-    expect(screen.getByRole("img", { name: /metric chart for unknown metric/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole("img", { name: /metric chart for unknown metric/i }),
+    ).toBeInTheDocument();
   });
 });

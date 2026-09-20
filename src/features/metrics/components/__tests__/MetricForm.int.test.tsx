@@ -59,8 +59,7 @@ function mockDuplicateMetricLookup(onQuery?: (params: URLSearchParams) => void) 
     // `filter[name]` is a LIKE on the server, so return the row for any
     // substring match and let the form decide whether it is an exact conflict.
     const filterName = url.searchParams.get("filter[name]")?.trim().toLowerCase() ?? "";
-    const matches =
-      filterName.length > 0 && duplicateMetricName.toLowerCase().includes(filterName);
+    const matches = filterName.length > 0 && duplicateMetricName.toLowerCase().includes(filterName);
 
     return HttpResponse.json({
       status: "success",
@@ -441,7 +440,9 @@ describe("MetricForm integration", () => {
 
   it("has no critical accessibility violations on initial render", async () => {
     server.use(mockCategoryTypeahead());
-    const { container } = renderWithProviders(<MetricForm initialMetric={null} onClose={jest.fn()} />);
+    const { container } = renderWithProviders(
+      <MetricForm initialMetric={null} onClose={jest.fn()} />,
+    );
     await waitForCategoryTypeaheadIdle();
     await settleAsyncUpdates();
     const results = await axe(container);

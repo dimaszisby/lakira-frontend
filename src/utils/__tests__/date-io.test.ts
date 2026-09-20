@@ -59,15 +59,20 @@ describe("date-io utilities", () => {
 
     it("produces deterministic human-readable strings", () => {
       expect(formatHumanShort("2025-11-04")).toBe("04/11/25");
-      expect(formatHumanShort("2025-11-04T09:30", { withTime: true, sep: "-", year: "numeric" })).toBe(
-        "04-11-2025 09:30",
-      );
+      expect(
+        formatHumanShort("2025-11-04T09:30", { withTime: true, sep: "-", year: "numeric" }),
+      ).toBe("04-11-2025 09:30");
     });
 
     it("formats ranges with intelligent elision", () => {
-      expect(formatHumanRange("2025-11-04", "2025-11-06", { locale: "en-US" })).toBe("4–6 Nov 2025");
+      expect(formatHumanRange("2025-11-04", "2025-11-06", { locale: "en-US" })).toBe(
+        "4–6 Nov 2025",
+      );
       expect(
-        formatHumanRange("2025-11-04T09:00", "2025-11-04T11:30", { withTime: true, locale: "en-US" }),
+        formatHumanRange("2025-11-04T09:00", "2025-11-04T11:30", {
+          withTime: true,
+          locale: "en-US",
+        }),
       ).toBe("4 Nov 2025 09:00–11:30");
     });
   });

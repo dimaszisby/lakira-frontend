@@ -109,11 +109,11 @@ Checked in the browser against the local backend:
 - **Rotation persists.** Three consecutive revivals succeeded, the last past the 30 s coalescing
   window — so it was a genuine redemption of a rotated token, not a replayed result. A dropped
   rotation would have presented a superseded token and revoked the family.
-- **Log Out ends the session.** `POST /api/auth/logout` 200, landed on `/login` and *stayed* there.
+- **Log Out ends the session.** `POST /api/auth/logout` 200, landed on `/login` and _stayed_ there.
   `/dashboard` now redirects, and a revival attempt afterwards logs `auth.revive.failed` — nothing
   left to revive.
 - **The gate runs.** `GET /dashboard 200 … proxy.ts: 4ms`, and `build` reports `ƒ Proxy
-  (Middleware)`.
+(Middleware)`.
 
 ## Follow-ups, not done here
 

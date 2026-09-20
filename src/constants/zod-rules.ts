@@ -8,13 +8,11 @@ import { ZodMessages } from "@/constants/zod-messages"; // centralized error mes
  */
 
 // Reuse base rules
-export const zUUID = z
-  .string()
-  .uuid({ message: ZodMessages.common.invalidUUID });
+export const zUUID = z.string().uuid({ message: ZodMessages.common.invalidUUID });
 export const zDateOptional = z
   .preprocess(
     (val) => (typeof val === "string" && val.trim() === "" ? undefined : val),
-    z.coerce.date().optional()
+    z.coerce.date().optional(),
   )
   .refine((date) => date === undefined || !isNaN(date.getTime()), {
     message: ZodMessages.common.invalidDate,
@@ -24,7 +22,7 @@ export const zDateOptional = z
 export const zDateRequired = z
   .preprocess(
     (val) => (typeof val === "string" && val.trim() === "" ? undefined : val),
-    z.coerce.date()
+    z.coerce.date(),
   )
   .refine((date) => date === undefined || !isNaN(date.getTime()), {
     message: ZodMessages.common.invalidDate,
@@ -38,15 +36,9 @@ export const zISOTime = z.string().regex(/^\d{2}:\d{2}:\d{2}$/);
 /**
  * export const zMetricCategoryId = zUUID.optional().nullable();
  */
-export const zUsername = z
-  .string()
-  .min(3, { message: ZodMessages.user.usernameMin });
-export const zEmail = z
-  .string()
-  .email({ message: ZodMessages.user.emailInvalid });
-export const zPassword = z
-  .string()
-  .min(6, { message: ZodMessages.user.passwordMin });
+export const zUsername = z.string().min(3, { message: ZodMessages.user.usernameMin });
+export const zEmail = z.string().email({ message: ZodMessages.user.emailInvalid });
+export const zPassword = z.string().min(6, { message: ZodMessages.user.passwordMin });
 export const zPasswordConfirmation = z
   .string()
   .min(6, { message: ZodMessages.user.passwordConfirmMin });
@@ -59,11 +51,7 @@ export const zRole = z.enum(["user", "admin"]).optional().default("user");
 export const zMetricCategoryName = z
   .string()
   .min(1, { message: ZodMessages.metricCategory.nameRequired });
-export const zMetricCategoryColor = z
-  .string()
-  .min(1)
-  .optional()
-  .default("#E897A3");
+export const zMetricCategoryColor = z.string().min(1).optional().default("#E897A3");
 export const zMetricCategoryIcon = z.string().min(1).optional().default("📁");
 export const zMetricCategoryDeletedAt = zDateOptional.optional().nullable();
 
@@ -99,10 +87,7 @@ export const zMetricDeletedAt = zDateOptional.optional().nullable();
  * * Metric Settings
  */
 export const zGoalEnabled = z.boolean().optional().default(false);
-export const zGoalType = z
-  .enum(["cumulative", "incremental"])
-  .optional()
-  .nullable();
+export const zGoalType = z.enum(["cumulative", "incremental"]).optional().nullable();
 export const zGoalValue = z
   .number()
   .positive(ZodMessages.metricSettings.goalValuePositive)

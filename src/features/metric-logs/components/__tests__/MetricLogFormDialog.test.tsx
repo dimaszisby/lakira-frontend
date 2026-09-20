@@ -17,11 +17,7 @@ jest.mock("next/navigation", () => ({
 
 jest.mock("@/features/metric-logs/components/LogForm", () => ({
   __esModule: true,
-  default: (props: {
-    metricId: string;
-    initialLog?: MetricLogVM | null;
-    onClose: () => void;
-  }) => {
+  default: (props: { metricId: string; initialLog?: MetricLogVM | null; onClose: () => void }) => {
     metricLogFormSpy(props);
     return (
       <button type="button" onClick={props.onClose} aria-label="close metric log form">

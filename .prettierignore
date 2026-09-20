@@ -14,3 +14,9 @@ src/styles/output.css
 # `npm run format:fix` out too closes the same hole (the backend hit a bug
 # where the formatter re-injected frontmatter into agent-memory files).
 .claude
+
+# Structured records. `.claude/rules/documentation.md` says never to reformat
+# or condense these; the rule was stated but not enforced, so the formatter
+# still wanted to rewrite all seven. Ignoring them makes the rule mechanical.
+# Incidents are deliberately NOT here — see that rule's scope.
+docs/internal/audits
