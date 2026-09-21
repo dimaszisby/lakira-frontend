@@ -157,8 +157,10 @@ describe("RegisterForm integration", () => {
       await user.type(screen.getByPlaceholderText(/confirm your password/i), "password123");
       await user.click(screen.getByRole("button", { name: /register/i }));
 
+      // The backend's wording, not ours: a specific server message now wins over
+      // the status copy, which is a fallback for when the server says nothing.
       const alert = await screen.findByRole("alert");
-      expect(alert).toHaveTextContent(/too many attempts/i);
+      expect(alert).toHaveTextContent(/too many requests, please try again later/i);
       expect(alert).not.toHaveTextContent(/couldn't reach the server/i);
     } finally {
       consoleErrorSpy.mockRestore();
