@@ -123,6 +123,23 @@ describe("a 401 refresh cannot rescue", () => {
     expect(response.status).toBe(401);
   });
 
+  // AC-5. The backend's wording here is "Unauthorized: Invalid token", which is
+  // both jargon and indistinguishable from a wrong password once it reaches the
+  // UI. Having just ended the session, the proxy is the only thing that knows.
+  it("answers with its own SESSION_EXPIRED body instead of the backend's", async () => {
+    global.fetch = jest.fn().mockResolvedValue(upstream(401)) as unknown as typeof fetch;
+
+    const response = await GET(
+      request("metrics", { [SESSION_COOKIE_NAME]: "rejected" }),
+      context("metrics"),
+    );
+
+    await expect(response.json()).resolves.toEqual({
+      error: "Session expired",
+      code: "SESSION_EXPIRED",
+    });
+  });
+
   it("leaves the session alone when refresh rescued it", async () => {
     mockRefresh.mockResolvedValue({ token: "fresh", refreshToken: "rotated" });
     global.fetch = jest
@@ -161,5 +178,22 @@ describe("a 401 refresh cannot rescue", () => {
     );
 
     expect(mockRefresh).toHaveBeenCalledWith("the-cookie");
+  });
+});
+
+describe("a protected path reached with no session cookie", () => {
+  // AC-5, the other half. This 401 never reaches the backend at all, so the
+  // only body the UI can see is the one the proxy writes here.
+  it("is denied with a tagged SESSION_EXPIRED body and never forwarded", async () => {
+    global.fetch = jest.fn() as unknown as typeof fetch;
+
+    const response = await GET(request("metrics"), context("metrics"));
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({
+      error: "Session expired",
+      code: "SESSION_EXPIRED",
+    });
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 });

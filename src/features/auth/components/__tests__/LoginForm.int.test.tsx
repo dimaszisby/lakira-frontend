@@ -141,32 +141,43 @@ describe("LoginForm integration", () => {
         renderWithProviders(<LoginForm />);
         await submit(user);
 
+        // The backend's own wording, not ours. Our "Too many attempts" copy is
+        // now a fallback for when the server says nothing, so a specific server
+        // message wins — which is the point of the change. Either sentence
+        // satisfies what this test is actually about: telling the user to wait.
         const alert = await screen.findByRole("alert");
-        expect(alert).toHaveTextContent(/too many attempts/i);
+        expect(alert).toHaveTextContent(/too many requests, please try again later/i);
         expect(alert).not.toHaveTextContent(CONNECTION_COPY);
       } finally {
         consoleErrorSpy.mockRestore();
       }
     });
 
-    it("does not blame the connection for a rejected credential", async () => {
+    // AC-6. This test used to assert only that the copy was not the connection
+    // message, with a comment explaining that the 401 mapping said "Your session
+    // expired" — wrong for a login form — and that it was logged as a separate
+    // finding. This is that finding closed, so the assertion is now exact.
+    it("shows the reason the credential was rejected", async () => {
       const user = userEvent.setup();
       const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
 
       try {
         server.use(
           http.post(LOGIN_ENDPOINT, () =>
-            HttpResponse.json({ status: "fail", message: "Invalid credentials" }, { status: 401 }),
+            HttpResponse.json(
+              { status: "fail", message: "Invalid email or password" },
+              { status: 401 },
+            ),
           ),
         );
 
         renderWithProviders(<LoginForm />);
         await submit(user);
 
-        // Deliberately not asserting the exact 401 copy: the global mapping says
-        // "Your session expired", which is wrong for a login form and is logged
-        // as a separate finding. What matters here is that the status survived.
-        expect(await screen.findByRole("alert")).not.toHaveTextContent(CONNECTION_COPY);
+        const alert = await screen.findByRole("alert");
+        expect(alert).toHaveTextContent(/invalid email or password/i);
+        expect(alert).not.toHaveTextContent(/session expired/i);
+        expect(alert).not.toHaveTextContent(CONNECTION_COPY);
       } finally {
         consoleErrorSpy.mockRestore();
       }

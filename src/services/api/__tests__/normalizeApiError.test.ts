@@ -103,9 +103,41 @@ describe("normalizeApiError", () => {
       isAbort: false,
       title: "Unexpected error",
       messages: ["Boom"],
+      hasServerMessage: false,
       retryable: false,
       raw: error,
     });
+  });
+
+  it("marks a message read off the envelope as coming from the server", () => {
+    const result = normalizeApiError(
+      axiosError({ status: 401, data: { message: "Invalid email or password" } }),
+    );
+
+    expect(result.hasServerMessage).toBe(true);
+    expect(result.messages).toEqual(["Invalid email or password"]);
+  });
+
+  // `messages` is never empty for an Axios error, so this flag is the only way
+  // to tell a real server message from Axios's own boilerplate.
+  it("marks the Axios fallback as not coming from the server", () => {
+    const result = normalizeApiError(axiosError({ status: 401, data: undefined }));
+
+    expect(result.hasServerMessage).toBe(false);
+    expect(result.messages).toEqual([`${REQUEST_FAILED}`]);
+  });
+
+  it("reads a server-supplied code without clobbering the Axios transport code", () => {
+    const result = normalizeApiError(
+      axiosError({
+        status: 401,
+        data: { error: "Unauthorized", code: "SESSION_EXPIRED" },
+        code: "ERR_BAD_REQUEST",
+      }),
+    );
+
+    expect(result.serverCode).toBe("SESSION_EXPIRED");
+    expect(result.code).toBe("ERR_BAD_REQUEST");
   });
 
   it("describes a thrown non-Error value generically", () => {
