@@ -57,14 +57,19 @@ three different states.
 - [x] AC-1 — interaction · `ThemeSwitcher.test.tsx` (2 tests) and `theme-switching.int.test.tsx`
 - [x] AC-2 — interaction · `theme-switching.int.test.tsx`; **proven to fail** against `attribute="class"`
 - [x] AC-3 — interaction · `theme-switching.int.test.tsx`; **proven to fail** against `storageKey="theme"`
-- [ ] AC-4 — **NOT VERIFIED.** The manual browser pass could not run: the Claude in Chrome
-      extension is not connected. Structural evidence only — the `next-themes` pre-paint script is
-      the first node in `<body>` and reads the same key the test asserts. That is not the same as
-      watching for a flash.
-- [ ] AC-5 — **PARTIAL.** Click-to-select verified in `ThemeSwitcher.test.tsx`. The arrow-key
-      half is **not verified** — it needs a real browser and the extension is not connected. This is
-      the exact trap `.claude/rules/accessibility.md` warns about for Ariakit radios, so it must not
-      be signed off from the unit test alone.
+- [x] AC-4 — **manual browser pass**, 2026-09-20. Shipped unverified in PR #35: the Claude in Chrome
+      extension was unavailable, and the structural argument — the `next-themes` pre-paint script is
+      the first node in `<body>` and reads the same key the test asserts — is not the same as
+      watching for a flash. Closed out by storing `light`, then navigating fresh to `/account`:
+      `data-theme` was already `light` on arrival and the loading state itself rendered light, so
+      the theme was applied before first paint. No dark flash.
+- [x] AC-5 — **manual keyboard pass**, 2026-09-20. Also shipped unverified in PR #35, and the one
+      that most needed a browser: `.claude/rules/accessibility.md` records that Ariakit selects on
+      arrow-key focus only when the radio is a real `<input type="radio">`, which no jsdom test can
+      demonstrate. With focus on the group, `ArrowRight` gave
+      `{focused: "light", checked: ["light"], dataTheme: "light", stored: "light"}` — focus moved
+      **and** selection followed, and the page repainted. Click-to-select remains covered by
+      `ThemeSwitcher.test.tsx`.
 - [x] AC-6 — jest-axe · `ThemeSwitcher.test.tsx`, plus by-role queries on all three names
 - [x] AC-7 — **derived from tokens**, not measured in a browser: `.segmented[data-size="md"]` is
       `--control-h-md` (48px) with `--space-1` (4px) padding, so each item is 40px tall, and
@@ -73,6 +78,17 @@ three different states.
       effects inside `act`, so the pre-mount state is unobservable through it and an RTL assertion
       would have asserted nothing. The integration test runs under `<StrictMode>`.
 - [x] AC-9 — **I checked it** · ADR-0017 reviewed against the measured tables in the plan
+
+## Closing note — the deviation, seen
+
+Switching to light mode on 2026-09-20 was the first time anyone had actually looked at it, which was
+half the point of building the switcher. ADR-0017's numbers hold up visually: on `/account` the
+secondary "Refresh profile" button renders pale green on white and is hard to pick out against the
+card — the 1.95:1 in the table, in the wild.
+
+Recorded here rather than in ADR-0017, which is immutable per
+`.claude/rules/documentation.md` § Decisions and ADRs. It confirms that record; it does not change
+it, and a future contrast pass supersedes rather than edits.
 
 ## Gates
 
