@@ -211,6 +211,10 @@ const MetricLogsClient = ({ initialParams }: MetricLogsClientProps) => {
             onSort={(col) => onColumnSort(String(col))}
             onEdit={handleEditLogClick}
             onDelete={handleDeleteClick}
+            // Desktop's only way into a log: LogDesktopTable renders no
+            // per-row edit control, so without this the row is inert and
+            // editing is reachable on mobile and by URL but nowhere else.
+            onRowClick={handleEditLogClick}
           />
 
           <Pagination
