@@ -311,20 +311,18 @@ const config = [
    * mapped in boundaries/elements), so this debt accumulated unseen.
    *
    * Tracked in docs/internal/todos/2026-08-17-todo-claude-code-setup.md:
-   * withAuth, HydrateUser, Header and Sidebar are app-shell concerns that need
-   * auth state; they belong under src/app/ or need state injected.
-   * (CategorySelect and Visualization moved into their feature modules on
-   * 2026-09-11 and are no longer exempt.)
+   * Header and Sidebar are app-shell concerns that need auth state; they belong
+   * under src/app/ or need state injected.
+   *
+   * The list has only ever shrunk. CategorySelect and Visualization moved into
+   * their feature modules on 2026-09-11; withAuth and HydrateUser were deleted
+   * on 2026-09-22 — both were dead, and withAuth's job was already done by
+   * src/proxy.ts, (app)/layout.tsx and useAuthProfileQuery.
    *
    * Do not add to this list. New code must satisfy the boundary rule.
    */
   {
-    files: [
-      "src/components/hoc/withAuth.tsx",
-      "src/components/layout/Header.tsx",
-      "src/components/layout/Sidebar.tsx",
-      "src/components/providers/HydrateUser.tsx",
-    ],
+    files: ["src/components/layout/Header.tsx", "src/components/layout/Sidebar.tsx"],
     rules: {
       "boundaries/element-types": "off",
     },

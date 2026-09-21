@@ -488,7 +488,7 @@ Scheduled/manual `frontend-performance` runs:
 3. Metric settings delete capability exists in API hooks but is not exposed in current UI.
 4. Account page is read-only (no profile update form/workflow).
 5. E2E coverage is minimal compared to unit/integration coverage.
-6. `src/hooks/useAuth.ts` is legacy and unreachable — nothing imports it, and it imports `useRouter` from `next/router`, a Pages Router API the App Router does not provide. The parallel `/api/auth/login` route was deleted on 2026-09-12.
+6. ~~`src/hooks/useAuth.ts` is legacy and unreachable~~ — **deleted 2026-09-22**, along with `withAuth.tsx` and `HydrateUser.tsx`. It imported `useRouter` from `next/router`, a Pages Router API the App Router does not provide, so it would have thrown had anything called it. The parallel `/api/auth/login` route was deleted on 2026-09-12.
 
 ---
 

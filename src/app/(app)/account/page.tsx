@@ -2,7 +2,6 @@
 
 import { useMemo } from "react";
 
-import { withAuth } from "@/components/hoc/withAuth";
 import { APP_NAME } from "@/constants/app";
 import EmailVerificationNotice from "@/features/auth/components/EmailVerificationNotice";
 import { useAuthProfileQuery } from "@/features/auth/hooks/profile.query";
@@ -11,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/
 import { ErrorMessage } from "@/ui/ErrorMessage";
 import { ThemeSwitcher } from "@/ui/ThemeSwitcher";
 
-const AccountPageBase = () => {
+const AccountPage = () => {
   const { data, isLoading, isFetching, isError, error, refetch } = useAuthProfileQuery();
 
   const profileError = useMemo(() => {
@@ -124,7 +123,5 @@ const AccountPageBase = () => {
     </section>
   );
 };
-
-const AccountPage = withAuth(AccountPageBase);
 
 export default AccountPage;
