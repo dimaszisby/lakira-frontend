@@ -54,12 +54,19 @@ let a rendering concern force a change in a pure utility.
 ## The quarantine
 
 `src/components/**` was unmapped in `boundaries/elements` until 2026-08-17, so the `components`
-boundary never ran and 18 inversions accumulated. The rule is live now, with six files exempted at
+boundary never ran and 18 inversions accumulated. The rule is live now, with two files exempted at
 the bottom of `eslint.config.mjs`:
 
 ```
-withAuth.tsx · Header.tsx · Sidebar.tsx · HydrateUser.tsx · CategorySelect.tsx · Visualization.tsx
+Header.tsx · Sidebar.tsx
 ```
+
+The list has only ever shrunk, and the two ways off it are both visible in its history.
+`CategorySelect.tsx` and `Visualization.tsx` left on 2026-09-11 by being **moved** into the feature
+modules they were reaching into. `withAuth.tsx` and `HydrateUser.tsx` left on 2026-09-22 by being
+**deleted** — `HydrateUser` was referenced nowhere, and `withAuth` guarded a single route that
+`src/proxy.ts` and `(app)/layout.tsx` already gate, while duplicating a profile fetch the page was
+making anyway. An inversion that exists only to serve dead code is removed, not inverted.
 
 They import from `features`, which the graph forbids. **Do not add to that list.** It is a debt
 register, not an escape hatch — each entry is a component that should be inverted so the feature

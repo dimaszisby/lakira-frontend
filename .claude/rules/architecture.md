@@ -36,7 +36,7 @@ Three things to know about the enforcement:
 
 - The rule set is disabled for `**/*.{test,spec}.{ts,tsx}` and `cypress/**`.
 - `app → types` is **not** in the allow list. Route files that need a DTO type should reach it through the feature module.
-- **Four files are quarantined** at the bottom of `eslint.config.mjs` with the rule turned off — `withAuth.tsx`, `Header.tsx`, `Sidebar.tsx`, `HydrateUser.tsx`. They are known inversions awaiting a refactor. Do not add to that list, and do not copy their import pattern. (`CategorySelect` and `Visualization` were the other two; they moved into their feature modules on 2026-09-11.)
+- **Two files are quarantined** at the bottom of `eslint.config.mjs` with the rule turned off — `Header.tsx` and `Sidebar.tsx`. They are known inversions awaiting a refactor. Do not add to that list, and do not copy their import pattern. The list has only ever shrunk: `CategorySelect` and `Visualization` moved into their feature modules on 2026-09-11, and `withAuth.tsx` and `HydrateUser.tsx` were deleted on 2026-09-22 — both dead, and `withAuth`'s gating was already covered by `src/proxy.ts` and `(app)/layout.tsx`.
 
 If you add a directory that should be its own layer, add it to **both** `settings["boundaries/elements"]` and the `boundaries/element-types` rules. A `from: <type>` rule with no matching `elements` entry silently matches nothing — that exact mistake left the `components` layer unenforced until 2026-08-17, and 18 inversions accumulated behind it (see `.claude/lessons.md`).
 
