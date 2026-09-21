@@ -86,12 +86,19 @@ cleared-session path stops forwarding the upstream response entirely.
 **Consequences.**
 
 - **Security, which is why this is written down.** A small sweep owes no plan and therefore has no
-  _Security and data_ section; this entry is where that reasoning lives instead. The change is a net
-  reduction in what the browser sees: the backend puts a full `stack` in its error bodies, and the
-  proxy previously forwarded 401 bodies verbatim. This closes that on the cleared-session path.
-  **It does not close it generally** — every other upstream error body is still forwarded as-is,
-  stack included. Filed separately; it is the more serious finding and it is not this sweep's to fix.
-- The 5xx override in `handleApiError` is load-bearing for the same reason: `sanitizeErrorMessage`
-  truncates and strips control characters and angle brackets, but it does not redact.
+  _Security and data_ section; this entry is where that reasoning lives instead. The change is a
+  small net reduction in what the browser sees: the proxy previously forwarded 401 bodies verbatim,
+  and now answers the cleared-session path itself.
+- **What that is not.** The backend's error bodies carry a `stack` in development, which is visible
+  in the network tab locally and looks alarming. It is gated —
+  `lakira-backend/src/shared/middleware/error.ts` sets `stack` only when
+  `env.NODE_ENV === "development"`, and `res.json()` drops the `undefined`. Production also masks
+  5xx messages. So this is **not** a production leak, and the remaining
+  forward-upstream-bodies-verbatim behaviour is a defence-in-depth question rather than a live
+  exposure. Checked against the backend source on 2026-09-21, after an earlier note here called it
+  "the more serious finding" on the strength of a local response alone.
+- The 5xx override in `handleApiError` is still worth keeping, and does not rest on the backend
+  masking: `sanitizeErrorMessage` truncates and strips control characters and angle brackets but
+  does not redact, so the frontend should not depend on an upstream choice it cannot enforce.
 - A caller that relied on reading the backend's 401 body through the proxy would now get the proxy's.
   Nothing does today.

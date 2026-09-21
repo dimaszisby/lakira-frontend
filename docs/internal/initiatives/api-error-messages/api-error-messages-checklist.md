@@ -31,10 +31,11 @@
       that test is now the AC-6 assertion and the comment is gone.
 - [x] Found: preferring server messages changes 429 copy on two existing tests, because the backend
       sends its own rate-limit sentence → in scope, both updated; consequence recorded in `D-01`.
-- [ ] Found: the backend puts a full `stack` in its error bodies and the proxy forwards upstream
-      error bodies verbatim, so backend stack traces reach the browser on every error path this
-      change does not touch → **out of scope**, filed as
-      `docs/internal/todos/2026-09-20-todo-upstream-error-bodies-reach-the-browser.md`.
+- [ ] Found: the proxy forwards upstream error bodies verbatim → **out of scope**, filed as
+      `docs/internal/todos/2026-09-20-todo-proxy-forwards-upstream-error-bodies.md`. First written
+      up as "backend stack traces reach the browser", on the strength of a local response carrying a
+      full `stack`. Corrected 2026-09-21 after reading the backend: `stack` is set only when
+      `NODE_ENV === "development"`, so it never ships. Hardening, not a leak.
 
 ## Acceptance
 
