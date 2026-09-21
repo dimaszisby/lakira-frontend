@@ -1,4 +1,4 @@
-import { act, screen, waitFor } from "@testing-library/react";
+import { act, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { http, HttpResponse } from "msw";
@@ -112,6 +112,76 @@ describe("MetricLogsClient integration", () => {
 
     await waitFor(() => {
       expect(screen.getAllByText("120").length).toBeGreaterThan(0);
+    });
+  });
+
+  describe("opening a log from the desktop table", () => {
+    /**
+     * The desktop table's only edit affordance is the row itself —
+     * `LogDesktopTable` never reads `onEdit`, unlike the mobile card. So a
+     * missing `onRowClick` does not degrade desktop editing, it removes it.
+     *
+     * Both queries below rely on `Table` setting `aria-label="View row details"`
+     * and `tabIndex={0}` only when `onRowClick` is supplied, which is what makes
+     * them fail against the unfixed client rather than silently pass.
+     */
+    const singleLog = () =>
+      mockMetricLogsCursor(
+        [
+          {
+            id: "log-1",
+            metricId,
+            logValue: 120,
+            loggedAt: fixedTimestamp,
+            type: "manual",
+            createdAt: fixedTimestamp,
+            updatedAt: fixedTimestamp,
+          },
+        ],
+        1,
+      );
+
+    const findDesktopRow = async () => {
+      // jsdom applies no CSS, so the mobile list renders alongside the desktop
+      // table. Scope to the table to avoid matching the card.
+      const table = await screen.findByRole("table", { name: /metric logs table/i });
+      return within(table).getByRole("row", { name: /view row details/i });
+    };
+
+    it("navigates to the log when its row is clicked", async () => {
+      const user = userEvent.setup();
+      server.use(singleLog());
+
+      renderMetricLogsClient();
+
+      await user.click(await findDesktopRow());
+
+      expect(mockPush).toHaveBeenCalledWith(`/metrics/${metricId}/logs/log-1`);
+    });
+
+    it("navigates to the log when its row is opened with Enter", async () => {
+      const user = userEvent.setup();
+      server.use(singleLog());
+
+      renderMetricLogsClient();
+
+      const row = await findDesktopRow();
+      row.focus();
+      await user.keyboard("{Enter}");
+
+      expect(mockPush).toHaveBeenCalledWith(`/metrics/${metricId}/logs/log-1`);
+    });
+
+    // The pre-existing axe assertion covers the empty state only. Focusable rows
+    // are new interactive surface, so the populated table needs its own pass.
+    it("has no critical accessibility violations with rows interactive", async () => {
+      server.use(singleLog());
+
+      const { container } = renderMetricLogsClient();
+      await findDesktopRow();
+      await settleAsyncUpdates();
+
+      expect(await axe(container)).toHaveNoViolations();
     });
   });
 
