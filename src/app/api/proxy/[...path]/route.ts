@@ -19,6 +19,17 @@ import { logger } from "@/lib/logger";
 
 const FORWARDED_HEADER_BLOCKLIST = new Set(["connection", "content-length", "host"]);
 
+/**
+ * The body this proxy returns for the two 401s it issues on its own behalf:
+ * no session cookie at all, and a cookie whose refresh could not rescue it.
+ *
+ * The `code` is what lets the UI tell those apart from an endpoint's own 401 —
+ * a wrong password is also a 401, and `handleApiError` used to render both as
+ * "Your session expired", telling users to log in on the login page. Status
+ * alone cannot carry the difference; only this proxy knows it.
+ */
+const SESSION_EXPIRED_BODY = { error: "Session expired", code: "SESSION_EXPIRED" } as const;
+
 type RouteContext = {
   params: Promise<{ path?: string[] }>;
 };
@@ -53,7 +64,7 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
   // OpenAPI contract marks both as secured.
   if (!isPublicApiPath(rawSegments) && !token) {
     logger.warn("proxy.unauthenticated", { path: targetPath, method: request.method });
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json(SESSION_EXPIRED_BODY, { status: 401 });
   }
 
   const upstreamHeaders = new Headers();
@@ -151,7 +162,15 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
   // Clearing here means the next navigation reaches the login form.
   if (response.status === 401 && !refreshed && token && !isPublicApiPath(rawSegments)) {
     logger.info("proxy.session.cleared", { path: targetPath });
-    clearSessionCookies(proxied.cookies);
+
+    // Replace the upstream body, not just the cookies. Having just ended the
+    // session, the proxy knows more about this 401 than the backend does, and
+    // the backend's own wording — "Unauthorized: Invalid token" — is not a
+    // sentence to put in front of a user. The `code` is what keeps the UI from
+    // rendering this the same way it renders a wrong password.
+    const expired = NextResponse.json(SESSION_EXPIRED_BODY, { status: 401 });
+    clearSessionCookies(expired.cookies);
+    return expired;
   }
 
   return proxied;

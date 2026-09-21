@@ -6,9 +6,27 @@ import { isAbortError } from "./isAbortError";
 export type NormalizedApiError = {
   isAbort: boolean;
   status?: number;
-  code?: string; // e.g., ERR_CANCELED, ECONNABORTED
+  code?: string; // transport code from Axios, e.g. ERR_CANCELED, ECONNABORTED
+  /**
+   * A `code` the *server* put in the error envelope, e.g. `SESSION_EXPIRED`.
+   *
+   * Deliberately not merged into `code` above: that one is Axios's transport
+   * code, and folding the two together would make `ERR_CANCELED` and
+   * `SESSION_EXPIRED` indistinguishable to anyone reading the field.
+   */
+  serverCode?: string;
   title: string; // short classification
   messages: string[]; // user-facing messages
+  /**
+   * Whether `messages` came from the response envelope or from Axios's own
+   * `e.message` fallback ("Request failed with status code 401").
+   *
+   * `messages` is never empty for an Axios error, so emptiness cannot be used
+   * to ask "did the server actually say anything?" — and that is exactly the
+   * question `handleApiError` needs answered before it prefers a server message
+   * over its own copy. The distinction is unrecoverable once normalized.
+   */
+  hasServerMessage: boolean;
   retryable: boolean; // hint for retries/backoff
   raw?: unknown; // original error for telemetry
 };
@@ -94,6 +112,7 @@ export function normalizeApiError(err: unknown): NormalizedApiError {
       isAbort: true,
       title: "Canceled",
       messages: [],
+      hasServerMessage: false,
       retryable: false,
       raw: err,
     };
@@ -106,14 +125,17 @@ export function normalizeApiError(err: unknown): NormalizedApiError {
     const code = e.code;
     const data = e.response?.data;
 
-    const messages = extractMessages(data) ?? (e.message ? [e.message] : ["Request failed"]);
+    const serverMessages = extractMessages(data);
+    const messages = serverMessages ?? (e.message ? [e.message] : ["Request failed"]);
 
     return {
       isAbort: false,
       status,
       code,
+      serverCode: isRecord(data) ? getString(data, "code") : undefined,
       title: titleFrom(status, code),
       messages,
+      hasServerMessage: serverMessages !== null,
       retryable: computeRetryable(status, code),
       raw: err,
     };
@@ -125,6 +147,7 @@ export function normalizeApiError(err: unknown): NormalizedApiError {
     isAbort: false,
     title: "Unexpected error",
     messages: [msg],
+    hasServerMessage: false,
     retryable: false,
     raw: err,
   };
