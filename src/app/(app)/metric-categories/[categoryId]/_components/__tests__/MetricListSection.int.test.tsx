@@ -9,6 +9,8 @@ import { DEFAULT_METRIC_LIST_PARAMS } from "@/features/metrics/listSearchParams"
 import { server } from "@/src/test-utils/msw/server";
 import { renderWithProviders } from "@/src/test-utils/renderWithProviders";
 
+const FIXED_TIMESTAMP = "2026-02-18T08:00:00.000Z";
+
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
 const mockPrefetch = jest.fn();
@@ -86,8 +88,8 @@ describe("MetricListSection integration", () => {
             },
             logCount: 12,
             goalType: "incremental",
-            createdAt: "2026-02-18T08:00:00.000Z",
-            updatedAt: "2026-02-18T08:00:00.000Z",
+            createdAt: FIXED_TIMESTAMP,
+            updatedAt: FIXED_TIMESTAMP,
           },
         ],
         1,
@@ -127,8 +129,8 @@ describe("MetricListSection integration", () => {
             },
             logCount: 12,
             goalType: "incremental",
-            createdAt: "2026-02-18T08:00:00.000Z",
-            updatedAt: "2026-02-18T08:00:00.000Z",
+            createdAt: FIXED_TIMESTAMP,
+            updatedAt: FIXED_TIMESTAMP,
           },
         ],
         1,

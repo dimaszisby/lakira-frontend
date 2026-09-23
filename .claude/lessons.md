@@ -63,3 +63,24 @@ Treat the app's identity (palette values, brand mapping, fonts, type scale) as f
 **Rule**: after writing a regression test, **restore the unfixed file from `HEAD` and watch the test fail**. If it cannot be made to fail, say so in the test file and in the PR, and verify the fix another way — do not let a green suite stand in for evidence it never had.
 
 **Why**: the bug being fixed had survived a suite that asserted `role="alert"` existed without asserting what it said. A test written to that same standard would have shipped the next one.
+
+## [2026-09-23] An escape sequence written through an editing tool becomes the character
+
+**Mistake**: I wrote `.join("\u0000")` into `useRouteParams.ts` and the tool stored two literal NUL
+bytes instead of the six characters. Git reclassified the file as binary; lint, typecheck, build and
+all 768 tests passed regardless, because a NUL inside a JS string literal is valid JavaScript. I then
+described the hazard in the todo and the commit message — reproducing it in both. `git commit`
+refused the message, the push created an empty branch, and `gh pr create` failed with "No commits
+between dev and ...". Three failures, one byte, and the user had to bring it back.
+
+**Rule**: never write an escape sequence for a control character through an editing tool — use a
+plain-ASCII value, or build the string in code. When one seems unavoidable, scan for it across
+**staged, untracked and the commit draft**: `git diff --cached --name-only` plus
+`git ls-files --others --exclude-standard`. My first scan used `git diff --name-only`, which lists
+tracked modified files only, so it checked everything except the newly written file and the draft —
+the two places the bytes actually survived.
+
+**Why**: no gate catches this. A NUL is valid inside a string literal, so the whole suite stays
+green; `git diff --stat` printing `Bin` is the only signal, and it appears nowhere a gate looks. Same
+shape as the `boundaries` and OpenAPI lessons — verify the mechanism, and make sure the check's scope
+actually covers the thing being checked.

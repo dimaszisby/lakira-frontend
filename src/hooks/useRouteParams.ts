@@ -22,7 +22,13 @@ export const useRouteParams = <T extends Record<string, string | undefined>>(
   options?: UseRouteParamsOptions<T>,
 ): T => {
   const rawParams = useParams<Record<string, string | string[]>>();
-  const requiredKeys = options?.required ?? [];
+
+  // Depend on the contents of `required`, not its identity. Both call sites pass
+  // an inline literal — `useRouteParams({ required: ["categoryId"] })` — so the
+  // array is a new object on every render and the memo never actually memoized:
+  // it recomputed each time and handed back a fresh object. Joining to a
+  // primitive is what makes the dependency stable.
+  const requiredKey = (options?.required ?? []).map(String).join(",");
 
   return useMemo(() => {
     const normalized: Record<string, string | undefined> = {};
@@ -31,13 +37,14 @@ export const useRouteParams = <T extends Record<string, string | undefined>>(
       normalized[key] = normalizeValue(value);
     });
 
-    requiredKeys.forEach((key) => {
-      const castKey = String(key);
+    const requiredKeys = requiredKey ? requiredKey.split(",") : [];
+
+    requiredKeys.forEach((castKey) => {
       if (!normalized[castKey]) {
         throw new Error(`Missing required route param: ${castKey}`);
       }
     });
 
     return normalized as T;
-  }, [rawParams, requiredKeys]);
+  }, [rawParams, requiredKey]);
 };

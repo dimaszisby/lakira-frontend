@@ -1,11 +1,12 @@
-import MetricCategoryHeaderSection from "./_components/MetricCategoryHeaderSection";
-import MetricListSection from "./_components/MetricListSection";
+import { decodeCategoryReturnParams } from "@/features/metric-categories/listSearchParams";
 import {
   DEFAULT_METRIC_LIST_PARAMS,
   parseMetricListSearchParams,
 } from "@/features/metrics/listSearchParams";
-import { decodeCategoryReturnParams } from "@/features/metric-categories/listSearchParams";
+
+import MetricCategoryHeaderSection from "./_components/MetricCategoryHeaderSection";
 import { MetricCategoryReturnProvider } from "./_components/MetricCategoryReturnContext";
+import MetricListSection from "./_components/MetricListSection";
 
 type MetricCategoryDetailPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
