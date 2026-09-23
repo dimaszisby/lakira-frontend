@@ -19,12 +19,12 @@ This file is checked against `package.json`. If you add, rename, or remove a scr
 
 ## Quality gates
 
-| Command                             | What it does                          |
-| ----------------------------------- | ------------------------------------- |
-| `npm run typecheck`                 | `tsc --noEmit`.                       |
-| `npm run lint` / `lint:fix`         | ESLint across the repo.               |
-| `npm run lint:css` / `lint:css:fix` | Stylelint over `src/**/*.{css,pcss}`. |
-| `npm run format` / `format:fix`     | Prettier check / write.               |
+| Command                             | What it does                                                              |
+| ----------------------------------- | ------------------------------------------------------------------------- |
+| `npm run typecheck`                 | `tsc --noEmit`.                                                           |
+| `npm run lint` / `lint:fix`         | ESLint across the repo. `lint` fails on any warning (`--max-warnings=0`). |
+| `npm run lint:css` / `lint:css:fix` | Stylelint over `src/**/*.{css,pcss}`.                                     |
+| `npm run format` / `format:fix`     | Prettier check / write.                                                   |
 
 ## Tests
 

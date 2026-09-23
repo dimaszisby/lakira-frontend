@@ -20,6 +20,8 @@ Prettier owns formatting — do not hand-format. `.prettierrc.json`: double quot
 
 - `react-refresh/only-export-components` warns when a component file exports non-components. Constants are exempt; move anything else out.
 
+  **Context files are exempt** — `**/*Context.tsx` and `**/context.tsx`. They export a Provider and its consumer hook together, the standard Context shape, and keep doing so; do not split them. The rule's only payoff is dev-time Fast Refresh: per `node_modules/next/dist/docs/03-architecture/fast-refresh.md`, editing a file with non-component exports re-runs it and its importers rather than patching it in place, which can reset state under that provider. Name a new context file to match the globs rather than adding a per-file exception. Decided 2026-09-24.
+
 ## Imports
 
 - `simple-import-sort` owns order. Run `lint:fix` rather than reordering by hand.
@@ -67,4 +69,4 @@ For what classes to reach for, see `.claude/rules/styling.md`.
 - `sonarjs/no-duplicate-string`, `sonarjs/prefer-immediate-return`.
 - `security/detect-object-injection` is off — too noisy for frontend code.
 
-Lint currently emits non-blocking warnings across the repo (import order, tailwind class order, react-refresh, sonarjs, react-hooks). That backlog is tracked in `docs/internal/todos/2026-02-16-todo-cicd-overview.md`. Do not add to it: leave every file you touch warning-free.
+**Warnings fail lint.** `npm run lint` is `eslint . --max-warnings=0` as of 2026-09-24, so a warning fails CI's `checks` job exactly as an error does. The distinction between `warn` and `error` in `eslint.config.mjs` is now only how the editor displays it. Fix the warning; if a rule is wrong for a whole class of file, scope an override with its reason next to it, as the context-file exemption above does. Never raise `--max-warnings` to make a build pass.

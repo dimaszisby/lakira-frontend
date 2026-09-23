@@ -55,8 +55,10 @@ file. That means splitting every context in this repo in two and updating their 
 convention change, not a lint tidy, and one whose only benefit is Fast Refresh behaviour in
 development. It wants a decision rather than a sweep.
 
-- [ ] Decide whether context files split hook-from-provider repo-wide, or whether this rule should
+- [x] Decide whether context files split hook-from-provider repo-wide, or whether this rule should
       be disabled for `**/*Context.tsx` and `**/context.tsx` with a comment explaining why.
+      **Decided 2026-09-24: disabled for those globs** — see
+      `docs/internal/todos/2026-09-24-todo-zero-warning-lint-gate.md`.
 
 ## A hazard worth recording
 
