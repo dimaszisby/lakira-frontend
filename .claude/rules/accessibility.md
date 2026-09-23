@@ -41,7 +41,7 @@ What is built on it today: Modal (`Dialog`), Select, DateTimePicker (`Popover` p
 
 ## Content
 
-- Every `<img>` has `alt`. Decorative images get `alt=""`. This is the one `jsx-a11y` rule currently enabled, so lint catches it — but only this one.
+- Every `<img>` has `alt`. Decorative images get `alt=""`. Lint enforces this, along with the rest of the recommended `jsx-a11y` set — all as **errors**, so they fail CI rather than adding to a warning backlog.
 - Form inputs have associated `<label>`s. A placeholder is not a label.
 - Error messages are associated with their field via `aria-describedby` and announced, not only coloured red.
 - Colour is never the sole carrier of meaning. Status needs an icon or text alongside the token colour.
@@ -69,8 +69,22 @@ Queries in tests should be by role and accessible name. `getByRole("button", { n
 
 Know these so you do not mistake a passing lint run for a passing a11y check:
 
-- **`eslint-plugin-jsx-a11y` is installed but only `alt-text` is enabled.** The recommended ruleset is not spread in, so label association, ARIA validity, and keyboard handlers are all unchecked by lint.
-- **`npm run check-accessibility` was removed on 2026-08-27.** It ran `npm install axe-core && echo` and asserted nothing. It was not replaced: all 16 integration suites already carry `toHaveNoViolations`, so a dedicated script would be an exact alias for `npm run test:integration`, which gates CI. Run that.
+- **`eslint-plugin-jsx-a11y` is fully enabled as of 2026-09-23** — the recommended set, as errors,
+  listed explicitly in `eslint.config.mjs` so adding a rule is a visible decision. It found no
+  defects when switched on; its value is catching the next one. Two deliberate exceptions carry
+  disable comments with reasons (`SwipeableCard`'s Escape handler, `CategorySelect`'s `autoFocus`
+  passthrough).
+- **`jsx-a11y/no-redundant-roles` is off, deliberately.** Its common case is `role="list"` on a
+  `<ul>`, which is not redundant here: Tailwind's preflight sets `list-style: none` on every `ul`,
+  and Safari + VoiceOver then drop list semantics — item count and boundaries stop being announced.
+  The three mobile lists restate the role for that reason. **Do not remove those roles**, and do not
+  re-enable the rule without a plan for them.
+- **`npm run check-accessibility` was removed on 2026-08-27.** It ran `npm install axe-core && echo` and asserted nothing. It was not replaced: all 19 integration suites already carry `toHaveNoViolations`, so a dedicated script would be an exact alias for `npm run test:integration`, which gates CI. Run that.
 - There is no `cypress-axe`, so E2E accessibility is not covered. `docs/internal/initiatives/tests-overhaul/4-end-to-end-tests/a11y-e2e-checklist.md` describes the intent.
 
-Until those close, `jest-axe` in integration tests is the only automated coverage — and axe catches roughly a third of real issues. Keyboard-test anything you build by hand.
+Automated coverage is now lint plus `jest-axe`, and neither is sufficient alone. Lint reads the
+source and catches structural mistakes — a handler on a `<div>`, an invalid ARIA prop — before the
+component runs. `jest-axe` reads the rendered tree and catches roughly a third of real issues, and
+nothing in jsdom evaluates colour contrast at all (which is why ADR-0017's deviations pass every
+suite). **Keyboard-test anything you build by hand**, and read `.claude/rules/styling.md` §
+Known token-system defects before trusting a contrast claim.

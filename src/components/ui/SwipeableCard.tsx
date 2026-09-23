@@ -112,6 +112,11 @@ export const SwipeableCard = ({
   };
 
   return (
+    // The handler is Escape-to-dismiss for the panel, not an activation: the
+    // card's own actions are real <button>s inside `actions`, and the drag has
+    // a keyboard alternative per WCAG 2.5.7. Giving this container a role and a
+    // tabstop to satisfy the rule would add a focus stop that does nothing.
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions
     <div
       ref={containerRef}
       data-open={isOpen}
