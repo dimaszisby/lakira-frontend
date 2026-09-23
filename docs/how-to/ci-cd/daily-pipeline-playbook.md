@@ -63,9 +63,9 @@ npm run test:e2e
 
 ## Notes
 
-- **Lint warnings do not fail CI.** There is a standing backlog (import order, Tailwind class order,
-  react-refresh, sonarjs, react-hooks). Leave every file you touch warning-free; do not try to clear
-  the backlog in an unrelated PR.
+- **Lint warnings fail CI.** `npm run lint` runs with `--max-warnings=0`, so a `checks` or
+  `security` failure reading "ESLint found too many warnings" is a real lint failure: fix the
+  warning. See `.claude/rules/code-style.md`.
 - **Coverage gates nothing.** Thresholds sit at 3/2/3/3 % and `coverage:check` only fails with
   `--strict`, which nothing passes. A green coverage step is not evidence of coverage.
 - The only CI secret in use is `CODECOV_TOKEN`.

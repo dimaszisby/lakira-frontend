@@ -24,7 +24,7 @@ npm run build           # 9
 
 Notes on reading the output:
 
-- **Gate 1** emits a large pre-existing warning backlog. Only errors fail. Do not report the warning count as a failure — but do check that none of the warnings are in files this branch touched.
+- **Gate 1** runs with `--max-warnings=0`, so any warning fails it, the same as an error. There is no pre-existing backlog to discount: `dev` has been at zero since 2026-09-24.
 - **Gate 4** is `prettier --check`. It fails whole, not per-file, and `npm run format:fix` resolves it — never hand-format. It runs last of the four static gates in CI for the same reason it sits here: a formatting slip must not mask a type error.
 - **Gates 7 and 8** failing means the backend shipped a contract change, not that this branch is broken. Report it as drift and point at `/sync-api-types`.
 - **Gate 9** is the slowest. If gates 1–8 are green and the diff is test-only, say so and let the user decide whether to skip it.

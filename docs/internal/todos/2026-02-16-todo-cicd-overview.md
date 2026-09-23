@@ -61,7 +61,7 @@ Frontend CI has been expanded to a gated chain in `.github/workflows/test.yml` (
 ## Known Blockers
 
 - No active P0 gate blockers.
-- `npm run lint` currently reports non-blocking warnings (import order/class order/react-refresh/sonar/react-hooks guidance); warning cleanup remains a quality backlog item.
+- ~~`npm run lint` currently reports non-blocking warnings~~ — cleared to zero and made blocking (`--max-warnings=0`) on 2026-09-24; see `docs/internal/todos/2026-09-24-todo-zero-warning-lint-gate.md`.
 - Real-user Web Vitals telemetry path is not implemented yet (current Web Vitals checks are lab-derived from Lighthouse reports).
 
 ## FE/BE Handshake Checkpoints

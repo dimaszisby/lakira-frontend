@@ -376,6 +376,21 @@ const config = [
     },
   },
 
+  /*
+   * React Context files export a Provider and its consumer hook together — the
+   * standard Context shape. only-export-components would have every context
+   * split in two, and its only payoff is dev-time Fast Refresh: editing such a
+   * file re-runs it and its importers instead of patching it in place, which
+   * can reset state under that provider. Not worth a second file per context.
+   * See .claude/rules/code-style.md.
+   */
+  {
+    files: ["**/*Context.tsx", "**/context.tsx"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
+
   /* Test files (React Testing Library | Jest DOM) */
   {
     files: ["**/*.{test,spec}.{ts,tsx}"],
