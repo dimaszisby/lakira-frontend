@@ -49,12 +49,12 @@ npx jest --config jest.integration.config.ts path/to/file.int.test.tsx
 
 ## Performance
 
-| Command                    | What it does                                                                                                 |
-| -------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `npm run perf:bundle-size` | Sums `.next/static/chunks` against `scripts/perf/performance-thresholds.json`. Needs a build.                |
-| `npm run perf:lighthouse`  | Lighthouse over the configured routes. Needs the app running on `PERF_BASE_URL`.                             |
-| `npm run perf:web-vitals`  | Derives a lab Web Vitals summary from the Lighthouse output. Lab-derived, not RUM.                           |
-| `npm run coverage:check`   | Compares coverage against `coverage-goals.json`. Only fails with `--strict`, which nothing currently passes. |
+| Command                    | What it does                                                                                                       |
+| -------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `npm run perf:bundle-size` | Sums `.next/static/chunks` against `scripts/perf/performance-thresholds.json`. Needs a build.                      |
+| `npm run perf:lighthouse`  | Lighthouse over the configured routes. Needs the app running on `PERF_BASE_URL`.                                   |
+| `npm run perf:web-vitals`  | Derives a lab Web Vitals summary from the Lighthouse output. Lab-derived, not RUM.                                 |
+| `npm run coverage:check`   | Compares coverage against `coverage-goals.json`, with `--strict`, so an unmet goal fails. CI's `unit` job runs it. |
 
 ## Security
 

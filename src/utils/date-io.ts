@@ -194,7 +194,7 @@ export function formatDateTimeLocalInput(v?: string | Date | null): string {
  * - `locale` is optional; if omitted, the environment/browser locale is used.
  * - Returns `fallback` (default `"-"`) when the input is invalid/falsy.
  *
- * ⚠️ Output is **locale-dependent** (month names/order vary with locale).
+ * Note: output is **locale-dependent** (month names/order vary with locale).
  * If you need a fixed pattern string, reintroduce a pattern-based formatter only where required.
  *
  * @param input     A date-like value (`string | Date | null | undefined`)

@@ -18,15 +18,18 @@ paths:
 Enforced by `eslint-plugin-boundaries` in `eslint.config.mjs`. Violating this fails `npm run lint`.
 
 ```
-app        → features, components, services, lib, utils, generics
-features   → components, services, lib, utils, types, generics
-components → lib, utils, types, generics
-services   → lib, utils, types, generics
-lib        → utils, types, generics
-utils      → generics
-types      → generics
+app        → features, components, services, lib, utils, generics, constants
+features   → components, services, lib, utils, types, generics, constants
+components → lib, utils, types, generics, constants
+services   → lib, utils, types, generics, constants
+lib        → utils, types, generics, constants
+utils      → generics, constants
+types      → generics, constants
 generics   → (nothing)
+constants  → constants
 ```
+
+`constants` is a leaf: every layer may import it, and it imports nothing but other constants.
 
 `generics` is the dependency-free base; `app` (routes) sits at the top. `components` is the shared design-system layer — **`app` and `features` consume it, and it must never reach back up into either.** A UI primitive that needs to know about a feature is not a primitive; it belongs in that feature.
 

@@ -40,7 +40,7 @@ const DEFAULT_URL = `https://raw.githubusercontent.com/dimaszisby/lakira-backend
 const isCheck = process.argv.includes("--check");
 
 const fail = (message) => {
-  console.error(`✗ ${message}`);
+  console.error(`FAIL ${message}`);
   process.exit(1);
 };
 
@@ -131,7 +131,7 @@ async function main() {
   console.log(`source: ${source.location}`);
 
   if (current === next) {
-    console.log(`✓ snapshot is in sync — ${Object.keys(upstream.paths).length} paths`);
+    console.log(`OK snapshot is in sync — ${Object.keys(upstream.paths).length} paths`);
     return;
   }
 
@@ -155,7 +155,7 @@ async function main() {
   }
 
   await writeFile(SNAPSHOT, next, "utf8");
-  console.log(`✓ wrote ${path.relative(REPO_ROOT, SNAPSHOT)}`);
+  console.log(`OK wrote ${path.relative(REPO_ROOT, SNAPSHOT)}`);
   console.log("  next: npm run api:types:generate");
 }
 

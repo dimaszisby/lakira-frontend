@@ -33,8 +33,13 @@ of their quarantine when it is perfectly legal, and it cost a detour to establis
 
 ## The fix
 
-- [ ] Add `constants` to every row of the table in `.claude/rules/architecture.md` that
+- [x] Add `constants` to every row of the table in `.claude/rules/architecture.md` that
       `eslint.config.mjs` allows it for.
-- [ ] While there, note that `constants` is its own boundary element and depends on nothing.
+- [x] While there, note that `constants` is its own boundary element and depends on nothing.
+      Corrected on the way in: the rule allows `constants → constants`, so the table says that.
 
 Docs-only. No code change, no behaviour change.
+
+## Status
+
+**Done 2026-09-24** on `docs/stale-state-sweep`, via `2026-09-24-todo-stale-state-sweep.md`.
