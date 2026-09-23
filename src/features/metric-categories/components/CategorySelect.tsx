@@ -182,6 +182,12 @@ const CategorySelect = ({
             onChange={(event) => setQuery(event.target.value)}
             placeholder={showSelectedPreview ? "" : placeholder}
             disabled={disabled}
+            // Not a hardcoded autofocus — this is the passthrough for the
+            // standard input prop, picked up from ComponentProps<"input">, and
+            // no caller currently sets it. The rule fires on the attribute
+            // regardless of where the value comes from. If a caller ever does
+            // pass it, the rule's actual concern applies to that call site.
+            // eslint-disable-next-line jsx-a11y/no-autofocus
             autoFocus={autoFocus}
             aria-autocomplete="list"
             aria-invalid={ariaInvalid}

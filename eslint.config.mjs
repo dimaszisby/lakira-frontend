@@ -183,8 +183,56 @@ const config = [
         },
       ],
 
-      /* --- A11y + Tailwind ergonomics --- */
-      "jsx-a11y/alt-text": "warn",
+      /* --- A11y --- */
+      /* The recommended jsx-a11y set, as errors. `eslint-config-next` already
+       * registers the plugin; only `alt-text` was ever switched on, which is why
+       * `.claude/rules/accessibility.md` warns not to read a passing lint run as
+       * a passing a11y check.
+       *
+       * Turning the rest on found no defects — all five hits were correct code
+       * the rules cannot see the intent of, and carry disable comments giving
+       * the reason. The value is forward-looking: these catch the next
+       * `<div onClick>` before review does. Listed explicitly rather than spread
+       * from the preset so that adding a rule is a visible decision.
+       */
+      "jsx-a11y/alt-text": "error",
+      "jsx-a11y/anchor-has-content": "error",
+      "jsx-a11y/anchor-is-valid": "error",
+      "jsx-a11y/aria-activedescendant-has-tabindex": "error",
+      "jsx-a11y/aria-props": "error",
+      "jsx-a11y/aria-proptypes": "error",
+      "jsx-a11y/aria-role": "error",
+      "jsx-a11y/aria-unsupported-elements": "error",
+      "jsx-a11y/autocomplete-valid": "error",
+      "jsx-a11y/click-events-have-key-events": "error",
+      "jsx-a11y/heading-has-content": "error",
+      "jsx-a11y/html-has-lang": "error",
+      "jsx-a11y/iframe-has-title": "error",
+      "jsx-a11y/img-redundant-alt": "error",
+      "jsx-a11y/interactive-supports-focus": "error",
+      "jsx-a11y/label-has-associated-control": "error",
+      "jsx-a11y/mouse-events-have-key-events": "error",
+      "jsx-a11y/no-access-key": "error",
+      "jsx-a11y/no-autofocus": "error",
+      "jsx-a11y/no-distracting-elements": "error",
+      "jsx-a11y/no-noninteractive-element-interactions": "error",
+      "jsx-a11y/no-noninteractive-element-to-interactive-role": "error",
+      "jsx-a11y/no-noninteractive-tabindex": "error",
+      /* Off, deliberately. Its common case is `role="list"` on a `<ul>`, which
+       * is NOT redundant here: Tailwind's preflight sets `list-style: none` on
+       * every ul, and Safari + VoiceOver drop list semantics from a list styled
+       * that way — item count and boundaries stop being announced. The three
+       * mobile lists restate the role for exactly that reason, so enabling this
+       * rule would push someone to remove them and regress screen-reader output.
+       */
+      "jsx-a11y/no-redundant-roles": "off",
+      "jsx-a11y/no-static-element-interactions": "error",
+      "jsx-a11y/role-has-required-aria-props": "error",
+      "jsx-a11y/role-supports-aria-props": "error",
+      "jsx-a11y/scope": "error",
+      "jsx-a11y/tabindex-no-positive": "error",
+
+      /* --- Tailwind ergonomics --- */
       "tailwindcss/classnames-order": "warn",
       "tailwindcss/no-contradicting-classname": "error",
       // If you heavily use custom classnames/tokens, keep this off to avoid noise:

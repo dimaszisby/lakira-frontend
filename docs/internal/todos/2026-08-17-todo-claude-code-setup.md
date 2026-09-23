@@ -138,7 +138,7 @@ All kept agents use `memory: project` with the `MEMORY.md`-index + `**How to app
 - [ ] Enable server-side branch protection on `dev` and `main` (user action — `gh api`)
 - [ ] Raise coverage thresholds from the placeholder 3/2/3/3 %
 - [ ] Populate `src/test-utils/msw/handlers.ts` — currently empty while `onUnhandledRequest: "error"`
-- [ ] Enable `jsx-a11y` recommended ruleset
+- [x] Enable `jsx-a11y` recommended ruleset — **done 2026-09-23**, as errors. Found no existing defects; two reasoned disables and `no-redundant-roles` off with its rationale recorded in `.claude/rules/accessibility.md`.
 - [ ] Replace the `check-accessibility` placeholder script
 - [x] Reconcile the three conflicting local backend defaults (`:3000` / `:4000` / `:8001`) — closed 2026-08-24 by SaaS-readiness Phase 3. `:8001` is canonical; see `DEV_API_BASE_URL` in `src/lib/env.ts`.
 - [ ] `docs/README.md` references `docs/code-review/`, which does not exist
