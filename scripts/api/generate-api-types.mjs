@@ -27,7 +27,7 @@ const BIN = path.join(REPO_ROOT, "node_modules", ".bin", "openapi-typescript");
 const isCheck = process.argv.includes("--check");
 
 const fail = (message) => {
-  console.error(`✗ ${message}`);
+  console.error(`FAIL ${message}`);
   process.exit(1);
 };
 
@@ -63,7 +63,7 @@ async function main() {
   const committed = existsSync(OUT_FILE) ? await readFile(OUT_FILE, "utf8") : null;
 
   if (committed === generated) {
-    console.log("✓ generated API types are in sync with the OpenAPI snapshot");
+    console.log("OK generated API types are in sync with the OpenAPI snapshot");
     return;
   }
 
@@ -78,7 +78,7 @@ async function main() {
 
   await mkdir(OUT_DIR, { recursive: true });
   await writeFile(OUT_FILE, generated, "utf8");
-  console.log(`✓ wrote ${path.relative(REPO_ROOT, OUT_FILE)}`);
+  console.log(`OK wrote ${path.relative(REPO_ROOT, OUT_FILE)}`);
 }
 
 await main();

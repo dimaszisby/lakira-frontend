@@ -1,7 +1,7 @@
 /* Raw brand palette (no UI meaning) — HSL bodies only */
 @layer base {
   :root {
-    /* 🌸 Primary */
+    /* Primary */
     --primary-sakurapink-100: 348 69% 86%; /* #f4c3cd */
     --primary-sakurapink-500: 351 64% 75%; /* #e897a3 */
     --primary-sakurapink-700: 350 47% 59%; /* #c76576 */
@@ -12,7 +12,7 @@
     --primary-softwhite-500: 20 69% 97%; /* #fdf7f4 */
     --primary-softwhite-700: 27 20% 91%; /* #ede8e4 */
 
-    /* 🔵 Secondary */
+    /* Secondary */
     --secondary-origamiblue-100: 196 36% 79%; /* #b7d3dd */
     --secondary-origamiblue-500: 196 32% 63%; /* #82aebe */
     --secondary-origamiblue-700: 194 28% 48%; /* #578c9c */
@@ -23,7 +23,7 @@
     --secondary-washigray-500: 45 11% 86%; /* #e0ded8 */
     --secondary-washigray-700: 0 0% 17%; /* #2c2c2c */
 
-    /* 🟡 Accent */
+    /* Accent */
     --accent-vividcoral-100: 0 75% 80%; /* #f2a5a5 */
     --accent-vividcoral-500: 0 67% 66%; /* #e26d6d */
     --accent-vividcoral-700: 0 42.8% 51.7%; /* #B94F4F */
@@ -34,7 +34,7 @@
     --accent-softlavender-500: 272 47% 70%; /* #b690d7 */
     --accent-softlavender-700: 270 29% 55%; /* #8c6aad */
 
-    /* 🟦 Info */
+    /* Info */
     --info-100: 216 45% 98%; /* #f7f9fc */
     --info-500: 198 38% 74%; /* #a3c7d6 */
     --info-700: 0 0% 29%; /* #4a4a4a */

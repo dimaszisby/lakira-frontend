@@ -59,11 +59,14 @@ resolved to the already-declared 15.21.0. `package.json` itself did not change.
 - [x] Run plain `npm audit fix` on a dedicated branch off `dev`.
 - [x] Verify `lint`, `typecheck`, `test:unit`, `test:integration`, `api:spec:check`, `api:types:check`, `build`.
 - [x] Confirm no `next` or `cypress` major bump was actually required — both were already in-range in `package.json`.
-- [ ] Confirm `Security Scan` job goes green in CI.
-- [ ] Confirm `E2E tests` job passes in CI (first real check of the Cypress 15 resolution under `test:e2e`).
-- [ ] Close out `2026-08-22-todo-cypress-security-upgrade.md` once CI confirms — its concern (cypress major bump risk) is resolved by this change.
+- [x] Confirm `Security Scan` job goes green in CI.
+- [x] Confirm `E2E tests` job passes in CI (first real check of the Cypress 15 resolution under `test:e2e`).
+- [x] Close out `2026-08-22-todo-cypress-security-upgrade.md` once CI confirms — its concern (cypress major bump risk) is resolved by this change.
 
 ## Status
 
 Lockfile fix done and locally verified on `chore/npm-audit-fix`; open a PR and
 confirm CI (especially `E2E tests`) before closing this out.
+
+**Closed 2026-09-24.** Security Scan and E2E tests both passed in CI on `dev` at `67e586d`, and
+`2026-08-22-todo-cypress-security-upgrade.md` already records itself as resolved by this change.

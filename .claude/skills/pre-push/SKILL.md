@@ -40,12 +40,12 @@ npm run test:e2e
 
 ```
 Pre-push validation
-  ✓ lint
-  ✓ lint:css
-  ✓ typecheck
-  ✓ format
-  ✓ test:unit          (142 passed)
-  ✗ test:integration   (1 failed — MetricsPageClient.int.test.tsx)
+  PASS lint
+  PASS lint:css
+  PASS typecheck
+  PASS format
+  PASS test:unit          (142 passed)
+  FAIL test:integration   (1 failed — MetricsPageClient.int.test.tsx)
 
 Result: BLOCKED at gate 6
 ```

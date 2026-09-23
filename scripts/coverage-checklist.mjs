@@ -65,7 +65,7 @@ Object.entries(goals).forEach(([prefix, target]) => {
   const stats = aggregateForPrefix(prefix);
   const met = stats.statements >= target;
   if (!met) unmet += 1;
-  const status = met ? "✔" : "✖";
+  const status = met ? "PASS" : "FAIL";
   console.log(`${status} ${prefix} → statements ${stats.statements.toFixed(2)}% (goal ${target}%)`);
 });
 
