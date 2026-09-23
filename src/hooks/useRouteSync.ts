@@ -3,8 +3,8 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useCallback } from "react";
 
-import { buildPath } from "@/lib/routes";
 import type { QueryParams } from "@/lib/routes";
+import { buildPath } from "@/lib/routes";
 
 type RouteSyncOptions<T> = {
   serialize: (state: T) => QueryParams;

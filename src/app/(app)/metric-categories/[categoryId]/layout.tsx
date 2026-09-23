@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
 import { notFound } from "next/navigation";
+import type { ReactNode } from "react";
 
 import { getMetricCategoryById } from "@/features/metric-categories/api";
 import { toVM } from "@/features/metric-categories/mappers";

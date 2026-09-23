@@ -8,6 +8,8 @@ import MetricForm from "@/features/metrics/components/MetricForm";
 import { server } from "@/src/test-utils/msw/server";
 import { renderWithProviders } from "@/src/test-utils/renderWithProviders";
 
+const SERVER_ERROR_MESSAGE = "Internal server error";
+
 const metricId = "metric-1";
 const defaultUnit = "kg";
 const fixedDate = "2026-02-18";
@@ -224,7 +226,7 @@ describe("MetricForm integration", () => {
           HttpResponse.json(
             {
               status: "error",
-              message: "Internal server error",
+              message: SERVER_ERROR_MESSAGE,
               data: null,
             },
             { status: 500 },
@@ -300,7 +302,7 @@ describe("MetricForm integration", () => {
           HttpResponse.json(
             {
               status: "error",
-              message: "Internal server error",
+              message: SERVER_ERROR_MESSAGE,
               data: null,
             },
             { status: 500 },
@@ -334,7 +336,7 @@ describe("MetricForm integration", () => {
           HttpResponse.json(
             {
               status: "error",
-              message: "Internal server error",
+              message: SERVER_ERROR_MESSAGE,
               data: null,
             },
             { status: 500 },
