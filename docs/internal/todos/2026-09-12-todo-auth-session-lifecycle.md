@@ -122,9 +122,11 @@ Checked in the browser against the local backend:
   internal fetch. It self-heals on the next client call, and it is why the first clear during
   verification appeared not to work. The same mechanism is the reason the refresh cookie stays
   scoped to `/api`.
-- **Registration gets no refresh cookie.** The backend's `/auth/register` never calls
-  `setRefreshCookie` — only `/auth/login` and `/auth/refresh` do. A newly registered user's session
-  therefore still ends when the access token expires, and the revive route will fall through to
-  `/login`. A backend change, raised here because it looks like a frontend bug.
+- ~~**Registration gets no refresh cookie.**~~ **Fixed in the backend 2026-09-20** by `b7cc7ce`
+  (#103): `register` now calls `setRefreshCookie`. Checked against backend `dev` on 2026-09-24.
+  The original note: the backend's `/auth/register` never called
+  `setRefreshCookie` — only `/auth/login` and `/auth/refresh` did. A newly registered user's session
+  therefore ended when the access token expired, and the revive route fell through to `/login`. A
+  backend change, raised here because it looked like a frontend bug.
 - `src/hooks/useAuth.ts` is dead code and imports `useRouter` from `next/router`, which the App
   Router does not have. It would not run if anything called it.

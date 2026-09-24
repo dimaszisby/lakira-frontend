@@ -62,7 +62,8 @@ Defined in `next.config.ts` alongside HSTS, `Referrer-Policy`, `Permissions-Poli
 
 - No secret ever gets a `NEXT_PUBLIC_` prefix. See `.claude/rules/environment.md`.
 - No credentials in the repo, including test accounts for staging. The backend handoff is explicit: staging credentials live only in GitHub/Vercel secrets.
-- `gitleaks` runs on full history in CI (`secret-scan` job). A hit there means the secret is already public and must be rotated, not just removed.
+- `gitleaks` runs on full history in CI (`secret-scan` job), on every push and PR. A hit there means the secret is already public and must be rotated, not just removed.
+- The job runs a pinned gitleaks binary checked against a SHA-256 hard-coded in `test.yml`, not a third-party action — so no action code runs with the job's token, and the digest cannot be changed by whoever publishes the release. To upgrade, change `GITLEAKS_VERSION` and `GITLEAKS_SHA256` together, taking the digest from the release's published checksums and confirming it against the downloaded asset. Scheduled or dispatched workflows are not an option for a full scan here: they run from the default branch, `main`, which does not carry the workflows.
 - `npm audit --audit-level=high` runs in the `security` job. A new high-severity advisory fails CI.
 
 ## Reviewing changes

@@ -79,7 +79,7 @@ Read by scripts, never by the app:
 ## Where secrets are not
 
 - There is no `.env` committed to this repo, and none should be.
-- The only secret currently used in CI is `CODECOV_TOKEN`.
+- CI uses no secrets. No workflow references one, and none are configured on the repository (checked 2026-09-24). Coverage is uploaded as a workflow artifact, not to Codecov.
 - `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` appear in the environments matrix as
   _not currently required_ — deploys are not driven from CI today.
 

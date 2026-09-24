@@ -19,7 +19,24 @@ Measured 2026-09-24 against `origin`:
 happen as things stand: a PR from `dev` to `main` has no common ancestor to diff against, and a
 merge needs `--allow-unrelated-histories`.
 
-## Why it has not mattered yet
+## It already matters: the nightly performance workflow has never run
+
+Found 2026-09-24 while hardening the secret scan. GitHub runs `schedule` and `workflow_dispatch`
+workflows from the **default branch**. `.github/workflows/performance.yml` (`frontend-performance`,
+Lighthouse and bundle-size metrics, cron `0 2 * * *`) has been on `dev` since `2862c92`
+(2026-02-18), but `main` does not carry it. The Actions API lists only `frontend-ci` as a
+registered workflow, and all 98 recorded runs are `frontend-ci`. **It has never run.**
+
+Six live documents describe it as running nightly: `.claude/agents/ci-debugger.md` (twice),
+`.claude/rules/performance.md`, `docs/explanation/product-requirements.md`,
+`docs/how-to/ci-cd/daily-pipeline-playbook.md`, `docs/reference/commands.md`, and the comment in
+`src/app/_components/WebVitalsReporter.tsx`. Resolving this todo makes them true; if it is
+deferred, correct them instead.
+
+The same constraint ruled out a scheduled full-history secret scan — see
+`2026-09-24-todo-secret-scan-hardening.md`.
+
+## Why it looked harmless
 
 Every PR targets `dev`, and a PR mis-targeted at `main` fails loudly for the same reason a release
 PR would. For now the broken `main` works as a safety net. It stops working as one at the first

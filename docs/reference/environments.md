@@ -38,9 +38,8 @@ This matrix captures FE-relevant CI/CD environment values based on current FE re
 
 ## 5. CI Secrets
 
-Currently required by workflow:
-
-- `CODECOV_TOKEN`
+Currently required by workflow: **none.** No workflow references a secret (checked 2026-09-24).
+Coverage is uploaded as a workflow artifact; there is no Codecov integration.
 
 Not currently required by this FE workflow:
 
