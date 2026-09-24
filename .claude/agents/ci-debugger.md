@@ -28,13 +28,13 @@ The chain is strictly serial, so a failure in `checks` means nothing downstream 
 
 | Job | Runs | First thing to check |
 |---|---|---|
-| `checks` | `lint`, `lint:css`, `typecheck` | Lint emits a large pre-existing **warning** backlog; only errors fail. Confirm you are looking at an error. |
-| `unit` | `test:unit:ci` + Codecov upload | Codecov has `fail_ci_if_error: true` — a missing or invalid `CODECOV_TOKEN` fails the job even when every test passed. Check whether tests actually failed before debugging tests. |
+| `checks` | `lint`, `lint:css`, `typecheck`, `format` | Lint runs with `--max-warnings=0`, so a single warning fails it — "ESLint found too many warnings" is a real failure. `format` runs last so it cannot mask a type error. |
+| `unit` | `test:unit:ci`, `coverage:check`, uploads `coverage/` as an artifact | Two coverage gates: jest's global thresholds in `test:unit:ci`, then the per-folder goals in `coverage:check --strict`. Read which one failed before touching tests. There is no Codecov upload and no CI secret. |
 | `integration` | `test:integration` | `onUnhandledRequest: "error"` with empty MSW handlers. A test that passes locally and fails in CI is often an escaped request that a local cache was serving. |
 | `build` | `next build`, uploads `.next` | `if-no-files-found: error` on the artifact. A build that "succeeds" but uploads nothing fails here. |
 | `e2e` | downloads `.next`, `next start`, `test:e2e` | 60×2s readiness poll against `CYPRESS_BASE_URL`. If it timed out, read the `tail -n 200 /tmp/next-start.log` output in the step — the app usually failed to boot on a missing env var. |
 | `security` | `security:scan` | `npm audit --audit-level=high`. A new advisory fails a job that has nothing to do with the diff. |
-| `secret-scan` | gitleaks, full history | A hit means the secret is already public. Rotation first, removal second. |
+| `secret-scan` | pinned gitleaks binary, full history | A digest mismatch in "Install gitleaks" means the download changed — stop and investigate, never update the digest to match. A hit means the secret is already public: rotation first, removal second. |
 | `api-contract` | `api:spec:check`, `api:types:check` | Failure means the backend shipped a contract change. Run `/sync-api-types`. This is expected drift, not a broken build. |
 
 ## CI-versus-local deltas

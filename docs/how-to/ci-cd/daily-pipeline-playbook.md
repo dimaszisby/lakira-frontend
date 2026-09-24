@@ -69,7 +69,7 @@ npm run test:e2e
 - **Coverage gates the `unit` job twice.** `test:unit:ci` enforces the global thresholds in
   `jest.config.ts`, and `coverage:check` runs with `--strict` against the per-folder goals in
   `coverage-goals.json`. Never lower either to make a build pass.
-- The only CI secret in use is `CODECOV_TOKEN`.
+- CI uses no secrets. Coverage goes up as a workflow artifact, not to Codecov.
 
 ## Related
 

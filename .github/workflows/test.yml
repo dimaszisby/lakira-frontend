@@ -249,17 +249,36 @@ jobs:
       - name: Run lint + npm audit
         run: npm run security:scan
 
+  # Full-history gitleaks scan on every push and PR. Runs a pinned,
+  # checksum-verified gitleaks binary rather than a third-party action, so no
+  # action code runs with this job's token. See .claude/rules/security.md.
   secret-scan:
     name: Secret Scan
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      GITLEAKS_VERSION: 8.30.1
+      # SHA-256 of gitleaks_8.30.1_linux_x64.tar.gz, matching the release's
+      # published checksums. Hard-coded on purpose: fetching the checksum at run
+      # time would verify nothing the release itself could not change.
+      GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
     steps:
       - name: Checkout full history
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Run gitleaks
-        uses: zricethezav/gitleaks-action@v1.6.0
-        with:
-          args: --path . --verbose --redact
+      - name: Install gitleaks
+        run: |
+          set -euo pipefail
+          tarball="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -fsSL -o "$RUNNER_TEMP/$tarball" \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/$tarball"
+          echo "${GITLEAKS_SHA256}  $RUNNER_TEMP/$tarball" | sha256sum --check --strict
+          tar -xzf "$RUNNER_TEMP/$tarball" -C "$RUNNER_TEMP" gitleaks
+          "$RUNNER_TEMP/gitleaks" version
+
+      - name: Scan full history
+        run: '"$RUNNER_TEMP/gitleaks" git . --redact --verbose --no-banner'

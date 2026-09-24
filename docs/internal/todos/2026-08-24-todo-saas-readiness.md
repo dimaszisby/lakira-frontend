@@ -337,9 +337,9 @@ Adding global handlers would have **weakened** the harness.
 
 - [ ] Expand Cypress past its single spec — belongs with Phase 5b's auth flows, which need a
       running backend
-- [ ] `gitleaks-action` v1.6.0 -> v2, SHA-pinned
+- [x] `gitleaks-action` v1.6.0 -> v2, SHA-pinned — done 2026-09-24 differently: v2 no longer runs (Node 20 removed), and v3 would have lost full-history scanning, so the job now runs a pinned, checksum-verified gitleaks 8.30.1. See `2026-09-24-todo-secret-scan-hardening.md`.
 - [ ] Deploy config and a gated `deploy_production` job — needs a hosting decision
-- [ ] Reconcile `CODECOV_TOKEN`, documented but absent from both workflows
+- [x] Reconcile `CODECOV_TOKEN`, documented but absent from both workflows — reconciled 2026-09-24 by correcting the docs: there is no Codecov integration and CI uses no secrets.
 
 ## Phase 8 — Re-audit + closeout
 

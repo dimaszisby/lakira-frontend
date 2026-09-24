@@ -139,7 +139,7 @@ All kept agents use `memory: project` with the `MEMORY.md`-index + `**How to app
 - [x] Raise coverage thresholds from the placeholder 3/2/3/3 % — done 2026-08-27: `jest.config.ts` sets 29/29/26/29, inherited by `jest.unit.config.ts`. Ticked 2026-09-24.
 - [x] ~~Populate `src/test-utils/msw/handlers.ts` — currently empty while `onUnhandledRequest: "error"`~~ — won't do: the empty array is by design, each suite declares its own requests. See `CLAUDE.md` § Known state. Closed 2026-09-24.
 - [x] Enable `jsx-a11y` recommended ruleset — **done 2026-09-23**, as errors. Found no existing defects; two reasoned disables and `no-redundant-roles` off with its rationale recorded in `.claude/rules/accessibility.md`.
-- [ ] Replace the `check-accessibility` placeholder script
+- [x] ~~Replace the `check-accessibility` placeholder script~~ — removed instead, 2026-08-27; see `.claude/rules/accessibility.md`. Ticked 2026-09-24.
 - [x] Reconcile the three conflicting local backend defaults (`:3000` / `:4000` / `:8001`) — closed 2026-08-24 by SaaS-readiness Phase 3. `:8001` is canonical; see `DEV_API_BASE_URL` in `src/lib/env.ts`.
 - [x] `docs/README.md` references `docs/code-review/`, which does not exist — the reference is already gone. Ticked 2026-09-24.
 
