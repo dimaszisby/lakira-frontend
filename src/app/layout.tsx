@@ -7,7 +7,6 @@ import { APP_DESCRIPTION, APP_NAME, TITLE_SEPARATOR } from "@/constants/app";
 
 import WebVitalsReporter from "./_components/WebVitalsReporter";
 import { Providers } from "./providers";
-import ThemeScript from "./ThemeScript";
 
 export const metadata: Metadata = {
   title: {
@@ -48,7 +47,6 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <ThemeScript />
       </head>
       <body className=" min-h-dvh font-sans antialiased">
         <WebVitalsReporter />

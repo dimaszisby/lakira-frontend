@@ -4,15 +4,9 @@
  * `scripts/bootstrap-fork.sh` rewrites these values when a fork is renamed, so
  * prefer importing from here over writing a brand string inline.
  *
- * Two brand strings live outside this module and cannot import it:
- *
- * - `public/scripts/theme-init.js` duplicates {@link THEME_STORAGE_KEY}. It is a
- *   blocking inline script served as static JS with no module system, so the key
- *   has to be literal there. Change both together.
- * - `package.json` `"name"`.
- *
- * The fork script keeps all three in sync. If you edit a value here by hand,
- * edit them there too.
+ * One brand string lives outside this module and cannot import it:
+ * `package.json` `"name"`. The fork script keeps both in sync. If you edit a
+ * value here by hand, edit it there too.
  */
 
 /** Display name, used in metadata titles and visible chrome. */
@@ -88,5 +82,8 @@ export const REFRESH_COOKIE_PATH = "/api";
 /** Refresh-token lifetime in seconds (30 days), matching the backend. */
 export const REFRESH_MAX_AGE_SECONDS = 60 * 60 * 24 * 30;
 
-/** localStorage key for the persisted theme. Mirrored in `public/scripts/theme-init.js`. */
+/**
+ * localStorage key for the persisted theme. Returning users already have it
+ * stored, so changing it silently resets every saved choice.
+ */
 export const THEME_STORAGE_KEY = "lakira.theme";

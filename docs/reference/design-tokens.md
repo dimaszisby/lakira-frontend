@@ -69,8 +69,8 @@ Tailwind's `theme.colors` is **replaced**, not extended, so only token colours g
 
 ## Theming
 
-Theme is driven by a `data-theme` attribute on `<html>`, set by `next-themes` and the inline
-`src/app/ThemeScript.tsx` (which runs before paint to avoid a flash).
+Theme is driven by a `data-theme` attribute on `<html>`, set by `next-themes`. Its inline script,
+injected first in `<body>`, applies the stored choice before paint to avoid a flash.
 
 Tailwind is configured to match:
 

@@ -12,11 +12,10 @@ import { ThemeSwitcher } from "@/ui/ThemeSwitcher";
  *
  * The unit suite covers the component. What this asserts is the configuration in
  * `src/app/providers.tsx` — that `attribute="data-theme"` reaches `<html>`, and
- * that `storageKey` is the same key `public/scripts/theme-init.js` reads before
- * paint. Those two have drifted apart once already; the comment in providers.tsx
- * records that the pre-paint script then never found a stored choice, and a user
- * whose choice differed from their OS got a flash of the wrong theme on every
- * load. Neither half is visible from the component alone.
+ * that the choice persists under `lakira.theme`. That key is what returning
+ * users already have stored; next-themes' pre-paint script reads it, and a
+ * changed key would silently reset every stored choice to the OS setting.
+ * Neither half is visible from the component alone.
  *
  * StrictMode because `next dev` runs it, and jsdom without it has hidden real
  * effect-ordering bugs in this repo twice.
@@ -55,7 +54,7 @@ describe("theme switching", () => {
     expect(document.documentElement.getAttribute(DATA_THEME)).toBe("light");
   });
 
-  // AC-3 — the key must match the literal in public/scripts/theme-init.js.
+  // AC-3 — the key is what existing users have stored; changing it resets their choice.
   it("persists the choice under the key the pre-paint script reads", async () => {
     const user = userEvent.setup();
     renderThemeSwitching();
