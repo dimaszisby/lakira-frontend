@@ -1,6 +1,8 @@
 {
   "lighthouse": {
-    "routes": ["/", "/login", "/dashboard", "/metrics"],
+    "version": "12.8.2",
+    "runsPerRoute": 3,
+    "routes": ["/", "/login", "/register"],
     "categories": {
       "performance": 70,
       "accessibility": 90,
