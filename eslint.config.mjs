@@ -66,7 +66,6 @@ const config = [
       "cypress/videos/**",
       "cypress/screenshots/**",
       "documents", // currently documents only used for temp-docs
-      "public/scripts/**",
     ],
   },
 

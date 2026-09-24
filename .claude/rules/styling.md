@@ -83,7 +83,7 @@ These are enforced by review:
 - **Never reference a palette variable from a component.** Components consume layer 2 or layer 5. If no semantic token expresses what you need, add one to `semantic.css`, defined for both themes.
 - **Never write an arbitrary font size.** Use the named scale: `text-h3`, `text-body1`, `text-caption`. In recipe CSS, read it with `theme("fontSize.caption")` rather than repeating the value.
 - **New values must match the current look.** Add a token that reproduces an existing value instead of silently restyling. The brand identity is fixed input: palette values, brand mapping, Button colour tokens, fonts and type scale.
-- **Theme switching** is `data-theme` on `<html>` (`darkMode: ["class", '[data-theme="dark"]']`, driven by `next-themes` and `src/app/ThemeScript.tsx`). A bare `.dark` class does nothing.
+- **Theme switching** is `data-theme` on `<html>` (`darkMode: ["class", '[data-theme="dark"]']`, driven by `next-themes`, whose inline script applies it before paint). A bare `.dark` class does nothing.
 - **Merge classes with `cn()`** from `src/lib/cn.ts`. Never concatenate class strings. `cn` knows the named type scale, so `cn("text-caption", "text-ink-secondary")` keeps both classes.
 
 ## Adding a component's styles

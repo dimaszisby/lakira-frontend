@@ -38,8 +38,8 @@ export type ThemeSwitcherProps = {
  * Light / dark / system selector.
  *
  * The provider in `src/app/providers.tsx` owns persistence and the `data-theme`
- * attribute, and `public/scripts/theme-init.js` applies the stored choice before
- * first paint. This component only reads and writes the preference.
+ * attribute, and the inline script next-themes injects applies the stored choice
+ * before first paint. This component only reads and writes the preference.
  *
  * Until it has mounted, the control renders unselected and disabled rather than
  * absent: `useTheme()` has no value on the server or on the first client render,

@@ -13,11 +13,10 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
   return (
     <ThemeProvider
       attribute="data-theme" // we theme via [data-theme="dark"]
-      // next-themes defaults this to "theme". `public/scripts/theme-init.js`
-      // reads THEME_STORAGE_KEY before paint, so without this they used
-      // different keys: the script never found a stored choice, fell back to
-      // the system preference, and a user whose choice differed from their OS
-      // got a flash of the wrong theme on every load.
+      // next-themes defaults this to "theme". Users already have their choice
+      // stored under THEME_STORAGE_KEY, and next-themes' pre-paint script reads
+      // whatever key is set here — so a mismatch resets every stored choice to
+      // the OS setting.
       storageKey={THEME_STORAGE_KEY}
       defaultTheme="system" // explicit default (no system surprises)
       enableSystem
