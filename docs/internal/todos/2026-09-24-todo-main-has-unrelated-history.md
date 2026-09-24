@@ -60,5 +60,10 @@ sweep.
 
 - [x] Confirm `dev` carries `LICENSE` — it does (checked 2026-09-24).
 - [ ] Choose reset or one-time merge; record the reason here.
-- [ ] Decide whether `dev` becomes the default branch.
+- [x] Decide whether `dev` becomes the default branch. **Done 2026-09-24** with
+      `gh repo edit --default-branch dev`. Non-destructive and reversible; it rewrites no history.
+      It fixed the scheduled-workflow problem at once: GitHub registered `frontend-performance`
+      immediately, the six docs describing a nightly run became true, and `gh pr create` without
+      `--base` now targets `dev`. The first run found a measurement problem, not a performance one
+      — see `2026-09-24-todo-perf-measurement-reliability.md`.
 - [ ] Do the same for `lakira-backend`, or file it there.

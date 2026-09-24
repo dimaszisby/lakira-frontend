@@ -27,7 +27,14 @@ Two sets exist, and they disagree. The doc states the aspiration; the JSON is wh
 | Total JS | — | ≤ 3,000,000 bytes |
 | Largest chunk | — | ≤ 300,000 bytes |
 
-Aim at the doc targets. The JSON is the floor, not the goal. Routes audited: `/`, `/login`, `/dashboard`, `/metrics`.
+Aim at the doc targets. The JSON is the floor, not the goal. Routes audited: `/`, `/login`, `/register` — public pages only. Authenticated routes are not measured yet: with no session they redirect to `/login`, and scoring that would report the login page under their name (`docs/internal/todos/2026-09-24-todo-authenticated-perf-routes.md`).
+
+How the Lighthouse gate reads a result:
+
+- **Median of three runs per route.** A single Lighthouse run is noisy — on 2026-09-24 the same commit scored 58 and then 81 on `/`. One failing run is not a regression; a failing median is. Do not reduce `runsPerRoute` to speed the job up.
+- **A redirect fails the route.** If a route's final URL differs from the one requested, the run fails with `REDIRECTED`, rather than scoring the page it landed on.
+- **Lighthouse is pinned** (`lighthouse.version` in the JSON), so a score cannot move because a new Lighthouse was published. Bump it deliberately, in its own change, and expect scores to shift with it.
+- Each route's canonical report (`reports/performance/lighthouse/<route>.json`) is its median-performance run; the individual runs sit beside it as `<route>.run-N.json`.
 
 These are **lab** measurements derived from Lighthouse, not real-user monitoring. RUM is not implemented — do not describe these numbers as field data.
 
