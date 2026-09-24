@@ -80,7 +80,9 @@ Thresholds are unchanged.
       `docs/reference/commands.md`.
 - [x] `2026-09-24-todo-authenticated-perf-routes.md` filed.
 - [x] `2026-09-24-todo-main-has-unrelated-history.md` — the default-branch switch recorded.
-- [ ] After push: dispatch the workflow on this branch three times; all pass.
+- [x] After push: dispatch the workflow on this branch three times; all pass. Dispatched on `dev`
+      at `5010ef4` after the merge instead, since that is the code the schedule runs. Runs
+      `35999595326`, `35999894314`, `36000277316` all succeeded; see "CI dispatches" below.
 
 ## Proof
 
@@ -96,6 +98,20 @@ A production build of this branch, served locally, with the script run exactly a
 Gates: `lint` (the script included), `lint:css`, `typecheck`, `format` clean; `test:unit` 80 suites,
 669 tests; `build` passes. `test:integration`, spec drift and `test:e2e` skipped, not triggered.
 
+## CI dispatches
+
+`frontend-performance` on `dev` at `5010ef4`, Lighthouse 12.8.2, performance median against a
+threshold of 70, with the three runs in brackets. Read from the run logs on 2026-09-24.
+
+| Run           | `/`             | `/login`        | `/register`     |
+| ------------- | --------------- | --------------- | --------------- |
+| `35999595326` | 96 [95, 96, 96] | 94 [94, 95, 94] | 94 [94, 97, 94] |
+| `35999894314` | 99 [79, 99, 99] | 95 [95, 95, 97] | 94 [96, 94, 93] |
+| `36000277316` | 99 [93, 99, 99] | 94 [94, 97, 94] | 93 [93, 97, 93] |
+
+The 79 in the second run is the single-run noise this change exists to absorb: the old gate would
+have reported it as the score.
+
 ## Discovered
 
 - [x] Found: `npx --yes lighthouse` was unpinned → in scope, it is D-4.
@@ -104,7 +120,7 @@ Gates: `lint` (the script included), `lint:css`, `typecheck`, `format` clean; `t
 
 ## Status
 
-**Complete pending the CI dispatches.** No application code changed; the gate now measures three
+**Complete.** The three CI dispatches passed; see "CI dispatches" above. No application code changed; the gate now measures three
 public pages on the median of three pinned Lighthouse runs, and refuses to score a page it was
 redirected to. No threshold moved.
 

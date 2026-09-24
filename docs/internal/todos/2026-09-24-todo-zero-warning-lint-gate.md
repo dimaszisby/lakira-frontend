@@ -56,10 +56,11 @@ the glob matches only files that are named as contexts.
       repointed at `.claude/rules/code-style.md`, which now holds the durable rationale.
 - [x] Found: Fast Refresh's cost was first stated as a full page reload → corrected against Next
       16's own docs before anything shipped: it re-runs the file and its importers.
-- [ ] Found: `docs/how-to/ci-cd/daily-pipeline-playbook.md` ("Coverage gates nothing. Thresholds
+- [x] Found: `docs/how-to/ci-cd/daily-pipeline-playbook.md` ("Coverage gates nothing. Thresholds
       sit at 3/2/3/3 %") and `docs/reference/commands.md` (`coverage:check` "only fails with
       `--strict`, which nothing currently passes") contradict `CLAUDE.md`, which records real
       thresholds and `coverage:check --strict` in CI since 2026-08-27 → out of scope, not fixed here.
+      Fixed in #45 (`6c8d215`); checked on `dev` at `144964a`, neither claim remains.
 
 ## Verification
 
