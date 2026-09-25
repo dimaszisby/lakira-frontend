@@ -84,3 +84,19 @@ the two places the bytes actually survived.
 green; `git diff --stat` printing `Bin` is the only signal, and it appears nowhere a gate looks. Same
 shape as the `boundaries` and OpenAPI lessons — verify the mechanism, and make sure the check's scope
 actually covers the thing being checked.
+
+## [2026-09-24] A long staging line wrapped on paste and dropped a path
+
+**Mistake**: I handed over one `! git add` naming three long paths on a single line. On paste the
+third path wrapped onto its own line, so git staged two files and zsh tried to run the third as a
+command (`permission denied`). The commit, push and PR all went through regardless, so PR #50 opened
+missing one of the three files its body described. The `--dry-run` passed because I ran the line
+as written, not as it arrived.
+
+**Rule**: one path per `! git add` line, or a directory when the whole directory belongs to the
+task. Keep every handover line short enough that it cannot wrap. A dry run proves the command, not
+the paste.
+
+**Why**: the global instructions already warn that long lines break on paste; I checked the command
+and not its length. The failure is silent: every later command succeeds, so nothing looks wrong
+until `git status` shows a leftover change.

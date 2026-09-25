@@ -128,5 +128,7 @@ Checked in the browser against the local backend:
   `setRefreshCookie` — only `/auth/login` and `/auth/refresh` did. A newly registered user's session
   therefore ended when the access token expired, and the revive route fell through to `/login`. A
   backend change, raised here because it looked like a frontend bug.
-- `src/hooks/useAuth.ts` is dead code and imports `useRouter` from `next/router`, which the App
-  Router does not have. It would not run if anything called it.
+- ~~`src/hooks/useAuth.ts` is dead code~~ **Deleted** in `cb69753` ("refactor(auth): delete
+  withAuth and the dead auth shims around it"). Checked on `dev` at `144964a`. The original note: it
+  imported `useRouter` from `next/router`, which the App Router does not have, so it would not run
+  if anything called it.
