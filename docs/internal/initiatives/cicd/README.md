@@ -12,7 +12,8 @@ This folder documents the current CI/CD setup for the Lakira Frontend repository
 Related documents:
 
 - `docs/reference/environments.md`
-- `docs/internal/initiatives/cicd/pipeline-plan.md`
+- `docs/reference/ci-pipeline/workflows.md`: what the workflows run today
+- `docs/internal/initiatives/cicd/pipeline-plan.md`: the 2026-02 rollout record
 - `docs/internal/initiatives/cicd/pipeline-checklist.md`
 - `docs/reference/ci-pipeline/backend-handoff.md`
 

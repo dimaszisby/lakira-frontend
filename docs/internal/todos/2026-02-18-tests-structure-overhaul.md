@@ -124,5 +124,6 @@ Validation snapshot (2026-02-18):
 - `docs/internal/initiatives/tests-overhaul/3-integration-tests/PLAN.md`
 - `docs/reference/components/component-testing-and-quality-gates.md`
 - `docs/internal/initiatives/cicd/README.md`
+- `docs/reference/ci-pipeline/workflows.md` (the pipeline today; supersedes the plan below as reference)
 - `docs/internal/initiatives/cicd/pipeline-plan.md`
 - `docs/internal/todos/2026-02-16-todo-cicd-overview.md`
