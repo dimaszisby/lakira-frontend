@@ -86,15 +86,7 @@ npx jest --config jest.integration.config.ts path/to/file.int.test.tsx
 
 ## What CI runs
 
-`.github/workflows/test.yml` (`frontend-ci`), on push and PR to `main` and `dev`, as a strict serial chain plus three independent jobs:
-
-```
-checks (lint, lint:css, typecheck) → unit → integration → build → e2e
-security      (independent)
-secret-scan   (independent, gitleaks)
-api-contract  (independent)
-```
-
-`.github/workflows/performance.yml` (`frontend-performance`) runs nightly at 02:00 UTC and on manual dispatch.
+[`ci-pipeline/workflows.md`](./ci-pipeline/workflows.md) is the one description of both workflows:
+jobs, order, triggers and what each runs.
 
 Before proposing a change is complete, run what `checks` runs plus the suite you touched. `/pre-push` does the whole sequence.

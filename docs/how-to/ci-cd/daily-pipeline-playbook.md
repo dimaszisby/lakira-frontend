@@ -4,29 +4,9 @@ What runs, when, and what to do when a job goes red.
 
 ## The workflows
 
-**`frontend-ci`** (`.github/workflows/test.yml`) — on push and PR to `main` and `dev`. Node from
-`.nvmrc` (24), `npm ci`.
-
-Serial chain, each gated on the last:
-
-```
-checks (lint → lint:css → typecheck) → unit → integration → build → e2e
-```
-
-`build` passes its `.next` artifact to `e2e`, which boots `npm run start` on `127.0.0.1:3000` and
-uploads Cypress videos and screenshots.
-
-Three independent jobs run alongside:
-
-| Job            | Runs                                                            |
-| -------------- | --------------------------------------------------------------- |
-| `security`     | `npm run security:scan` (lint + `npm audit --audit-level=high`) |
-| `secret-scan`  | gitleaks                                                        |
-| `api-contract` | `npm run api:spec:check` and `npm run api:types:check`          |
-
-**`frontend-performance`** (`.github/workflows/performance.yml`) — nightly at 02:00 UTC and on
-manual dispatch. Build → `perf:bundle-size` → start → `perf:lighthouse` → `perf:web-vitals`,
-uploading `reports/performance`. Thresholds live in `scripts/perf/performance-thresholds.json`.
+Which jobs run, in what order and on what: [`ci-pipeline/workflows.md`](../../reference/ci-pipeline/workflows.md).
+The short version: `checks → unit → integration → build → e2e` in series, with `api-contract`,
+`security` and `secret-scan` alongside, and `frontend-performance` nightly.
 
 ## Reproduce a failure locally
 
@@ -34,7 +14,7 @@ Match the job before debugging anything:
 
 ```bash
 # checks
-npm run lint && npm run lint:css && npm run typecheck
+npm run lint && npm run lint:css && npm run typecheck && npm run format
 
 # unit / integration
 npm run test:unit
@@ -56,7 +36,7 @@ npm run test:e2e
 | -------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `api-contract` | "generated API types are stale" | `npm run api:types:generate`, commit the result.                                                           |
 | `api-contract` | "snapshot has drifted"          | `npm run api:spec:sync`, then regenerate types. Commit both.                                               |
-| `checks`       | Passes locally, fails in CI     | Node version. CI is on 20.                                                                                 |
+| `checks`       | Passes locally, fails in CI     | Node version. CI runs the major in `.nvmrc` (24); run `nvm use`.                                           |
 | `e2e`          | Times out on first visit        | The app did not start. Check the `build` artifact uploaded and `npm run start` bound to `127.0.0.1:3000`.  |
 | `security`     | `npm audit` high finding        | Upgrade the dependency. If it cannot be upgraded, record the exception rather than lowering the threshold. |
 | `secret-scan`  | gitleaks hit                    | Rotate the credential first, then remove it from history. A revert does not un-leak it.                    |
