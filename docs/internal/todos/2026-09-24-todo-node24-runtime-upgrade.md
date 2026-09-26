@@ -89,9 +89,17 @@ skipped.
 - [x] Gates on Node 24.21.0 locally, from a fresh `npm ci` in a scratch worktree: lint, css lint,
       typecheck, unit (80 suites, 669 tests), integration (19 suites, 99 tests), build. Format on
       the working tree.
-- [ ] Gates in CI on the PR, and one `frontend-performance` dispatch on the branch.
-- [ ] Check the CI logs for the Node version actually used (the setup-node step prints it), not
-      just the green tick; and that `e2e` found the Cypress binary.
+- [x] Gates in CI on the PR, and one `frontend-performance` dispatch on the branch. Run
+      `36225877771` on `0bdac86`: all 8 jobs green. Dispatch `36225878190`: passed.
+- [x] Check the CI logs for the Node version actually used, not just the green tick; and that `e2e`
+      found the Cypress binary. Every job logged "Resolved .nvmrc as 24" and `node: v24.21.0` from
+      the runner cache, the same patch as the local gates. Zero "not yet covered by allowScripts"
+      notices in the run. `e2e`: "All specs passed".
+
+## Status
+
+**Complete.** Merged in #52 (`0bdac86`). ADR-0018 and ADR-0019 record the decisions. The backend
+still pins Node 20; its move is on the Notion page "FE message to BE".
 
 ## Proof that the allowlist does what it says
 
