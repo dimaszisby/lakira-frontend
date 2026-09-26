@@ -73,7 +73,7 @@ Worth knowing about:
 - [`docs/explanation/testing-strategy.md`](docs/explanation/testing-strategy.md) — the full pyramid.
 - [`docs/reference/components/README.md`](docs/reference/components/README.md) — UI standards, read in the order that README gives.
 - [`docs/internal/todos/`](docs/internal/todos/) — active backlogs.
-- [`docs/explanation/decisions/`](docs/explanation/decisions/) — 17 ADRs, one per file. Check **Status** before trusting one.
+- [`docs/explanation/decisions/`](docs/explanation/decisions/) — 19 ADRs, one per file. Check **Status** before trusting one.
 - [`docs/reference/commands.md`](docs/reference/commands.md) — canonical npm scripts. Do not keep a second copy elsewhere.
 
 ## Known state of the repo

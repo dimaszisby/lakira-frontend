@@ -4,8 +4,8 @@ What runs, when, and what to do when a job goes red.
 
 ## The workflows
 
-**`frontend-ci`** (`.github/workflows/test.yml`) — on push and PR to `main` and `dev`. Node 20,
-`npm ci`.
+**`frontend-ci`** (`.github/workflows/test.yml`) — on push and PR to `main` and `dev`. Node from
+`.nvmrc` (24), `npm ci`.
 
 Serial chain, each gated on the last:
 

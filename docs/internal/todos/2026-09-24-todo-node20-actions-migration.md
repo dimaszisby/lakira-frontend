@@ -69,12 +69,18 @@ rule in `.claude/rules/security.md` into an enforced one.
 - [x] Update all workflows in one change: 23 `uses:` across `test.yml` and `performance.yml`.
 - [x] `.github/dependabot.yml` for `github-actions` (D-3).
 - [x] `.claude/rules/security.md` states the pinning rule.
-- [ ] On the PR: every job green, and no Node 20 annotation in any job's summary.
-- [ ] On the PR: `e2e` downloads the `next-build` artifact that `build` uploaded (v7 upload, v8
-      download).
-- [ ] Dispatch `frontend-performance` on the branch; it passes and uploads its reports.
-- [ ] After merge: Dependabot's first run appears under Insights, Dependency graph, Dependabot, with
-      no config error.
+- [x] On the PR: every job green, and no Node 20 annotation in any job's summary. Run
+      `36093904901` on `1a3b127`: 8 of 8 green, zero Node 20 annotations; `dev` at `fc3ce5e` just
+      before (`36093164573`) still carried one.
+- [x] On the PR: `e2e` downloads the `next-build` artifact that `build` uploaded (v7 upload, v8
+      download). Same run: "Artifact download completed successfully. Total of 1 artifact(s)
+      downloaded", then `home.cy.ts` passed.
+- [x] Dispatch `frontend-performance` on the branch; it passes and uploads its reports. Run
+      `36109848705`: medians `/` 99, `/login` 97, `/register` 94; `performance-reports` uploaded.
+- [x] After merge: Dependabot's first run appears under Insights, Dependency graph, Dependabot, with
+      no config error. Run `36109876997`, 9 s after the #51 merge: success, against `dev`, with the
+      `chore(ci)` prefix and the `github-actions` group; it read each version from the trailing
+      comment and logged "No update needed" for all four, so it opened no PR.
 - [ ] Note: `ubuntu-latest` moves to Ubuntu 26 from 2026-10-19 (a CI notice on the same runs).
 
 ## Discovered
@@ -82,3 +88,13 @@ rule in `.claude/rules/security.md` into an enforced one.
 - [x] Found: `.claude/rules/security.md` said scheduled workflows run from the default branch,
       `main`. The default has been `dev` since 2026-09-24 → in scope, corrected in the same bullet
       list the pinning rule was added to.
+
+## Status
+
+**Complete.** Merged in #51 (`1a3b127`). Every job runs on Node 24 actions pinned by SHA, and
+Dependabot keeps the pins current. The `cypress/screenshots` "No files were found" warning on
+`e2e` predates this change: Cypress writes screenshots only when a test fails.
+
+**Not promoted to an ADR.** CI-only; the pinning rule lives in `.claude/rules/security.md`, next to
+the secret-scan rule it extends, and no application interface, data shape, runtime dependency or
+auth boundary changed.

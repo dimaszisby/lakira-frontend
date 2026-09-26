@@ -11,7 +11,7 @@ You diagnose CI failures for the Lakira frontend. Find the root cause and give a
 
 ## The pipeline
 
-`.github/workflows/test.yml` — `frontend-ci`, on push and PR to `main` and `dev`, Node 20, `npm ci` per job (no `node_modules` reuse across jobs), concurrency group per ref with cancel-in-progress.
+`.github/workflows/test.yml` — `frontend-ci`, on push and PR to `main` and `dev`, Node from `.nvmrc` (24) via `node-version-file`, `npm ci` per job (no `node_modules` reuse across jobs), concurrency group per ref with cancel-in-progress.
 
 ```
 checks ──► unit ──► integration ──► build ──► e2e
@@ -39,7 +39,8 @@ The chain is strictly serial, so a failure in `checks` means nothing downstream 
 
 ## CI-versus-local deltas
 
-- Node 20 in CI. Check yours with `node -v`.
+- Node 24 in CI, from `.nvmrc`; the runner picks whichever 24.x it has cached, so check the setup-node step's log for the exact version. Check yours with `node -v`.
+- Dependency install scripts run only for packages allowed in `package.json` `allowScripts` (ADR-0019). A package set to `false` is skipped silently; an unlisted one runs with an npm notice.
 - `npm ci` from the lockfile, not `npm install`. A dependency that works locally may not be in the lockfile at all.
 - No display, headless Electron for Cypress.
 - `TZ` is forced to UTC in Jest setup both places, so date bugs are *not* usually a timezone delta.
