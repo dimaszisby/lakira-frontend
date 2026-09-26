@@ -7,7 +7,8 @@ alternatives live in [`../how-to/`](../how-to/).
 
 ## Before you start
 
-- **Node 20 or newer.** CI pins Node 20; newer versions work (verified on v26).
+- **Node 24.** `.nvmrc` pins it and CI reads the same file; `nvm use` or `fnm use` picks it up.
+  Newer versions work (verified on v26), but npm warns that `engines` asks for `24.x`.
 - **Docker**, for the backend's Postgres and Redis.
 - A checkout of [`lakira-backend`](https://github.com/dimaszisby/lakira-backend) beside this one.
 

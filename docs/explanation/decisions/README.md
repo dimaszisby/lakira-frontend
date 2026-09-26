@@ -40,6 +40,8 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0015](./adr-0015-cache-keys-are-organization-scoped.md)                        | Cache keys are organization-scoped                        | Accepted       | 2026-08-29 | `ADR-004` |
 | [ADR-0016](./adr-0016-ui-primitives-conventions-ariakit-and-centralised-styling.md) | UI primitives: conventions, Ariakit, centralised styling  | Accepted       | 2026-09-11 | todo      |
 | [ADR-0017](./adr-0017-accept-the-button-contrast-deviations.md)                     | Accept the Button contrast deviations                     | Accepted       | 2026-09-20 | `D-03`    |
+| [ADR-0018](./adr-0018-node-24-runtime-pinned-in-nvmrc.md)                           | Node 24 runtime, pinned once in `.nvmrc`                  | Accepted       | 2026-09-25 | todo      |
+| [ADR-0019](./adr-0019-dependency-install-scripts-are-opt-in.md)                     | Dependency install scripts are opt-in                     | Accepted       | 2026-09-25 | todo      |
 
 ## Where the other decisions went
 

@@ -20,8 +20,8 @@ npm run dev
 
 Then open <http://localhost:3000> and register an account.
 
-Requires **Node 20** — pinned in `.nvmrc` and `.node-version`, so `nvm use` or `fnm use` picks it
-up automatically.
+Requires **Node 24**, pinned in `.nvmrc`, so `nvm use` or `fnm use` picks it up automatically. CI
+reads the same file. See [ADR-0018](docs/explanation/decisions/adr-0018-node-24-runtime-pinned-in-nvmrc.md).
 
 `.env.example` points at a backend on `http://localhost:4000/api/v1`, so you need
 [`lakira-backend`](https://github.com/dimaszisby/lakira-backend) running locally. See
