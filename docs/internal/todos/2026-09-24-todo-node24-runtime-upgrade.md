@@ -96,11 +96,6 @@ skipped.
       the runner cache, the same patch as the local gates. Zero "not yet covered by allowScripts"
       notices in the run. `e2e`: "All specs passed".
 
-## Status
-
-**Complete.** Merged in #52 (`0bdac86`). ADR-0018 and ADR-0019 record the decisions. The backend
-still pins Node 20; its move is on the Notion page "FE message to BE".
-
 ## Proof that the allowlist does what it says
 
 Both runs: Node 24.21.0, fresh `npm ci`, empty `CYPRESS_CACHE_FOLDER`.
@@ -118,3 +113,9 @@ The first run is what exposed the wrong reading of the man page.
 - [x] Found: `docs/internal/initiatives/cicd/pipeline-plan.md` says "Setup Node 20" seven times →
       out of scope: a plan document, already tracked for a move to `docs/reference/` by
       `2026-09-19-todo-pipeline-plan-is-reference-material.md`, which should re-check versions then.
+
+## Status
+
+**Complete.** Merged in #52 (`0bdac86`). ADR-0018 and ADR-0019 record the decisions. The backend
+moved to Node 24 in lakira-backend #113 (`93c7fa6`, 2026-09-25), so both repos run one runtime; the
+Notion record "Move the runtime off Node 20" is closed.
