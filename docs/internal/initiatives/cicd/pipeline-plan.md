@@ -1,5 +1,11 @@
 # Lakira Frontend - GitHub Actions Pipeline Plan
 
+> **Superseded as reference on 2026-09-26** by
+> [`docs/reference/ci-pipeline/workflows.md`](../../../reference/ci-pipeline/workflows.md), which is
+> checked against the workflows. This file is the record of the 2026-02 rollout and is left as
+> written; several details below no longer hold (Node 20, Codecov, non-blocking lint warnings, the
+> gitleaks action).
+
 ## 1. Purpose
 
 This document defines the implemented GitHub Actions pipelines in this FE repo.

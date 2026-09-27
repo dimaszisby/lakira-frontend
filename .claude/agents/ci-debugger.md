@@ -11,7 +11,7 @@ You diagnose CI failures for the Lakira frontend. Find the root cause and give a
 
 ## The pipeline
 
-`.github/workflows/test.yml` — `frontend-ci`, on push and PR to `main` and `dev`, Node from `.nvmrc` (24) via `node-version-file`, `npm ci` per job (no `node_modules` reuse across jobs), concurrency group per ref with cancel-in-progress.
+Full description: `docs/reference/ci-pipeline/workflows.md`. `.github/workflows/test.yml` — `frontend-ci`, on push and PR to `main` and `dev`, Node from `.nvmrc` (24) via `node-version-file`, `npm ci` per job (no `node_modules` reuse across jobs), concurrency group per ref with cancel-in-progress.
 
 ```
 checks ──► unit ──► integration ──► build ──► e2e

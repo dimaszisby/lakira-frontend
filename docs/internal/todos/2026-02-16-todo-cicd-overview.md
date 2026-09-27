@@ -91,6 +91,7 @@ Frontend CI has been expanded to a gated chain in `.github/workflows/test.yml` (
 
 - `docs/explanation/documentation-standards.md`
 - `docs/internal/initiatives/cicd/README.md`
+- `docs/reference/ci-pipeline/workflows.md` (the pipeline today; supersedes the plan below as reference)
 - `docs/internal/initiatives/cicd/pipeline-plan.md`
 - `docs/reference/environments.md`
 - `docs/reference/ci-pipeline/backend-handoff.md`
