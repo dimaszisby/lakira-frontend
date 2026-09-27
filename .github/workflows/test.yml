@@ -17,7 +17,7 @@ concurrency:
 jobs:
   checks:
     name: Static checks
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 15
     steps:
       - name: Checkout
@@ -49,7 +49,7 @@ jobs:
 
   unit:
     name: Unit tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: checks
     timeout-minutes: 20
     steps:
@@ -84,7 +84,7 @@ jobs:
 
   integration:
     name: Integration tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: unit
     timeout-minutes: 20
     steps:
@@ -105,7 +105,7 @@ jobs:
 
   build:
     name: Build
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: integration
     timeout-minutes: 20
     steps:
@@ -134,7 +134,7 @@ jobs:
 
   e2e:
     name: E2E tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     needs: build
     timeout-minutes: 30
     env:
@@ -206,7 +206,7 @@ jobs:
 
   api-contract:
     name: API Contract Drift
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     steps:
       - name: Checkout
@@ -231,7 +231,7 @@ jobs:
 
   security:
     name: Security Scan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 20
     steps:
       - name: Checkout
@@ -254,7 +254,7 @@ jobs:
   # action code runs with this job's token. See .claude/rules/security.md.
   secret-scan:
     name: Secret Scan
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
     timeout-minutes: 10
     permissions:
       contents: read
