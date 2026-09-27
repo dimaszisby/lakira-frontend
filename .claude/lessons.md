@@ -116,3 +116,21 @@ change at all; a red `api-contract` alone means "sync the contract", not "this P
 **Why**: the PR run tests the branch at one moment against the backend as it was then. The `dev`
 run is the first to test the merged result, and for `api-contract` the only one that sees the
 backend as it is now.
+
+## [2026-09-28] A realistic fake token in a test tripped the secret scan
+
+**Mistake**: The org-switcher integration test used a JWT-shaped fixture,
+`header.<base64 JSON>.signature`, assigned to `NEW_TOKEN`. gitleaks' `generic-api-key` rule
+flagged it (entropy 4.85) and failed `secret-scan` on the PR. Nothing real leaked, but the scan
+covers full history, so fixing it in a follow-up commit would have left the string in `dev` and
+failed every later scan.
+
+**Rule**: a test value that stands in for a credential is plain and low-entropy
+(`"switched-session-token"`) unless the code under test parses it. If the test needs a real JWT
+shape, build it at runtime from parts rather than writing the encoded string. When the scan does
+fire on an unmerged branch, amend the commit that introduced it; do not add a `.gitleaksignore`
+entry, of which this repo has none.
+
+**Why**: the secret-scan hardening lesson was that a low-entropy fake passes and a random one is
+caught. That cuts both ways: a realistic-looking fixture is exactly what the scan exists to catch,
+and it cannot tell a test from a leak.

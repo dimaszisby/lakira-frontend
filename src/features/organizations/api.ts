@@ -4,7 +4,13 @@ import type ApiResponse from "@/types/generics/ApiResponse";
 import { unwrap } from "@/types/generics/ApiResponse";
 import type { RequestOpts } from "@/types/generics/RequestOpts";
 
-import type { InvitableRole, Member, MemberRole, MembersResponse } from "./types";
+import type {
+  InvitableRole,
+  Member,
+  MemberRole,
+  MembersResponse,
+  UserOrganizationsResponse,
+} from "./types";
 
 /**
  * Organization membership calls.
@@ -68,4 +74,27 @@ export const acceptInvite = (token: string, opts?: RequestOpts) =>
     () =>
       api.post<ApiResponse<{ message?: string }>>("/invites/accept", { token }, opts).then(unwrap),
     "acceptInvite",
+  );
+
+/** The organizations the signed-in user belongs to, oldest membership first. */
+export const listMyOrganizations = (opts?: RequestOpts) =>
+  withApiErrorHandling(
+    () => api.get<ApiResponse<UserOrganizationsResponse>>("/organizations", opts).then(unwrap),
+    "listMyOrganizations",
+  );
+
+/**
+ * Move the session to another organization.
+ *
+ * The backend checks the membership (403 otherwise), returns a new access token
+ * carrying the new `organizationId` claim, and sets a fresh refresh cookie that
+ * the proxy persists. Storing the token is the caller's job.
+ */
+export const switchOrganization = (organizationId: string, opts?: RequestOpts) =>
+  withApiErrorHandling(
+    () =>
+      api
+        .post<ApiResponse<{ token: string }>>("/auth/switch-org", { organizationId }, opts)
+        .then(unwrap),
+    "switchOrganization",
   );

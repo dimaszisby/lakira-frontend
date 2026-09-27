@@ -78,6 +78,7 @@ Backend rate limits you will hit: 100/15min per IP globally, 50/15min per user, 
 - One hook file per operation, named `<operation>.<kind>.ts`.
 - Pass `signal` through to axios via `RequestOpts` so React Query can cancel in-flight requests.
 - Anything that scopes to a tenant, user, or filter set must have that in the key. A missing scope in a cache key is a cross-account data leak, not a staleness bug.
+- Changing the active organization reloads the document (`hardNavigate`), never `router.push` or `router.refresh`: a full load is the only thing that empties every client cache of the previous tenant. See ADR-0020.
 
 ## The contract
 
