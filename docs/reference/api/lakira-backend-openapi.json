@@ -2199,6 +2199,75 @@
         ],
         "type": "object"
       },
+      "UserOrganization": {
+        "properties": {
+          "isCurrent": {
+            "description": "True for the organization the presented access token is scoped to.",
+            "example": true,
+            "type": "boolean"
+          },
+          "joinedAt": {
+            "example": "2025-01-15T09:30:00Z",
+            "format": "date-time",
+            "type": "string"
+          },
+          "name": {
+            "example": "Acme",
+            "type": "string"
+          },
+          "organizationId": {
+            "$ref": "#/components/schemas/Uuid"
+          },
+          "role": {
+            "enum": [
+              "owner",
+              "admin",
+              "member"
+            ],
+            "example": "owner",
+            "type": "string"
+          },
+          "slug": {
+            "example": "acme",
+            "type": "string"
+          }
+        },
+        "required": [
+          "organizationId",
+          "name",
+          "slug",
+          "role",
+          "joinedAt",
+          "isCurrent"
+        ],
+        "type": "object"
+      },
+      "UserOrganizationListResponse": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/SuccessResponse"
+          },
+          {
+            "properties": {
+              "data": {
+                "properties": {
+                  "organizations": {
+                    "items": {
+                      "$ref": "#/components/schemas/UserOrganization"
+                    },
+                    "type": "array"
+                  }
+                },
+                "required": [
+                  "organizations"
+                ],
+                "type": "object"
+              }
+            },
+            "type": "object"
+          }
+        ]
+      },
       "UserResponse": {
         "allOf": [
           {
@@ -5302,6 +5371,38 @@
         "summary": "Get trend data for a specific metric",
         "tags": [
           "Trends"
+        ]
+      }
+    },
+    "/organizations": {
+      "get": {
+        "description": "Returns the organizations the authenticated user holds an active membership in, oldest membership first, with the caller's role in each. `isCurrent` marks the organization the access token is scoped to; pass any listed `organizationId` to `POST /auth/switch-org`. Scoped to the caller: it takes no parameters and never lists another user's organizations.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOrganizationListResponse"
+                }
+              }
+            },
+            "description": "The caller's organizations"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "List the caller's organizations",
+        "tags": [
+          "Organizations"
         ]
       }
     },

@@ -1932,6 +1932,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/organizations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the caller's organizations
+         * @description Returns the organizations the authenticated user holds an active membership in, oldest membership first, with the caller's role in each. `isCurrent` marks the organization the access token is scoped to; pass any listed `organizationId` to `POST /auth/switch-org`. Scoped to the caller: it takes no parameters and never lists another user's organizations.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The caller's organizations */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserOrganizationListResponse"];
+                    };
+                };
+                401: components["responses"]["UnauthorizedError"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/organizations/{id}/invites": {
         parameters: {
             query?: never;
@@ -2873,6 +2914,33 @@ export interface components {
             updatedAt: string;
             /** @example testuser */
             username: string;
+        };
+        UserOrganization: {
+            /**
+             * @description True for the organization the presented access token is scoped to.
+             * @example true
+             */
+            isCurrent: boolean;
+            /**
+             * Format: date-time
+             * @example 2025-01-15T09:30:00Z
+             */
+            joinedAt: string;
+            /** @example Acme */
+            name: string;
+            organizationId: components["schemas"]["Uuid"];
+            /**
+             * @example owner
+             * @enum {string}
+             */
+            role: "owner" | "admin" | "member";
+            /** @example acme */
+            slug: string;
+        };
+        UserOrganizationListResponse: components["schemas"]["SuccessResponse"] & {
+            data?: {
+                organizations: components["schemas"]["UserOrganization"][];
+            };
         };
         UserResponse: components["schemas"]["SuccessResponse"] & {
             data?: components["schemas"]["User"];
