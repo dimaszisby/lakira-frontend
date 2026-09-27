@@ -81,7 +81,8 @@ rule in `.claude/rules/security.md` into an enforced one.
       no config error. Run `36109876997`, 9 s after the #51 merge: success, against `dev`, with the
       `chore(ci)` prefix and the `github-actions` group; it read each version from the trailing
       comment and logged "No update needed" for all four, so it opened no PR.
-- [ ] Note: `ubuntu-latest` moves to Ubuntu 26 from 2026-10-19 (a CI notice on the same runs).
+- [x] Note: `ubuntu-latest` moves to Ubuntu 26 from 2026-10-19 (a CI notice on the same runs).
+      Handled separately: `2026-09-27-todo-pin-ubuntu-runner.md`.
 
 ## Discovered
 

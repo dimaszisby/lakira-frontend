@@ -11,7 +11,7 @@ This page is the one description of the pipeline. What to do when a job goes red
 
 | Setting         | Value                                                                                                                                                          |
 | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Runner          | `ubuntu-latest`                                                                                                                                                |
+| Runner          | `ubuntu-26.04`, pinned; not `ubuntu-latest`. Moving to the next Ubuntu is a deliberate PR, like a Node major.                                                  |
 | Node            | `setup-node` with `node-version-file: .nvmrc` (24), `cache: npm`. See [ADR-0018](../../explanation/decisions/adr-0018-node-24-runtime-pinned-in-nvmrc.md).     |
 | Install         | `npm ci` in every job; `node_modules` is never shared between jobs                                                                                             |
 | Install scripts | Only packages allowed in `package.json` `allowScripts` run one. See [ADR-0019](../../explanation/decisions/adr-0019-dependency-install-scripts-are-opt-in.md). |
@@ -81,5 +81,5 @@ runs, a redirect fails the route, pinned Lighthouse) is in `.claude/rules/perfor
 ## Changing a workflow
 
 - Update this page in the same change.
-- Pin any new action by commit SHA, never by tag.
+- Pin any new action by commit SHA, never by tag, and any new job's runner to the same `ubuntu-26.04` as the others.
 - A job that needs a secret is a change of stance, since no job has one today; say so in the PR.
