@@ -100,3 +100,19 @@ the paste.
 **Why**: the global instructions already warn that long lines break on paste; I checked the command
 and not its length. The failure is silent: every later command succeeds, so nothing looks wrong
 until `git status` shows a leftover change.
+
+## [2026-09-27] A merge was reported verified before its `dev` run finished
+
+**Mistake**: After #52 merged I read the PR's CI run in detail, saw the post-merge `dev` push run
+still in progress, and reported the merge verified anyway. That run went red on `api-contract`: the
+backend had shipped `GET /organizations` in the meantime. The failure surfaced a day later on the
+next PR, where it read at first like that PR's fault.
+
+**Rule**: a merge is verified when the `dev` push run for the merge commit has finished, not when
+the PR run is green. If it is still running, say so and check it before the next task starts.
+`api-contract` compares against the backend's live `dev`, so it can fail on `dev` with no frontend
+change at all; a red `api-contract` alone means "sync the contract", not "this PR broke something".
+
+**Why**: the PR run tests the branch at one moment against the backend as it was then. The `dev`
+run is the first to test the merged result, and for `api-contract` the only one that sees the
+backend as it is now.
