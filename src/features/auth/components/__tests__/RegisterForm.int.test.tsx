@@ -18,6 +18,7 @@ jest.mock("next/navigation", () => ({
 
 const REGISTER_ENDPOINT = "/api/proxy/auth/register";
 const TEST_EMAIL = "john@example.com";
+const FIXTURE_TIMESTAMP = "2026-01-01T00:00:00.000Z";
 
 describe("RegisterForm integration", () => {
   beforeEach(() => {
@@ -45,8 +46,8 @@ describe("RegisterForm integration", () => {
               email: TEST_EMAIL,
               role: "user",
               isPublicProfile: true,
-              createdAt: "2026-01-01T00:00:00.000Z",
-              updatedAt: "2026-01-01T00:00:00.000Z",
+              createdAt: FIXTURE_TIMESTAMP,
+              updatedAt: FIXTURE_TIMESTAMP,
             },
           },
         });
@@ -95,6 +96,58 @@ describe("RegisterForm integration", () => {
     expect(await screen.findByText(/passwords do not match/i)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /register/i })).toBeDisabled();
   });
+
+  it.each([
+    ["the session cookie cannot be stored", { token: "token-123" }, 400],
+    ["the response carries no token", {}, 200],
+  ])(
+    "shows an error and does not redirect when registration succeeds but %s",
+    async (_label, tokenField, sessionStatus) => {
+      const user = userEvent.setup();
+      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+      try {
+        server.use(
+          http.post(REGISTER_ENDPOINT, () =>
+            HttpResponse.json(
+              {
+                status: "success",
+                data: {
+                  ...tokenField,
+                  user: {
+                    id: "user-1",
+                    username: "john",
+                    email: TEST_EMAIL,
+                    role: "user",
+                    isPublicProfile: true,
+                    createdAt: FIXTURE_TIMESTAMP,
+                    updatedAt: FIXTURE_TIMESTAMP,
+                  },
+                },
+              },
+              { status: 201 },
+            ),
+          ),
+          http.post("/api/auth/session", () =>
+            HttpResponse.json({ error: "Invalid token" }, { status: sessionStatus }),
+          ),
+        );
+
+        renderWithProviders(<RegisterForm />);
+
+        await user.type(screen.getByLabelText(/username/i), "john");
+        await user.type(screen.getByLabelText(/email/i), TEST_EMAIL);
+        await user.type(screen.getByPlaceholderText(/enter your password/i), "password123");
+        await user.type(screen.getByPlaceholderText(/confirm your password/i), "password123");
+        await user.click(screen.getByRole("button", { name: /register/i }));
+
+        expect(await screen.findByRole("alert")).toBeInTheDocument();
+        expect(mockPush).not.toHaveBeenCalled();
+      } finally {
+        consoleErrorSpy.mockRestore();
+      }
+    },
+  );
 
   it("shows error feedback and does not redirect when register fails", async () => {
     const user = userEvent.setup();

@@ -18,6 +18,7 @@ jest.mock("next/navigation", () => ({
 
 const LOGIN_ENDPOINT = "/api/proxy/auth/login";
 const TEST_EMAIL = "john@example.com";
+const FIXTURE_TIMESTAMP = "2026-01-01T00:00:00.000Z";
 
 describe("LoginForm integration", () => {
   beforeEach(() => {
@@ -46,8 +47,8 @@ describe("LoginForm integration", () => {
               email,
               role: "user",
               isPublicProfile: true,
-              createdAt: "2026-01-01T00:00:00.000Z",
-              updatedAt: "2026-01-01T00:00:00.000Z",
+              createdAt: FIXTURE_TIMESTAMP,
+              updatedAt: FIXTURE_TIMESTAMP,
             },
           },
         });
@@ -75,6 +76,56 @@ describe("LoginForm integration", () => {
     });
     expect(sessionPayloadSpy).toHaveBeenCalledWith({ token: "token-123" });
   });
+
+  it.each([
+    ["the session cookie cannot be stored", { token: "token-123" }, 400],
+    ["the response carries no token", {}, 200],
+  ])(
+    "shows an error and does not redirect when login succeeds but %s",
+    async (_label, tokenField, sessionStatus) => {
+      const user = userEvent.setup();
+      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+      try {
+        server.use(
+          http.post(LOGIN_ENDPOINT, () =>
+            HttpResponse.json(
+              {
+                status: "success",
+                data: {
+                  ...tokenField,
+                  user: {
+                    id: "user-1",
+                    username: "john",
+                    email: TEST_EMAIL,
+                    role: "user",
+                    isPublicProfile: true,
+                    createdAt: FIXTURE_TIMESTAMP,
+                    updatedAt: FIXTURE_TIMESTAMP,
+                  },
+                },
+              },
+              { status: 200 },
+            ),
+          ),
+          http.post("/api/auth/session", () =>
+            HttpResponse.json({ error: "Invalid token" }, { status: sessionStatus }),
+          ),
+        );
+
+        renderWithProviders(<LoginForm />);
+
+        await user.type(screen.getByLabelText(/email/i), TEST_EMAIL);
+        await user.type(screen.getByPlaceholderText(/enter your password/i), "password123");
+        await user.click(screen.getByRole("button", { name: /login/i }));
+
+        expect(await screen.findByRole("alert")).toBeInTheDocument();
+        expect(mockPush).not.toHaveBeenCalled();
+      } finally {
+        consoleErrorSpy.mockRestore();
+      }
+    },
+  );
 
   it("shows error feedback and does not redirect when login fails", async () => {
     const user = userEvent.setup();
