@@ -1,4 +1,4 @@
-import { persistSessionToken } from "@/features/shared/session.client";
+import { establishSession, persistSessionToken } from "@/features/shared/session.client";
 
 const mockFetch = jest.fn<Promise<Pick<Response, "ok">>, Parameters<typeof fetch>>();
 
@@ -41,5 +41,30 @@ describe("persistSessionToken", () => {
     await expect(persistSessionToken(null)).resolves.toBe(true);
 
     expect(mockFetch).toHaveBeenCalledWith("/api/auth/session", { method: "DELETE" });
+  });
+});
+
+describe("establishSession", () => {
+  beforeEach(() => {
+    mockFetch.mockReset();
+    global.fetch = mockFetch as unknown as typeof fetch;
+  });
+
+  it("resolves when the token is stored", async () => {
+    mockFetch.mockResolvedValue({ ok: true });
+
+    await expect(establishSession("a.b.c")).resolves.toBeUndefined();
+  });
+
+  it("rejects when the server refuses the token", async () => {
+    mockFetch.mockResolvedValue({ ok: false });
+
+    await expect(establishSession("a.b.c")).rejects.toThrow("The session could not be stored.");
+  });
+
+  it("rejects without calling the server when there is no token", async () => {
+    await expect(establishSession(undefined)).rejects.toThrow("The session could not be stored.");
+
+    expect(mockFetch).not.toHaveBeenCalled();
   });
 });

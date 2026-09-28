@@ -25,3 +25,18 @@ export async function persistSessionToken(token: string | null): Promise<boolean
     return false;
   }
 }
+
+/**
+ * Store a freshly issued token as the session, or fail.
+ *
+ * For login and register, which must not send the user into the app without a
+ * session cookie: the app would render signed in, then fail on its first
+ * request. Throwing here fails the mutation instead, so the form shows its
+ * error and stays put. A missing token is a failure too; the contract requires
+ * one on both responses.
+ */
+export async function establishSession(token: string | undefined): Promise<void> {
+  if (!token || !(await persistSessionToken(token))) {
+    throw new Error("The session could not be stored.");
+  }
+}
