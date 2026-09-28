@@ -5,6 +5,7 @@ import { metricCategoriesKeys } from "@/features/metric-categories/keys";
 import { metricLogsKeys } from "@/features/metric-logs/keys";
 import { metricSettingsKeys } from "@/features/metric-settings/keys";
 import { metricsKeys } from "@/features/metrics/keys";
+import { organizationKeys } from "@/features/organizations/keys";
 
 /**
  * Tenant isolation for every TanStack Query cache key.
@@ -62,6 +63,10 @@ const scopedKeys: Array<{
   { name: "viz.all", build: (o) => vizKeys.all(o) },
   { name: "viz.byMetric", build: (o) => vizKeys.byMetric(o, "m-1", VIZ_QUERY) },
   { name: "viz.dashboard", build: (o) => vizKeys.dashboard(o, VIZ_QUERY) },
+
+  { name: "organizations.all", build: (o) => organizationKeys.all(o) },
+  { name: "organizations.members", build: (o) => organizationKeys.members(o) },
+  { name: "organizations.mine", build: (o) => organizationKeys.mine(o) },
 ];
 
 describe("every org-scoped key differs across organizations", () => {
@@ -94,6 +99,7 @@ describe("key layout", () => {
     ["logs", metricLogsKeys.all(ORG_A), "logs"],
     ["settings", metricSettingsKeys.all(ORG_A), "metric-settings"],
     ["viz", vizKeys.all(ORG_A), "viz"],
+    ["organizations", organizationKeys.all(ORG_A), "organizations"],
   ])("%s keys are [resource, organizationId, ...]", (_label, key, root) => {
     expect(key[0]).toBe(root);
     expect(key[1]).toBe(ORG_A);

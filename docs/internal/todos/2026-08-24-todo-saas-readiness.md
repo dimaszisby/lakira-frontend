@@ -227,7 +227,7 @@ therefore duplicated, with a test enforcing that it matches `PROTECTED_APP_MATCH
   pages carry the same warning and none disables it, so this matches the convention rather than
   diverging from it. Lint goes 41 -> 44 for that reason alone; all new files are warning-free.
 
-## Phase 6 — Multi-tenancy UI (org scoping + members/invites done; switcher unblocked, not built)
+## Phase 6 — Multi-tenancy UI (org scoping + members/invites done; switcher built, two-org switch unverified live)
 
 ### Cache-key tenant scoping (the safety-critical part) — done
 
@@ -292,15 +292,17 @@ There were **no** tests touching any key factory or `cache.ts` before this.
       as Phase 5b's verify-email. Unit tests prove the keys differ and the live tests prove
       backend isolation, but the in-session switch is unexercised.
 
-### Not built (unblocked 2026-09-26)
+### Built, not verified live (unblocked 2026-09-26)
 
 - [ ] **Organization switcher.** Was blocked: no `GET /organizations`, and `User` carries no
       memberships, so the frontend could not discover the ids `/auth/switch-org` requires.
       Unblocked by backend #114 (`afac3f4`): `GET /organizations` returns the caller's
       `UserOrganization[]` (`organizationId`, `name`, `slug`, `role`, `joinedAt`, `isCurrent`).
       Contract synced into `docs/reference/api/lakira-backend-openapi.json` and the generated types
-      on `chore/sync-api-types`. The switcher itself is unbuilt and needs its own plan; the
-      one-user-two-orgs switch also still depends on the emailed-tokens backend request.
+      on `chore/sync-api-types`. Built on `feat/org-switcher` (kit:
+      `docs/internal/initiatives/org-switcher/`). The one-user-two-orgs switch is still unverified
+      live: a second membership needs an invite, which depends on the emailed-tokens backend
+      request. Stays open until that live check.
 
 ## Phase 7 — Testing, gates, CI/CD, deploy (gates done; deploy deferred)
 

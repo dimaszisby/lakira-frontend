@@ -100,6 +100,20 @@ Forgetting this produces a silent `401` rather than an error — the page render
 failing loudly. Two of the four logged incidents trace back to this class of bug; see
 [`../internal/incidents/`](../internal/incidents/).
 
+## Switching organization
+
+`OrganizationSwitcher` on `/organization` calls `POST /api/proxy/auth/switch-org` with the target
+`organizationId`. That path is secured, so the proxy requires a session as for any other. The
+backend checks the membership (403 otherwise), returns a new access token in the body, and sets a
+new refresh cookie, which the proxy persists as it does for every response.
+
+The client then stores the token through `/api/auth/session` and loads `/dashboard` as a full
+document, never a client-side navigation: that is what empties every client cache of the previous
+organization ([ADR-0020](../explanation/decisions/adr-0020-changing-organization-reloads-the-document.md)).
+If storing the token fails, it loads `/api/auth/revive?returnUrl=/dashboard` instead, which redeems
+the new refresh cookie into a matching session or signs the user out, so the browser is never left
+with one organization's access token and another's refresh cookie.
+
 ## Route map
 
 Two route groups: `(app)` for the authenticated shell, `(auth)` for login and register.

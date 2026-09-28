@@ -1,3 +1,5 @@
+import type { components } from "@/types/api/generated/lakira-backend";
+
 /**
  * Membership shapes, mirroring the `Member` schema in
  * `docs/reference/api/lakira-backend-openapi.json`. Verified against a live
@@ -24,4 +26,18 @@ export type Member = {
 
 export type MembersResponse = {
   members: Member[];
+};
+
+/**
+ * One of the organizations the signed-in user belongs to, from
+ * `GET /organizations`.
+ *
+ * Aliased from the generated schema rather than written by hand, so a backend
+ * change to the shape surfaces as a type error at the next sync. See D-05 in
+ * `docs/internal/initiatives/org-switcher/decisions.md`.
+ */
+export type UserOrganization = components["schemas"]["UserOrganization"];
+
+export type UserOrganizationsResponse = {
+  organizations: UserOrganization[];
 };

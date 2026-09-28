@@ -19,6 +19,10 @@ import { createContext, useContext } from "react";
  * not identify its tenant. Reading the claim on the server makes the value
  * present on first render instead, and it is the same claim the backend
  * authorizes against.
+ *
+ * The value never changes while the page is alive: switching organization
+ * reloads the document, so a new provider value always comes with empty client
+ * caches. See ADR-0020.
  */
 const OrganizationContext = createContext<string | null>(null);
 

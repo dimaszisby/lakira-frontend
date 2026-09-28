@@ -2,11 +2,11 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSetAtom } from "jotai";
 
 import { loginUser } from "@/api/auth.api";
+import { persistSessionToken } from "@/features/shared/session.client";
 import { userAtom } from "@/src/services/state/atoms";
 import type { AuthResponseDTO, LoginRequestDTO } from "@/types/dtos/user.dto";
 
 import { setCachedUserProfile } from "../cache";
-import { persistSessionToken } from "../session.client";
 
 export function useLoginUserMutation(
   onSuccess?: (response: AuthResponseDTO) => void | Promise<void>,

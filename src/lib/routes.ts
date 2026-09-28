@@ -71,6 +71,14 @@ export const authRoutes = {
   account: () => "/account",
   organization: () => "/organization",
   afterAuth: (returnUrl?: string | null) => resolveReturnUrl(returnUrl) ?? "/dashboard",
+  /**
+   * Redeem the refresh cookie into a new session, then continue to `returnUrl`.
+   * A route handler, not a page: it must be reached by a full navigation.
+   */
+  revive: (returnUrl?: string | null) => {
+    const safeReturnUrl = resolveReturnUrl(returnUrl);
+    return buildPath("/api/auth/revive", safeReturnUrl ? { returnUrl: safeReturnUrl } : undefined);
+  },
   forgotPassword: () => "/forgot-password",
   // Token is carried in the query string because it arrives from an emailed
   // link. It is single-use and short-lived; the backend rejects a spent one.

@@ -42,8 +42,18 @@ the check: it runs every job on the new image before anything merges.
 - [x] `runs-on: ubuntu-26.04` in all 8 `test.yml` jobs and the `performance.yml` job.
 - [x] `docs/reference/ci-pipeline/workflows.md`: runner row, and the rule for new jobs.
 - [x] `2026-09-24-todo-node20-actions-migration.md`: its Ubuntu note points here.
-- [ ] Draft PR: all 8 `frontend-ci` jobs green on 26.04, with the runner image named in each job's
-      "Set up job" log, not just the green tick.
-- [ ] Dispatch `frontend-performance` on the branch; it passes on 26.04.
-- [ ] `e2e` in particular: Cypress needs system libraries a new image may name differently.
-- [ ] No "ubuntu-latest label will migrate" notice on any job.
+- [x] Draft PR: all 8 `frontend-ci` jobs green on 26.04, with the runner image named in each job's
+      "Set up job" log, not just the green tick. Run `36333848938` on `f691afd`: every job logged
+      `Image: ubuntu-26.04`, image version 20260920.143.
+- [x] Dispatch `frontend-performance` on the branch; it passes on 26.04. Run `36333848895`: medians
+      `/` 96, `/login` 97, `/register` 94, in line with 24.04.
+- [x] `e2e` in particular: Cypress needs system libraries a new image may name differently. It
+      started and "All specs passed".
+- [x] No "ubuntu-latest label will migrate" notice on any job. The only annotation left is the
+      known `cypress/screenshots` warning.
+
+## Status
+
+**Complete.** Merged in #55 (`f691afd`); the `dev` run on the merge commit (`36334637117`) passed all
+8 jobs on 26.04. Not promoted to an ADR: CI configuration, recorded here and in
+`docs/reference/ci-pipeline/workflows.md`.
