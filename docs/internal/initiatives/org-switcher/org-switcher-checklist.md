@@ -41,11 +41,9 @@
 
 ## Phase 3 — Live check and docs
 
-- [ ] AC-11 against a local backend — **blocked**: the running backend container (`node_app`,
-      port 8001) was built 2026-09-13, before lakira-backend #114, and answers `GET /organizations`
-      with 404. Needs the container rebuilt from backend `dev`; not done here because it restarts
-      shared local infrastructure. Expected against that old backend, from the tests rather than a
-      browser: the 404 is a list error, so the switcher shows its error state with "Try again".
+- [x] AC-11 against a local backend — done 2026-09-29, evidence under Acceptance. Was blocked on
+      the `node_app` container, built 2026-09-13 before lakira-backend #114; rebuilt from backend
+      `dev` (`9f51457`) with Mailpit, `docker compose up -d --build mailpit app`.
 - [x] `docs/reference/routes-and-proxy.md` — "Switching organization" section
 - [x] `src/features/organizations/context.tsx` — the comment points at ADR-0020
 - [x] `.claude/rules/data-access.md` — tenant changes reload the document, ADR-0020
@@ -66,6 +64,10 @@
 - [x] Found: audit finding "[P1] Session-persistence failures are swallowed" (login and register)
       was tracked nowhere → out of scope, filed as
       `docs/internal/todos/2026-09-28-todo-login-ignores-session-persist-failure.md`
+- [x] Found, during the AC-5 check: `/invites/accept` and `/verify-email` never leave their
+      pending state under `next dev`, although the backend call succeeds (Strict Mode detaches the
+      mutation observer) → out of scope, filed as
+      `docs/internal/todos/2026-09-29-todo-token-panels-stall-in-strict-mode.md`
 
 ## Acceptance
 
@@ -73,16 +75,25 @@
 - [x] AC-2 — integration test (text, not class) · same file
 - [x] AC-3 — integration test, queried by accessible name · same file
 - [x] AC-4 — integration test: request body, `/api/auth/session` body, `hardNavigate("/dashboard")`
-- [ ] AC-5 — **nobody can check it live yet**: needs a second membership (see plan, Out of scope).
-      Covered by AC-4's test up to the navigation; the layout reading the new claim is existing,
-      tested behaviour.
+- [x] AC-5 — **I checked it live**, 2026-09-29, local backend `dev` at `9f51457`, `next dev`.
+      User B (owner of `orgcheckb`) was invited into `orgchecka` from `/organization`, the token
+      read from Mailpit, and the invite accepted through `/invites/accept`. On `/organization` B
+      saw both organizations, `orgcheckb` as current. "Switch to orgchecka" sent
+      `POST /api/proxy/auth/switch-org` 200, then `POST /api/auth/session` 200, then a full
+      document load of `/dashboard` (navigation entry type `navigate`). Back on `/organization`,
+      `orgchecka` read "Member · Current" and the member list was fetched for its id
+      (`GET …/organizations/9a6b36ed-…/members` 200). Switching back by keyboard (button focused
+      by script, then Enter) also landed in `orgcheckb`. Accepting the invite hit the stall filed
+      under Discovered; the membership was created regardless.
 - [x] AC-6 — integration test: session write rejected, navigation goes to the revive route
 - [x] AC-7 — integration test: 403 and network failure, `role="alert"`, no navigation, no session
       write
 - [x] AC-8 — integration test: every button disabled while pending and after success
 - [x] AC-9 — integration test: loading, error with a retry that recovers, one organization
 - [x] AC-10 — jest-axe in five states · same file
-- [ ] AC-11 — blocked, see Phase 3
+- [x] AC-11 — **I checked it live**, 2026-09-29, same stack. User A, one membership, on
+      `/organization`: "You belong to one organization.", `orgchecka` marked "Owner · Current", no
+      switch button.
 
 ## Gates
 

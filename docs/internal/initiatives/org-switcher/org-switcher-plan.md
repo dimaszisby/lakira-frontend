@@ -1,6 +1,6 @@
 # Organization switcher — Plan
 
-- **Status:** Approved
+- **Status:** Done
 - **Appetite:** 2 days — past that, cut scope rather than extend
 - **Date:** 2026-09-27
 
