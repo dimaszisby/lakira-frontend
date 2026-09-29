@@ -134,3 +134,22 @@ entry, of which this repo has none.
 **Why**: the secret-scan hardening lesson was that a low-entropy fake passes and a random one is
 caught. That cuts both ways: a realistic-looking fixture is exactly what the scan exists to catch,
 and it cannot tell a test from a leak.
+
+## [2026-09-29] A handover with `cd` moved the user's shell into the other repo
+
+**Mistake**: I handed over `! cd ../lakira-backend && docker compose up -d --build mailpit app`.
+It was run in the user's own terminal, which keeps its working directory, so the shell stayed in
+`lakira-backend`. The next handover (stage, commit, push, open PR for a frontend branch) was
+pasted into that same shell: every `git add` failed with `pathspec ... did not match any files`,
+the commit ran the backend's `lint-staged` hook, and the push and PR failed on a branch the backend
+does not have. Nothing landed, but only because every path happened not to exist in the other repo.
+
+**Rule**: never put `cd` in a handover. Point the tool at the other repo instead
+(`docker compose -f ../lakira-backend/docker-compose.yml ...`, `git -C <repo> ...`). Start every
+git handover block with `! git rev-parse --show-toplevel` so a wrong directory shows up on the
+first line. Say that `!` only means "run here" at the Claude Code prompt: in a plain zsh, `! cmd`
+is pipeline negation, so the command still runs and its failure reads as success, and a pasted
+block runs every line regardless of "stop at the first failure".
+
+**Why**: a handover is run verbatim, possibly in a shell whose state I cannot see. A `cd` changes
+state that outlives the command, and the next block silently inherits it.

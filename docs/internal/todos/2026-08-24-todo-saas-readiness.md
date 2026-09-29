@@ -197,6 +197,11 @@ therefore duplicated, with a test enforcing that it matches `PROTECTED_APP_MATCH
       and returned by the live API, but was missing from the hand-written DTO; per
       `.claude/rules/data-access.md` the generated type wins.
 - [x] "Forgot your password?" linked from `LoginForm` — the pages were otherwise unreachable
+- [ ] **Success paths checked live, 2026-09-29, with tokens from Mailpit.** Verify-email and
+      invite accept both succeed on the backend (`emailVerifiedAt` set; membership created), but
+      each page stays on its pending message under `next dev`. Filed as
+      `docs/internal/todos/2026-09-29-todo-token-panels-stall-in-strict-mode.md`. Reset-password
+      not checked yet.
 
 **Verified against the live backend (partial — see the gap below):**
 
@@ -227,7 +232,7 @@ therefore duplicated, with a test enforcing that it matches `PROTECTED_APP_MATCH
   pages carry the same warning and none disables it, so this matches the convention rather than
   diverging from it. Lint goes 41 -> 44 for that reason alone; all new files are warning-free.
 
-## Phase 6 — Multi-tenancy UI (org scoping + members/invites done; switcher built, two-org switch unverified live)
+## Phase 6 — Multi-tenancy UI (done; two-org switch verified live 2026-09-29)
 
 ### Cache-key tenant scoping (the safety-critical part) — done
 
@@ -287,14 +292,16 @@ There were **no** tests touching any key factory or `cache.ts` before this.
 
 ### Not verified
 
-- [ ] **One user in two organizations, switching between them.** That is the scenario the org
+- [x] **One user in two organizations, switching between them.** That is the scenario the org
       dimension exists for. It needs the invite flow, whose token is emailed — the same blocker
       as Phase 5b's verify-email. Unit tests prove the keys differ and the live tests prove
-      backend isolation, but the in-session switch is unexercised.
+      backend isolation, but the in-session switch is unexercised. **Verified live 2026-09-29**
+      once backend #115 (Mailpit) delivered the invite token; evidence in
+      `docs/internal/initiatives/org-switcher/org-switcher-checklist.md`, AC-5.
 
-### Built, not verified live (unblocked 2026-09-26)
+### Built, not verified live (unblocked 2026-09-26; verified 2026-09-29)
 
-- [ ] **Organization switcher.** Was blocked: no `GET /organizations`, and `User` carries no
+- [x] **Organization switcher.** Was blocked: no `GET /organizations`, and `User` carries no
       memberships, so the frontend could not discover the ids `/auth/switch-org` requires.
       Unblocked by backend #114 (`afac3f4`): `GET /organizations` returns the caller's
       `UserOrganization[]` (`organizationId`, `name`, `slug`, `role`, `joinedAt`, `isCurrent`).
@@ -302,7 +309,8 @@ There were **no** tests touching any key factory or `cache.ts` before this.
       on `chore/sync-api-types`. Built on `feat/org-switcher` (kit:
       `docs/internal/initiatives/org-switcher/`). The one-user-two-orgs switch is still unverified
       live: a second membership needs an invite, which depends on the emailed-tokens backend
-      request. Stays open until that live check.
+      request. Stays open until that live check. **Closed 2026-09-29:** AC-5 and AC-11 checked
+      live against a local backend with Mailpit, on `docs/org-switcher-live-check`.
 
 ## Phase 7 — Testing, gates, CI/CD, deploy (gates done; deploy deferred)
 
