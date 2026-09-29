@@ -52,6 +52,12 @@ Details that decide whether a job fails:
 - `format` is deliberately last in `checks`: a formatting failure is auto-fixable, so it must not
   hide a lint or type error in the same run.
 - `lint` runs with `--max-warnings=0`, so a warning fails `checks` and `security` alike.
+- `e2e` runs `cypress/e2e/public/` only: the home spec, axe over every public page in both themes
+  (contrast included), and the `/login` keyboard check. It has no backend, so `cypress/e2e/stack/`
+  never runs here (kit `cypress-a11y-e2e`, D-01). An accessibility failure prints the rule, the
+  element and axe's reason in the job log.
+- `checks` covers the Cypress specs anyway: `typecheck` includes `cypress/tsconfig.json`, and
+  `lint` covers `cypress/`.
 - `e2e` sets `CYPRESS_BASE_URL=http://127.0.0.1:3000`. `cypress-screenshots` warns "No files were
   found" on every passing run; Cypress writes screenshots only when a test fails.
 - `secret-scan` is the only job with an explicit `permissions` block (`contents: read`), and it

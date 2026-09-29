@@ -1,6 +1,6 @@
 # ADR-0021 — TanStack Query's floor is the release that reattaches mutation observers
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-09-29
 - **Origin:** todo — [`2026-09-29-todo-token-panels-stall-in-strict-mode.md`](../../internal/todos/2026-09-29-todo-token-panels-stall-in-strict-mode.md)
 

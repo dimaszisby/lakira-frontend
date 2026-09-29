@@ -1,5 +1,10 @@
 # End-to-End (E2E) Test Checklist – Lakira Frontend
 
+> **Superseded in part (2026-09-29).** What is built today is described in
+> [`.claude/rules/testing.md`](../../../../../.claude/rules/testing.md) § E2E and the
+> [`cypress-a11y-e2e` kit](../../cypress-a11y-e2e/README.md). This document is the 2026 intent,
+> kept as written; where they differ, the kit and the rule win.
+
 Use this checklist when:
 
 - Creating/updating **E2E specs** (e.g. `auth.cy.ts`, `dashboard.cy.ts`), or

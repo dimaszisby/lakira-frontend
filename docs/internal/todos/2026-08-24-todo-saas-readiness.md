@@ -55,7 +55,8 @@ audit. Phases land as separate PRs; this file tracks them.
       repoints the owner to `your-org`. No source change needed here.
 - [x] `manifest.ts` added; dead `<link rel="icon">` removed from `src/app/layout.tsx`
       (it pointed at `/favicon.ico`, which does not exist in `public/`)
-- [ ] `robots.ts` / `sitemap.ts` — **deferred to Phase 3.** Both need a base-URL helper, and the
+- [x] `robots.ts` / `sitemap.ts` — **deferred to Phase 3.** Done in Phase 3 by `0c67d80`, which
+      added both beside `src/lib/env.ts`; box ticked 2026-09-29. Both need a base-URL helper, and the
       only origin-resolution logic lives privately inside `src/services/api/api.ts` with zero test
       coverage. Duplicating the env chain would violate `.claude/rules/environment.md`; extracting
       it is Phase 3's job, once `src/lib/env.ts` exists.
@@ -353,18 +354,24 @@ Adding global handlers would have **weakened** the harness.
 
 ### Deferred
 
-- [ ] Expand Cypress past its single spec — belongs with Phase 5b's auth flows, which need a
-      running backend
+- [x] Expand Cypress past its single spec — belongs with Phase 5b's auth flows, which need a
+      running backend. Done 2026-09-29 in `docs/internal/initiatives/cypress-a11y-e2e/`: axe over
+      every public page in CI, and the signed-in pages plus the token journeys against the local
+      stack with `npm run test:e2e:stack`.
 - [x] `gitleaks-action` v1.6.0 -> v2, SHA-pinned — done 2026-09-24 differently: v2 no longer runs (Node 20 removed), and v3 would have lost full-history scanning, so the job now runs a pinned, checksum-verified gitleaks 8.30.1. See `2026-09-24-todo-secret-scan-hardening.md`.
 - [ ] Deploy config and a gated `deploy_production` job — needs a hosting decision
 - [x] Reconcile `CODECOV_TOKEN`, documented but absent from both workflows — reconciled 2026-09-24 by correcting the docs: there is no Codecov integration and CI uses no secrets.
 
 ## Phase 8 — Re-audit + closeout
 
-- [ ] New dated `audit-YYYY-MM-DD.md`; diff the scorecard against the baseline
-- [ ] Update `SAAS-BASE-CHECKLIST.md` verdict
-- [ ] `FINAL-AUDIT-SUMMARY.md`
-- [ ] Promote stabilised kit ADRs into `docs/explanation/decisions/` from `adr-0015`
+- [x] New dated `audit-YYYY-MM-DD.md`; diff the scorecard against the baseline
+- [x] Update `SAAS-BASE-CHECKLIST.md` verdict
+- [x] `FINAL-AUDIT-SUMMARY.md`
+- [x] Promote stabilised kit ADRs into `docs/explanation/decisions/` from `adr-0015`
+
+All four landed in `d3fc147` ("re-audit after phases 0-7 and close out the programme"):
+`audit-2026-08-29.md`, the root `SAAS-BASE-CHECKLIST.md`, `FINAL-AUDIT-SUMMARY.md` and ADR-0015.
+The boxes were left unticked; ticked 2026-09-29.
 
 ## Status
 

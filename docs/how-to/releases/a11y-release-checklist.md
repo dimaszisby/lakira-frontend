@@ -16,7 +16,10 @@ Before running this checklist:
 
 - [ ] All tests are green:
   - [ ] Unit + integration tests
-  - [ ] E2E smoke suite
+  - [ ] E2E public suite, `npm run test:e2e` (CI runs it)
+  - [ ] E2E stack suite, `npm run test:e2e:stack`, against the local backend and Mailpit. CI cannot
+        run it, so this step is the only place the signed-in pages are checked before a release
+        ([how to run it](../testing/run-stack-e2e.md))
 - [ ] Any new UI is considered stable (no major redesign expected before release).
 - [ ] No **known critical accessibility regressions** are currently open without a plan.
 
@@ -71,14 +74,18 @@ See:
 
 Verify E2E a11y coverage for full pages:
 
-- [ ] `cypress-axe` or equivalent is configured and running.
-- [ ] At least the following have `cy.checkA11y()` (or equivalents):
-  - [ ] Login page
-  - [ ] Dashboard
-  - [ ] One metrics page (list or detail)
-  - [ ] One main form flow (e.g., metric create or log metric)
+`cypress-axe` is configured in `cypress/support/a11y.ts` (`cy.checkPageA11y()`), since
+2026-09-29. Coverage today:
 
-- [ ] E2E a11y tests are passing in **staging / test environment** matching the release.
+- Public pages, both themes, in CI: `cypress/e2e/public/auth-pages.a11y.cy.ts`.
+- Dashboard, metrics, metric categories, organization and account, both themes, stack suite only:
+  `cypress/e2e/stack/app-pages.a11y.cy.ts`.
+- Keyboard order and visible focus on `/login`: `cypress/e2e/public/login-keyboard.cy.ts`.
+
+- [ ] Both E2E suites pass against the build being released.
+- [ ] Any page added since the last release is in one of the page lists above.
+- [ ] The exclusions in `cypress/support/a11y.ts` are still the ones you expect, each citing an ADR
+      or WCAG criterion.
 
 Any remaining violations:
 

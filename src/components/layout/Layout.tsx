@@ -30,7 +30,12 @@ const Layout = ({ children }: LayoutProps) => {
       />
 
       <div className="flex min-h-screen flex-1 flex-col lg:pl-64">
-        <main id="main" className="flex-1 overflow-x-hidden bg-bg sm:px-6 lg:px-8 lg:pb-8 lg:pt-6">
+        {/* pb-20 below lg clears the fixed BottomNavigationBar, which would otherwise cover the last
+            control on the page (cypress-a11y-e2e, finding F-3). */}
+        <main
+          id="main"
+          className="flex-1 overflow-x-hidden bg-bg pb-20 sm:px-6 lg:px-8 lg:pb-8 lg:pt-6"
+        >
           {children}
         </main>
       </div>

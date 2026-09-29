@@ -22,7 +22,7 @@ This matrix captures FE-relevant CI/CD environment values based on current FE re
 | Environment | FE URL                                   | Backend API URL used by FE                                                                               | Provisioning Source |
 | ----------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------- |
 | `local`     | `http://localhost:3000`                  | `http://localhost:8001/api/v1` (the frontend's built-in dev default; start the backend with `PORT=8001`) | `.env.local`        |
-| `ci`        | n/a (runner)                             | Not required for current Cypress smoke + unit scope                                                      | GitHub Actions      |
+| `ci`        | n/a (runner)                             | Not provided: CI's Cypress runs `cypress/e2e/public/` only, which needs no backend                       | GitHub Actions      |
 | `preview`   | Vercel preview URL (TBD concrete domain) | `https://lakira-backend-staging.onrender.com/api/v1` — **currently down**, see Current Status            | Vercel env config   |
 | `prod`      | FE prod URL not finalized                | Backend prod URL not available                                                                           | Pending             |
 
@@ -35,6 +35,14 @@ This matrix captures FE-relevant CI/CD environment values based on current FE re
 - `NEXT_PUBLIC_VERCEL_URL`
 - `VERCEL_URL`
 - `HOST`, `PORT`
+
+Test tooling only, read in `cypress.config.ts` and never by the app:
+
+- `CYPRESS_BASE_URL`: the app Cypress targets, default `http://127.0.0.1:3000`.
+- `E2E_MAILPIT_URL`: Mailpit for the stack specs, default `http://localhost:8025`.
+- `E2E_BACKEND_URL`: the backend the stack preflight probes, default `http://localhost:8001/api/v1`.
+
+The stack specs refuse to run unless all three are local hosts.
 
 ## 5. CI Secrets
 

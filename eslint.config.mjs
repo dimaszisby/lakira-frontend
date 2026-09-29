@@ -414,6 +414,10 @@ const config = [
       "cypress/no-assigning-return-values": "error",
       "cypress/no-unnecessary-waiting": "warn",
       "cypress/assertion-before-screenshot": "warn",
+      // A Cypress chainable has `.then` but is not a Promise: it has no `.catch`, is not awaited,
+      // and nesting `.then` is how Cypress sequences commands. Both rules misread it.
+      "promise/catch-or-return": "off",
+      "promise/no-nesting": "off",
     },
   },
 ];

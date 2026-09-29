@@ -36,7 +36,8 @@ Server-only vars (no prefix) are readable in route handlers, `src/proxy.ts` (the
 | `TZ` | test | forced to `UTC` in `jest.setup.ts` |
 | `CYPRESS_BASE_URL` | CI | Cypress target, default `http://127.0.0.1:3000` |
 | `PERF_BASE_URL` | CI | Lighthouse target |
-| `E2E_USER_EMAIL`, `E2E_USER_PASSWORD` | Cypress | read via `Cypress.env()`, not `process.env` |
+| `E2E_MAILPIT_URL` | local | Cypress stack specs, Mailpit, default `http://localhost:8025`; read in `cypress.config.ts`, exposed as `mailpitUrl` |
+| `E2E_BACKEND_URL` | local | Cypress stack preflight, default `http://localhost:8001/api/v1`; exposed as `backendUrl` |
 
 Per environment:
 
