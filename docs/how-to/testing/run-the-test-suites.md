@@ -7,7 +7,8 @@ Two Jest configs and a Cypress suite. **The filename decides which one a test be
 ```bash
 npm run test:unit          # *.test.ts(x), *.spec.ts(x) — excludes *.int.test.*
 npm run test:integration   # *.int.test.ts(x) only
-npm run test:e2e           # Cypress, headless Electron
+npm run test:e2e           # Cypress, headless Electron, public pages (what CI runs)
+npm run test:e2e:stack     # Cypress against the local backend and Mailpit; see run-stack-e2e.md
 ```
 
 | Suite       | Config                       | Setup                                                                                     |

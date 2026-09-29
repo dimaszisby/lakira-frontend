@@ -72,9 +72,33 @@ That is deliberate and stricter than a shared handler list — a test cannot pas
 
 ## E2E
 
-Cypress, `cypress/e2e/**/*.cy.ts`. `cy.loginAsTestUser()` and `cy.setInvalidAuthToken()` exist in `cypress/support/commands.ts` and read `E2E_USER_EMAIL` / `E2E_USER_PASSWORD` from `Cypress.env()`. Only one spec exists today (`home.cy.ts`), and the auth helpers are unused — new authed flows are the obvious place to grow this.
+Cypress, in two folders that differ in what they may touch (kit `cypress-a11y-e2e`, D-01):
 
-`cypress/tsconfig.json` is deliberately separate so Chai globals do not collide with Jest matchers. Keep it that way.
+| Folder | Needs | Runs with | In CI |
+|---|---|---|---|
+| `cypress/e2e/public/` | the app only | `npm run test:e2e` | yes, the `e2e` job |
+| `cypress/e2e/stack/` | the app, the backend and Mailpit | `npm run test:e2e:stack` | **no** |
+
+**The folder is the contract.** A spec in `public/` must not call the backend, because CI runs none.
+Anything that signs in, or reads an emailed token, goes in `stack/`. How to run it:
+`docs/how-to/testing/run-stack-e2e.md`.
+
+- **Accessibility:** `cy.visitInTheme(path, theme)` then `cy.checkPageA11y(label)`, from
+  `cypress/support/a11y.ts`. It runs axe's WCAG 2.0/2.1 A and AA rules in a real browser, contrast
+  included, and fails on any violation. Check both themes (`THEMES`). The rule set and every
+  exclusion live in that one file, and each exclusion cites an ADR or a WCAG criterion.
+- **Stack helpers**, in `cypress/support/stack.ts`: `preflightStack()` first in every stack spec's
+  `before`, then `newUser()`, `registerUser()`, `signIn()` / `signInSession()` and `tokenFor()`.
+  Users are created fresh per run; no credential is stored anywhere. The helpers refuse to run
+  unless the app, backend and Mailpit URLs are all local.
+- **Email templates** are known only to `cypress/support/mailpit.ts`. When the backend changes a
+  subject or a link, that file is the one edit.
+- **Configuration** is public and goes through `expose` in `cypress.config.ts`, read with
+  `Cypress.expose()`. `allowCypressEnv` is off.
+- Cypress's default viewport (1000x660) is below the `lg` breakpoint, so specs see the tablet
+  layout, bottom navigation bar included.
+
+`cypress/tsconfig.json` is deliberately separate so Chai globals do not collide with Jest matchers. Keep it that way. `npm run typecheck` checks it as a second project, so the specs are typechecked in CI even where they do not run.
 
 ## What to test, and where
 

@@ -1,5 +1,10 @@
 # End-to-End (E2E) Test Plan – Lakira Frontend
 
+> **Superseded in part (2026-09-29).** What is built today is described in
+> [`.claude/rules/testing.md`](../../../../../.claude/rules/testing.md) § E2E and the
+> [`cypress-a11y-e2e` kit](../../cypress-a11y-e2e/README.md). This document is the 2026 intent,
+> kept as written; where they differ, the kit and the rule win.
+
 This document describes the **end-to-end (E2E) testing strategy** for the Lakira frontend.  
 E2E tests validate **full user flows in a real browser** against a running Lakira backend (or a fully mocked API layer), ensuring that critical journeys behave correctly in a production-like environment.
 

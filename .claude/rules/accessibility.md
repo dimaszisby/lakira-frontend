@@ -80,11 +80,17 @@ Know these so you do not mistake a passing lint run for a passing a11y check:
   The three mobile lists restate the role for that reason. **Do not remove those roles**, and do not
   re-enable the rule without a plan for them.
 - **`npm run check-accessibility` was removed on 2026-08-27.** It ran `npm install axe-core && echo` and asserted nothing. It was not replaced: all 19 integration suites already carry `toHaveNoViolations`, so a dedicated script would be an exact alias for `npm run test:integration`, which gates CI. Run that.
-- There is no `cypress-axe`, so E2E accessibility is not covered. `docs/internal/initiatives/tests-overhaul/4-end-to-end-tests/a11y-e2e-checklist.md` describes the intent.
+- **Real-browser checks exist since 2026-09-29**, contrast included: `cypress-axe` over every
+  public page in both themes, in CI, and over the signed-in pages with `npm run test:e2e:stack`,
+  locally only. See `.claude/rules/testing.md` § E2E. Two exclusions from `color-contrast`, both in
+  `cypress/support/a11y.ts`: ADR-0017's buttons, and the header wordmark as a logotype. The
+  signed-in pages are therefore checked only when someone runs the stack suite; the gate table in
+  `.claude/rules/workflow.md` says when that is.
 
-Automated coverage is now lint plus `jest-axe`, and neither is sufficient alone. Lint reads the
-source and catches structural mistakes — a handler on a `<div>`, an invalid ARIA prop — before the
-component runs. `jest-axe` reads the rendered tree and catches roughly a third of real issues, and
-nothing in jsdom evaluates colour contrast at all (which is why ADR-0017's deviations pass every
-suite). **Keyboard-test anything you build by hand**, and read `.claude/rules/styling.md` §
+Automated coverage is now lint, `jest-axe` and Cypress with `cypress-axe`, and none is sufficient
+alone. Lint reads the source and catches structural mistakes — a handler on a `<div>`, an invalid
+ARIA prop — before the component runs. `jest-axe` reads the rendered tree and catches roughly a
+third of real issues, but nothing in jsdom evaluates colour contrast (which is why ADR-0017's
+deviations pass every Jest suite). The Cypress layer is the one that measures contrast, in a real
+browser; it still sees only what axe can detect, and only on the pages it visits. **Keyboard-test anything you build by hand**, and read `.claude/rules/styling.md` §
 Known token-system defects before trusting a contrast claim.

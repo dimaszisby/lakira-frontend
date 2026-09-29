@@ -108,14 +108,22 @@ and paste the failure. "Tests pass" is not a status.
 | spec drift   | `npm run api:spec:check` / `npm run api:types:check` | the backend contract or `src/types/dtos/**` is in play |
 | build        | `npm run build`                                    | always                                  |
 | e2e          | `npm run test:e2e`                                 | before a release, or a user-facing flow changed end to end |
+| e2e (stack)  | `npm run test:e2e:stack`                           | a signed-in page, the app layout, or an auth or token flow changed; before a release. Needs the local stack |
 
 `/pre-push` runs these in CI's own order and is the canonical local sequence — use it rather than
 inventing an order here.
 
-**Every gate in this table runs in CI**, `format` included as of 2026-09-20 — it is the last step of
-the `checks` job, so a formatting failure cannot mask a lint or type error in the same run. Nothing
-here depends on anyone remembering: `.claude/hooks/format-on-edit.sh` only reformats files an agent
-edits, which is why the repo reached 93 unformatted files before the gate existed.
+**Every gate in this table runs in CI except `e2e (stack)`.** `format` included as of 2026-09-20 —
+it is the last step of the `checks` job, so a formatting failure cannot mask a lint or type error
+in the same run. For those gates nothing depends on anyone remembering:
+`.claude/hooks/format-on-edit.sh` only reformats files an agent edits, which is why the repo
+reached 93 unformatted files before the gate existed.
+
+`e2e (stack)` is the exception, and it **does** depend on remembering. It needs the backend and
+Mailpit, which CI does not have (kit `cypress-a11y-e2e`, D-01). CI still typechecks and lints its
+specs, so a renamed helper fails a PR, but whether the signed-in pages pass is only known when
+someone runs it. When its trigger applies, run it and report it by name, or report it as skipped
+and why.
 
 For anything touching routing, auth, or caching, check `docs/internal/incidents/` first — four logged postmortems cover exactly those areas, and their causes recur.
 

@@ -29,7 +29,7 @@ from a clean clone.
 
 - [`development/`](./how-to/development/) — add a feature module, a route, a form, a query hook;
   build a component; sync the OpenAPI spec
-- [`testing/`](./how-to/testing/) — run the test suites, write a component test
+- [`testing/`](./how-to/testing/) — run the test suites, run the stack E2E specs, write a component test
 - [`releases/`](./how-to/releases/) — the release, accessibility, and performance gates
 - [`ci-cd/`](./how-to/ci-cd/) — the pipeline playbook
 

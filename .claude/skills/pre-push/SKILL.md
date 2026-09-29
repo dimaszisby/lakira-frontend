@@ -36,6 +36,14 @@ npm run build && npm run start &
 npm run test:e2e
 ```
 
+If the change touches a signed-in page, the app layout, or an auth or token flow, also run the stack
+suite against the local backend and Mailpit (`docs/how-to/testing/run-stack-e2e.md`), and report
+it by name or as skipped:
+
+```bash
+npm run test:e2e:stack
+```
+
 ## Report
 
 ```

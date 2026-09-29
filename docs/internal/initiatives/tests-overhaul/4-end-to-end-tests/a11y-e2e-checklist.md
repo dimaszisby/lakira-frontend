@@ -1,5 +1,10 @@
 # Accessibility E2E Test Checklist – Lakira Frontend
 
+> **Superseded in part (2026-09-29).** What is built today is described in
+> [`.claude/rules/testing.md`](../../../../../.claude/rules/testing.md) § E2E and the
+> [`cypress-a11y-e2e` kit](../../cypress-a11y-e2e/README.md). This document is the 2026 intent,
+> kept as written; where they differ, the kit and the rule win.
+
 This checklist defines how we apply **accessibility (a11y) checks** at the **end-to-end (E2E)** level using Cypress (or Playwright) and `cypress-axe` (or equivalent).
 
 Use it when:

@@ -36,10 +36,12 @@ const BottomNavigationBar: React.FC<NavigationListProps> = ({
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
                   "flex flex-col items-center rounded-xl px-2 py-1 text-xs font-medium transition",
-                  isActive ? "text-brand-primary" : "text-ink-secondary hover:text-ink",
+                  // The label stays in the text colour: brand pink is 1.88:1 on the bar, and the
+                  // icon carries the accent instead (cypress-a11y-e2e D-08).
+                  isActive ? "font-semibold text-ink" : "text-ink-secondary hover:text-ink",
                 )}
               >
-                <item.icon size={20} />
+                <item.icon size={20} className={isActive ? "text-brand-primary" : undefined} />
                 <span className="mt-1">{item.name}</span>
               </Link>
             </li>

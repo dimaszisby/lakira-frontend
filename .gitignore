@@ -15,6 +15,7 @@
 /coverage-all
 /coverage-integration
 /cypress/videos
+/cypress/screenshots
 /reports/performance
 
 # next.js

@@ -12,7 +12,7 @@
     /* Equal to --text: h5/h6 and .text-button already render this way */
     --text-emphasis: var(--text);
     --text-secondary: var(--gray-700);
-    --text-tertiary: var(--gray-600);
+    --text-tertiary: var(--gray-700); /* 5.61:1 on --bg; 600 was 3.97:1 (cypress-a11y-e2e D-09) */
     --text-inverted: var(--gray-white);
     --text-error: var(--accent-vividcoral-700); /* 4.68:1 on surface */
 

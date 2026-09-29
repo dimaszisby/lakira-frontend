@@ -76,4 +76,4 @@ against the broken version.
 ## Status
 
 Done 2026-09-29 on `fix/token-panels-stall-in-strict-mode`, apart from the one discovered item
-above. ADR-0021 is `Proposed` until the branch merges.
+above. ADR-0021 accepted on merge (#59).
