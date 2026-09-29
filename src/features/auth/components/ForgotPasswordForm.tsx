@@ -77,6 +77,8 @@ const ForgotPasswordForm = () => {
               <TextField
                 placeholder="e.g., john.doe@example.com"
                 {...register("email")}
+                type="email"
+                autoComplete="email"
                 invalid={!!errors.email}
                 disabled={isBusyInputs}
                 clearable

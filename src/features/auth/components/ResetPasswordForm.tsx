@@ -97,6 +97,7 @@ const ResetPasswordForm = ({ token }: Props) => {
                 type="password"
                 placeholder="At least 6 characters"
                 {...register("password")}
+                autoComplete="new-password"
                 invalid={!!errors.password}
                 disabled={isBusyInputs}
                 required
@@ -114,6 +115,7 @@ const ResetPasswordForm = ({ token }: Props) => {
                 type="password"
                 placeholder="Repeat the new password"
                 {...register("passwordConfirmation")}
+                autoComplete="new-password"
                 invalid={!!errors.passwordConfirmation}
                 disabled={isBusyInputs}
                 required

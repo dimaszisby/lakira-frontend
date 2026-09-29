@@ -44,7 +44,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0019](./adr-0019-dependency-install-scripts-are-opt-in.md)                     | Dependency install scripts are opt-in                                 | Accepted       | 2026-09-25 | todo      |
 | [ADR-0020](./adr-0020-changing-organization-reloads-the-document.md)                | Changing the active organization reloads the document                 | Accepted       | 2026-09-28 | `D-02`    |
 | [ADR-0021](./adr-0021-tanstack-query-floor-at-the-observer-reattach-fix.md)         | TanStack Query's floor is the observer-reattach fix                   | Accepted       | 2026-09-29 | todo      |
-| [ADR-0022](./adr-0022-browser-accessibility-checks-with-cypress-axe.md)             | Browser accessibility checks through `cypress-axe`, `axe-core` pinned | Proposed       | 2026-09-29 | `D-02`    |
+| [ADR-0022](./adr-0022-browser-accessibility-checks-with-cypress-axe.md)             | Browser accessibility checks through `cypress-axe`, `axe-core` pinned | Accepted       | 2026-09-29 | `D-02`    |
 
 ## Where the other decisions went
 

@@ -1,6 +1,6 @@
 # ADR-0022 — Browser accessibility checks run through `cypress-axe`, with `axe-core` pinned
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-09-29
 - **Origin:** `D-02` in the cypress-a11y-e2e kit — [`decisions.md`](../../internal/initiatives/cypress-a11y-e2e/decisions.md)
 
