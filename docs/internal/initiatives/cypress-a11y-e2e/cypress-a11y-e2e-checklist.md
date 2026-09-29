@@ -124,8 +124,8 @@ After the fixes, all 10 signed-in checks and all 16 public checks pass.
       outlines stripped
 - [x] AC-5 — a machine checks it, locally only · `stack/app-pages.a11y.cy.ts`, 11 of 11
 - [x] AC-6 — a machine checks it, locally only · both journey specs pass
-- [ ] AC-7 — the PR's CI run: `e2e` green, and its log lists only `public/` specs. Locally,
-      `test:e2e` ran exactly the three `public/` specs, 18 of 18
+- [x] AC-7 — the PR's CI run, #60 (run 36594435300): `E2E tests` green, running exactly
+      `auth-pages.a11y.cy.ts`, `home.cy.ts` and `login-keyboard.cy.ts`, 18 of 18
 - [x] AC-8 — I checked it · a non-local `E2E_MAILPIT_URL` is refused before any request; a local but
       stopped Mailpit stops the run with the start instructions
 - [x] AC-9 — I checked it · evidence under Phase 0

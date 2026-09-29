@@ -2,7 +2,7 @@
 
 **Purpose:** add `autoComplete` tokens to the auth forms' email and password fields.
 **Owner:** hardini
-**Branch:** none yet; branch off `dev` when picked up
+**Branch:** `fix/auth-fields-missing-autocomplete` off `dev`
 **Priority:** low. WCAG 2.1 AA gap, small fix.
 **Found:** 2026-09-29, writing the `/login` keyboard spec in kit
 `docs/internal/initiatives/cypress-a11y-e2e/`.
@@ -26,14 +26,32 @@ Measured in `src/features/auth/components/`:
 
 The login email field is also `type="text"`; `type="email"` would bring the mobile email keyboard.
 
+The table missed one field: the registration **Username**, which had no token either.
+
+## Decisions
+
+**The registration username is `nickname`, not `username`.** The app signs in by email; the
+username is a public handle nobody signs in with. A field marked `username` on a sign-up form is
+what password managers store as the login, and they would later fill the handle into the login
+form's email field. `nickname` is also on WCAG 1.3.5's list of input purposes, so the field still
+declares one. The login and registration email fields are `email`. Decided 2026-09-29.
+
+**`type="email"` on the login and forgot-password fields.** Registration already had it. All three
+forms set `noValidate`, so the browser adds no validation of its own; Zod still validates. The
+change brings the email keyboard on phones. `TextField` uses no selection API, which email inputs
+do not support. Decided 2026-09-29.
+
 ## To do
 
-- [ ] Add the tokens above through `TextField`'s passthrough
-- [ ] Consider `type="email"` on the login and forgot-password email fields
-- [ ] A unit test per form asserting the attributes, watched failing first
-- [ ] Keyboard spec in `cypress/e2e/public/login-keyboard.cy.ts` still passes (it identifies fields
-      by `name`, so a type change does not affect it)
+- [x] Tokens added, through `TextField`'s passthrough: login `email` and `current-password`;
+      registration `nickname` and `email` (passwords were already `new-password`); forgot-password
+      `email`; reset-password `new-password` on both fields
+- [x] `type="email"` on the login and forgot-password email fields
+- [x] `src/features/auth/components/__tests__/auth-form-autocomplete.test.tsx`, one case per form,
+      querying by label. All four failed before the tokens were added; after, the two `type`
+      assertions failed until the type was added
+- [x] Keyboard spec still passes (it identifies fields by `name`)
 
 ## Status
 
-Open.
+Done 2026-09-29 on `fix/auth-fields-missing-autocomplete`.

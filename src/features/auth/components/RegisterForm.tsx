@@ -101,6 +101,7 @@ const RegisterForm = () => {
               <TextField
                 placeholder="e.g., john.doe"
                 {...register("username")}
+                autoComplete="nickname"
                 invalid={!!errors.username}
                 disabled={isBusyInputs}
                 clearable
@@ -116,6 +117,7 @@ const RegisterForm = () => {
               <TextField
                 placeholder="e.g., john.doe@example.com"
                 {...register("email")}
+                autoComplete="email"
                 invalid={!!errors.email}
                 disabled={isBusyInputs}
                 clearable

@@ -89,6 +89,8 @@ const LoginForm = () => {
               <TextField
                 placeholder="e.g., john.doe@example.com"
                 {...register("email")}
+                type="email"
+                autoComplete="email"
                 invalid={!!errors.email}
                 disabled={isBusyInputs}
                 clearable
@@ -104,6 +106,7 @@ const LoginForm = () => {
               <TextField
                 placeholder="Enter your password"
                 {...register("password")}
+                autoComplete="current-password"
                 invalid={!!errors.password}
                 disabled={isBusyInputs}
                 clearable
