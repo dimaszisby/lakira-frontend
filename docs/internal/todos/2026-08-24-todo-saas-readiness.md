@@ -197,11 +197,13 @@ therefore duplicated, with a test enforcing that it matches `PROTECTED_APP_MATCH
       and returned by the live API, but was missing from the hand-written DTO; per
       `.claude/rules/data-access.md` the generated type wins.
 - [x] "Forgot your password?" linked from `LoginForm` — the pages were otherwise unreachable
-- [ ] **Success paths checked live, 2026-09-29, with tokens from Mailpit.** Verify-email and
+- [x] **Success paths checked live, 2026-09-29, with tokens from Mailpit.** Verify-email and
       invite accept both succeed on the backend (`emailVerifiedAt` set; membership created), but
       each page stays on its pending message under `next dev`. Filed as
       `docs/internal/todos/2026-09-29-todo-token-panels-stall-in-strict-mode.md`. Reset-password
-      not checked yet.
+      not checked yet. **Fixed and re-checked the same day** with TanStack Query 5.104.0
+      (ADR-0021): verify-email shows "Email verified", invite accept "You're in", and
+      reset-password "Password updated", the new password signing in and the old one refused.
 
 **Verified against the live backend (partial — see the gap below):**
 
@@ -213,7 +215,8 @@ therefore duplicated, with a test enforcing that it matches `PROTECTED_APP_MATCH
   rejected cleanly rather than 500-ing.
 - All three new routes render 200 and register in the production build.
 
-- [ ] **Not verified: the success paths of `verify-email` and `reset-password`.** Both consume a
+- [x] **Not verified: the success paths of `verify-email` and `reset-password`.** Verified
+      2026-09-29 through Mailpit (backend #115); see the entry above. Original note: Both consume a
       single-use token delivered by email. The backend logs outbound mail to stdout
       (`EMAIL_PROVIDER=console`), but its commit `47854e2` moved logging off disk —
       `logs/combined.log` was last written 2026-08-23 — and the server runs in a terminal this

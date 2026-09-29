@@ -42,6 +42,15 @@ renderWithProviders(<MetricCard metric={metric} />, { route: "/metrics" });
 
 Query by accessible role and name, not by test id or class. Prefer `userEvent` over `fireEvent`.
 
+**To test under Strict Mode, pass `reactStrictMode: true`**, which wraps the whole tree, providers
+included, as `next.config.ts` does. A `<StrictMode>` nested inside `renderWithProviders` doubles
+renders but **not** effects, so it cannot reproduce anything that depends on the extra
+effect-and-subscription cycle `next dev` runs. Measured 2026-09-29; see ADR-0021.
+
+```tsx
+renderWithProviders(<VerifyEmailPanel token={token} />, { reactStrictMode: true });
+```
+
 `jest.setup.ts` gives you `@testing-library/jest-dom`, `jest-canvas-mock` (Chart.js needs it), a `ResizeObserver` polyfill, `TZ=UTC`, and `toHaveNoViolations`.
 
 ## Integration tests

@@ -43,6 +43,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0018](./adr-0018-node-24-runtime-pinned-in-nvmrc.md)                           | Node 24 runtime, pinned once in `.nvmrc`                  | Accepted       | 2026-09-25 | todo      |
 | [ADR-0019](./adr-0019-dependency-install-scripts-are-opt-in.md)                     | Dependency install scripts are opt-in                     | Accepted       | 2026-09-25 | todo      |
 | [ADR-0020](./adr-0020-changing-organization-reloads-the-document.md)                | Changing the active organization reloads the document     | Accepted       | 2026-09-28 | `D-02`    |
+| [ADR-0021](./adr-0021-tanstack-query-floor-at-the-observer-reattach-fix.md)         | TanStack Query's floor is the observer-reattach fix       | Proposed       | 2026-09-29 | todo      |
 
 ## Where the other decisions went
 
