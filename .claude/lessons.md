@@ -153,3 +153,18 @@ block runs every line regardless of "stop at the first failure".
 
 **Why**: a handover is run verbatim, possibly in a shell whose state I cannot see. A `cd` changes
 state that outlives the command, and the next block silently inherits it.
+
+## [2026-09-30] Started a task without naming its size or entering plan mode
+
+**Mistake**: Given the go-ahead on a handoff's open item (the MetricSettingsForm Strict Mode test),
+I branched, broke the fix on purpose, edited the test and updated its todo without saying which
+row of the kit-sizing table it was, and without plan mode, though it ran to more than three steps.
+The user had to ask whether I was planning and documenting at all.
+
+**Rule**: before the first edit, say the size by its row name ("Ephemeral: the item lives in
+`<todo path>`") and where the paperwork goes. For anything past three steps, enter plan mode and
+present the plan before the branch is cut, even when the change looks like a test tweak.
+
+**Why**: a handoff's "Small" is a claim about the change, not permission to skip announcing it.
+The sizing statement is how the user catches a wrong call cheaply, and without it they cannot tell
+a deliberate light path from a skipped one.

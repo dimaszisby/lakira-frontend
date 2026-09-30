@@ -67,13 +67,18 @@ against the broken version.
 
 ## Discovered
 
-- [ ] Found: `src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx`
+- [x] Found: `src/features/metric-settings/components/__tests__/MetricSettingsForm.int.test.tsx`
       ("shows the saved priority as selected when the form opens") nests `<StrictMode>` inside
       `renderWithProviders`, and its comment says it reproduces the double effect run. By the
       measurement above it runs no extra effect cycle, so it may not guard what it claims → out of
-      scope; check it by breaking the fix it guards and switching it to `reactStrictMode: true`
+      scope; check it by breaking the fix it guards and switching it to `reactStrictMode: true`.
+      Checked 2026-09-30 on `fix/metric-settings-strict-mode-test`. The fix it guards is
+      Modal's `createPortal` (b5b1ebb). With Ariakit's portal restored, the case failed nested
+      and with the option, and passed with no Strict Mode. So it did guard the fix; its
+      comment named the wrong mechanism. Switched to `reactStrictMode: true` anyway, to match the wrapper
+      `next.config.ts` applies and `testing.md`; comment rewritten; `testing.md` clarified.
 
 ## Status
 
-Done 2026-09-29 on `fix/token-panels-stall-in-strict-mode`, apart from the one discovered item
-above. ADR-0021 accepted on merge (#59).
+Done 2026-09-29 on `fix/token-panels-stall-in-strict-mode`. ADR-0021 accepted on merge (#59).
+The discovered item was closed 2026-09-30 on `fix/metric-settings-strict-mode-test`.

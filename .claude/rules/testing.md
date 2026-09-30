@@ -45,7 +45,9 @@ Query by accessible role and name, not by test id or class. Prefer `userEvent` o
 **To test under Strict Mode, pass `reactStrictMode: true`**, which wraps the whole tree, providers
 included, as `next.config.ts` does. A `<StrictMode>` nested inside `renderWithProviders` doubles
 renders but **not** effects, so it cannot reproduce anything that depends on the extra
-effect-and-subscription cycle `next dev` runs. Measured 2026-09-29; see ADR-0021.
+effect-and-subscription cycle `next dev` runs. Measured 2026-09-29; see ADR-0021. The double
+render alone can still catch a bug (it caught the Modal remount, measured 2026-09-30), so a
+nested wrapper is incomplete, not inert. Use the option regardless.
 
 ```tsx
 renderWithProviders(<VerifyEmailPanel token={token} />, { reactStrictMode: true });
