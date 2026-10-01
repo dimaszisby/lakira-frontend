@@ -2,7 +2,6 @@ import { act, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { http, HttpResponse } from "msw";
-import { StrictMode } from "react";
 
 import MetricSettingsForm from "@/features/metric-settings/components/MetricSettingsForm";
 import type { MetricSettingsExtendedVM } from "@/features/metric-settings/view-models";
@@ -342,23 +341,23 @@ describe("MetricSettingsForm integration", () => {
   });
 
   it("shows the saved priority as selected when the form opens", async () => {
-    // StrictMode matches `next dev` (reactStrictMode: true), where the double
-    // effect run exposed a stale watched value.
+    // Guards Modal's createPortal. With Ariakit's own portal the form remounts and
+    // loses Priority, but only under Strict Mode (as in `next dev`): without it
+    // this case passes against the broken Modal. Measured 2026-09-30.
     renderWithProviders(
-      <StrictMode>
-        <MetricSettingsForm
-          metricId={metricId}
-          initialSettings={{
-            ...existingSettings,
-            displayOptions: {
-              ...existingSettings.displayOptions,
-              showOnDashboard: true,
-              priority: 1,
-            },
-          }}
-          onClose={jest.fn()}
-        />
-      </StrictMode>,
+      <MetricSettingsForm
+        metricId={metricId}
+        initialSettings={{
+          ...existingSettings,
+          displayOptions: {
+            ...existingSettings.displayOptions,
+            showOnDashboard: true,
+            priority: 1,
+          },
+        }}
+        onClose={jest.fn()}
+      />,
+      { reactStrictMode: true },
     );
     await settleAsyncUpdates();
 
