@@ -1738,6 +1738,7 @@
       "TrendDataPoint": {
         "properties": {
           "date": {
+            "description": "When the value was logged (the log's loggedAt), not when it was recorded. Points are in ascending date order.",
             "example": "2023-01-01",
             "type": "string"
           },
