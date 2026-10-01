@@ -153,3 +153,20 @@ block runs every line regardless of "stop at the first failure".
 
 **Why**: a handover is run verbatim, possibly in a shell whose state I cannot see. A `cd` changes
 state that outlives the command, and the next block silently inherits it.
+
+## [2026-10-01] An "unblock CI" fix was handed over without the other external-drift gate
+
+**Mistake**: For the lockfile fix (#63) I ran `api:types:check` and called the contract covered.
+That script compares the generated types with the local snapshot; only `api:spec:check` compares
+the snapshot with the backend's live `dev`. Backend #125 had changed the spec hours earlier, so #63
+went red on `API Contract Drift` as soon as Security Scan turned green. A separate sync PR would
+then have failed Security Scan on the old lockfile: each fix failed the other's gate.
+
+**Rule**: two gates depend on state outside this repo, `npm run security:audit` (advisories) and
+`npm run api:spec:check` (the backend spec). Run both immediately before every handover, whatever
+the change. When both are red at once, fix them in one PR as separate commits; split, neither PR
+can go green.
+
+**Why**: an external-drift gate can go red between one hour and the next with no change here, so a
+result from earlier in the session is stale by handover. Same lesson as 2026-09-27 from the other
+side: that one was about verifying after merge, this one about checking before handover.
