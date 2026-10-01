@@ -2721,7 +2721,10 @@ export interface components {
             organizationId: string;
         };
         TrendDataPoint: {
-            /** @example 2023-01-01 */
+            /**
+             * @description When the value was logged (the log's loggedAt), not when it was recorded. Points are in ascending date order.
+             * @example 2023-01-01
+             */
             date: string;
             /** @example 7500 */
             value: number;
