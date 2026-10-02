@@ -187,19 +187,25 @@ describe("RegisterForm integration", () => {
    * normalized the plain `Error` a second time, and every failure rendered as a
    * connection problem. Asserted on the text, since the existing failure test
    * only checks that an alert exists.
+   *
+   * The body is the one backend #127 sends for its per-IP registration limit.
+   * That limit is counted per hour, so a retried 429 would spend the user's
+   * remaining attempts: the request must go out exactly once.
    */
   it("reports a rate limit as a rate limit, not a connection failure", async () => {
     const user = userEvent.setup();
     const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+    let registerRequests = 0;
 
     try {
       server.use(
-        http.post(REGISTER_ENDPOINT, () =>
-          HttpResponse.json(
-            { status: 429, message: "Too many requests, please try again later." },
+        http.post(REGISTER_ENDPOINT, () => {
+          registerRequests += 1;
+          return HttpResponse.json(
+            { status: 429, message: "Too many registration attempts, please try again later." },
             { status: 429 },
-          ),
-        ),
+          );
+        }),
       );
 
       renderWithProviders(<RegisterForm />);
@@ -212,13 +218,17 @@ describe("RegisterForm integration", () => {
 
       // The backend's wording, not ours: a specific server message now wins over
       // the status copy, which is a fallback for when the server says nothing.
-      const alert = await screen.findByRole("alert");
-      expect(alert).toHaveTextContent(/too many requests, please try again later/i);
+      // The wait outlasts axios-retry's backoff, so a regression that retries
+      // fails on the request count below rather than on a missing alert.
+      const alert = await screen.findByRole("alert", {}, { timeout: 4000 });
+      expect(alert).toHaveTextContent(/too many registration attempts, please try again later/i);
       expect(alert).not.toHaveTextContent(/couldn't reach the server/i);
+      expect(registerRequests).toBe(1);
     } finally {
       consoleErrorSpy.mockRestore();
     }
-  });
+    // Above the alert wait, so a missing alert fails on findByRole's message, not a timeout.
+  }, 8000);
 
   it("has no critical accessibility violations on initial render", async () => {
     const { container } = renderWithProviders(<RegisterForm />);
