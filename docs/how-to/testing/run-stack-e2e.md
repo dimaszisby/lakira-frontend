@@ -70,4 +70,6 @@ sending a request.
 - **429 responses**: the backend rate-limits registration and sign-in. Its `.env.example` ships
   `DISABLE_RATE_LIMITING=false` and allows `true` "only for local testing / fuzzing"; the specs were
   written against a local backend with it set to `true`. With limits on, repeated runs may be
-  throttled.
+  throttled. Registration is the tightest: 10 per hour per IP (`RATE_LIMIT_REGISTER_IP_MAX`,
+  since backend #127), and every run registers fresh users, so a second run within the hour can
+  fail with "Too many registration attempts". `DISABLE_RATE_LIMITING=true` switches it off too.
