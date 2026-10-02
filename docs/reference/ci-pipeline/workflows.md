@@ -1,7 +1,8 @@
 # CI workflows
 
 What each GitHub Actions workflow runs, in what order, and on what. Checked against
-`.github/workflows/test.yml` and `.github/workflows/performance.yml` on 2026-09-26.
+`.github/workflows/test.yml` and `.github/workflows/performance.yml` on 2026-09-26, and
+`.github/workflows/dependency-audit.yml` on 2026-10-02.
 
 This page is the one description of the pipeline. What to do when a job goes red is in the
 [daily pipeline playbook](../../how-to/ci-cd/daily-pipeline-playbook.md); the npm scripts are in
@@ -36,16 +37,16 @@ secret-scan    (independent)
 Each job in the chain `needs` the one before it, so the first failure stops the rest. The three
 independent jobs start immediately and do not gate the chain.
 
-| Job            | Name               | Timeout | Runs, in order                                                                                                   | Uploads                                          |
-| -------------- | ------------------ | ------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| `checks`       | Static checks      | 15 min  | `lint`, `lint:css`, `typecheck`, `format`                                                                        | none                                             |
-| `unit`         | Unit tests         | 20 min  | `test:unit:ci` (global coverage thresholds), `coverage:check` (per-folder goals, `--strict`)                     | `coverage-report` (always)                       |
-| `integration`  | Integration tests  | 20 min  | `test:integration`                                                                                               | none                                             |
-| `build`        | Build              | 20 min  | `build`                                                                                                          | `next-build` (`.next`, hidden files included)    |
-| `e2e`          | E2E tests          | 30 min  | downloads `next-build`, `npm run start` on `127.0.0.1:3000`, waits up to 120 s for it, `test:e2e`, stops the app | `cypress-videos`, `cypress-screenshots` (always) |
-| `api-contract` | API Contract Drift | 10 min  | `api:spec:check`, `api:types:check`                                                                              | none                                             |
-| `security`     | Security Scan      | 20 min  | `security:scan`: `lint`, `lint:css`, then `npm audit --audit-level=high`                                         | none                                             |
-| `secret-scan`  | Secret Scan        | 10 min  | full-history checkout, gitleaks `8.30.1` binary verified against a hard-coded SHA-256, `gitleaks git . --redact` | none                                             |
+| Job            | Name               | Timeout | Runs, in order                                                                                                     | Uploads                                          |
+| -------------- | ------------------ | ------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
+| `checks`       | Static checks      | 15 min  | `lint`, `lint:css`, `typecheck`, `format`                                                                          | none                                             |
+| `unit`         | Unit tests         | 20 min  | `test:unit:ci` (global coverage thresholds), `coverage:check` (per-folder goals, `--strict`)                       | `coverage-report` (always)                       |
+| `integration`  | Integration tests  | 20 min  | `test:integration`                                                                                                 | none                                             |
+| `build`        | Build              | 20 min  | `build`                                                                                                            | `next-build` (`.next`, hidden files included)    |
+| `e2e`          | E2E tests          | 30 min  | downloads `next-build`, `npm run start` on `127.0.0.1:3000`, waits up to 120 s for it, `test:e2e`, stops the app   | `cypress-videos`, `cypress-screenshots` (always) |
+| `api-contract` | API Contract Drift | 10 min  | `api:spec:check`, `api:types:check`                                                                                | none                                             |
+| `security`     | Security Scan      | 20 min  | `security:scan`: `lint`, `lint:css`, then `npm audit --omit=dev --audit-level=high` (production dependencies only) | none                                             |
+| `secret-scan`  | Secret Scan        | 10 min  | full-history checkout, gitleaks `8.30.1` binary verified against a hard-coded SHA-256, `gitleaks git . --redact`   | none                                             |
 
 Details that decide whether a job fails:
 
@@ -83,6 +84,22 @@ One job, `performance` (Lighthouse and Bundle Metrics), 45 min timeout:
 Thresholds, routes, the Lighthouse version and runs per route all live in
 `scripts/perf/performance-thresholds.json`. How the Lighthouse gate reads a result (median of the
 runs, a redirect fails the route, pinned Lighthouse) is in `.claude/rules/performance.md`.
+
+## `dependency-audit` (`dependency-audit.yml`)
+
+**Triggers:** `schedule` at `0 3 * * *` (03:00 UTC daily) and `workflow_dispatch`
+(`gh workflow run dependency-audit`). Scheduled runs use the default branch, `dev`.
+**Concurrency:** group `dependency-audit-<ref>`, `cancel-in-progress: false`, so a dispatched run
+cannot cancel the nightly one.
+**Permissions:** `contents: read`.
+**Not a PR gate.** It runs on no push and no pull request.
+
+One job, `audit` (Full dependency audit), 10 min timeout: checkout, setup-node from `.nvmrc`, then
+`security:audit:full`. There is no `npm ci`: `npm audit` reads `package-lock.json`, so no package
+code runs. Pull requests audit production dependencies only; this is where an advisory in
+development tooling surfaces ([ADR-0023](../../explanation/decisions/adr-0023-pull-requests-block-on-production-advisories-only.md)).
+A failed scheduled run is sent to whoever last edited the cron line, and GitHub disables the
+schedule after 60 days without repository activity.
 
 ## Changing a workflow
 

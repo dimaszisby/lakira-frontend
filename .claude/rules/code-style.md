@@ -68,5 +68,6 @@ For what classes to reach for, see `.claude/rules/styling.md`.
 - `promise/catch-or-return`, `promise/no-nesting`.
 - `sonarjs/no-duplicate-string`, `sonarjs/prefer-immediate-return`.
 - `security/detect-object-injection` is off — too noisy for frontend code.
+- `import-x/no-extraneous-dependencies` — runtime code in `src/` (not tests, not `test-utils`) may not import a devDependency. CI's PR audit skips devDependencies (ADR-0023), so such an import would ship a package nothing audits. Move it to `dependencies`. Type-only imports are fine.
 
 **Warnings fail lint.** `npm run lint` is `eslint . --max-warnings=0` as of 2026-09-24, so a warning fails CI's `checks` job exactly as an error does. The distinction between `warn` and `error` in `eslint.config.mjs` is now only how the editor displays it. Fix the warning; if a rule is wrong for a whole class of file, scope an override with its reason next to it, as the context-file exemption above does. Never raise `--max-warnings` to make a build pass.

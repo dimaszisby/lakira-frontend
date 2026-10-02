@@ -56,8 +56,9 @@ Serial chain, each step gated on the last:
 checks (lint → lint:css → typecheck) → unit → integration → build → e2e
 ```
 
-plus three independent jobs: `security` (`security:scan`), `secret-scan` (gitleaks), and
-`api-contract` (`api:spec:check` + `api:types:check`).
+plus three independent jobs: `security` (`security:scan`, production dependencies only),
+`secret-scan` (gitleaks), and `api-contract` (`api:spec:check` + `api:types:check`). The full
+dependency audit runs nightly in a separate workflow, `dependency-audit`.
 
 Reproduce the serial part locally:
 
