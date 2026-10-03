@@ -188,7 +188,8 @@ describe("RegisterForm integration", () => {
    * connection problem. Asserted on the text, since the existing failure test
    * only checks that an alert exists.
    *
-   * The body is the one backend #127 sends for its per-IP registration limit.
+   * The body is the one the backend sends for its per-IP registration limit:
+   * the message from backend #127, in the error envelope since backend #131.
    * That limit is counted per hour, so a retried 429 would spend the user's
    * remaining attempts: the request must go out exactly once.
    */
@@ -202,7 +203,7 @@ describe("RegisterForm integration", () => {
         http.post(REGISTER_ENDPOINT, () => {
           registerRequests += 1;
           return HttpResponse.json(
-            { status: 429, message: "Too many registration attempts, please try again later." },
+            { status: "fail", message: "Too many registration attempts, please try again later." },
             { status: 429 },
           );
         }),
