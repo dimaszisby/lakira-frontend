@@ -102,3 +102,7 @@ grep -rhoE '(docs)/[A-Za-z0-9._/-]+\.(md|json|ts|tsx|mjs|sh|yml)' docs *.md .cla
 ```
 
 Must print nothing. Then report every file written, with its path and one line on what it covers.
+
+## Memory
+
+Record anything non-obvious in `.claude/agent-memory/doc-writer/` following the `MEMORY.md` + **How to apply:** convention. Record the heuristic and a pointer to the PR or branch, not an account of what you wrote — the files are tracked in git and reviewed in the PR (`.claude/rules/workflow.md` § Self-improvement loop).

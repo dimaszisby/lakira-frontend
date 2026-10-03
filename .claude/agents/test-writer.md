@@ -79,4 +79,4 @@ The proxy, the auth routes, and the error layer are the highest-risk untested co
 
 Run the suite you wrote into — `npx jest --config jest.unit.config.ts <path>` or the integration equivalent — and report the actual output. A test you have not seen pass is not written.
 
-Record anything non-obvious in `.claude/agent-memory/test-writer/` following the `MEMORY.md` + **How to apply:** convention.
+Record anything non-obvious in `.claude/agent-memory/test-writer/` following the `MEMORY.md` + **How to apply:** convention. Record the heuristic and a pointer to the PR or branch, not an account of what you did — the files are tracked in git and reviewed in the PR (`.claude/rules/workflow.md` § Self-improvement loop).

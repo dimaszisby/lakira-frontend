@@ -146,6 +146,8 @@ After **any** correction from the user, append the pattern to `.claude/lessons.m
 
 Read `.claude/lessons.md` at session start. Iterate on it until the mistake rate drops. A lesson that stabilises — one that keeps proving true — should be promoted into the relevant `.claude/rules/*.md` file and removed from the lessons log.
 
+**Agent memory runs the same loop.** `.claude/agent-memory/<agent>/` is tracked in git as of 2026-10-04. Each note is a heuristic and a pointer to the PR it came from, not a record of the findings. A new or changed note is part of the task's diff: read it before handing over, because a heuristic you disagree with is a bug the agent will repeat. One that keeps proving true is promoted into the relevant rules file and deleted from memory; one that is contradicted is deleted.
+
 ## Ephemeral todos
 
 Work that sizes to the ephemeral row gets one `docs/internal/todos/YYYY-MM-DD-todo-<kebab-title>.md` with checkable items instead of a kit. Check items off as they land, and append a `## Status` review section to the **same** file when done.

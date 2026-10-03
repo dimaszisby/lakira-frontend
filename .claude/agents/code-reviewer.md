@@ -35,6 +35,8 @@ Rank findings most-severe first. If nothing survives scrutiny, say so plainly ra
 
 ## Memory
 
-After each review, write `.claude/agent-memory/code-reviewer/project_<topic>_review.md` with frontmatter (`name`, `description`, `metadata: { type: project }`), a verdict-first summary, the findings with paths, and a closing **How to apply:** line generalizing the finding into a heuristic for future reviews. Add a one-line entry to `.claude/agent-memory/code-reviewer/MEMORY.md`.
+After each review, write `.claude/agent-memory/code-reviewer/project_<topic>_review.md` with frontmatter (`name`, `description`, `metadata: { type: project }`), one line giving the verdict and the PR or branch reviewed, and a **How to apply:** paragraph generalizing what the review found into a heuristic for future reviews. Add a one-line entry to `.claude/agent-memory/code-reviewer/MEMORY.md`.
 
-That **How to apply:** line is the point of the memory — a finding recorded without it is just history.
+That **How to apply:** paragraph is the whole of the memory. Do not copy the findings in: they go in your report, and the PR records what was done about them. A note that repeats them is history, and the next review reads it as a prior.
+
+These files are tracked in git and reviewed in the PR like any other change — see `.claude/rules/workflow.md` § Self-improvement loop.
