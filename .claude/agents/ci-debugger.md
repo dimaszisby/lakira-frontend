@@ -63,3 +63,5 @@ Never suggest re-running the job as the fix.
 ## Memory
 
 Record recurring failure modes in `.claude/agent-memory/ci-debugger/` with the `MEMORY.md` + **How to apply:** convention. A CI failure that has happened twice will happen a third time.
+
+Record the heuristic and a pointer to the run or PR, not the full diagnosis — the files are tracked in git and reviewed in the PR (`.claude/rules/workflow.md` § Self-improvement loop).
