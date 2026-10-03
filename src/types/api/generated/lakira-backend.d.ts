@@ -456,6 +456,15 @@ export interface paths {
                 };
                 400: components["responses"]["BadRequestError"];
                 409: components["responses"]["ConflictError"];
+                /** @description Too many registration attempts from this IP (RATE_LIMIT_REGISTER_IP_MAX per hour) */
+                429: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RateLimitError"];
+                    };
+                };
                 500: components["responses"]["InternalServerError"];
             };
         };

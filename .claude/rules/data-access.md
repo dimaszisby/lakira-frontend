@@ -69,7 +69,7 @@ Two things to know:
 - `fetchUserProfile` still returns `null` rather than throwing, deliberately — callers treat "no profile" and "could not load it" alike.
 - The backend's own docs flag that 4xx/5xx bodies are under-specified in the OpenAPI spec, and its global error handler can emit shapes the spec does not describe. Treat `normalizeApiError` as the compatibility layer and add cases there rather than defensively in features.
 
-Backend rate limits you will hit: 100/15min per IP globally, 50/15min per user, 30/1min on analytics. A 429 is `retryable`.
+Backend rate limits you will hit: 100/15min per IP globally, 50/15min per user, 30/1min on analytics, and 10/hour per IP on `POST /auth/register` (`RATE_LIMIT_REGISTER_IP_MAX`, backend ADR-0053, since backend #127). A 429 is `retryable`, but `api.ts` retries it only for safe methods or a request carrying an `Idempotency-Key`. `registerUser` sends none on purpose: each retry would spend one of the user's hourly attempts. `RegisterForm.int.test.tsx` asserts the request goes out once.
 
 ## TanStack Query
 
