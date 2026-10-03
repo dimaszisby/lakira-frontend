@@ -152,8 +152,8 @@
                   "type": "string"
                 },
                 "status": {
-                  "example": 429,
-                  "type": "number"
+                  "example": "fail",
+                  "type": "string"
                 }
               },
               "required": [
@@ -1606,8 +1606,8 @@
             "type": "string"
           },
           "status": {
-            "example": 429,
-            "type": "number"
+            "example": "fail",
+            "type": "string"
           }
         },
         "required": [

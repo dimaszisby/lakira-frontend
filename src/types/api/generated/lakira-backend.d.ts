@@ -2681,8 +2681,8 @@ export interface components {
         RateLimitError: {
             /** @example Too many requests, please try again later. */
             message: string;
-            /** @example 429 */
-            status: number;
+            /** @example fail */
+            status: string;
         };
         RefreshResponse: components["schemas"]["SuccessResponse"] & {
             data?: {
@@ -3090,8 +3090,8 @@ export interface components {
                 "application/json": {
                     /** @example Too many requests, please try again later. */
                     message: string;
-                    /** @example 429 */
-                    status: number;
+                    /** @example fail */
+                    status: string;
                 };
             };
         };

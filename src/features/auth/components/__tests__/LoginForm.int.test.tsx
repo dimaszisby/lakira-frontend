@@ -183,7 +183,7 @@ describe("LoginForm integration", () => {
         server.use(
           http.post(LOGIN_ENDPOINT, () =>
             HttpResponse.json(
-              { status: 429, message: "Too many requests, please try again later." },
+              { status: "fail", message: "Too many requests, please try again later." },
               { status: 429 },
             ),
           ),
