@@ -33,7 +33,8 @@ The chain is strictly serial, so a failure in `checks` means nothing downstream 
 | `integration` | `test:integration` | `onUnhandledRequest: "error"` with empty MSW handlers. A test that passes locally and fails in CI is often an escaped request that a local cache was serving. |
 | `build` | `next build`, uploads `.next` | `if-no-files-found: error` on the artifact. A build that "succeeds" but uploads nothing fails here. |
 | `e2e` | downloads `.next`, `next start`, `test:e2e` | 60×2s readiness poll against `CYPRESS_BASE_URL`. If it timed out, read the `tail -n 200 /tmp/next-start.log` output in the step — the app usually failed to boot on a missing env var. |
-| `security` | `security:scan` | `npm audit --audit-level=high`. A new advisory fails a job that has nothing to do with the diff. |
+| `security` | `security:scan` | `npm audit --omit=dev --audit-level=high`, production dependencies only (ADR-0023). A new advisory in a shipped package fails every PR, whatever the diff. |
+| `dependency-audit` (nightly, separate workflow) | `security:audit:full` | Every dependency. A failure here with green PRs means a development-tooling advisory: a task, not a broken branch. |
 | `secret-scan` | pinned gitleaks binary, full history | A digest mismatch in "Install gitleaks" means the download changed — stop and investigate, never update the digest to match. A hit means the secret is already public: rotation first, removal second. |
 | `api-contract` | `api:spec:check`, `api:types:check` | Failure means the backend shipped a contract change. Run `/sync-api-types`. This is expected drift, not a broken build. |
 

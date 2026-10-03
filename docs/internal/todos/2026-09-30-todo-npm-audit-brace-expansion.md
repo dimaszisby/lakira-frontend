@@ -27,7 +27,7 @@ patched versions sit inside ranges the parents already declare.
 - [x] Gates: lint, css lint, typecheck, format, unit, integration, build, and
       `api:types:check` (openapi-typescript is in the chain)
 - [x] Hand over commit and PR (#63: lockfile fix, contract sync, production advisories, docs)
-- [ ] After #63 merges, bring #62 up to date with `dev` so its Security Scan and API Contract
+- [x] After #63 merges, bring #62 up to date with `dev` so its Security Scan and API Contract
       Drift re-run against the fixes
 
 ## Discovered
@@ -63,4 +63,5 @@ finds 0 vulnerabilities. All gates listed above passed.
 
 This clears the advisory, not the pattern: a dev-tool advisory fails every open PR. The
 long-term change (block PRs on production dependencies only, audit everything on a schedule)
-is its own task.
+is its own task: kit `docs/internal/initiatives/dependency-audit-split/`, ADR-0023.
+#62 took `dev` on 2026-10-01 (53036db) and merged green.

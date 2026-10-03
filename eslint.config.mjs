@@ -351,6 +351,20 @@ const config = [
     },
   },
 
+  /* Runtime code may not import a devDependency.
+   *
+   * CI's pull-request audit covers production dependencies only (ADR-0023). A
+   * runtime import of a devDependency would ship that package while hiding it
+   * from the audit, so this rule is what keeps the audit's scope true. Type-only
+   * imports are allowed: they are erased at build time. */
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    ignores: ["src/**/__tests__/**", "src/test-utils/**", "src/**/*.d.ts"],
+    rules: {
+      "import-x/no-extraneous-dependencies": ["error", { devDependencies: false }],
+    },
+  },
+
   /* Known layer inversions, quarantined.
    *
    * These files live in `components` but reach up into `features`/`services`.

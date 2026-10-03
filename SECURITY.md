@@ -66,6 +66,8 @@ one.
 
 - Secrets never enter the repository. `gitleaks` runs over full history in CI; a hit means the
   secret is already public and must be rotated, not merely deleted.
-- `npm audit --audit-level=high` gates CI. A new high-severity advisory fails the build.
+- `npm audit --omit=dev --audit-level=high` gates every pull request: a high-severity advisory in a
+  production dependency fails the build. A nightly workflow audits every dependency, development
+  tooling included.
 - Nothing sensitive goes behind a `NEXT_PUBLIC_` name — that prefix inlines the value into the
   client bundle at build time and publishes it permanently. See `.claude/rules/environment.md`.

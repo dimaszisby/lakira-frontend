@@ -19,7 +19,7 @@ What the frontend does with a 429 on register today (read, not yet tested):
 - [x] Confirm the register form shows the 429 message: an integration test with an MSW `429`
       `RateLimitError` response, broken on purpose first
 - [x] Gates, with `api:spec:check` and `security:audit` re-run right before handover
-- [ ] After it merges, update `chore/dependency-audit-split` with `dev` so its API Contract
+- [x] After it merges, update `chore/dependency-audit-split` with `dev` so its API Contract
       Drift re-runs
 
 ## Status
@@ -43,3 +43,6 @@ Review found that the per-IP limit may not see real client IPs through the proxy
 
 This file was written on `chore/dependency-audit-split` too. When #64 takes `dev`, keep `dev`'s
 copy of it.
+
+Merged as #65 (e307f89, 2026-10-02). #64 took `dev` on 2026-10-03: the only conflict was this
+file, resolved by keeping `dev`'s copy and ticking the last box.

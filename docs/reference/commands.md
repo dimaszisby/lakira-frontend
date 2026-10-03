@@ -59,11 +59,12 @@ npx jest --config jest.integration.config.ts path/to/file.int.test.tsx
 
 ## Security
 
-| Command                  | What it does                                      |
-| ------------------------ | ------------------------------------------------- |
-| `npm run security:lint`  | `lint` + `lint:css`.                              |
-| `npm run security:audit` | `npm audit --audit-level=high`.                   |
-| `npm run security:scan`  | Both of the above. What CI's `security` job runs. |
+| Command                       | What it does                                                                                         |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `npm run security:lint`       | `lint` + `lint:css`.                                                                                 |
+| `npm run security:audit`      | `npm audit --omit=dev --audit-level=high`: production dependencies only.                             |
+| `npm run security:audit:full` | `npm audit --audit-level=high`: every dependency. What the nightly `dependency-audit` workflow runs. |
+| `npm run security:scan`       | `security:lint` + `security:audit`. What CI's `security` job runs.                                   |
 
 ## API contract
 

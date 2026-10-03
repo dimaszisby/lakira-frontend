@@ -246,7 +246,8 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run lint + npm audit
+      # Production dependencies only; the full audit runs nightly in dependency-audit.yml (ADR-0023).
+      - name: Run lint + npm audit (production dependencies)
         run: npm run security:scan
 
   # Full-history gitleaks scan on every push and PR. Runs a pinned,

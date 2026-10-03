@@ -32,14 +32,15 @@ npm run test:e2e
 
 ## Common failures
 
-| Job            | Symptom                         | Fix                                                                                                        |
-| -------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `api-contract` | "generated API types are stale" | `npm run api:types:generate`, commit the result.                                                           |
-| `api-contract` | "snapshot has drifted"          | `npm run api:spec:sync`, then regenerate types. Commit both.                                               |
-| `checks`       | Passes locally, fails in CI     | Node version. CI runs the major in `.nvmrc` (24); run `nvm use`.                                           |
-| `e2e`          | Times out on first visit        | The app did not start. Check the `build` artifact uploaded and `npm run start` bound to `127.0.0.1:3000`.  |
-| `security`     | `npm audit` high finding        | Upgrade the dependency. If it cannot be upgraded, record the exception rather than lowering the threshold. |
-| `secret-scan`  | gitleaks hit                    | Rotate the credential first, then remove it from history. A revert does not un-leak it.                    |
+| Job                          | Symptom                         | Fix                                                                                                                                                                                                                           |
+| ---------------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api-contract`               | "generated API types are stale" | `npm run api:types:generate`, commit the result.                                                                                                                                                                              |
+| `api-contract`               | "snapshot has drifted"          | `npm run api:spec:sync`, then regenerate types. Commit both.                                                                                                                                                                  |
+| `checks`                     | Passes locally, fails in CI     | Node version. CI runs the major in `.nvmrc` (24); run `nvm use`.                                                                                                                                                              |
+| `e2e`                        | Times out on first visit        | The app did not start. Check the `build` artifact uploaded and `npm run start` bound to `127.0.0.1:3000`.                                                                                                                     |
+| `security`                   | `npm audit` high finding        | A production dependency is affected, so every PR fails until it is fixed. Upgrade it (`npm audit fix`, no `--force`, then the full gates). If it cannot be upgraded, record the exception rather than lowering the threshold. |
+| `dependency-audit` (nightly) | `npm audit` high finding        | A development dependency is affected; PRs stay green. Fix it as its own task, the same way. The failure email goes to whoever last edited the workflow's cron line.                                                           |
+| `secret-scan`                | gitleaks hit                    | Rotate the credential first, then remove it from history. A revert does not un-leak it.                                                                                                                                       |
 
 ## Notes
 

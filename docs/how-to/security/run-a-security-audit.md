@@ -6,11 +6,15 @@ Audits are run as dated cycles. Each produces a folder of structured records und
 ## Automated scans first
 
 ```bash
-npm run security:scan     # lint + lint:css + npm audit --audit-level=high
-npm run security:audit    # npm audit alone
+npm run security:scan        # lint + lint:css + the production audit
+npm run security:audit       # npm audit --omit=dev --audit-level=high
+npm run security:audit:full  # npm audit --audit-level=high, every dependency
 ```
 
-Both run in CI on every push as the `security` job, alongside a gitleaks `secret-scan`.
+`security:scan` runs in CI on every push and pull request as the `security` job, alongside a
+gitleaks `secret-scan`. It blocks on production dependencies only; `security:audit:full` runs
+nightly in the `dependency-audit` workflow, where an advisory in development tooling surfaces
+([ADR-0023](../../explanation/decisions/adr-0023-pull-requests-block-on-production-advisories-only.md)).
 
 ## Then the manual cycle
 
