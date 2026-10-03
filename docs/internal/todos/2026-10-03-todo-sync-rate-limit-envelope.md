@@ -21,11 +21,12 @@ What the frontend does with that field (read on 2026-10-03):
 - [x] Both 429 fixtures send the envelope body the backend now sends
 - [x] `CLAUDE.md`: last synced date
 - [x] Gates, with `api:spec:check` and `security:audit` re-run right before handover
-- [ ] After it merges, hand over `docs/braces-dev-advisory`
+- [x] After it merges, hand over `docs/braces-dev-advisory`
 
 ## Status
 
-Done 2026-10-03 on `chore/sync-rate-limit-envelope`, apart from handing over the docs branch.
+Done 2026-10-03 on `chore/sync-rate-limit-envelope`; merged as #66 (03974f5). The docs branch was
+handed over after it.
 
 - Sync: `status` in the `RateLimitError` schema and the `TooManyRequestsError` response is a
   string with example `fail`, where it was a number with example 429. Nothing else changed

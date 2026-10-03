@@ -1,8 +1,9 @@
 # Dependency audit split
 
-**Status:** Implemented on the branch; D-01 is ADR-0023, accepted in the same PR (registry rule).
-Open: AC-3 (one dispatched run after merge) and spec drift, which waits on the register-rate-limit
-sync (`docs/internal/todos/2026-10-02-todo-sync-register-rate-limit.md`).
+**Status:** Merged as #64 (77fa8e3, 2026-10-03); D-01 is ADR-0023, accepted in the same PR
+(registry rule). Open: AC-3. The first dispatched run failed on an unpatched advisory in `braces`,
+a development-only dependency, so no green run exists yet; tracked in
+`docs/internal/todos/2026-10-03-todo-braces-dev-advisory.md`.
 **Slug:** `dependency-audit-split` · **Branch:** `chore/dependency-audit-split`
 
 - [Checklist](dependency-audit-split-checklist.md) — work items, acceptance, gates

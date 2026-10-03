@@ -28,6 +28,10 @@
       `POST /auth/register` after #62's green `dev` run -> out of scope, filed as
       `docs/internal/todos/2026-10-02-todo-sync-register-rate-limit.md`. That PR merges first;
       this branch then takes `dev` so its API Contract Drift check re-runs.
+- [x] Found: the first dispatched run after merge (37131845770, 2026-10-03) failed on an
+      unpatched advisory in `braces`, a development-only dependency. The workflow ran as
+      designed, but AC-3 says green, so it stays open -> out of scope, filed as
+      `docs/internal/todos/2026-10-03-todo-braces-dev-advisory.md`.
 
 ## Acceptance
 
@@ -55,7 +59,8 @@
 - [x] format
 - [x] unit tests
 - [x] integration
-- [ ] spec drift (`api:spec:check`) — fails on backend #127, not this branch; see Discovered
+- [x] spec drift (`api:spec:check`) — failed on backend #127, not this branch; passed on
+      2026-10-03 once the branch took `dev` with #65 (see Discovered)
 - [x] build
 - [x] `security:scan` and `security:audit:full`
 - [x] e2e, e2e (stack) — skipped: no page or flow changes
