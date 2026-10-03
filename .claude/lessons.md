@@ -185,3 +185,18 @@ can go green.
 **Why**: an external-drift gate can go red between one hour and the next with no change here, so a
 result from earlier in the session is stale by handover. Same lesson as 2026-09-27 from the other
 side: that one was about verifying after merge, this one about checking before handover.
+
+## [2026-10-01] A finished run was reported as stuck for a day
+
+**Mistake**: After #62 merged I reported its `dev` push run as stuck since "17:26 yesterday" and
+proposed cancelling and re-running it. It had finished six minutes after the merge. I had read the
+merge time as the previous day without checking the clock, and during a GitHub Actions incident
+the API kept reporting finished jobs as in progress.
+
+**Rule**: before calling a run stuck, run `date -u` and compare it with the run's `createdAt` and
+`updatedAt` from `gh run view <id> --json status,conclusion,createdAt,updatedAt`. All three are
+UTC; the machine's local time is not. While githubstatus.com shows an Actions incident, an
+in-progress status is not evidence: wait and re-read before proposing a cancel or a re-run.
+
+**Why**: "stuck for a day" was an inference from two numbers, one of them misread. Cancelling a
+run that had already passed would have thrown away the result that verified the merge.
