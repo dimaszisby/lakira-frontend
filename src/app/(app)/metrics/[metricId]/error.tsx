@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 
+import { reportClientError } from "@/lib/monitoring/report-client-error";
 import { Button } from "@/ui/Button";
 
 const MetricDetailError = ({
@@ -13,6 +14,7 @@ const MetricDetailError = ({
 }) => {
   useEffect(() => {
     console.error("Metric detail route error:", error);
+    reportClientError(error, "boundary");
   }, [error]);
 
   return (

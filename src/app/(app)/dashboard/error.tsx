@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 
+import { reportClientError } from "@/lib/monitoring/report-client-error";
 import { Button } from "@/ui/Button";
 
 type DashboardErrorProps = {
@@ -12,6 +13,7 @@ type DashboardErrorProps = {
 const DashboardError = ({ error, reset }: DashboardErrorProps) => {
   useEffect(() => {
     console.error("Dashboard route error:", error);
+    reportClientError(error, "boundary");
   }, [error]);
 
   return (

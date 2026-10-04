@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 
+import { reportClientError } from "@/lib/monitoring/report-client-error";
 import { Button } from "@/ui/Button";
 
 /**
@@ -11,9 +12,9 @@ import { Button } from "@/ui/Button";
  * Only two route subtrees had an `error.tsx` before this; anything else showed
  * the raw Next.js default.
  *
- * The report is sent to the app's own endpoint rather than a vendor SDK. That
- * keeps the base provider-agnostic; register a `LogSink` in `src/lib/logger.ts`
- * to forward it onward.
+ * The report goes to the app's own endpoint rather than a vendor SDK in the
+ * browser. The server's registered `LogSink` decides where it goes next; see
+ * `src/instrumentation.ts`.
  */
 
 type GlobalErrorProps = {
@@ -25,18 +26,7 @@ const GlobalError = ({ error, reset }: GlobalErrorProps) => {
   useEffect(() => {
     // `digest` is the server-side correlation id; the message is omitted on the
     // server for security, so the digest is what ties this to a server log line.
-    const body = JSON.stringify({
-      message: error.message,
-      digest: error.digest,
-      path: window.location.pathname,
-    });
-
-    void fetch("/api/observability/client-error", {
-      method: "POST",
-      body,
-      keepalive: true,
-      headers: { "content-type": "application/json" },
-    }).catch(() => undefined);
+    reportClientError(error, "boundary");
   }, [error]);
 
   return (
