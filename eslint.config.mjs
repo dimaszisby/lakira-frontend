@@ -365,6 +365,31 @@ const config = [
     },
   },
 
+  /* The monitoring vendor stays behind the adapter.
+   *
+   * Sentry runs on the server only (ADR-0024): `src/instrumentation.ts` loads it
+   * by dynamic import when a DSN is set, and everything else reports through the
+   * logger. An import anywhere else would put the SDK in a client bundle, or tie
+   * feature code to one provider. */
+  {
+    files: ["**/*.{ts,tsx,mjs}"],
+    ignores: ["src/instrumentation.ts", "src/lib/monitoring/**"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@sentry/*"],
+              message:
+                "Report through `logger` from src/lib/logger.ts. Only src/instrumentation.ts and src/lib/monitoring/** may import the vendor SDK (ADR-0024).",
+            },
+          ],
+        },
+      ],
+    },
+  },
+
   /* Known layer inversions, quarantined.
    *
    * These files live in `components` but reach up into `features`/`services`.

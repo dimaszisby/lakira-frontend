@@ -153,3 +153,19 @@ export const getApiBaseUrl = (): string => {
 
   return DEV_API_BASE_URL;
 };
+
+/**
+ * Error-monitoring configuration. Server-only, and `null` when unset.
+ *
+ * `SENTRY_DSN` and `APP_RELEASE` are the names `lakira-backend` uses. Neither is
+ * `NEXT_PUBLIC_`: Sentry runs only on the server here (ADR-0024), so the browser
+ * never needs the DSN. `null` means reporting is off, which is the default and
+ * what a fork without an account gets.
+ */
+export const getMonitoringConfig = (): { dsn: string; release?: string } | null => {
+  const dsn = process.env.SENTRY_DSN?.trim();
+  if (!dsn) return null;
+
+  const release = process.env.APP_RELEASE?.trim();
+  return release ? { dsn, release } : { dsn };
+};

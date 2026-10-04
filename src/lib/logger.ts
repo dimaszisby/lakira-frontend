@@ -70,22 +70,36 @@ export const redact = (value: unknown, depth = 0): unknown => {
   return out;
 };
 
-let sink: LogSink | null = null;
+/**
+ * The registered sink lives on `globalThis`, not in a module variable.
+ *
+ * Next bundles this file into each server chunk that imports it, and every
+ * copy gets its own module scope. `src/instrumentation.ts` registers the sink
+ * from one copy; a route handler logs through another. With a module variable
+ * the route's copy never saw the sink, so its entries reached stdout and went
+ * no further. Found on 2026-10-04 by sending real errors: the one logged from
+ * the instrumentation chunk arrived in Sentry, the two from a route did not.
+ * `Symbol.for` is what makes every copy resolve the same slot.
+ */
+const SINK_KEY = Symbol.for("lakira.logger.sink");
+
+type SinkRegistry = { [SINK_KEY]?: LogSink | null };
+
+const registry = globalThis as SinkRegistry;
 
 /**
  * Register a destination for log entries, e.g. an error-monitoring adapter.
  * Passing `null` restores the default stdout writer.
  */
 export const setLogSink = (next: LogSink | null): void => {
-  sink = next;
+  registry[SINK_KEY] = next;
 };
 
-const writeEntry = (entry: LogEntry): void => {
-  if (sink) {
-    sink(entry);
-    return;
-  }
-
+/**
+ * The default writer: one JSON object per line. Exported so a sink can keep the
+ * event stream intact and forward on top of it, rather than replace it.
+ */
+export const writeToStdout = (entry: LogEntry): void => {
   const line = JSON.stringify(entry);
 
   // Node: one JSON object per line on stdout, the twelve-factor event stream.
@@ -98,6 +112,16 @@ const writeEntry = (entry: LogEntry): void => {
   } else {
     console.warn(line);
   }
+};
+
+const writeEntry = (entry: LogEntry): void => {
+  const sink = registry[SINK_KEY];
+  if (sink) {
+    sink(entry);
+    return;
+  }
+
+  writeToStdout(entry);
 };
 
 export const log = (level: LogLevel, msg: string, fields: LogFields = {}): void => {
