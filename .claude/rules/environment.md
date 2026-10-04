@@ -33,6 +33,8 @@ Server-only vars (no prefix) are readable in route handlers, `src/proxy.ts` (the
 | `HOST`, `PORT` | server | SSR origin fallback, defaults `localhost:3000` |
 | `NODE_ENV` | build | dev-only logging; CSP `unsafe-eval` in dev |
 | `NEXT_PUBLIC_ENABLE_DUMMY_ACTIONS` | **public** | feature flag, compared `=== "true"`, gates the "generate dummy data" buttons |
+| `SENTRY_DSN` | server | `src/lib/monitoring/server.ts` — turns error reporting on; unset means no vendor code loads (ADR-0024) |
+| `APP_RELEASE` | server | the release sent with each Sentry event; the backend's name for it |
 | `TZ` | test | forced to `UTC` in `jest.setup.ts` |
 | `CYPRESS_BASE_URL` | CI | Cypress target, default `http://127.0.0.1:3000` |
 | `PERF_BASE_URL` | CI | Lighthouse target |
@@ -54,7 +56,7 @@ Keep `API_URL` and `NEXT_PUBLIC_API_BASE_URL` **equal** within an environment. T
 Do not scatter `process.env` reads through feature code. `src/lib/env.ts` is the one module that touches the environment, and it has two segments:
 
 - **Public** — `clientEnv` and `isDummyActionsEnabled`, covering the `NEXT_PUBLIC_*` vars. Safe to import anywhere.
-- **Server** — `getApiBaseUrl()` and `resolveAppOrigin()`. Route handlers, server components, and `src/proxy.ts` only.
+- **Server** — `getApiBaseUrl()`, `resolveAppOrigin()` and `getMonitoringConfig()`. Route handlers, server components, and `src/proxy.ts` only.
 
 Each variable is referenced as a **literal** `process.env.X` inside that module. Next.js substitutes those literals at build time; a dynamic lookup like `process.env[name]` is never substituted and resolves to `undefined`.
 

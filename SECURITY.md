@@ -50,8 +50,9 @@ This repo publishes its own readiness assessment rather than implying it has non
 
 Security-relevant items already known and tracked — please do not re-report these:
 
-- No error monitoring is wired up; CSP violation reports are received and discarded in
-  production.
+- Error monitoring is off unless the deployment sets `SENTRY_DSN`. It runs on the server only,
+  and browser stack traces are not symbolicated (ADR-0024). CSP violation reports are written
+  to the server's log stream at `warn`, which is not forwarded.
 - `middleware.ts` performs a presence-only session-cookie check and does not validate token
   expiry.
 - The proxy's authentication allowlist is opt-in by path segment, so `analytics/*` proxies

@@ -4,17 +4,22 @@ import { z } from "zod";
 import { logger } from "@/lib/logger";
 
 /**
- * Receives client-side error reports from `global-error.tsx`.
+ * Receives browser error reports: the three error boundaries and the window
+ * listeners in `src/instrumentation-client.ts`, all through
+ * `reportClientError`.
  *
  * Unauthenticated and browser-driven, so the payload is size-capped and
  * schema-validated before it reaches the log stream.
  */
 
-const MAX_BODY_BYTES = 4_096;
+const MAX_BODY_BYTES = 8_192;
 
 const ClientErrorSchema = z.object({
+  kind: z.enum(["boundary", "uncaught", "unhandled-rejection"]).optional(),
   message: z.string().max(1_024).optional(),
+  stack: z.string().max(4_000).optional(),
   digest: z.string().max(128).optional(),
+  requestId: z.string().max(128).optional(),
   path: z.string().max(512).optional(),
 });
 

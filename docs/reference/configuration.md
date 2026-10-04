@@ -19,6 +19,7 @@ It has two segments:
 | `clientEnv`, `isDummyActionsEnabled` | Public — `NEXT_PUBLIC_*` only | Anywhere                                           |
 | `getApiBaseUrl()`                    | Server                        | Route handlers, server components, `src/proxy.ts`  |
 | `resolveAppOrigin()`                 | Server                        | Route handlers, server components, metadata routes |
+| `getMonitoringConfig()`              | Server                        | `src/lib/monitoring/server.ts`                     |
 
 Parsing is lenient on purpose: every field is optional and nothing throws at module load, because
 `npm run build` runs in CI with no environment set. Required values fail at the point of use
@@ -59,6 +60,8 @@ deliberately unprefixed for this reason — see below.
 | `NEXT_PUBLIC_ENABLE_DUMMY_ACTIONS` | Client | dummy-data mutation hooks                          | off                                      | Gates the `create-dummy` mutations. Keep off outside local development.                                    |
 | `NODE_ENV`                         | Server | dev-only diagnostics, test setup                   | set by the toolchain                     | Never set by hand.                                                                                         |
 | `HOST` / `PORT`                    | Server | `npm run start`                                    | `localhost` / `3000`                     |                                                                                                            |
+| `SENTRY_DSN`                       | Server | `src/lib/monitoring/server.ts`                     | unset: monitoring is off                 | Turns on error reporting. Never `NEXT_PUBLIC_`; the browser does not talk to Sentry (ADR-0024).            |
+| `APP_RELEASE`                      | Server | `src/lib/monitoring/server.ts`                     | —                                        | Optional. Sent as the release on each Sentry event. Same name as `lakira-backend`.                         |
 
 ## Tooling-only variables
 

@@ -46,6 +46,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0021](./adr-0021-tanstack-query-floor-at-the-observer-reattach-fix.md)         | TanStack Query's floor is the observer-reattach fix                   | Accepted       | 2026-09-29 | todo      |
 | [ADR-0022](./adr-0022-browser-accessibility-checks-with-cypress-axe.md)             | Browser accessibility checks through `cypress-axe`, `axe-core` pinned | Accepted       | 2026-09-29 | `D-02`    |
 | [ADR-0023](./adr-0023-pull-requests-block-on-production-advisories-only.md)         | Pull requests block on production advisories; nightly audits all      | Accepted       | 2026-10-02 | `D-01`    |
+| [ADR-0024](./adr-0024-sentry-on-the-server-only.md)                                 | Error monitoring is Sentry, running on the server only                | Accepted       | 2026-10-04 | `D-01`    |
 
 ## Where the other decisions went
 

@@ -7,6 +7,7 @@
  */
 
 import type { LogEntry } from "../logger";
+import type * as LoggerNamespace from "../logger";
 import { logger, redact, REDACTED, SENSITIVE_KEY_PATTERN, setLogSink } from "../logger";
 
 const AUTH_HEADER = "Bearer abc.def.ghi";
@@ -120,5 +121,35 @@ describe("logger", () => {
   it("works with no fields supplied", () => {
     logger.warn("bare");
     expect(entries[0]).toMatchObject({ level: "warn", msg: "bare" });
+  });
+});
+
+describe("setLogSink across module instances", () => {
+  /**
+   * Next bundles the logger into each server chunk that imports it, so the copy
+   * `src/instrumentation.ts` registers the sink on is not the copy a route
+   * handler logs through. Two isolated loads of the module stand in for two
+   * chunks.
+   */
+  afterEach(() => setLogSink(null));
+
+  it("delivers an entry logged by one copy to the sink registered on another", () => {
+    let registering!: typeof LoggerNamespace;
+    let logging!: typeof LoggerNamespace;
+    jest.isolateModules(() => {
+      registering = jest.requireActual<typeof LoggerNamespace>("../logger");
+    });
+    jest.isolateModules(() => {
+      logging = jest.requireActual<typeof LoggerNamespace>("../logger");
+    });
+    expect(logging).not.toBe(registering);
+
+    const entries: LogEntry[] = [];
+    registering.setLogSink((entry) => entries.push(entry));
+    logging.logger.error("client.error", { message: "boom" });
+
+    expect(entries).toEqual([
+      expect.objectContaining({ level: "error", msg: "client.error", message: "boom" }),
+    ]);
   });
 });

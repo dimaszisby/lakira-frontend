@@ -9,11 +9,13 @@ const axiosError = ({
   status,
   data,
   code,
+  headers,
   message = REQUEST_FAILED,
 }: {
   status?: number;
   data?: unknown;
   code?: string;
+  headers?: Record<string, unknown>;
   message?: string;
 }) =>
   new AxiosError(
@@ -21,7 +23,7 @@ const axiosError = ({
     code,
     undefined,
     undefined,
-    status === undefined ? undefined : ({ status, data } as AxiosResponse),
+    status === undefined ? undefined : ({ status, data, headers } as AxiosResponse),
   );
 
 describe("normalizeApiError", () => {
@@ -142,5 +144,35 @@ describe("normalizeApiError", () => {
 
   it("describes a thrown non-Error value generically", () => {
     expect(normalizeApiError("nope").messages).toEqual(["Unexpected error"]);
+  });
+
+  describe("requestId", () => {
+    it("keeps the backend's x-request-id from a failed response", () => {
+      const result = normalizeApiError(
+        axiosError({ status: 500, headers: { "x-request-id": "req-123" } }),
+      );
+
+      expect(result.requestId).toBe("req-123");
+    });
+
+    it("is undefined when the response carries none", () => {
+      expect(normalizeApiError(axiosError({ status: 500 })).requestId).toBeUndefined();
+      expect(normalizeApiError(axiosError({ status: 500, headers: {} })).requestId).toBeUndefined();
+    });
+
+    it("is undefined when no response arrived", () => {
+      expect(normalizeApiError(axiosError({ code: "ERR_NETWORK" })).requestId).toBeUndefined();
+    });
+
+    it("ignores a non-string value and caps an oversized one", () => {
+      expect(
+        normalizeApiError(axiosError({ status: 500, headers: { "x-request-id": ["a", "b"] } }))
+          .requestId,
+      ).toBeUndefined();
+      expect(
+        normalizeApiError(axiosError({ status: 500, headers: { "x-request-id": "x".repeat(500) } }))
+          .requestId,
+      ).toHaveLength(128);
+    });
   });
 });

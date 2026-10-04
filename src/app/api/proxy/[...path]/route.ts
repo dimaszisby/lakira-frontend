@@ -30,6 +30,12 @@ const FORWARDED_HEADER_BLOCKLIST = new Set(["connection", "content-length", "hos
  */
 const SESSION_EXPIRED_BODY = { error: "Session expired", code: "SESSION_EXPIRED" } as const;
 
+/** Returned when the request to the backend fails outright, before any response. */
+const UPSTREAM_UNREACHABLE_BODY = { error: "The server could not be reached." } as const;
+
+/** The header `lakira-backend` sets on every response and tags its own errors with. */
+const REQUEST_ID_HEADER = "x-request-id";
+
 type RouteContext = {
   params: Promise<{ path?: string[] }>;
 };
@@ -102,18 +108,50 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
     return fetch(targetUrl, init);
   };
 
-  let response = await send(token);
+  let response: Response;
   let refreshed: Awaited<ReturnType<typeof refreshAccessToken>> = null;
 
-  // Retry once on 401. The backend issues 15-minute access tokens, so an
-  // otherwise-valid session hits this constantly; without the retry the app
-  // stops working a quarter of an hour after login.
-  if (response.status === 401) {
-    refreshed = await refreshAccessToken(request.cookies.get(REFRESH_COOKIE_NAME)?.value);
-    if (refreshed) {
-      logger.info("proxy.refreshed", { path: targetPath });
-      response = await send(refreshed.token);
+  try {
+    response = await send(token);
+
+    // Retry once on 401. The backend issues 15-minute access tokens, so an
+    // otherwise-valid session hits this constantly; without the retry the app
+    // stops working a quarter of an hour after login.
+    if (response.status === 401) {
+      refreshed = await refreshAccessToken(request.cookies.get(REFRESH_COOKIE_NAME)?.value);
+      if (refreshed) {
+        logger.info("proxy.refreshed", { path: targetPath });
+        response = await send(refreshed.token);
+      }
     }
+  } catch (error) {
+    // Refused, timed out, unresolvable: the one fault the backend cannot report
+    // itself, so it is logged at `error` here. This used to escape as an
+    // unhandled rejection and a bare 500.
+    logger.error("proxy.upstream_unreachable", {
+      path: targetPath,
+      method: request.method,
+      error,
+    });
+    const unreachable = NextResponse.json(UPSTREAM_UNREACHABLE_BODY, { status: 502 });
+
+    // The refresh may have succeeded before the retry failed. The backend has
+    // then already rotated the token, and dropping the new pair here would leave
+    // the browser holding a redeemed one: its next refresh reads as replay and
+    // the whole session family is revoked.
+    if (refreshed) applyRefreshedSession(unreachable.cookies, refreshed);
+    return unreachable;
+  }
+
+  // A backend 5xx is the backend's to report, and it does, tagged with this
+  // same id. `warn` keeps the line on stdout without a second event.
+  if (response.status >= 500) {
+    logger.warn("proxy.upstream_error", {
+      path: targetPath,
+      method: request.method,
+      status: response.status,
+      requestId: response.headers.get(REQUEST_ID_HEADER) ?? undefined,
+    });
   }
 
   // Read before the header is stripped. `/auth/login` issues the refresh cookie
