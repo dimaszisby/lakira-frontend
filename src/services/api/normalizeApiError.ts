@@ -28,6 +28,14 @@ export type NormalizedApiError = {
    */
   hasServerMessage: boolean;
   retryable: boolean; // hint for retries/backoff
+  /**
+   * The backend's `x-request-id` for the failed call, when it sent one.
+   *
+   * `lakira-backend` writes the same id on every log line for the request and
+   * tags its own Sentry events with it, so this is what ties an error the user
+   * saw to the server-side record of it.
+   */
+  requestId?: string;
   raw?: unknown; // original error for telemetry
 };
 
@@ -98,6 +106,15 @@ function titleFrom(status?: number, code?: string): string {
   return "Request error";
 }
 
+const REQUEST_ID_HEADER = "x-request-id";
+const MAX_REQUEST_ID_LENGTH = 128;
+
+function readRequestId(headers: unknown): string | undefined {
+  if (!isRecord(headers)) return undefined;
+  const value = headers[REQUEST_ID_HEADER];
+  return typeof value === "string" && value ? value.slice(0, MAX_REQUEST_ID_LENGTH) : undefined;
+}
+
 function computeRetryable(status?: number, code?: string): boolean {
   if (code === "ERR_CANCELED") return false;
   if (status == null) return true; // network/CORS/timeouts → often retryable
@@ -137,6 +154,7 @@ export function normalizeApiError(err: unknown): NormalizedApiError {
       messages,
       hasServerMessage: serverMessages !== null,
       retryable: computeRetryable(status, code),
+      requestId: readRequestId(e.response?.headers),
       raw: err,
     };
   }

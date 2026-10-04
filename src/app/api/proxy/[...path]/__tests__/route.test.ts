@@ -18,6 +18,7 @@ jest.mock("@/lib/auth-refresh", () => ({
 const mockRefresh = refreshAccessToken as jest.MockedFunction<typeof refreshAccessToken>;
 
 const LOGIN_PATH = "auth/login";
+const FETCH_FAILED = "fetch failed";
 
 const context = (...segments: string[]) => ({ params: Promise.resolve({ path: segments }) });
 
@@ -195,5 +196,113 @@ describe("a protected path reached with no session cookie", () => {
       code: "SESSION_EXPIRED",
     });
     expect(global.fetch).not.toHaveBeenCalled();
+  });
+});
+
+describe("a backend the proxy cannot reach", () => {
+  // The backend reports its own 5xx faults. This is the one it cannot: no
+  // response ever arrived. It used to escape as an unhandled rejection.
+  it("answers 502 and logs at error, which is what gets forwarded", async () => {
+    const stdout = jest.spyOn(process.stdout, "write").mockImplementation(() => true);
+    global.fetch = jest.fn().mockRejectedValue(new TypeError(FETCH_FAILED)) as typeof fetch;
+
+    try {
+      const response = await GET(
+        request("metrics", { [SESSION_COOKIE_NAME]: "valid" }),
+        context("metrics"),
+      );
+
+      expect(response.status).toBe(502);
+      await expect(response.json()).resolves.toEqual({
+        error: "The server could not be reached.",
+      });
+      const lines = stdout.mock.calls.map(([line]) => JSON.parse(String(line)) as object);
+      expect(lines).toEqual([
+        expect.objectContaining({
+          level: "error",
+          msg: "proxy.upstream_unreachable",
+          path: "metrics",
+          method: "GET",
+        }),
+      ]);
+    } finally {
+      stdout.mockRestore();
+    }
+  });
+});
+
+describe("a backend that goes away between the refresh and the retry", () => {
+  /**
+   * The refresh already rotated the token on the backend. Answering without the
+   * new pair leaves the browser holding a redeemed refresh token; its next
+   * refresh reads as replay and the backend revokes the whole session family.
+   */
+  it("still hands the rotated session to the browser on the 502", async () => {
+    const stdout = jest.spyOn(process.stdout, "write").mockImplementation(() => true);
+    mockRefresh.mockResolvedValue({ token: "fresh", refreshToken: "rotated" });
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(upstream(401))
+      .mockRejectedValueOnce(new TypeError(FETCH_FAILED)) as unknown as typeof fetch;
+
+    try {
+      const response = await GET(
+        request("metrics", { [SESSION_COOKIE_NAME]: "expired", [REFRESH_COOKIE_NAME]: "r" }),
+        context("metrics"),
+      );
+
+      expect(response.status).toBe(502);
+      const cookies = setCookies(response);
+      expect(cookies[SESSION_COOKIE_NAME]).toContain(`${SESSION_COOKIE_NAME}=fresh`);
+      expect(cookies[REFRESH_COOKIE_NAME]).toContain(`${REFRESH_COOKIE_NAME}=rotated`);
+    } finally {
+      stdout.mockRestore();
+    }
+  });
+
+  it("sets no cookies when nothing was refreshed", async () => {
+    const stdout = jest.spyOn(process.stdout, "write").mockImplementation(() => true);
+    global.fetch = jest.fn().mockRejectedValue(new TypeError(FETCH_FAILED)) as typeof fetch;
+
+    try {
+      const response = await GET(
+        request("metrics", { [SESSION_COOKIE_NAME]: "valid" }),
+        context("metrics"),
+      );
+
+      expect(setCookies(response)).toEqual({});
+    } finally {
+      stdout.mockRestore();
+    }
+  });
+});
+
+describe("a backend 5xx", () => {
+  it("passes through, logged at warn with the backend's request id", async () => {
+    const stdout = jest.spyOn(process.stdout, "write").mockImplementation(() => true);
+    const failed = upstream(500);
+    failed.headers.set("x-request-id", "req-123");
+    global.fetch = jest.fn().mockResolvedValue(failed) as typeof fetch;
+
+    try {
+      const response = await GET(
+        request("metrics", { [SESSION_COOKIE_NAME]: "valid" }),
+        context("metrics"),
+      );
+
+      expect(response.status).toBe(500);
+      expect(response.headers.get("x-request-id")).toBe("req-123");
+      const lines = stdout.mock.calls.map(([line]) => JSON.parse(String(line)) as object);
+      expect(lines).toEqual([
+        expect.objectContaining({
+          level: "warn",
+          msg: "proxy.upstream_error",
+          status: 500,
+          requestId: "req-123",
+        }),
+      ]);
+    } finally {
+      stdout.mockRestore();
+    }
   });
 });
