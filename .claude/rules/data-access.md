@@ -35,6 +35,8 @@ This used to be an allowlist of *protected* segments, which was a denylist by om
 
 `src/app/api/auth/*` handles logout, session and revival directly rather than through the proxy. That is correct, not a bypass: the proxy exists so the **browser** never reaches the backend, and these are already server routes — routing them through the proxy would make the server call itself. Login is the exception and goes through the proxy like any other call; the route that duplicated it was deleted on 2026-09-12 having never been reachable.
 
+**A backend the proxy cannot reach is answered with a 502** and `{ error: "The server could not be reached." }`, logged as `proxy.upstream_unreachable`. If a token refresh succeeded before the retry failed, that 502 still carries the rotated cookies; dropping them would get the session revoked as replay on the next refresh.
+
 The proxy also **captures `lakira_refresh` out of the backend's `Set-Cookie` and re-issues it against `/api` on this origin**, and clears both cookies on a 401 that refresh could not rescue. It strips the header otherwise: the backend scopes its cookie to `Path=/api/v1/auth/refresh`, which this origin does not serve.
 
 `src/proxy.ts` gate-checks the same cookie for the paths in `PROTECTED_APP_PATHS`. It **validates the token's `exp` claim**, not just its presence. The signature is deliberately not verified there — that needs the backend's secret, and the backend re-checks every proxied request.
@@ -61,7 +63,7 @@ export const getMetricCategory = (id: string, opts?: RequestOpts) =>
 
 The chain is `withApiErrorHandling` → `handleApiError` → `normalizeApiError`. It converts aborts into a `DOMException` so React Query treats them as cancellations rather than failures, logs in non-production, and rethrows.
 
-`NormalizedApiError` is `{isAbort, status, code, title, messages[], retryable, raw}`. It already understands the backend's four error envelopes: `{message}`, `{errors:[]}`, `{error}`, and Zod `{issues:[]}`. Render `messages`; do not re-parse `raw` in a component.
+`NormalizedApiError` is `{isAbort, status, code, title, messages[], retryable, requestId?, raw}`. It already understands the backend's four error envelopes: `{message}`, `{errors:[]}`, `{error}`, and Zod `{issues:[]}`. Render `messages`; do not re-parse `raw` in a component. `requestId` is the backend's `x-request-id` for the failed call, the same id on its log lines and its Sentry events.
 
 Two things to know:
 

@@ -34,6 +34,7 @@ This matrix captures FE-relevant CI/CD environment values based on current FE re
 - `NEXT_PUBLIC_SITE_URL`
 - `NEXT_PUBLIC_VERCEL_URL`
 - `VERCEL_URL`
+- `SENTRY_DSN` and `APP_RELEASE` (server-only, optional; error monitoring is off without a DSN)
 - `HOST`, `PORT`
 
 Test tooling only, read in `cypress.config.ts` and never by the app:

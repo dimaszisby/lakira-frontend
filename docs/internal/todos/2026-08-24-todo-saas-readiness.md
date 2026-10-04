@@ -92,7 +92,7 @@ audit. Phases land as separate PRs; this file tracks them.
 - [ ] `next.config.ts` still reads `NEXT_PUBLIC_API_BASE_URL` raw — it runs before the app's
       module graph exists and cannot import from `src/`. Documented as a known exception.
 
-## Phase 4 — Observability (4a complete; 4b pending a provider decision)
+## Phase 4 — Observability (4a complete; 4b complete 2026-10-04)
 
 Split deliberately. 4a closes everything that needs no external account; 4b is the vendor
 adapter, which needs a provider choice, a DSN, and a new CSP origin.
@@ -117,18 +117,21 @@ adapter, which needs a provider choice, a DSN, and a new CSP origin.
       because the logger no-ops in the browser and the unit default is jsdom
 - [x] `docs/how-to/development/plug-in-error-monitoring.md`
 
-### 4b — vendor adapter (blocked on a decision)
+### 4b — vendor adapter (done 2026-10-04)
 
-- [ ] Choose a provider. Needs a DSN, a dependency, and an explicit CSP ingest origin.
-- [ ] Register it through `setLogSink()` in `instrumentation.ts`
-- [ ] PII scrubber at the SDK level (`beforeSend` or equivalent) — the logger redacts by key,
+Kit: [`sentry-error-monitoring`](../initiatives/sentry-error-monitoring/README.md).
+
+- [x] Choose a provider. Needs a DSN, a dependency, and an explicit CSP ingest origin. — Sentry,
+      on the server only, so there is a DSN and a dependency but no CSP origin (ADR-0024)
+- [x] Register it through `setLogSink()` in `instrumentation.ts`
+- [x] PII scrubber at the SDK level (`beforeSend` or equivalent) — the logger redacts by key,
       but an SDK also captures breadcrumbs, request bodies and locals it never sees
-- [ ] Absent configuration must disable reporting, not throw
+- [x] Absent configuration must disable reporting, not throw
 
 **Audit status:** section 4.5's P1s (RUM, discarded CSP reports, production diagnostics being
 console-only) are closed. The **P0 "no error monitoring of any kind" is downgraded, not
 closed** — structured stdout is collectable by any log drain, but it is not an error
-aggregator. 4b closes it.
+aggregator. 4b closes it, and did on 2026-10-04.
 
 ## Phase 5 — Auth lifecycle (5a complete; 5b is the UI flows)
 

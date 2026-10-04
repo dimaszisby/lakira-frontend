@@ -16,7 +16,7 @@ This is the master roadmap for closing the 8 P0 + 21 P1 + 8 P2 items in the base
 | 1   | Forkability scaffolding       | §4.13 all; §4.6 Node pin                  | M      | Done                           | —                      |
 | 2   | De-branding + white-label     | §4.13 branding, API tooling; §4.3 favicon | M      | Done                           | —                      |
 | 3   | Env validation + DX           | §4.6 all                                  | M      | Done                           | —                      |
-| 4   | Observability                 | §4.5 all; §4.4 CSP sink; §4.10 RUM        | M      | 4a Done, 4b blocked            | —                      |
+| 4   | Observability                 | §4.5 all; §4.4 CSP sink; §4.10 RUM        | M      | Done (4b: 2026-10-04)          | —                      |
 | 5   | Auth lifecycle                | §4.1 all; §4.2 proxy allowlist            | L      | Done                           | —                      |
 | 6   | Multi-tenancy UI              | §4.11 all                                 | L      | Done                           | **ADR-004**            |
 | 7   | Testing, gates, CI/CD, deploy | §4.7, §4.8, §4.9 all                      | L      | Gates done, deploy deferred    | ADR-003                |
@@ -82,8 +82,13 @@ Phase 1 was corrected. `robots.ts` and `sitemap.ts`, deferred from Phase 2, ship
 Phase 4 was split. **4a** shipped a provider-agnostic observability layer — structured stdout
 logging with substring-matched redaction, a CSP sink that persists in production, Core Web
 Vitals RUM, and the two missing error boundaries — adding no dependency and no CSP origin.
-**4b**, the vendor adapter, is blocked on choosing a provider; `setLogSink()` is the seam it
+**4b**, the vendor adapter, was blocked on choosing a provider; `setLogSink()` is the seam it
 registers against. Section 4.5's P1s are closed; its P0 is downgraded, not closed.
+
+4b landed on 2026-10-04: Sentry, on the server only, off without a DSN. Kit
+[`sentry-error-monitoring`](../../initiatives/sentry-error-monitoring/README.md),
+[ADR-0024](../../../explanation/decisions/adr-0024-sentry-on-the-server-only.md). That closes the
+section 4.5 P0.
 
 Phase 5 was split. **5a** hardened the existing auth surface: the middleware now checks token
 expiry rather than cookie presence, the proxy was inverted to deny-by-default against an

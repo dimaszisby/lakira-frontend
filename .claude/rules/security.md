@@ -52,6 +52,15 @@ Defined in `next.config.ts` alongside HSTS, `Referrer-Policy`, `Permissions-Poli
 
 `connect-src` is derived from `NEXT_PUBLIC_API_BASE_URL`, and `unsafe-eval` is dev-only. Any new external origin — an image host, an analytics endpoint, a font CDN — needs an explicit CSP entry. Do not widen a directive to a wildcard to make something work; add the specific origin, and if that feels like too many origins, that is the signal.
 
+## Error monitoring
+
+Sentry runs on the **server only** and is off unless `SENTRY_DSN` is set ([ADR-0024](../../docs/explanation/decisions/adr-0024-sentry-on-the-server-only.md)). The browser never talks to it, so there is no CSP origin and no public key.
+
+- **Report through `logger`.** `logger.error(...)` is what gets forwarded; `info` and `warn` stay on stdout. `@sentry/*` may be imported only from `src/instrumentation.ts` and `src/lib/monitoring/**`, and lint enforces it.
+- **Every `logger.error` field leaves the process.** `redact` matches by key name and `scrubText` (`src/lib/monitoring/scrub.ts`) catches emails, bearer values, token shapes and `?key=value` queries in free text, but neither is a guarantee. Log identifiers, never user input, and never a URL with its query string.
+- **`@sentry/node` 11 collects by default.** `sendDefaultPii` is gone; `dataCollection` categories default to on. `src/lib/monitoring/server.ts` switches each off and a test pins it. Re-check that block on any SDK upgrade.
+- **`/api/observability/client-error` is unauthenticated by necessity**, so its reports are capped: 5 per page load in the browser, 30 a minute per process when forwarding. Do not forward from another unauthenticated route without a cap.
+
 ## Injection
 
 - **Every string reaching `dangerouslySetInnerHTML` goes through DOMPurify.** No exceptions, including strings that "come from our own backend".
@@ -78,3 +87,4 @@ Use the built-in `/security-review` for a full pass. When reviewing by hand, the
 3. Is a cache key missing a scope that makes one user's data reachable by another?
 4. Did a new external origin get added to the CSP, or worked around?
 5. Is anything sensitive newly behind a `NEXT_PUBLIC_` name?
+6. Does a new `logger.error` call pass user input, a token, or a URL with its query string? It is forwarded to Sentry.

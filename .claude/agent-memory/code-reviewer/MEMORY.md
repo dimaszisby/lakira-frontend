@@ -1,3 +1,4 @@
 - [Metric-settings Strict Mode test review](project_metric-settings-strict-mode-test_review.md) — approve; keep comments to measured facts, limit "cannot reproduce" claims
 - [Dependency-audit-split review](project_dependency-audit-split_review.md) — approve; check ADR names build-time devDeps risk, scheduled-workflow pitfalls
 - [Register rate-limit sync review](project_register-rate-limit-sync_review.md) — approve; check jest default timeout vs findBy wait, XFF through proxy
+- [Sentry error-monitoring review](project_sentry-error-monitoring_review.md) — request changes; sink forwarding: free-text fields, per-process caps, try-scope side effects
