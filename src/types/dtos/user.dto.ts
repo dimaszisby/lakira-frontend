@@ -73,11 +73,13 @@ export interface UserResponseDTO {
 }
 
 /**
- * Defines the structure of authentication-related API responses.
+ * What the browser receives from login and registration.
+ *
+ * The backend's response also carries an access token. The proxy stores it as
+ * the httpOnly session cookie and removes it from the body (ADR-0025), so it is
+ * deliberately absent here: no client code should ever expect one.
  */
-// TODO: Add documentation
 export interface AuthResponseDTO {
-  token?: string;
   user?: UserResponseDTO;
 }
 

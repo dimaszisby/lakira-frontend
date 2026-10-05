@@ -18,6 +18,8 @@ jest.mock("@/lib/auth-refresh", () => ({
 const mockRefresh = refreshAccessToken as jest.MockedFunction<typeof refreshAccessToken>;
 
 const LOGIN_PATH = "auth/login";
+const SWITCH_PATH = "auth/switch-org";
+const SWITCH_SEGMENTS = ["auth", "switch-org"];
 const FETCH_FAILED = "fetch failed";
 
 const context = (...segments: string[]) => ({ params: Promise.resolve({ path: segments }) });
@@ -34,6 +36,28 @@ const upstream = (status: number, setCookie: string[] = []) => {
   Object.defineProperty(headers, "getSetCookie", { value: () => setCookie });
   return { status, body: null, headers } as unknown as Response;
 };
+
+/** An unsigned JWT that expires in an hour, built at runtime so no token literal sits in this file. */
+const usableToken = (claims: Record<string, unknown> = {}) => {
+  const encode = (value: unknown) =>
+    Buffer.from(JSON.stringify(value)).toString("base64").replace(/=+$/, "");
+  const exp = Math.floor(Date.now() / 1000) + 3600;
+  return `${encode({ alg: "none" })}.${encode({ exp, ...claims })}.sig`;
+};
+
+/** A backend JSON response, as `/auth/login` and its siblings send. */
+const upstreamJson = (status: number, body: unknown, setCookie: string[] = []) => {
+  const headers = new Headers({ "content-type": "application/json" });
+  Object.defineProperty(headers, "getSetCookie", { value: () => setCookie });
+  return {
+    status,
+    headers,
+    body: null,
+    text: () => Promise.resolve(JSON.stringify(body)),
+  } as unknown as Response;
+};
+
+const USER = { id: "user-1", email: "a@example.test" };
 
 const setCookies = (response: Response) =>
   Object.fromEntries(
@@ -63,7 +87,7 @@ describe("the refresh cookie the backend issues on login", () => {
     global.fetch = jest
       .fn()
       .mockResolvedValue(
-        upstream(200, [
+        upstreamJson(200, { status: "success", data: { token: usableToken(), user: USER } }, [
           `${REFRESH_COOKIE_NAME}=from-backend; Path=/api/v1/auth/refresh; HttpOnly; SameSite=Strict`,
         ]),
       ) as unknown as typeof fetch;
@@ -82,7 +106,9 @@ describe("the refresh cookie the backend issues on login", () => {
     global.fetch = jest
       .fn()
       .mockResolvedValue(
-        upstream(200, [`${REFRESH_COOKIE_NAME}=x; Path=/api/v1/auth/refresh`]),
+        upstreamJson(200, { status: "success", data: { token: usableToken(), user: USER } }, [
+          `${REFRESH_COOKIE_NAME}=x; Path=/api/v1/auth/refresh`,
+        ]),
       ) as unknown as typeof fetch;
 
     const response = await POST(request(LOGIN_PATH, {}, "POST"), context("auth", "login"));
@@ -370,5 +396,183 @@ describe("a path that tries to leave the API base", () => {
     expect(String(fetchMock.mock.calls[0][0])).toBe(
       "http://backend.test/api/v1/metrics/8f14e45f-ceea-467f-a9d1-3f0b2c1d9e77?limit=10&sort=name",
     );
+  });
+});
+
+describe("a response that issues an access token", () => {
+  /**
+   * The browser used to receive the token in the body, read it in JavaScript
+   * and post it to `/api/auth/session` to be stored (audit 2026-10-04, N3). The
+   * proxy now stores it itself and removes it from what the browser sees
+   * (ADR-0025).
+   */
+  const SESSION = { [SESSION_COOKIE_NAME]: usableToken() };
+
+  // AC-1 to AC-4, and AC-5 for the two that also return a user.
+  it.each([
+    ["auth/login", ["auth", "login"], 200, { user: USER }, {}],
+    ["auth/register", ["auth", "register"], 201, { user: USER }, {}],
+    [SWITCH_PATH, SWITCH_SEGMENTS, 200, {}, SESSION],
+    ["auth/refresh", ["auth", "refresh"], 200, {}, {}],
+  ])(
+    "stores the token from %s as the session cookie and strips it from the body",
+    async (path, segments, status, rest, cookies) => {
+      const token = usableToken({ organizationId: "org-2" });
+      global.fetch = jest
+        .fn()
+        .mockResolvedValue(
+          upstreamJson(status, { status: "success", data: { token, ...rest } }),
+        ) as unknown as typeof fetch;
+
+      const response = await POST(request(path, cookies, "POST"), context(...segments));
+
+      expect(response.status).toBe(status);
+
+      const cookie = setCookies(response)[SESSION_COOKIE_NAME];
+      expect(cookie).toContain(`${SESSION_COOKIE_NAME}=${token}`);
+      expect(cookie).toContain("HttpOnly");
+      expect(cookie).toContain("Secure");
+      expect(cookie).toContain("Path=/");
+
+      const text = await response.text();
+      expect(text).not.toContain(token);
+      expect(JSON.parse(text)).toEqual({ status: "success", data: rest });
+    },
+  );
+
+  // A switch made with an expired access token: the first call is a 401, the
+  // proxy refreshes and retries, and the retry issues a token of its own. The
+  // refresh obtained a token for the OLD organization; the one the backend just
+  // issued is for the new one and has to be the cookie that survives, beside the
+  // refresh cookie the switch issued.
+  it("lets a newly issued session win over one a refresh obtained on the way", async () => {
+    const refreshedOldOrg = usableToken({ organizationId: "org-old" });
+    const issuedNewOrg = usableToken({ organizationId: "org-new" });
+    mockRefresh.mockResolvedValue({ token: refreshedOldOrg, refreshToken: "rotated-old-org" });
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(upstream(401))
+      .mockResolvedValueOnce(
+        upstreamJson(200, { status: "success", data: { token: issuedNewOrg } }, [
+          `${REFRESH_COOKIE_NAME}=issued-new-org; Path=/api/v1/auth/refresh; HttpOnly`,
+        ]),
+      ) as unknown as typeof fetch;
+
+    const response = await POST(
+      request(
+        SWITCH_PATH,
+        { [SESSION_COOKIE_NAME]: "expired", [REFRESH_COOKIE_NAME]: "r" },
+        "POST",
+      ),
+      context(...SWITCH_SEGMENTS),
+    );
+
+    expect(response.status).toBe(200);
+    const cookies = setCookies(response);
+    expect(cookies[SESSION_COOKIE_NAME]).toContain(`${SESSION_COOKIE_NAME}=${issuedNewOrg}`);
+    expect(cookies[REFRESH_COOKIE_NAME]).toContain(`${REFRESH_COOKIE_NAME}=issued-new-org`);
+    expect(response.headers.getSetCookie().join("\n")).not.toContain(refreshedOldOrg);
+    expect(response.headers.getSetCookie().join("\n")).not.toContain("rotated-old-org");
+  });
+
+  it("ends the session, refreshed cookies included, when the retried call issues no usable token", async () => {
+    mockRefresh.mockResolvedValue({ token: usableToken(), refreshToken: "rotated" });
+    global.fetch = jest
+      .fn()
+      .mockResolvedValueOnce(upstream(401))
+      .mockResolvedValueOnce(
+        upstreamJson(200, { status: "success", data: {} }),
+      ) as unknown as typeof fetch;
+
+    const response = await POST(
+      request(
+        SWITCH_PATH,
+        { [SESSION_COOKIE_NAME]: "expired", [REFRESH_COOKIE_NAME]: "r" },
+        "POST",
+      ),
+      context(...SWITCH_SEGMENTS),
+    );
+
+    expect(response.status).toBe(502);
+    const cookies = setCookies(response);
+    expect(cookies[SESSION_COOKIE_NAME]).toContain("Max-Age=0");
+    expect(cookies[REFRESH_COOKIE_NAME]).toContain("Max-Age=0");
+    expect(cookies[REFRESH_COOKIE_NAME]).not.toContain("rotated");
+  });
+
+  // AC-6.
+  it.each([
+    ["no token at all", { user: USER }],
+    ["a token that is not a JWT", { token: "not-a-jwt", user: USER }],
+    ["an expired token", { token: usableToken({ exp: 1 }), user: USER }],
+    ["a token that is not a string", { token: { nested: usableToken() } }],
+    ["no data object", undefined],
+  ])("answers 502 and ends the session when a success carries %s", async (_label, data) => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(
+        upstreamJson(200, { status: "success", data }, [
+          `${REFRESH_COOKIE_NAME}=new-org; Path=/api/v1/auth/refresh; HttpOnly`,
+        ]),
+      ) as unknown as typeof fetch;
+
+    const response = await POST(request(SWITCH_PATH, SESSION, "POST"), context(...SWITCH_SEGMENTS));
+
+    expect(response.status).toBe(502);
+
+    const cookies = setCookies(response);
+    expect(cookies[SESSION_COOKIE_NAME]).toContain("Max-Age=0");
+    expect(cookies[REFRESH_COOKIE_NAME]).toContain("Max-Age=0");
+    expect(cookies[REFRESH_COOKIE_NAME]).not.toContain("new-org");
+
+    const text = await response.text();
+    expect(text).not.toContain("eyJ");
+    expect(text).not.toContain("not-a-jwt");
+  });
+
+  it("answers 502 when the success body is not JSON", async () => {
+    const broken = upstreamJson(200, null);
+    (broken as unknown as { text: () => Promise<string> }).text = () => Promise.resolve("<html>");
+    global.fetch = jest.fn().mockResolvedValue(broken) as unknown as typeof fetch;
+
+    const response = await POST(request(LOGIN_PATH, {}, "POST"), context("auth", "login"));
+
+    expect(response.status).toBe(502);
+    expect(setCookies(response)[SESSION_COOKIE_NAME]).toContain("Max-Age=0");
+  });
+
+  // AC-7.
+  it("forwards an error on a token-issuing path untouched, and sets no session", async () => {
+    const stream = new Response(JSON.stringify({ status: "fail", message: "Invalid" })).body;
+    const failed = upstream(401);
+    (failed as unknown as { body: unknown }).body = stream;
+    global.fetch = jest.fn().mockResolvedValue(failed) as unknown as typeof fetch;
+
+    const response = await POST(request(LOGIN_PATH, {}, "POST"), context("auth", "login"));
+
+    expect(response.status).toBe(401);
+    expect(setCookies(response)[SESSION_COOKIE_NAME]).toBeUndefined();
+    await expect(response.json()).resolves.toEqual({ status: "fail", message: "Invalid" });
+  });
+
+  it("leaves a token in the body of any other path alone", async () => {
+    const stream = new Response(JSON.stringify({ data: { token: "api-key-for-something" } })).body;
+    const other = upstream(200);
+    (other as unknown as { body: unknown }).body = stream;
+    global.fetch = jest.fn().mockResolvedValue(other) as unknown as typeof fetch;
+
+    const response = await POST(request("metrics", SESSION, "POST"), context("metrics"));
+
+    expect(setCookies(response)[SESSION_COOKIE_NAME]).toBeUndefined();
+    await expect(response.json()).resolves.toEqual({ data: { token: "api-key-for-something" } });
+  });
+
+  it("does not treat a GET on a token-issuing path as issuing one", async () => {
+    global.fetch = jest.fn().mockResolvedValue(upstream(200)) as unknown as typeof fetch;
+
+    const response = await GET(request(LOGIN_PATH), context("auth", "login"));
+
+    expect(response.status).toBe(200);
+    expect(setCookies(response)[SESSION_COOKIE_NAME]).toBeUndefined();
   });
 });

@@ -5,9 +5,11 @@ import {
   buildUpstreamUrl,
   isProtectedAppPath,
   isPublicApiPath,
+  isTokenIssuingApiPath,
   PROTECTED_APP_MATCHERS,
   PROTECTED_APP_PATHS,
   PUBLIC_API_PATHS,
+  TOKEN_ISSUING_API_PATHS,
 } from "../auth-paths";
 
 describe("isProtectedAppPath", () => {
@@ -206,5 +208,114 @@ describe("buildUpstreamUrl", () => {
 
   it("builds the base itself for an empty path", () => {
     expect(String(buildUpstreamUrl(BASE, []))).toBe(`${BASE}/`);
+  });
+});
+
+describe("isTokenIssuingApiPath", () => {
+  it.each([
+    [["auth", "login"]],
+    [["auth", "register"]],
+    [["auth", "switch-org"]],
+    [["auth", "refresh"]],
+  ])("is true for %j", (segments) => {
+    expect(isTokenIssuingApiPath(segments)).toBe(true);
+  });
+
+  it.each([
+    [["auth", "profile"]],
+    [["auth", "logout"]],
+    [["auth"]],
+    [["auth", "login", "extra"]],
+    [["metrics"]],
+    [[]],
+  ])("is false for %j", (segments) => {
+    expect(isTokenIssuingApiPath(segments)).toBe(false);
+  });
+
+  it("is case-insensitive, like the public-path match", () => {
+    expect(isTokenIssuingApiPath(["Auth", "Login"])).toBe(true);
+  });
+});
+
+describe("TOKEN_ISSUING_API_PATHS stays complete", () => {
+  // The proxy strips the access token from these responses and stores it as the
+  // httpOnly session cookie (ADR-0025). An operation that returns a token and is
+  // not listed would hand that token to browser JavaScript, and nothing else
+  // would notice. So the list is checked against the contract itself.
+  type Schema = {
+    $ref?: string;
+    properties?: Record<string, Schema>;
+    allOf?: Schema[];
+    oneOf?: Schema[];
+    anyOf?: Schema[];
+    items?: Schema;
+  };
+  type Operation = {
+    responses?: Record<string, { content?: Record<string, { schema?: Schema }> }>;
+  };
+  type Contract = { paths: Record<string, Record<string, Operation>> };
+
+  const contract = JSON.parse(
+    readFileSync(
+      path.join(process.cwd(), "docs", "reference", "api", "lakira-backend-openapi.json"),
+      "utf8",
+    ),
+  ) as Contract;
+
+  const resolve = (schema: Schema): Schema => {
+    let current = schema;
+    while (current.$ref) {
+      current = current.$ref
+        .split("/")
+        .slice(1)
+        .reduce<unknown>((node, key) => (node as Record<string, unknown>)[key], contract) as Schema;
+    }
+    return current;
+  };
+
+  const hasTokenProperty = (schema: Schema | undefined, depth = 0): boolean => {
+    if (!schema || depth > 8) return false;
+    const resolved = resolve(schema);
+    if (resolved.properties) {
+      if ("token" in resolved.properties) return true;
+      if (Object.values(resolved.properties).some((child) => hasTokenProperty(child, depth + 1))) {
+        return true;
+      }
+    }
+    const branches = [
+      ...(resolved.allOf ?? []),
+      ...(resolved.oneOf ?? []),
+      ...(resolved.anyOf ?? []),
+    ];
+    if (resolved.items) branches.push(resolved.items);
+    return branches.some((child) => hasTokenProperty(child, depth + 1));
+  };
+
+  /** `METHOD path` for every operation whose success body declares a `token`. */
+  const tokenReturningOperations = (): string[] => {
+    const found: string[] = [];
+    for (const [apiPath, operations] of Object.entries(contract.paths)) {
+      for (const [method, operation] of Object.entries(operations)) {
+        const successes = Object.entries(operation.responses ?? {}).filter(([status]) =>
+          status.startsWith("2"),
+        );
+        const returnsToken = successes.some(([, response]) =>
+          Object.values(response.content ?? {}).some((media) => hasTokenProperty(media.schema)),
+        );
+        if (returnsToken) found.push(`${method.toUpperCase()} ${apiPath}`);
+      }
+    }
+    return found.sort();
+  };
+
+  it("finds the token-returning operations in the contract", () => {
+    // If this is ever empty the walk has stopped seeing the contract, and the
+    // comparison below would pass for the wrong reason.
+    expect(tokenReturningOperations().length).toBeGreaterThan(0);
+  });
+
+  it("lists every operation whose success response carries a token", () => {
+    const listed = [...TOKEN_ISSUING_API_PATHS].map((apiPath) => `POST /${apiPath}`).sort();
+    expect(tokenReturningOperations()).toEqual(listed);
   });
 });

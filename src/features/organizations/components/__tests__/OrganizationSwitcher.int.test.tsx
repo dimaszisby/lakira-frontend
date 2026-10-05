@@ -14,12 +14,9 @@ const mockHardNavigate = jest.mocked(hardNavigate);
 
 const ORGANIZATIONS_URL = "*/organizations";
 const SWITCH_URL = "*/auth/switch-org";
-const SESSION_URL = "/api/auth/session";
 
 /** The switch button for the non-current organization in most tests. */
 const SWITCH_TO_BETA = { name: "Switch to Beta" };
-
-const NEW_TOKEN = "switched-session-token";
 
 const acme = {
   organizationId: "org-acme",
@@ -132,18 +129,17 @@ describe("OrganizationSwitcher", () => {
   });
 
   describe("switching", () => {
-    it("switches, stores the new session, then reloads into /dashboard (AC-4)", async () => {
+    // The proxy stores the new session on the switch response and strips the
+    // token (ADR-0025), so the client makes one request and the body is empty.
+    // The MSW server errors on any undeclared request, which is what shows no
+    // second, session-storing call is made.
+    it("switches, then reloads into /dashboard (AC-4)", async () => {
       useOrganizations([acme, beta]);
       let switchBody: unknown;
-      let sessionBody: unknown;
       server.use(
         http.post(SWITCH_URL, async ({ request }) => {
           switchBody = await request.json();
-          return HttpResponse.json({ status: "success", data: { token: NEW_TOKEN } });
-        }),
-        http.post(SESSION_URL, async ({ request }) => {
-          sessionBody = await request.json();
-          return HttpResponse.json({ success: true });
+          return HttpResponse.json({ status: "success", data: {} });
         }),
       );
       const user = userEvent.setup();
@@ -153,44 +149,19 @@ describe("OrganizationSwitcher", () => {
 
       await waitFor(() => expect(mockHardNavigate).toHaveBeenCalledWith("/dashboard"));
       expect(switchBody).toEqual({ organizationId: "org-beta" });
-      expect(sessionBody).toEqual({ token: NEW_TOKEN });
-      expect(mockHardNavigate).toHaveBeenCalledTimes(1);
-    });
-
-    it("recovers through revive when the session cannot be stored (AC-6)", async () => {
-      useOrganizations([acme, beta]);
-      server.use(
-        http.post(SWITCH_URL, () =>
-          HttpResponse.json({ status: "success", data: { token: NEW_TOKEN } }),
-        ),
-        http.post(SESSION_URL, () =>
-          HttpResponse.json({ error: "Invalid token" }, { status: 400 }),
-        ),
-      );
-      const user = userEvent.setup();
-
-      renderWithProviders(<OrganizationSwitcher />);
-      await user.click(await screen.findByRole("button", SWITCH_TO_BETA));
-
-      await waitFor(() =>
-        expect(mockHardNavigate).toHaveBeenCalledWith("/api/auth/revive?returnUrl=%2Fdashboard"),
-      );
       expect(mockHardNavigate).toHaveBeenCalledTimes(1);
     });
 
     it.each([
       ["a 403", () => HttpResponse.json({ status: "fail", message: "Forbidden" }, { status: 403 })],
       ["a network failure", () => HttpResponse.error()],
+      [
+        "a 502 because the proxy could not start the new session",
+        () => HttpResponse.json({ error: "The session could not be started." }, { status: 502 }),
+      ],
     ])("stays put and announces an error on %s (AC-7)", async (_label, respond) => {
       useOrganizations([acme, beta]);
-      let sessionWrites = 0;
-      server.use(
-        http.post(SWITCH_URL, respond),
-        http.post(SESSION_URL, () => {
-          sessionWrites += 1;
-          return HttpResponse.json({ success: true });
-        }),
-      );
+      server.use(http.post(SWITCH_URL, respond));
       const user = userEvent.setup();
 
       renderWithProviders(<OrganizationSwitcher />);
@@ -198,7 +169,6 @@ describe("OrganizationSwitcher", () => {
 
       expect(await screen.findByRole("alert")).toBeInTheDocument();
       expect(mockHardNavigate).not.toHaveBeenCalled();
-      expect(sessionWrites).toBe(0);
       expect(screen.getByRole("button", SWITCH_TO_BETA)).toBeEnabled();
     });
 
@@ -212,9 +182,8 @@ describe("OrganizationSwitcher", () => {
       server.use(
         http.post(SWITCH_URL, async () => {
           await held;
-          return HttpResponse.json({ status: "success", data: { token: NEW_TOKEN } });
+          return HttpResponse.json({ status: "success", data: {} });
         }),
-        http.post(SESSION_URL, () => HttpResponse.json({ success: true })),
       );
       const user = userEvent.setup();
 

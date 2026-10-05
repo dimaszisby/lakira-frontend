@@ -15,9 +15,9 @@ export function useLogoutUserMutation(
 
   const mutation = useMutation<void, Error, void>({
     mutationFn: logoutUser,
-    // No `persistSessionToken(null)` here. `/api/auth/logout` clears both the
-    // session and the refresh cookie itself, and a second round trip that
-    // cleared only one of them is how they last fell out of step.
+    // Nothing to clear here. `/api/auth/logout` clears both the session and the
+    // refresh cookie itself, and a second round trip that cleared only one of
+    // them is how they last fell out of step.
     onSuccess: async () => {
       setUser(null);
       setCachedUserProfile(qc, null);

@@ -25,10 +25,9 @@ describe("LoginForm integration", () => {
     mockPush.mockReset();
   });
 
-  it("submits valid credentials, syncs session, and redirects to dashboard", async () => {
+  it("submits valid credentials, and redirects to dashboard", async () => {
     const user = userEvent.setup();
     const loginPayloadSpy = jest.fn();
-    const sessionPayloadSpy = jest.fn();
     const email = TEST_EMAIL;
 
     server.use(
@@ -40,7 +39,6 @@ describe("LoginForm integration", () => {
           status: "success",
           message: "Login success",
           data: {
-            token: "token-123",
             user: {
               id: "user-1",
               username: "john",
@@ -52,11 +50,6 @@ describe("LoginForm integration", () => {
             },
           },
         });
-      }),
-      http.post("/api/auth/session", async ({ request }) => {
-        const body = await request.json();
-        sessionPayloadSpy(body);
-        return HttpResponse.json({ ok: true });
       }),
     );
 
@@ -74,58 +67,33 @@ describe("LoginForm integration", () => {
       email,
       password: "password123",
     });
-    expect(sessionPayloadSpy).toHaveBeenCalledWith({ token: "token-123" });
   });
 
-  it.each([
-    ["the session cookie cannot be stored", { token: "token-123" }, 400],
-    ["the response carries no token", {}, 200],
-  ])(
-    "shows an error and does not redirect when login succeeds but %s",
-    async (_label, tokenField, sessionStatus) => {
-      const user = userEvent.setup();
-      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+  // The proxy answers 502 when the backend reports success without a token it
+  // can store (ADR-0025). The form has to treat that as a failed sign-in.
+  it("shows an error and does not redirect when the proxy could not start the session", async () => {
+    const user = userEvent.setup();
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
 
-      try {
-        server.use(
-          http.post(LOGIN_ENDPOINT, () =>
-            HttpResponse.json(
-              {
-                status: "success",
-                data: {
-                  ...tokenField,
-                  user: {
-                    id: "user-1",
-                    username: "john",
-                    email: TEST_EMAIL,
-                    role: "user",
-                    isPublicProfile: true,
-                    createdAt: FIXTURE_TIMESTAMP,
-                    updatedAt: FIXTURE_TIMESTAMP,
-                  },
-                },
-              },
-              { status: 200 },
-            ),
-          ),
-          http.post("/api/auth/session", () =>
-            HttpResponse.json({ error: "Invalid token" }, { status: sessionStatus }),
-          ),
-        );
+    try {
+      server.use(
+        http.post(LOGIN_ENDPOINT, () =>
+          HttpResponse.json({ error: "The session could not be started." }, { status: 502 }),
+        ),
+      );
 
-        renderWithProviders(<LoginForm />);
+      renderWithProviders(<LoginForm />);
 
-        await user.type(screen.getByLabelText(/email/i), TEST_EMAIL);
-        await user.type(screen.getByPlaceholderText(/enter your password/i), "password123");
-        await user.click(screen.getByRole("button", { name: /login/i }));
+      await user.type(screen.getByLabelText(/email/i), TEST_EMAIL);
+      await user.type(screen.getByPlaceholderText(/enter your password/i), "password123");
+      await user.click(screen.getByRole("button", { name: /login/i }));
 
-        expect(await screen.findByRole("alert")).toBeInTheDocument();
-        expect(mockPush).not.toHaveBeenCalled();
-      } finally {
-        consoleErrorSpy.mockRestore();
-      }
-    },
-  );
+      expect(await screen.findByRole("alert")).toBeInTheDocument();
+      expect(mockPush).not.toHaveBeenCalled();
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
 
   it("shows error feedback and does not redirect when login fails", async () => {
     const user = userEvent.setup();

@@ -6,13 +6,16 @@ import {
   REFRESH_COOKIE_PATH,
   REFRESH_MAX_AGE_SECONDS,
   SESSION_COOKIE_NAME,
+  SESSION_COOKIE_OPTIONS,
+  SESSION_MAX_AGE_SECONDS,
 } from "@/constants/app";
-import { buildUpstreamUrl, isPublicApiPath } from "@/lib/auth-paths";
+import { buildUpstreamUrl, isPublicApiPath, isTokenIssuingApiPath } from "@/lib/auth-paths";
 import {
   applyRefreshedSession,
   captureRefreshCookie,
   clearSessionCookies,
   refreshAccessToken,
+  takeIssuedToken,
 } from "@/lib/auth-refresh";
 import { getApiBaseUrl } from "@/lib/env";
 import { logger } from "@/lib/logger";
@@ -32,6 +35,12 @@ const SESSION_EXPIRED_BODY = { error: "Session expired", code: "SESSION_EXPIRED"
 
 /** Returned when the request to the backend fails outright, before any response. */
 const UPSTREAM_UNREACHABLE_BODY = { error: "The server could not be reached." } as const;
+
+/**
+ * Returned when the backend reports a successful sign-in, registration, switch
+ * or refresh but the response holds no token this app can store.
+ */
+const UNUSABLE_SESSION_BODY = { error: "The session could not be started." } as const;
 
 /** Returned for a path that could reach outside the API base. Nothing is forwarded. */
 const INVALID_PATH_BODY = { error: "Invalid path" } as const;
@@ -189,7 +198,34 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
   // re-issued below against this origin instead.
   responseHeaders.delete("set-cookie");
 
-  const proxied = new NextResponse(response.body, {
+  // Four operations answer with the access token in the body. It is stored
+  // here, in the same response that carries the refresh cookie, and removed
+  // from what the browser receives: no client code ever holds it (ADR-0025).
+  // The browser used to read it and post it back to be stored.
+  let body: BodyInit | null = response.body;
+  let issuedToken: string | null = null;
+
+  const isSuccess = response.status >= 200 && response.status < 300;
+  if (request.method === "POST" && isSuccess && isTokenIssuingApiPath(rawSegments)) {
+    const issued = takeIssuedToken(await response.text());
+
+    if (!issued) {
+      // The backend broke its contract. Forwarding the response would report a
+      // sign-in with no session behind it; for a switch it would leave the old
+      // access token beside a refresh cookie for the new organization. Signed
+      // out is the one state that is certainly consistent.
+      logger.error("proxy.session.unusable_token", { path: targetPath, status: response.status });
+      const unusable = NextResponse.json(UNUSABLE_SESSION_BODY, { status: 502 });
+      clearSessionCookies(unusable.cookies);
+      return unusable;
+    }
+
+    body = issued.body;
+    issuedToken = issued.token;
+    logger.info("proxy.session.issued", { path: targetPath });
+  }
+
+  const proxied = new NextResponse(body, {
     status: response.status,
     headers: responseHeaders,
   });
@@ -207,6 +243,15 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
       secure: true,
       path: REFRESH_COOKIE_PATH,
       maxAge: REFRESH_MAX_AGE_SECONDS,
+    });
+  }
+
+  // Last of all: a token the backend has just issued is newer than one a
+  // refresh obtained on the way to asking for it.
+  if (issuedToken) {
+    proxied.cookies.set(SESSION_COOKIE_NAME, issuedToken, {
+      ...SESSION_COOKIE_OPTIONS,
+      maxAge: SESSION_MAX_AGE_SECONDS,
     });
   }
 

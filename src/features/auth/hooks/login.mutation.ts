@@ -2,7 +2,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSetAtom } from "jotai";
 
 import { loginUser } from "@/api/auth.api";
-import { establishSession } from "@/features/shared/session.client";
 import { userAtom } from "@/src/services/state/atoms";
 import type { AuthResponseDTO, LoginRequestDTO } from "@/types/dtos/user.dto";
 
@@ -16,14 +15,10 @@ export function useLoginUserMutation(
   const setUser = useSetAtom(userAtom);
 
   const mutation = useMutation<AuthResponseDTO, Error, LoginRequestDTO>({
-    // The session is stored inside the mutation, not in onSuccess: a failed
-    // write has to fail the mutation, or the form navigates into the app with
-    // no cookie and the first request bounces the user back to /login.
-    mutationFn: async (input) => {
-      const response = await loginUser(input);
-      await establishSession(response.token);
-      return response;
-    },
+    // No session handling here. The proxy sets the session cookie on this same
+    // response and removes the token from its body (ADR-0025), so a resolved
+    // call is a signed-in browser and a rejected one is not.
+    mutationFn: loginUser,
     onSuccess: async (response) => {
       if (response.user) {
         setUser(response.user);
