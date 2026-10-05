@@ -34,6 +34,7 @@ E2E is deliberately not in this list — it needs a running app and takes minute
 ```bash
 npm run build && npm run start &
 npm run test:e2e
+npm run test:e2e:csp   # the same pages with the Content Security Policy enforced (ADR-0026)
 ```
 
 If the change touches a signed-in page, the app layout, or an auth or token flow, also run the stack

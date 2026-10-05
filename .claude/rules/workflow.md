@@ -109,11 +109,13 @@ and paste the failure. "Tests pass" is not a status.
 | build        | `npm run build`                                    | always                                  |
 | e2e          | `npm run test:e2e`                                 | before a release, or a user-facing flow changed end to end |
 | e2e (stack)  | `npm run test:e2e:stack`                           | a signed-in page, the app layout, or an auth or token flow changed; before a release. Needs the local stack |
+| e2e (csp)    | `npm run test:e2e:csp`                             | always when `e2e` runs; it is the only suite in which the browser enforces the Content Security Policy |
+| e2e (csp, stack) | `npm run test:e2e:csp:stack`                   | the CSP, `src/proxy.ts`, the root layout or a script-emitting dependency changed; before a release. Needs the local stack |
 
 `/pre-push` runs these in CI's own order and is the canonical local sequence — use it rather than
 inventing an order here.
 
-**Every gate in this table runs in CI except `e2e (stack)`.** `format` included as of 2026-09-20 —
+**Every gate in this table runs in CI except `e2e (stack)` and `e2e (csp, stack)`.** `format` included as of 2026-09-20 —
 it is the last step of the `checks` job, so a formatting failure cannot mask a lint or type error
 in the same run. For those gates nothing depends on anyone remembering:
 `.claude/hooks/format-on-edit.sh` only reformats files an agent edits, which is why the repo

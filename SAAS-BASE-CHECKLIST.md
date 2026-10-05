@@ -84,7 +84,7 @@ because this run probed them and found a defect. The audit lists every item's gr
 | **N2** | P1       | **Fixed in #71, pending a dated run.** A bootstrapped fork failed `format`. Forkability stays at 71% until that run.                                                                                    |
 | **N3** | P1       | **Fixed, pending a dated run** (ADR-0025). The access token passed through browser JavaScript at sign-in.                                                                                               |
 |        | P1       | **End-to-end coverage.** The three stack specs never run in CI, and creating a metric and logging a value are not covered.                                                                              |
-| **N4** | P2       | The production CSP allows inline script.                                                                                                                                                                |
+| **N4** | P2       | **Fixed, pending a dated run** (ADR-0026). The production CSP allowed inline script.                                                                                                                    |
 | **C6** | P2       | Two files still quarantined from the layer rule (was six).                                                                                                                                              |
 |        | P2       | Twelve more, listed in the audit: N5 to N11, no `CODE_OF_CONDUCT.md`, no plan surface, field vitals not aggregated, route groups without error boundaries, and `vizKeys.dashboard` with no invalidator. |
 

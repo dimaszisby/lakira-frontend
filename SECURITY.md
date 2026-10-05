@@ -53,8 +53,10 @@ Security-relevant items already known and tracked — please do not re-report th
 - Error monitoring is off unless the deployment sets `SENTRY_DSN`. It runs on the server only,
   and browser stack traces are not symbolicated (ADR-0024). CSP violation reports are written
   to the server's log stream at `warn`, which is not forwarded.
-- The production Content Security Policy allows inline script (audit 2026-10-04, N4).
-- The three unauthenticated telemetry endpoints have no rate limit of their own (N6).
+- The Content Security Policy still allows inline styles (`style-src 'unsafe-inline'`). Script is
+  allowed by per-request nonce only (ADR-0026).
+- The three unauthenticated telemetry endpoints have no rate limit of their own (audit
+  2026-10-04, N6).
 
 A **fork** of this repository inherits all of the above. Read the checklist before deploying
 one.

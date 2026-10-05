@@ -9,6 +9,8 @@ npm run test:unit          # *.test.ts(x), *.spec.ts(x) — excludes *.int.test.
 npm run test:integration   # *.int.test.ts(x) only
 npm run test:e2e           # Cypress, headless Electron, public pages (what CI runs)
 npm run test:e2e:stack     # Cypress against the local backend and Mailpit; see run-stack-e2e.md
+npm run test:e2e:csp       # the public pages again, with the Content Security Policy enforced
+npm run test:e2e:csp:stack # the signed-in pages with it enforced; needs the local stack
 ```
 
 | Suite       | Config                       | Setup                                                                                     |

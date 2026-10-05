@@ -5,8 +5,9 @@ independent; pick them off singly.
 
 ## Checklist
 
-- [ ] N4: production CSP has `script-src 'unsafe-inline'` (`next.config.ts`). A per-request nonce,
-      or record the deviation. A CSP change needs an ADR
+- [x] N4: production CSP has `script-src 'unsafe-inline'` (`next.config.ts`). A per-request nonce,
+      or record the deviation. A CSP change needs an ADR. Done 2026-10-05: nonce, ADR-0026, kit
+      `csp-script-nonce`
 - [ ] N5: ratchet the global coverage thresholds in `jest.config.ts` to just under measured
       (37/42/32/36), and correct the sentence in `CLAUDE.md` § Known state of the repo
 - [ ] N6: the three telemetry routes read the whole body before the size test, count characters

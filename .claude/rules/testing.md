@@ -74,12 +74,14 @@ That is deliberate and stricter than a shared handler list — a test cannot pas
 
 ## E2E
 
-Cypress, in two folders that differ in what they may touch (kit `cypress-a11y-e2e`, D-01):
+Cypress, in four folders. The first pair differ in what they may touch (kit `cypress-a11y-e2e`, D-01); the second pair repeat that split with the Content Security Policy enforced by the browser, which Cypress otherwise strips (ADR-0026):
 
 | Folder | Needs | Runs with | In CI |
 |---|---|---|---|
 | `cypress/e2e/public/` | the app only | `npm run test:e2e` | yes, the `e2e` job |
 | `cypress/e2e/stack/` | the app, the backend and Mailpit | `npm run test:e2e:stack` | **no** |
+| `cypress/e2e/csp/` | the app only | `npm run test:e2e:csp` | yes, the `e2e` job |
+| `cypress/e2e/csp-stack/` | the app, the backend and Mailpit | `npm run test:e2e:csp:stack` | **no** |
 
 **The folder is the contract.** A spec in `public/` must not call the backend, because CI runs none.
 Anything that signs in, or reads an emailed token, goes in `stack/`. How to run it:
