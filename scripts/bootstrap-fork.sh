@@ -17,9 +17,13 @@
 #   2. Renames the two brand-named generated artifacts and their references.
 #   3. Creates .env.local from .env.example when absent.
 #   4. Removes docs/internal/ (upstream working material); --keep-internal opts out.
-#   5. Drops FORKED-FROM.md with the upstream commit SHA, preserving an existing
+#   5. Re-formats the rewritten files with Prettier when dependencies are
+#      installed. A new name changes the width of Markdown table cells, and
+#      `npm run format` is a CI gate. Without node_modules this is left to
+#      `npm run format:fix`, which the closing steps print.
+#   6. Drops FORKED-FROM.md with the upstream commit SHA, preserving an existing
 #      one so the original fork point is never overwritten.
-#   6. Re-points the UPSTREAM_* variables below at the new brand, so forking a
+#   7. Re-points the UPSTREAM_* variables below at the new brand, so forking a
 #      fork works and re-running with the same name is a no-op.
 #
 # LICENSE is deliberately NOT rewritten. The ISC licence requires the original
@@ -40,7 +44,7 @@ while [[ $# -gt 0 ]]; do
     --keep-internal)  KEEP_INTERNAL=true; shift ;;
     --dry-run)        DRY_RUN=true; shift ;;
     -h|--help)
-      sed -n '2,26p' "$0" | sed 's/^# \{0,1\}//'
+      sed -n '2,31p' "$0" | sed 's/^# \{0,1\}//'
       exit 0 ;;
     *)
       echo "Unknown argument: $1" >&2
@@ -130,6 +134,7 @@ SED_ARGS=()
 for e in "${EXPRESSIONS[@]}"; do SED_ARGS+=(-e "$e"); done
 
 changed=0
+REWRITTEN=()
 while IFS= read -r f; do
   [[ -f "$f" ]] || continue
   case "$f" in
@@ -142,6 +147,7 @@ while IFS= read -r f; do
   grep -qF -e "$UPSTREAM_SHORT" -e "$UPSTREAM_OWNER" "$f" 2>/dev/null ||
     grep -qF "$UPSTREAM_DISPLAY" "$f" 2>/dev/null || continue
   changed=$((changed + 1))
+  REWRITTEN+=("$f")
   if $DRY_RUN; then
     echo "  would rewrite: $f"
   else
@@ -198,7 +204,40 @@ elif [[ -d docs/internal ]]; then
 fi
 
 # ---------------------------------------------------------------------------
-# 5. Record the fork point
+# 5. Re-format what the rewrite touched
+# ---------------------------------------------------------------------------
+# The rewrite changes the width of Markdown table cells, so their padding no
+# longer matches Prettier's and `npm run format` fails. That gate is the last
+# step of CI's `checks` job; a fork's first push was red until this ran.
+#
+# Prettier is a devDependency, and this script usually runs on a fresh clone
+# before `npm ci`. When it is missing, the closing steps say to run
+# `npm run format:fix` instead.
+PRETTIER="node_modules/.bin/prettier"
+FORMATTED=false
+if $DRY_RUN; then
+  echo "  would format: the rewritten files, if Prettier is installed"
+elif [[ -x "$PRETTIER" ]]; then
+  # Step 2 renamed two of these and step 4 may have removed others.
+  PRESENT=()
+  for f in ${REWRITTEN[@]+"${REWRITTEN[@]}"}; do
+    [[ -f "$f" ]] && PRESENT+=("$f")
+  done
+  # A formatter failure must not stop the script half-way: steps 6 and 7 are
+  # what make a re-run a no-op.
+  if [[ ${#PRESENT[@]} -eq 0 ]] ||
+    "$PRETTIER" --write --ignore-unknown --log-level warn "${PRESENT[@]}"; then
+    FORMATTED=true
+    echo "Formatted the rewritten files with Prettier."
+  else
+    echo "WARNING: Prettier failed — run 'npm run format:fix' yourself (step 3 below)." >&2
+  fi
+else
+  echo "Prettier is not installed yet — formatting is left to 'npm run format:fix' (step 3 below)."
+fi
+
+# ---------------------------------------------------------------------------
+# 6. Record the fork point
 # ---------------------------------------------------------------------------
 UPSTREAM_SHA="$(git rev-parse HEAD)"
 UPSTREAM_DATE="$(date -u +%Y-%m-%d)"
@@ -226,7 +265,7 @@ EOF
 fi
 
 # ---------------------------------------------------------------------------
-# 6. Re-point this script's own upstream identity at the new brand
+# 7. Re-point this script's own upstream identity at the new brand
 # ---------------------------------------------------------------------------
 if ! $DRY_RUN; then
   sed_inplace \
@@ -241,6 +280,11 @@ fi
 echo
 echo "Done."
 $DRY_RUN && { echo "Dry run — nothing was changed."; exit 0; }
+if $FORMATTED; then
+  FORMAT_NOTE="Prettier already ran here, so format:fix should change nothing."
+else
+  FORMAT_NOTE="Prettier has not run yet, so format:fix is required."
+fi
 cat <<EOF
 
 Next steps — these are NOT automated, and the repo will not build until they are done:
@@ -251,11 +295,14 @@ Next steps — these are NOT automated, and the repo will not build until they a
      local checkout) in .env.local, then run:
          npm run api:spec:sync && npm run api:types:generate
 
-  2. Edit .env.local — API_URL and NEXT_PUBLIC_API_BASE_URL both point at localhost:4000.
+  2. Edit .env.local — API_URL and NEXT_PUBLIC_API_BASE_URL both point at localhost:8001.
 
-  3. Reinstall and verify:
+  3. Reinstall, format and verify:
          npm ci
-         npm run lint && npm run typecheck && npm run test:unit && npm run build
+         npm run format:fix
+         npm run lint && npm run typecheck && npm run format && npm run test:unit && npm run build
+     The rename changes the width of Markdown table cells, and 'npm run format' is a
+     CI gate. ${FORMAT_NOTE}
 
   4. Renaming the session cookie to ${SHORT_NAME}_token invalidates any existing
      session. That is expected on a fresh fork.

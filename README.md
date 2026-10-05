@@ -83,9 +83,11 @@ This repo is intended to be reusable as a SaaS frontend base. To rename a fresh 
 ```
 
 It rewrites the brand across every tracked file, renames the two brand-named generated artifacts,
-creates `.env.local`, drops upstream working material under `docs/internal/`, and records the fork
-point in `FORKED-FROM.md`. It is idempotent, and it deliberately leaves `LICENSE` alone — ISC
-requires the original copyright notice to be retained.
+creates `.env.local`, drops upstream working material under `docs/internal/`, re-formats what it
+rewrote when dependencies are installed, and records the fork point in `FORKED-FROM.md`. Run on a
+fresh clone it prints `npm run format:fix` as a step instead: `npm run format` is a CI gate. It is
+idempotent, and it deliberately leaves `LICENSE` alone — ISC requires the original copyright notice
+to be retained.
 
 Renaming changes the session cookie name, which signs out any existing session once.
 
