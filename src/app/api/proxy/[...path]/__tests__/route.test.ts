@@ -306,3 +306,69 @@ describe("a backend 5xx", () => {
     }
   });
 });
+
+describe("a path that tries to leave the API base", () => {
+  /**
+   * Next decodes each segment before the handler sees it, so `..%2f..%2fhealth`
+   * arrives as the single segment `../../health`. Joined raw into a URL, that
+   * climbed out of `/api/v1` to any path on the backend's origin, with the
+   * caller's bearer token attached (audit 2026-10-04, N1).
+   */
+  const SESSION = { [SESSION_COOKIE_NAME]: "any-value" };
+
+  it.each([
+    ["an encoded slash inside one segment", ["../../health"]],
+    ["a dot-dot segment of its own", ["..", "..", "health"]],
+    ["a dot-dot after a public path", ["auth", "login", "..", "..", "..", "health"]],
+    ["a backslash", ["..\\..\\health"]],
+    ["a single dot", ["metrics", "."]],
+    ["an empty segment", ["metrics", ""]],
+  ])("is refused with 400 and never forwarded: %s", async (_label, segments) => {
+    global.fetch = jest.fn() as unknown as typeof fetch;
+
+    const response = await GET(request("x", SESSION), context(...segments));
+
+    expect(response.status).toBe(400);
+    await expect(response.json()).resolves.toEqual({ error: "Invalid path" });
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("is refused before the session check, so a caller with no cookie gets 400 too", async () => {
+    global.fetch = jest.fn() as unknown as typeof fetch;
+
+    const response = await GET(request("x"), context("..", "health"));
+
+    expect(response.status).toBe(400);
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["a literal percent-encoded dot-dot", ["%2e%2e", "health"], "/api/v1/%252e%252e/health"],
+    ["a question mark", ["metrics?admin=1"], "/api/v1/metrics%3Fadmin%3D1"],
+    ["a hash", ["metrics#frag", "abc"], "/api/v1/metrics%23frag/abc"],
+  ])("keeps %s inside one path component", async (_label, segments, pathname) => {
+    const fetchMock = jest.fn().mockResolvedValue(upstream(200));
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    await GET(request("x", SESSION), context(...segments));
+
+    const target = fetchMock.mock.calls[0][0] as URL;
+    expect(target.origin).toBe("http://backend.test");
+    expect(target.pathname).toBe(pathname);
+    expect(target.search).toBe("");
+  });
+
+  it("forwards an ordinary path and its query exactly as before", async () => {
+    const fetchMock = jest.fn().mockResolvedValue(upstream(200));
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    await GET(
+      request("metrics/8f14e45f-ceea-467f-a9d1-3f0b2c1d9e77?limit=10&sort=name", SESSION),
+      context("metrics", "8f14e45f-ceea-467f-a9d1-3f0b2c1d9e77"),
+    );
+
+    expect(String(fetchMock.mock.calls[0][0])).toBe(
+      "http://backend.test/api/v1/metrics/8f14e45f-ceea-467f-a9d1-3f0b2c1d9e77?limit=10&sort=name",
+    );
+  });
+});

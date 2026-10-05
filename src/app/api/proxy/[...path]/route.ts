@@ -7,7 +7,7 @@ import {
   REFRESH_MAX_AGE_SECONDS,
   SESSION_COOKIE_NAME,
 } from "@/constants/app";
-import { isPublicApiPath } from "@/lib/auth-paths";
+import { buildUpstreamUrl, isPublicApiPath } from "@/lib/auth-paths";
 import {
   applyRefreshedSession,
   captureRefreshCookie,
@@ -33,6 +33,12 @@ const SESSION_EXPIRED_BODY = { error: "Session expired", code: "SESSION_EXPIRED"
 /** Returned when the request to the backend fails outright, before any response. */
 const UPSTREAM_UNREACHABLE_BODY = { error: "The server could not be reached." } as const;
 
+/** Returned for a path that could reach outside the API base. Nothing is forwarded. */
+const INVALID_PATH_BODY = { error: "Invalid path" } as const;
+
+/** Long enough to recognise a probe in the log, short enough not to be a payload. */
+const MAX_LOGGED_PATH_LENGTH = 200;
+
 /** The header `lakira-backend` sets on every response and tags its own errors with. */
 const REQUEST_ID_HEADER = "x-request-id";
 
@@ -55,7 +61,17 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
   const params = await context.params;
   const rawSegments = params.path ?? [];
   const targetPath = rawSegments.join("/");
-  const targetUrl = new URL(`${apiBaseUrl}/${targetPath}`);
+
+  // Before the session check on purpose: a path that leaves the API base is
+  // refused whoever asks, and a 401 here would say only "log in and try again".
+  const targetUrl = buildUpstreamUrl(apiBaseUrl, rawSegments);
+  if (!targetUrl) {
+    logger.warn("proxy.invalid_path", {
+      path: targetPath.slice(0, MAX_LOGGED_PATH_LENGTH),
+      method: request.method,
+    });
+    return NextResponse.json(INVALID_PATH_BODY, { status: 400 });
+  }
 
   request.nextUrl.searchParams.forEach((value, key) => {
     targetUrl.searchParams.append(key, value);
