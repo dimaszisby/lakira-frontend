@@ -87,10 +87,39 @@ Where a guard was added, it was checked to fail:
 | C5 — `gitleaks-action` v1   | Frontend         | Small                                                             |
 | C6 — six quarantined files  | Frontend         | `HydrateUser.tsx` is dead code and can simply go                  |
 
-## 7. Related
+## 7. The 2026-10-04 run
+
+Added when that run landed. Sections 1 to 6 describe the programme as it stood on 2026-08-29 and
+are left as written.
+
+| Section 6 item              | On 2026-10-04                                                       |
+| --------------------------- | ------------------------------------------------------------------- |
+| C1 — organization switcher  | Closed. The backend added `GET /organizations`; ADR-0020            |
+| C2 — three unverified flows | Closed. All three run in `test:e2e:stack` against Mailpit           |
+| C3 — vendor error sink      | Closed. Sentry, server only, ADR-0024                               |
+| C4 — deploy config          | Open. Waits on the hosting decision                                 |
+| C5 — `gitleaks-action` v1   | Closed. A checksum-pinned binary                                    |
+| C6 — six quarantined files  | Two remain                                                          |
+
+What that run got from methods the first two did not use:
+
+- **Probing a production build** found that the proxy forwards outside its API base (N1). The
+  line is older than the baseline; both earlier runs read it and graded the hop Pass.
+- **Running the bootstrap and then every gate on the fork** found that the fork fails `format`
+  (N2). Section 5 above records the fork flow as verified; it was, against the gates that existed
+  then. `format` became a gate three weeks later and nobody re-ran the fork.
+- **Reading a rule against the code** found the access token in browser JavaScript at sign-in
+  (N3), which `.claude/rules/security.md` says never happens.
+
+It also read ADR-001 criterion 3 as written, where the 2026-08-29 run had passed it "with one
+exception". Whether that exception should exist is an open question for the owner, in section 9
+of the audit.
+
+## 8. Related
 
 - [`audit-2026-08-24.md`](./audit-2026-08-24.md) — baseline, immutable
-- [`audit-2026-08-29.md`](./audit-2026-08-29.md) — current run, immutable
+- [`audit-2026-08-29.md`](./audit-2026-08-29.md) — re-audit after phases 0-7, immutable
+- [`audit-2026-10-04.md`](./audit-2026-10-04.md) — current run, immutable
 - [`decisions.md`](./decisions.md) — ADR-001 through ADR-004
 - [`iteration-plan.md`](./iteration-plan.md) — phase roadmap and status
 - [`../../../../SAAS-BASE-CHECKLIST.md`](../../../../SAAS-BASE-CHECKLIST.md) — the public one-pager

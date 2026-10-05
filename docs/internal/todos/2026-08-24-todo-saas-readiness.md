@@ -379,3 +379,8 @@ The boxes were left unticked; ticked 2026-09-29.
 ## Status
 
 _Phase 0 complete 2026-08-24. Appended per `.claude/rules/workflow.md` as later phases land._
+
+_2026-10-04: third dated run,
+[`audit-2026-10-04.md`](../audits/saas-readiness/audit-2026-10-04.md). Two boxes above stay open:
+the raw read in `next.config.ts`, a documented exception, and deploy configuration, which waits on
+the hosting decision. The run's own findings are in four todos dated 2026-10-04._

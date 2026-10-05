@@ -29,6 +29,9 @@ It mirrors the equivalent kit in `lakira-backend`
 - `audit-2026-08-24.md` — baseline audit. Scorecard, gap entries (P0/P1/P2), evidence,
   recommended fixes.
 - `audit-2026-08-29.md` — re-audit after phases 0-7. 43% -> 84%; FORK-READY WITH CAVEATS.
+- `audit-2026-10-04.md` — re-audit after phase 4b and the switcher. 85%; the verdict is not
+  reconfirmed, on criterion 3. First run with a grade per item, vacuity checks, live probes and a
+  fork test.
 - `FINAL-AUDIT-SUMMARY.md` — closeout across both runs, including the findings the programme
   itself got wrong and corrected.
 - `iteration-plan.md` — phase roadmap mapping each remediation phase to its gap IDs and kit.
@@ -61,7 +64,8 @@ Each non-Pass item follows the same structure:
 See ADR-001 in [`decisions.md`](./decisions.md). All four must hold:
 
 1. Zero P0 gaps remaining.
-2. All eight empirical gates green.
+2. All eight empirical gates green. Runs since 2026-10-04 also record `format`, `coverage:check`
+   and both e2e suites.
 3. Categories 1 (Auth), 4 (Security), 6 (DX), 7 (Testing), 8 (CI/CD), 11 (Multi-Tenancy),
    13 (Forkability) at ≥ 80% Pass.
 4. `LICENSE` and `.env.example` present at repo root.
@@ -72,15 +76,17 @@ See ADR-001 in [`decisions.md`](./decisions.md). All four must hold:
 npm run lint
 npm run lint:css
 npm run typecheck
+npm run format
 npm run test:unit:ci
 npm run coverage:check
 npm run test:integration
 npm run build
 npm run api:spec:check && npm run api:types:check
 npm run security:scan
+npm run test:e2e
 ```
 
-`test:unit:ci` rather than `test:unit`: it collects coverage, which the thresholds gate on.
+Run them on the Node version in `.nvmrc`. `test:unit:ci` rather than `test:unit`: it collects coverage, which the thresholds gate on.
 `coverage:check` enforces the per-folder goals and runs in CI as of 2026-08-27.
 
 Capture real exit codes. A category cannot be Pass if any gate covering it fails.
@@ -93,10 +99,10 @@ scorecards across runs to track progress.
 
 ```bash
 # Branding footprint
-grep -rIl 'lakira\|Lakira' src public package.json cypress middleware.ts scripts
+grep -rIl 'lakira\|Lakira' src public package.json cypress scripts
 
 # Env reads not routed through a schema
-grep -rn 'process\.env' src middleware.ts next.config.ts
+grep -rn 'process\.env' src next.config.ts
 
 # Cache keys missing an org dimension
 find src/features -name keys.ts -exec grep -L 'organization\|orgId' {} +
@@ -108,6 +114,13 @@ grep -n 'coverageThreshold' -A6 jest.config.ts
 # argument, so a missed call site is a compile error rather than a silent leak.
 find src/features -name keys.ts -exec grep -L 'organizationId' {} +   # expect only auth/keys.ts
 ```
+
+The edge gate is `src/proxy.ts` since 2026-09-12 and is covered by `src`; the two scans above named
+a root `middleware.ts` until the 2026-10-04 run.
+
+Three checks from the 2026-10-04 run are worth repeating, and its sections 2.1 to 2.3 give the
+method: break each gate once and watch it fail; probe a production build, including
+`GET /api/proxy/..%2f..%2fhealth`; and bootstrap a clone, then run every gate on the fork.
 
 The MSW scan from the baseline is retired: `handlers.ts` being empty is correct design, not a
 gap. See the correction in `FINAL-AUDIT-SUMMARY.md` section 3.
