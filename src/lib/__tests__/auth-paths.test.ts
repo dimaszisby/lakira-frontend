@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 
 import {
+  buildUpstreamUrl,
   isProtectedAppPath,
   isPublicApiPath,
   PROTECTED_APP_MATCHERS,
@@ -121,5 +122,89 @@ describe("isPublicApiPath", () => {
     for (const path of PUBLIC_API_PATHS) {
       expect(path.startsWith("auth/")).toBe(true);
     }
+  });
+});
+
+describe("buildUpstreamUrl", () => {
+  const ORIGIN = "http://backend.test";
+  const BASE = `${ORIGIN}/api/v1`;
+
+  it.each([
+    [["metrics"], "http://backend.test/api/v1/metrics"],
+    [["auth", "login"], "http://backend.test/api/v1/auth/login"],
+    [["metric-settings", "42", "achieve"], "http://backend.test/api/v1/metric-settings/42/achieve"],
+    [["admin", "_ping"], "http://backend.test/api/v1/admin/_ping"],
+    // A dot inside a name is an ordinary character; only a whole-segment dot is special.
+    [["files", "report.v2.csv"], "http://backend.test/api/v1/files/report.v2.csv"],
+    [["...", "x"], "http://backend.test/api/v1/.../x"],
+  ])("builds %j under the base", (segments, expected) => {
+    expect(String(buildUpstreamUrl(BASE, segments))).toBe(expected);
+  });
+
+  it.each([
+    [["../../health"]],
+    [[".."]],
+    [["metrics", "..", "..", "health"]],
+    [["."]],
+    [["metrics", ""]],
+    [["a/b"]],
+    [["..\\..\\health"]],
+    [["a\\b"]],
+  ])("refuses %j", (segments) => {
+    expect(buildUpstreamUrl(BASE, segments)).toBeNull();
+  });
+
+  it.each([
+    [["%2e%2e", "health"], "/api/v1/%252e%252e/health"],
+    [["%2E%2E%2Fhealth"], "/api/v1/%252E%252E%252Fhealth"],
+    [["metrics?admin=1"], "/api/v1/metrics%3Fadmin%3D1"],
+    [["metrics#frag"], "/api/v1/metrics%23frag"],
+    [["a b"], "/api/v1/a%20b"],
+    [["@evil.test"], "/api/v1/%40evil.test"],
+  ])("keeps %j as one opaque component", (segments, pathname) => {
+    const url = buildUpstreamUrl(BASE, segments);
+    expect(url?.origin).toBe(ORIGIN);
+    expect(url?.pathname).toBe(pathname);
+    expect(url?.search).toBe("");
+    expect(url?.hash).toBe("");
+  });
+
+  it("refuses a segment that cannot be encoded instead of throwing", () => {
+    // A lone surrogate, built at runtime so no unpaired code unit sits in this file.
+    const loneSurrogate = String.fromCharCode(0xd800);
+    expect(buildUpstreamUrl(BASE, ["metrics", loneSurrogate])).toBeNull();
+  });
+
+  it.each([
+    ["a two-dot leader", String.fromCodePoint(0x2025), "/api/v1/%E2%80%A5/health"],
+    [
+      "fullwidth full stops",
+      String.fromCodePoint(0xff0e, 0xff0e),
+      "/api/v1/%EF%BC%8E%EF%BC%8E/health",
+    ],
+    ["a tab", String.fromCharCode(9), "/api/v1/%09/health"],
+  ])("does not let %s act as a dot segment", (_label, segment, pathname) => {
+    expect(buildUpstreamUrl(BASE, [segment, "health"])?.pathname).toBe(pathname);
+  });
+
+  it.each([
+    ["a port", `${ORIGIN}:8001/api/v1`, `${ORIGIN}:8001/api/v1/metrics`],
+    ["a query", `${BASE}?debug=1`, `${BASE}/metrics`],
+    ["a fragment", `${BASE}#top`, `${BASE}/metrics`],
+  ])("builds under a base that has %s", (_label, base, expected) => {
+    expect(String(buildUpstreamUrl(base, ["metrics"]))).toBe(expected);
+  });
+
+  it("gives the same result whether or not the base ends in a slash", () => {
+    expect(String(buildUpstreamUrl(`${BASE}/`, ["metrics"]))).toBe(`${BASE}/metrics`);
+  });
+
+  it("works when the API is served from the origin root", () => {
+    expect(String(buildUpstreamUrl(ORIGIN, ["metrics"]))).toBe(`${ORIGIN}/metrics`);
+    expect(buildUpstreamUrl(ORIGIN, ["..", "x"])).toBeNull();
+  });
+
+  it("builds the base itself for an empty path", () => {
+    expect(String(buildUpstreamUrl(BASE, []))).toBe(`${BASE}/`);
   });
 });

@@ -42,6 +42,8 @@ Non-negotiables:
 
 `src/app/api/proxy/[...path]/route.ts` rejects any request without a token, unless the path appears in `PUBLIC_API_PATHS` (`src/lib/auth-paths.ts`) — the seven unauthenticated auth entry points, matched exactly rather than by prefix so `auth/profile` and `auth/switch-org` stay protected.
 
+**It forwards only under the API base.** `buildUpstreamUrl` (`src/lib/auth-paths.ts`) builds the upstream URL and is the only thing that may. A route segment is one opaque path component: an empty one, `.`, `..`, or one containing a slash or a backslash is refused with 400 before the session check, and the rest are percent-encoded. Next decodes segments before the handler sees them, so until 2026-10-05 `/api/proxy/..%2f..%2fhealth` reached the backend's `/health` with the caller's token attached. Never join segments into a URL by hand.
+
 **Adding a backend resource requires no change here.** It is protected from the moment it exists. Only add to `PUBLIC_API_PATHS` when the contract genuinely marks an operation unauthenticated, and cover it in `src/lib/__tests__/auth-paths.test.ts`.
 
 Until 2026-08-27 this was inverted — an allowlist of protected segments, so every unlisted resource proxied unauthenticated. `analytics/*` and `admin/_ping` were both exposed that way.
