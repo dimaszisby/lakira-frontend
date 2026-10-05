@@ -21,33 +21,34 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 
 ## Records
 
-| №                                                                                   | Decision                                                               | Status         | Date       | Origin    |
-| ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | -------------- | ---------- | --------- |
-| [ADR-0001](./adr-0001-button-consolidation-and-primarybutton-deprecation-window.md) | Button consolidation and PrimaryButton deprecation window              | **Superseded** | 2026-02-13 | `ADR-003` |
-| [ADR-0002](./adr-0002-immediate-primarybutton-removal.md)                           | Immediate PrimaryButton removal                                        | Accepted       | 2026-02-13 | `ADR-004` |
-| [ADR-0003](./adr-0003-standardize-on-formfield-and-remove-fieldshell.md)            | Standardize on FormField, remove unused FieldShell                     | Accepted       | 2026-02-13 | `ADR-005` |
-| [ADR-0004](./adr-0004-colorfield-tokenization-and-hex-contract.md)                  | ColorField tokenization and hex contract hardening                     | Accepted       | 2026-02-14 | `ADR-007` |
-| [ADR-0005](./adr-0005-pagination-contract-and-accessibility-guardrails.md)          | Pagination contract rebuild and accessibility guardrails               | Accepted       | 2026-02-14 | `ADR-008` |
-| [ADR-0006](./adr-0006-card-primitive-contract.md)                                   | Card primitive contract hardening                                      | Accepted       | 2026-02-14 | `ADR-010` |
-| [ADR-0007](./adr-0007-table-contract-and-row-interaction-guardrails.md)             | Table contract and row-interaction guardrails                          | Accepted       | 2026-02-15 | `ADR-011` |
-| [ADR-0008](./adr-0008-visualization-url-state-sync.md)                              | Visualization URL-state sync hardening                                 | Accepted       | 2026-02-15 | `ADR-012` |
-| [ADR-0009](./adr-0009-select-listbox-trigger-semantics.md)                          | Select listbox trigger semantics and keyboard hardening                | **Superseded** | 2026-02-15 | `ADR-015` |
-| [ADR-0010](./adr-0010-modal-focus-management-and-close-behaviour.md)                | Modal focus management and close-behaviour hardening                   | **Superseded** | 2026-02-15 | `ADR-016` |
-| [ADR-0011](./adr-0011-sort-controls-and-skeleton-naming.md)                         | Sort controls and skeleton naming standardization                      | Accepted       | 2026-02-16 | `ADR-021` |
-| [ADR-0012](./adr-0012-closure-gates-and-the-tier-test-minimum.md)                   | Closure gates and the tier test minimum                                | Accepted       | 2026-02-18 | `ADR-023` |
-| [ADR-0013](./adr-0013-visualization-url-driven-state-source.md)                     | Visualization URL-driven state source                                  | Accepted       | 2026-03-02 | `ADR-053` |
-| [ADR-0014](./adr-0014-modal-shared-scroll-lock-coordination.md)                     | Modal shared scroll-lock coordination                                  | **Superseded** | 2026-03-12 | `ADR-062` |
-| [ADR-0015](./adr-0015-cache-keys-are-organization-scoped.md)                        | Cache keys are organization-scoped                                     | Accepted       | 2026-08-29 | `ADR-004` |
-| [ADR-0016](./adr-0016-ui-primitives-conventions-ariakit-and-centralised-styling.md) | UI primitives: conventions, Ariakit, centralised styling               | Accepted       | 2026-09-11 | todo      |
-| [ADR-0017](./adr-0017-accept-the-button-contrast-deviations.md)                     | Accept the Button contrast deviations                                  | Accepted       | 2026-09-20 | `D-03`    |
-| [ADR-0018](./adr-0018-node-24-runtime-pinned-in-nvmrc.md)                           | Node 24 runtime, pinned once in `.nvmrc`                               | Accepted       | 2026-09-25 | todo      |
-| [ADR-0019](./adr-0019-dependency-install-scripts-are-opt-in.md)                     | Dependency install scripts are opt-in                                  | Accepted       | 2026-09-25 | todo      |
-| [ADR-0020](./adr-0020-changing-organization-reloads-the-document.md)                | Changing the active organization reloads the document                  | Accepted       | 2026-09-28 | `D-02`    |
-| [ADR-0021](./adr-0021-tanstack-query-floor-at-the-observer-reattach-fix.md)         | TanStack Query's floor is the observer-reattach fix                    | Accepted       | 2026-09-29 | todo      |
-| [ADR-0022](./adr-0022-browser-accessibility-checks-with-cypress-axe.md)             | Browser accessibility checks through `cypress-axe`, `axe-core` pinned  | Accepted       | 2026-09-29 | `D-02`    |
-| [ADR-0023](./adr-0023-pull-requests-block-on-production-advisories-only.md)         | Pull requests block on production advisories; nightly audits all       | Accepted       | 2026-10-02 | `D-01`    |
-| [ADR-0024](./adr-0024-sentry-on-the-server-only.md)                                 | Error monitoring is Sentry, running on the server only                 | Accepted       | 2026-10-04 | `D-01`    |
-| [ADR-0025](./adr-0025-the-proxy-sets-the-session-cookie.md)                         | The proxy sets the session cookie; the token never reaches the browser | Accepted       | 2026-10-05 | `D-01`    |
+| №                                                                                   | Decision                                                                    | Status         | Date       | Origin    |
+| ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | -------------- | ---------- | --------- |
+| [ADR-0001](./adr-0001-button-consolidation-and-primarybutton-deprecation-window.md) | Button consolidation and PrimaryButton deprecation window                   | **Superseded** | 2026-02-13 | `ADR-003` |
+| [ADR-0002](./adr-0002-immediate-primarybutton-removal.md)                           | Immediate PrimaryButton removal                                             | Accepted       | 2026-02-13 | `ADR-004` |
+| [ADR-0003](./adr-0003-standardize-on-formfield-and-remove-fieldshell.md)            | Standardize on FormField, remove unused FieldShell                          | Accepted       | 2026-02-13 | `ADR-005` |
+| [ADR-0004](./adr-0004-colorfield-tokenization-and-hex-contract.md)                  | ColorField tokenization and hex contract hardening                          | Accepted       | 2026-02-14 | `ADR-007` |
+| [ADR-0005](./adr-0005-pagination-contract-and-accessibility-guardrails.md)          | Pagination contract rebuild and accessibility guardrails                    | Accepted       | 2026-02-14 | `ADR-008` |
+| [ADR-0006](./adr-0006-card-primitive-contract.md)                                   | Card primitive contract hardening                                           | Accepted       | 2026-02-14 | `ADR-010` |
+| [ADR-0007](./adr-0007-table-contract-and-row-interaction-guardrails.md)             | Table contract and row-interaction guardrails                               | Accepted       | 2026-02-15 | `ADR-011` |
+| [ADR-0008](./adr-0008-visualization-url-state-sync.md)                              | Visualization URL-state sync hardening                                      | Accepted       | 2026-02-15 | `ADR-012` |
+| [ADR-0009](./adr-0009-select-listbox-trigger-semantics.md)                          | Select listbox trigger semantics and keyboard hardening                     | **Superseded** | 2026-02-15 | `ADR-015` |
+| [ADR-0010](./adr-0010-modal-focus-management-and-close-behaviour.md)                | Modal focus management and close-behaviour hardening                        | **Superseded** | 2026-02-15 | `ADR-016` |
+| [ADR-0011](./adr-0011-sort-controls-and-skeleton-naming.md)                         | Sort controls and skeleton naming standardization                           | Accepted       | 2026-02-16 | `ADR-021` |
+| [ADR-0012](./adr-0012-closure-gates-and-the-tier-test-minimum.md)                   | Closure gates and the tier test minimum                                     | Accepted       | 2026-02-18 | `ADR-023` |
+| [ADR-0013](./adr-0013-visualization-url-driven-state-source.md)                     | Visualization URL-driven state source                                       | Accepted       | 2026-03-02 | `ADR-053` |
+| [ADR-0014](./adr-0014-modal-shared-scroll-lock-coordination.md)                     | Modal shared scroll-lock coordination                                       | **Superseded** | 2026-03-12 | `ADR-062` |
+| [ADR-0015](./adr-0015-cache-keys-are-organization-scoped.md)                        | Cache keys are organization-scoped                                          | Accepted       | 2026-08-29 | `ADR-004` |
+| [ADR-0016](./adr-0016-ui-primitives-conventions-ariakit-and-centralised-styling.md) | UI primitives: conventions, Ariakit, centralised styling                    | Accepted       | 2026-09-11 | todo      |
+| [ADR-0017](./adr-0017-accept-the-button-contrast-deviations.md)                     | Accept the Button contrast deviations                                       | Accepted       | 2026-09-20 | `D-03`    |
+| [ADR-0018](./adr-0018-node-24-runtime-pinned-in-nvmrc.md)                           | Node 24 runtime, pinned once in `.nvmrc`                                    | Accepted       | 2026-09-25 | todo      |
+| [ADR-0019](./adr-0019-dependency-install-scripts-are-opt-in.md)                     | Dependency install scripts are opt-in                                       | Accepted       | 2026-09-25 | todo      |
+| [ADR-0020](./adr-0020-changing-organization-reloads-the-document.md)                | Changing the active organization reloads the document                       | Accepted       | 2026-09-28 | `D-02`    |
+| [ADR-0021](./adr-0021-tanstack-query-floor-at-the-observer-reattach-fix.md)         | TanStack Query's floor is the observer-reattach fix                         | Accepted       | 2026-09-29 | todo      |
+| [ADR-0022](./adr-0022-browser-accessibility-checks-with-cypress-axe.md)             | Browser accessibility checks through `cypress-axe`, `axe-core` pinned       | Accepted       | 2026-09-29 | `D-02`    |
+| [ADR-0023](./adr-0023-pull-requests-block-on-production-advisories-only.md)         | Pull requests block on production advisories; nightly audits all            | Accepted       | 2026-10-02 | `D-01`    |
+| [ADR-0024](./adr-0024-sentry-on-the-server-only.md)                                 | Error monitoring is Sentry, running on the server only                      | Accepted       | 2026-10-04 | `D-01`    |
+| [ADR-0025](./adr-0025-the-proxy-sets-the-session-cookie.md)                         | The proxy sets the session cookie; the token never reaches the browser      | Accepted       | 2026-10-05 | `D-01`    |
+| [ADR-0026](./adr-0026-script-runs-by-nonce.md)                                      | Script runs by per-request nonce; the policy no longer allows inline script | Accepted       | 2026-10-05 | `D-01`    |
 
 ## Where the other decisions went
 

@@ -25,14 +25,50 @@ import { NextResponse } from "next/server";
 
 import { SESSION_COOKIE_NAME } from "@/constants/app";
 import { isProtectedAppPath } from "@/lib/auth-paths";
+import {
+  buildContentSecurityPolicy,
+  createNonce,
+  CSP_HEADER,
+  NONCE_HEADER,
+  originOf,
+} from "@/lib/csp";
+import { clientEnv } from "@/lib/env";
 import { isSessionTokenUsable } from "@/lib/jwt";
 import { authRoutes } from "@/lib/routes";
+
+const IS_DEV = process.env.NODE_ENV !== "production";
+
+/**
+ * Let the request through with a Content Security Policy that allows script by
+ * a nonce made for this response alone (ADR-0026).
+ *
+ * The policy goes on the *request* as well as the response. Next reads the nonce
+ * from the request's policy and stamps it on the scripts it emits; set only on
+ * the response, the browser would be told to require a nonce that no script
+ * carries, and the page would not hydrate.
+ */
+const passWithPolicy = (request: NextRequest): NextResponse => {
+  const nonce = createNonce();
+  const policy = buildContentSecurityPolicy({
+    nonce,
+    isDev: IS_DEV,
+    apiOrigin: originOf(clientEnv.NEXT_PUBLIC_API_BASE_URL),
+  });
+
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set(NONCE_HEADER, nonce);
+  requestHeaders.set(CSP_HEADER, policy);
+
+  const response = NextResponse.next({ request: { headers: requestHeaders } });
+  response.headers.set(CSP_HEADER, policy);
+  return response;
+};
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   if (!isProtectedAppPath(pathname)) {
-    return NextResponse.next();
+    return passWithPolicy(request);
   }
 
   const token = request.cookies.get(SESSION_COOKIE_NAME)?.value;
@@ -43,7 +79,7 @@ export function proxy(request: NextRequest) {
   // needs the backend's secret, and the backend re-checks on every proxied
   // request anyway.
   if (isSessionTokenUsable(token)) {
-    return NextResponse.next();
+    return passWithPolicy(request);
   }
 
   const returnUrl = `${pathname}${request.nextUrl.search ?? ""}`;
@@ -68,18 +104,14 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Next.js requires this to be statically analysable, so it cannot be derived
-  // from PROTECTED_APP_PATHS at runtime — a computed value fails the build with
-  // "matcher needs to be a static string or array of static strings".
+  // Every page, because every page needs a nonce; which ones are gated is
+  // decided above by `isProtectedAppPath`. Route handlers and Next's static
+  // output are left out: they have no document to protect, and a redirect here
+  // would block CSS, JS or images from loading.
   //
-  // The two are therefore kept in sync by a test:
-  // src/lib/__tests__/auth-paths.test.ts asserts this array equals
-  // PROTECTED_APP_MATCHERS. Add a protected section in auth-paths.ts, then here.
-  matcher: [
-    "/dashboard/:path*",
-    "/metrics/:path*",
-    "/metric-categories/:path*",
-    "/account/:path*",
-    "/organization/:path*",
-  ],
+  // Next.js requires this to be a literal ("matcher needs to be a static
+  // string or array of static strings"), so it repeats PROXY_MATCHER from
+  // src/lib/auth-paths.ts. src/lib/__tests__/auth-paths.test.ts asserts the two
+  // are equal and that the pattern covers every protected path.
+  matcher: ["/((?!api(?:/|$)|_next/static(?:/|$)|_next/image(?:/|$)).*)"],
 };

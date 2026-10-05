@@ -7,7 +7,13 @@ import { useState } from "react";
 
 import { THEME_STORAGE_KEY } from "@/constants/app";
 
-export const Providers = ({ children }: { children: React.ReactNode }) => {
+type ProvidersProps = {
+  children: React.ReactNode;
+  /** The Content Security Policy nonce for this response; see src/app/layout.tsx. */
+  nonce?: string;
+};
+
+export const Providers = ({ children, nonce }: ProvidersProps) => {
   const [queryClient] = useState(() => new QueryClient());
 
   return (
@@ -21,6 +27,9 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
       defaultTheme="system" // explicit default (no system surprises)
       enableSystem
       disableTransitionOnChange // no janky transitions on toggle
+      // Without it the policy blocks next-themes' pre-paint script, and the
+      // page paints in the wrong theme before hydration corrects it.
+      nonce={nonce}
     >
       <JotaiProvider>
         {/* Server-prefetched state is hydrated per route, not here: a route that

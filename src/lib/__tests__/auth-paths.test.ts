@@ -6,8 +6,8 @@ import {
   isProtectedAppPath,
   isPublicApiPath,
   isTokenIssuingApiPath,
-  PROTECTED_APP_MATCHERS,
   PROTECTED_APP_PATHS,
+  PROXY_MATCHER,
   PUBLIC_API_PATHS,
   TOKEN_ISSUING_API_PATHS,
 } from "../auth-paths";
@@ -41,11 +41,11 @@ describe("isProtectedAppPath", () => {
   });
 });
 
-describe("proxy matcher stays in sync", () => {
+describe("the proxy matcher", () => {
   // Next.js requires config.matcher to be statically analysable, so it cannot
-  // be derived from PROTECTED_APP_PATHS at runtime — a computed value fails the
-  // build with "matcher needs to be a static string or array of static
-  // strings". This test is what keeps the literal honest instead.
+  // import PROXY_MATCHER — a computed value fails the build with "matcher needs
+  // to be a static string or array of static strings". This test is what keeps
+  // the literal honest instead.
   //
   // The matcher is read as source text rather than imported: importing
   // src/proxy.ts pulls in next/server, which needs web globals the jsdom test
@@ -62,12 +62,50 @@ describe("proxy matcher stays in sync", () => {
     return [...block[1].matchAll(/"([^"]+)"/g)].map((match) => match[1]);
   };
 
-  it("matches PROTECTED_APP_MATCHERS exactly", () => {
-    expect(readMatcherFromSource().sort()).toEqual([...PROTECTED_APP_MATCHERS].sort());
+  // How Next applies a regex matcher: anchored to the whole path.
+  const matches = (pathname: string) => new RegExp(`^${PROXY_MATCHER}$`).test(pathname);
+
+  it("is the one pattern PROXY_MATCHER names", () => {
+    expect(readMatcherFromSource()).toEqual([PROXY_MATCHER]);
   });
 
-  it("derives one matcher per protected path", () => {
-    expect(PROTECTED_APP_MATCHERS).toHaveLength(PROTECTED_APP_PATHS.length);
+  // The matcher used to list the protected sections one by one, and this test
+  // compared the two lists. It is a single wide pattern now (ADR-0026), so what
+  // has to hold is that no protected path falls outside it: a section the
+  // matcher skipped would be gated by nothing but the layout's fallback.
+  it.each(PROTECTED_APP_PATHS.flatMap((section) => [[section], [`${section}/some/deeper/page`]]))(
+    "runs the gate on %s",
+    (pathname) => {
+      expect(matches(pathname)).toBe(true);
+    },
+  );
+
+  it.each([
+    ["/"],
+    ["/login"],
+    ["/register"],
+    ["/forgot-password"],
+    ["/no-such-page"],
+    // Look-alikes of the excluded prefixes. A lookahead without a segment
+    // boundary skipped these, and a page there got no policy at all.
+    ["/apiary"],
+    ["/api-docs"],
+    ["/api.html"],
+    ["/_next/staticfoo"],
+    ["/_next/images"],
+    ["/_nextish"],
+  ])("runs on the public page %s, which needs a nonce too", (pathname) => {
+    expect(matches(pathname)).toBe(true);
+  });
+
+  it.each([
+    ["/api"],
+    ["/api/proxy/metrics"],
+    ["/api/auth/logout"],
+    ["/_next/static/chunks/app.js"],
+    ["/_next/image"],
+  ])("leaves %s alone", (pathname) => {
+    expect(matches(pathname)).toBe(false);
   });
 });
 
