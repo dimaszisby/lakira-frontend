@@ -4,7 +4,7 @@ Kit-local `D-NN` entries. Grading calls are added here at the moment they are ma
 
 ## D-01 — Phase 4b closed a P1, not a P0
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-04
 
 **Context.** `docs/internal/audits/saas-readiness/iteration-plan.md` says of phase 4b: "That closes
@@ -31,7 +31,7 @@ is, together with a root checklist whose caveat table has gone stale. The run sa
 
 ## D-02 — Full regrade from the code, on the pinned runtime, by one grader
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-04
 
 **Context.** 135 commits separate this run from the last. A delta pass over the six caveats would
@@ -62,7 +62,7 @@ explained against the 2026-08-29 grade for the same item.
 
 ## D-03 — Per-item grades are published, and three items follow the last run's precedent
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-04
 
 **Context.** `audit-2026-08-29.md` gives category counts but no grade per item, so this run cannot
@@ -88,7 +88,7 @@ diff item by item. Where the 2026-08-29 counts leave only one reading, that read
 
 ## D-04 — A new finding that contradicts a Pass lowers that item's grade
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-04
 
 **Context.** Four checks in this run found a defect in something the baseline graded Pass: the
@@ -111,7 +111,7 @@ is not a regression in the code since 2026-08-29, or not only that. The audit sa
 
 ## D-05 — Criterion 3 is read by the letter, and it fails
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-04
 
 **Context.** ADR-001 of the audit kit makes the frontend fork-ready only when all seven critical
