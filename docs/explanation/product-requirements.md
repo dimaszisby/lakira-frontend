@@ -328,7 +328,7 @@ The product is built with Next.js App Router, React 19, TypeScript, TanStack Que
 
 - Primary API surface: `/api/proxy/*` (Next.js route handler proxying to backend API).
 - Auth cookie -> proxy injects `Authorization: Bearer <token>` for protected resource groups.
-- Session cookie synchronization endpoint: `/api/auth/session` (POST/DELETE).
+- The session cookie is set by the proxy on the sign-in response; there is no separate synchronization endpoint (ADR-0025).
 
 ### 8.2 Resource Endpoints Consumed by Frontend
 

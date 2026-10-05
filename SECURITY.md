@@ -53,9 +53,7 @@ Security-relevant items already known and tracked — please do not re-report th
 - Error monitoring is off unless the deployment sets `SENTRY_DSN`. It runs on the server only,
   and browser stack traces are not symbolicated (ADR-0024). CSP violation reports are written
   to the server's log stream at `warn`, which is not forwarded.
-- The access token is a JavaScript value for a moment during login, registration and organization
-  switch, before the server stores it in the httpOnly cookie (audit 2026-10-04, N3).
-- The production Content Security Policy allows inline script (N4).
+- The production Content Security Policy allows inline script (audit 2026-10-04, N4).
 - The three unauthenticated telemetry endpoints have no rate limit of their own (N6).
 
 A **fork** of this repository inherits all of the above. Read the checklist before deploying

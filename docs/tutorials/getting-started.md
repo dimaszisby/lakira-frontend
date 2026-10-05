@@ -101,15 +101,15 @@ were headed. The dev server drops that query parameter, so do not be surprised i
 Click **Register**, or go to <http://localhost:3000/register>. Fill in the form — username, email,
 password, and the password confirmation, which the backend requires — and submit.
 
-Two requests happen, and the split matters:
+One request happens, and where the token goes matters:
 
 1. The form posts through the proxy to the backend, which creates the user and returns a JWT.
-2. The app then posts that token to its own `/api/auth/session` route, which is what sets the
-   cookie.
+2. The proxy keeps that JWT for itself: it sets the cookie on the response and removes the token
+   from the body, so the page's JavaScript receives the user and nothing else.
 
 The result is an httpOnly cookie named `lakira_token`, flagged `Secure` and `SameSite=lax`. Confirm
 it in DevTools → Application → Cookies. **You cannot read it from JavaScript** — that is the whole
-point of the proxy, and why the token is minted by a route handler rather than stored client-side.
+point of the proxy, and why the cookie is set by a route handler rather than stored client-side.
 
 A validation failure comes back as `{ "status": "fail", "errors": [{ "field": …, "message": … }] }`
 and the form puts each message on its field.

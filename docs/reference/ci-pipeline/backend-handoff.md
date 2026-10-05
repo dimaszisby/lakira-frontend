@@ -59,7 +59,7 @@ Reason:
 
 - `.github/workflows/test.yml`
 - `src/app/api/proxy/[...path]/route.ts`
-- `src/app/api/auth/session/route.ts`, `src/app/api/auth/revive/route.ts`, `src/app/api/auth/logout/route.ts`
+- `src/app/api/auth/revive/route.ts`, `src/app/api/auth/logout/route.ts`
 - `src/proxy.ts`
 - `src/services/api/api.ts`
 - `next.config.ts`

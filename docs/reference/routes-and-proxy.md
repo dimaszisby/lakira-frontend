@@ -105,14 +105,18 @@ failing loudly. Two of the four logged incidents trace back to this class of bug
 `OrganizationSwitcher` on `/organization` calls `POST /api/proxy/auth/switch-org` with the target
 `organizationId`. That path is secured, so the proxy requires a session as for any other. The
 backend checks the membership (403 otherwise), returns a new access token in the body, and sets a
-new refresh cookie, which the proxy persists as it does for every response.
+new refresh cookie.
 
-The client then stores the token through `/api/auth/session` and loads `/dashboard` as a full
-document, never a client-side navigation: that is what empties every client cache of the previous
-organization ([ADR-0020](../explanation/decisions/adr-0020-changing-organization-reloads-the-document.md)).
-If storing the token fails, it loads `/api/auth/revive?returnUrl=/dashboard` instead, which redeems
-the new refresh cookie into a matching session or signs the user out, so the browser is never left
-with one organization's access token and another's refresh cookie.
+The proxy stores both on that one response: the access token becomes the session cookie and is
+removed from the body, and the refresh cookie is re-scoped to this origin
+([ADR-0025](../explanation/decisions/adr-0025-the-proxy-sets-the-session-cookie.md)). Login,
+registration and `auth/refresh` are handled the same way. If the backend's success carries no usable
+token, the proxy answers 502 and clears both cookies, so the browser is never left with one
+organization's access token and another's refresh cookie.
+
+The client then loads `/dashboard` as a full document, never a client-side navigation: that is what
+empties every client cache of the previous organization
+([ADR-0020](../explanation/decisions/adr-0020-changing-organization-reloads-the-document.md)).
 
 ## Route map
 

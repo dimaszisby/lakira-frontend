@@ -11,10 +11,17 @@ Check `docs/internal/incidents/` and ADR-0020 (the switch's recovery path) first
 
 ## Checklist
 
-- [ ] Decide where the cookie is set: a route handler per sign-in operation, or the proxy strips
+- [x] Decide where the cookie is set: a route handler per sign-in operation, or the proxy strips
       `token` from those three responses and writes the cookie itself
-- [ ] Remove `POST /api/auth/session` if nothing else needs it; it fails open when the backend is
+- [x] Remove `POST /api/auth/session` if nothing else needs it; it fails open when the backend is
       unreachable
-- [ ] Either way, make `.claude/rules/security.md` and the code agree
+- [x] Either way, make `.claude/rules/security.md` and the code agree
 
 ## Status
+
+Done 2026-10-05 on `fix/server-set-session-cookie`. Kit
+[`server-set-session-cookie`](../initiatives/server-set-session-cookie/README.md),
+[ADR-0025](../../explanation/decisions/adr-0025-the-proxy-sets-the-session-cookie.md).
+
+The proxy sets the cookie and strips the token, for four operations, not three: the contract's
+`auth/refresh` returns a token too. `/api/auth/session` is gone, `POST` and `DELETE` both.
