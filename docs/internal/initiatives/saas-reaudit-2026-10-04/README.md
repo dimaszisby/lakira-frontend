@@ -1,6 +1,6 @@
 # SaaS re-audit, 2026-10-04
 
-**Status:** Run complete on the branch, not yet merged. Result: FORK-READY WITH CAVEATS is not
+**Status:** Complete. Merged in #70 (`9cfeb12`). Result: FORK-READY WITH CAVEATS is not
 reconfirmed. ADR-001 criterion 3 fails (CI/CD 67%, Forkability 71%); C1, C2, C3 and C5 are closed;
 three new P1 findings, N1 to N3. One question is open for the owner: section 9 of the audit.
 **Slug:** `saas-reaudit-2026-10-04` · **Branch:** `docs/saas-reaudit-2026-10-04`
