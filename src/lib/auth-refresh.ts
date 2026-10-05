@@ -7,7 +7,7 @@ import {
   SESSION_MAX_AGE_SECONDS,
 } from "@/constants/app";
 import { getApiBaseUrl } from "@/lib/env";
-import { decodeJwtPayload } from "@/lib/jwt";
+import { decodeJwtPayload, isSessionTokenUsable } from "@/lib/jwt";
 import { logger } from "@/lib/logger";
 
 /**
@@ -243,3 +243,36 @@ export const clearSessionCookies = (cookies: CookieWriter): void => {
  */
 export const captureRefreshCookie = (headers: Headers): string | null =>
   readSetCookie(headers, REFRESH_COOKIE_NAME);
+
+/**
+ * Take the access token out of a token-issuing response body.
+ *
+ * Returns the token and the body without it, or `null` when the body is not
+ * JSON, has no `data.token`, or the token is malformed or already expired. The
+ * caller stores the token as the session cookie and sends the rest on; the
+ * token itself never reaches the browser (ADR-0025).
+ *
+ * Also `null` when the same token appears anywhere else in the body. The
+ * contract puts it in `data.token` only; a copy somewhere unexpected would
+ * otherwise be forwarded, and refusing is cheaper than guessing where.
+ */
+export const takeIssuedToken = (rawBody: string): { token: string; body: string } | null => {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(rawBody);
+  } catch {
+    return null;
+  }
+
+  if (typeof parsed !== "object" || parsed === null) return null;
+  const { data } = parsed as { data?: unknown };
+  if (typeof data !== "object" || data === null || Array.isArray(data)) return null;
+
+  const { token, ...rest } = data as Record<string, unknown>;
+  if (typeof token !== "string" || !isSessionTokenUsable(token)) return null;
+
+  const body = JSON.stringify({ ...parsed, data: rest });
+  if (body.includes(token)) return null;
+
+  return { token, body };
+};

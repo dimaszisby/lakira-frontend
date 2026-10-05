@@ -57,6 +57,27 @@ export const PUBLIC_API_PATHS = new Set([
 ]);
 
 /**
+ * Backend operations whose success response carries an access token in its body.
+ *
+ * The proxy stores that token as the session cookie and removes it from what
+ * the browser receives, so no client code ever holds it (ADR-0025). This list
+ * has to be complete: `src/lib/__tests__/auth-paths.test.ts` walks the OpenAPI
+ * contract and fails if an operation that returns a `token` is missing here.
+ *
+ * All four are `POST`. Matched exactly, like {@link PUBLIC_API_PATHS}.
+ */
+export const TOKEN_ISSUING_API_PATHS = new Set([
+  "auth/login",
+  "auth/register",
+  "auth/switch-org",
+  "auth/refresh",
+]);
+
+/** Does a successful `POST` to this backend path return an access token? */
+export const isTokenIssuingApiPath = (segments: readonly string[]): boolean =>
+  TOKEN_ISSUING_API_PATHS.has(segments.join("/").toLowerCase());
+
+/**
  * Does this backend path skip the token requirement?
  *
  * @param segments path segments as received by the proxy, e.g. `["auth", "login"]`

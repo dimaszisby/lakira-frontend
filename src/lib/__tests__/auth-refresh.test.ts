@@ -12,6 +12,7 @@ import {
   clearSessionCookies,
   refreshAccessToken,
   resetRefreshCoalescing,
+  takeIssuedToken,
 } from "../auth-refresh";
 
 const b64 = (value: object) =>
@@ -328,5 +329,56 @@ describe("clearSessionCookies", () => {
       sameSite: "strict",
       path: REFRESH_COOKIE_PATH,
     });
+  });
+});
+
+describe("takeIssuedToken", () => {
+  const body = (data: unknown) => JSON.stringify({ status: "success", message: "ok", data });
+
+  it("returns the token and the body without it", () => {
+    const token = makeToken();
+    const taken = takeIssuedToken(body({ token, user: { id: "u1" } }));
+
+    expect(taken?.token).toBe(token);
+    expect(JSON.parse(taken?.body ?? "")).toEqual({
+      status: "success",
+      message: "ok",
+      data: { user: { id: "u1" } },
+    });
+    expect(taken?.body).not.toContain(token);
+  });
+
+  it("leaves an empty data object when the token was all it held", () => {
+    expect(JSON.parse(takeIssuedToken(body({ token: makeToken() }))?.body ?? "")).toEqual({
+      status: "success",
+      message: "ok",
+      data: {},
+    });
+  });
+
+  it.each([
+    ["a body that is not JSON", "<html>"],
+    ["JSON that is not an object", "42"],
+    ["null", "null"],
+    ["no data", JSON.stringify({ status: "success" })],
+    ["data that is an array", body([{ token: makeToken() }])],
+    ["no token", body({ user: {} })],
+    ["a token that is not a string", body({ token: 7 })],
+    ["a token that is not a JWT", body({ token: "opaque" })],
+    ["an expired token", body({ token: makeToken(-60) })],
+    ["a token only at the top level", JSON.stringify({ token: makeToken(), data: {} })],
+  ])("returns null for %s", (_label, raw) => {
+    expect(takeIssuedToken(raw)).toBeNull();
+  });
+
+  // The contract puts the token in `data.token` and nowhere else. A second copy
+  // would be forwarded to the browser, so the whole response is refused.
+  it.each([
+    ["at the top level", (token: string) => ({ token, data: { token } })],
+    ["under another key in data", (token: string) => ({ data: { token, accessToken: token } })],
+    ["nested deeper", (token: string) => ({ data: { token, user: { session: { jwt: token } } } })],
+    ["inside a message", (token: string) => ({ message: `issued ${token}`, data: { token } })],
+  ])("returns null when the same token is repeated %s", (_label, build) => {
+    expect(takeIssuedToken(JSON.stringify(build(makeToken())))).toBeNull();
   });
 });

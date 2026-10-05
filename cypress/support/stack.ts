@@ -75,23 +75,24 @@ export const newUser = (role: string): StackUser => {
   };
 };
 
-type TokenBody = { data: { token: string } };
-
 export const registerUser = (user: StackUser): void => {
-  cy.request<TokenBody>("POST", "/api/proxy/auth/register", {
+  cy.request("POST", "/api/proxy/auth/register", {
     ...user,
     passwordConfirmation: user.password,
     isPublicProfile: false,
   });
 };
 
-/** Signs in the way the app does: the proxy's login, then the session cookie write. */
+/**
+ * Signs in the way the app does: the proxy's login. Its response sets the session cookie and
+ * carries no token (ADR-0025), which this asserts on every sign-in of every stack spec.
+ */
 export const signIn = (user: Pick<StackUser, "email" | "password">): void => {
-  cy.request<TokenBody>("POST", "/api/proxy/auth/login", {
+  cy.request("POST", "/api/proxy/auth/login", {
     email: user.email,
     password: user.password,
   }).then(({ body }) => {
-    cy.request("POST", "/api/auth/session", { token: body.data.token });
+    expect(JSON.stringify(body)).not.to.match(/"token"/);
   });
 };
 

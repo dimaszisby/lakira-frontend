@@ -86,15 +86,16 @@ export const listMyOrganizations = (opts?: RequestOpts) =>
 /**
  * Move the session to another organization.
  *
- * The backend checks the membership (403 otherwise), returns a new access token
- * carrying the new `organizationId` claim, and sets a fresh refresh cookie that
- * the proxy persists. Storing the token is the caller's job.
+ * The backend checks the membership (403 otherwise) and issues a new access
+ * token carrying the new `organizationId` claim, with a fresh refresh cookie.
+ * The proxy stores both and strips the token from the body (ADR-0025), so this
+ * resolves with nothing to act on.
  */
 export const switchOrganization = (organizationId: string, opts?: RequestOpts) =>
   withApiErrorHandling(
     () =>
       api
-        .post<ApiResponse<{ token: string }>>("/auth/switch-org", { organizationId }, opts)
-        .then(unwrap),
+        .post<ApiResponse<Record<string, never>>>("/auth/switch-org", { organizationId }, opts)
+        .then(() => undefined),
     "switchOrganization",
   );

@@ -25,10 +25,9 @@ describe("RegisterForm integration", () => {
     mockPush.mockReset();
   });
 
-  it("submits valid registration data, syncs session, and redirects to return URL", async () => {
+  it("submits valid registration data, and redirects to return URL", async () => {
     const user = userEvent.setup();
     const registerPayloadSpy = jest.fn();
-    const sessionPayloadSpy = jest.fn();
 
     server.use(
       http.post(REGISTER_ENDPOINT, async ({ request }) => {
@@ -39,7 +38,6 @@ describe("RegisterForm integration", () => {
           status: "success",
           message: "Register success",
           data: {
-            token: "token-123",
             user: {
               id: "user-1",
               username: "john",
@@ -51,11 +49,6 @@ describe("RegisterForm integration", () => {
             },
           },
         });
-      }),
-      http.post("/api/auth/session", async ({ request }) => {
-        const body = await request.json();
-        sessionPayloadSpy(body);
-        return HttpResponse.json({ ok: true });
       }),
     );
 
@@ -80,7 +73,6 @@ describe("RegisterForm integration", () => {
         isPublicProfile: true,
       }),
     );
-    expect(sessionPayloadSpy).toHaveBeenCalledWith({ token: "token-123" });
   });
 
   it("shows mismatch validation and keeps submit disabled", async () => {
@@ -97,57 +89,33 @@ describe("RegisterForm integration", () => {
     expect(screen.getByRole("button", { name: /register/i })).toBeDisabled();
   });
 
-  it.each([
-    ["the session cookie cannot be stored", { token: "token-123" }, 400],
-    ["the response carries no token", {}, 200],
-  ])(
-    "shows an error and does not redirect when registration succeeds but %s",
-    async (_label, tokenField, sessionStatus) => {
-      const user = userEvent.setup();
-      const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+  // The proxy answers 502 when the backend reports success without a token it
+  // can store (ADR-0025). The form has to treat that as a failed sign-in.
+  it("shows an error and does not redirect when the proxy could not start the session", async () => {
+    const user = userEvent.setup();
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
 
-      try {
-        server.use(
-          http.post(REGISTER_ENDPOINT, () =>
-            HttpResponse.json(
-              {
-                status: "success",
-                data: {
-                  ...tokenField,
-                  user: {
-                    id: "user-1",
-                    username: "john",
-                    email: TEST_EMAIL,
-                    role: "user",
-                    isPublicProfile: true,
-                    createdAt: FIXTURE_TIMESTAMP,
-                    updatedAt: FIXTURE_TIMESTAMP,
-                  },
-                },
-              },
-              { status: 201 },
-            ),
-          ),
-          http.post("/api/auth/session", () =>
-            HttpResponse.json({ error: "Invalid token" }, { status: sessionStatus }),
-          ),
-        );
+    try {
+      server.use(
+        http.post(REGISTER_ENDPOINT, () =>
+          HttpResponse.json({ error: "The session could not be started." }, { status: 502 }),
+        ),
+      );
 
-        renderWithProviders(<RegisterForm />);
+      renderWithProviders(<RegisterForm />);
 
-        await user.type(screen.getByLabelText(/username/i), "john");
-        await user.type(screen.getByLabelText(/email/i), TEST_EMAIL);
-        await user.type(screen.getByPlaceholderText(/enter your password/i), "password123");
-        await user.type(screen.getByPlaceholderText(/confirm your password/i), "password123");
-        await user.click(screen.getByRole("button", { name: /register/i }));
+      await user.type(screen.getByLabelText(/username/i), "john");
+      await user.type(screen.getByLabelText(/email/i), TEST_EMAIL);
+      await user.type(screen.getByPlaceholderText(/enter your password/i), "password123");
+      await user.type(screen.getByPlaceholderText(/confirm your password/i), "password123");
+      await user.click(screen.getByRole("button", { name: /register/i }));
 
-        expect(await screen.findByRole("alert")).toBeInTheDocument();
-        expect(mockPush).not.toHaveBeenCalled();
-      } finally {
-        consoleErrorSpy.mockRestore();
-      }
-    },
-  );
+      expect(await screen.findByRole("alert")).toBeInTheDocument();
+      expect(mockPush).not.toHaveBeenCalled();
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
 
   it("shows error feedback and does not redirect when register fails", async () => {
     const user = userEvent.setup();

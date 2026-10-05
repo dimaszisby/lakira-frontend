@@ -33,7 +33,7 @@ accepted deliberately — see [`data-access-and-caching.md`](./data-access-and-c
 ## What the frontend owns
 
 - Rendering, routing, and client state.
-- Session cookie lifecycle (`/api/auth/session`, `/revive`, `/logout`), and the edge gate in `src/proxy.ts`.
+- Session cookie lifecycle (set by `/api/proxy` on sign-in, `/api/auth/revive`, `/api/auth/logout`), and the edge gate in `src/proxy.ts`.
 - Security headers and CSP (`next.config.ts`), with violations reported to
   `/api/security/csp-report`.
 
