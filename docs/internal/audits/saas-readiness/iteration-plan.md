@@ -87,8 +87,10 @@ registers against. Section 4.5's P1s are closed; its P0 is downgraded, not close
 
 4b landed on 2026-10-04: Sentry, on the server only, off without a DSN. Kit
 [`sentry-error-monitoring`](../../initiatives/sentry-error-monitoring/README.md),
-[ADR-0024](../../../explanation/decisions/adr-0024-sentry-on-the-server-only.md). That closes the
-section 4.5 P0.
+[ADR-0024](../../../explanation/decisions/adr-0024-sentry-on-the-server-only.md). That closes
+caveat C3, a P1: the section 4.5 P0 had already been downgraded to it on 2026-08-29. (This sentence
+read "closes the section 4.5 P0" until the 2026-10-04 run corrected it; see D-01 in the
+[`saas-reaudit-2026-10-04`](../../initiatives/saas-reaudit-2026-10-04/decisions.md) kit.)
 
 Phase 5 was split. **5a** hardened the existing auth surface: the middleware now checks token
 expiry rather than cookie presence, the proxy was inverted to deny-by-default against an
@@ -147,3 +149,9 @@ Not visible from the OpenAPI contract alone; found by decoding a real token.
   items (84%). 0 P0, 6 P1, 9 P2. **FORK-READY WITH CAVEATS** — all four ADR-001 criteria pass;
   the switcher is blocked on a backend endpoint, three flows are unverified for want of
   email-token access, and there is no deploy configuration.
+- `audit-2026-10-04.md` — re-audit on Node 24 after phase 4b: 67 pass / 9 partial / 3 missing
+  (85%). 0 P0, 6 P1, 14 P2. **Verdict not reconfirmed** — criterion 3 fails, read as written:
+  CI/CD 67% (unchanged) and Forkability 71% (a bootstrapped fork fails `format`). C1, C2, C3 and
+  C5 closed. Three new P1s found by probing: the proxy leaves its API base, the fork failure, and
+  the token reaching browser JavaScript. Kit
+  [`saas-reaudit-2026-10-04`](../../initiatives/saas-reaudit-2026-10-04/README.md).

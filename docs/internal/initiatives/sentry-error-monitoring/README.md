@@ -1,7 +1,7 @@
 # Sentry error monitoring
 
-**Status:** Done on the branch: implemented, reviewed, gates green, and checked live against a
-real Sentry project. D-01 is ADR-0024.
+**Status:** Done. Merged in #69 (`07df6c9`): implemented, reviewed, gates green, and checked live
+against a real Sentry project. D-01 is ADR-0024.
 **Slug:** `sentry-error-monitoring` · **Branch:** `feat/sentry-error-monitoring`
 
 - [Plan](sentry-error-monitoring-plan.md) — goals, acceptance criteria, phases
