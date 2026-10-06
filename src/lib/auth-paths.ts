@@ -18,8 +18,9 @@
 /**
  * Top-level page routes that require a session.
  *
- * `src/proxy.ts` derives its `config.matcher` from this list, so the two can no
- * longer drift. Adding a protected section means adding it here only.
+ * `src/proxy.ts` runs on every page (see {@link PROXY_MATCHER}) and asks
+ * {@link isProtectedAppPath} which ones to gate, so adding a protected section
+ * means adding it here only.
  */
 export const PROTECTED_APP_PATHS = [
   "/dashboard",
@@ -29,8 +30,24 @@ export const PROTECTED_APP_PATHS = [
   "/organization",
 ] as const;
 
-/** Matcher patterns for `src/proxy.ts`, derived so they cannot drift. */
-export const PROTECTED_APP_MATCHERS = PROTECTED_APP_PATHS.map((path) => `${path}/:path*`);
+/**
+ * The one pattern `src/proxy.ts` runs on: every path except route handlers and
+ * Next's own static output.
+ *
+ * It used to be one pattern per protected section. It widened on 2026-10-05
+ * because the proxy also generates the Content Security Policy nonce, which
+ * every page needs (ADR-0026). Which pages are *gated* is still decided by
+ * {@link isProtectedAppPath}, inside the function.
+ *
+ * Each exclusion ends at a segment boundary on purpose. Written as a bare
+ * prefix (`api|_next/static|…`) it also skipped `/apiary` or `/api-docs`, and a
+ * page there was served with no policy at all: found in review, on a 404.
+ *
+ * Next requires `config.matcher` to be a literal, so `src/proxy.ts` repeats this
+ * string; `src/lib/__tests__/auth-paths.test.ts` fails if the two differ, or if
+ * the pattern stops covering a protected path.
+ */
+export const PROXY_MATCHER = "/((?!api(?:/|$)|_next/static(?:/|$)|_next/image(?:/|$)).*)";
 
 export const isProtectedAppPath = (pathname: string): boolean =>
   PROTECTED_APP_PATHS.some((path) => pathname === path || pathname.startsWith(`${path}/`));

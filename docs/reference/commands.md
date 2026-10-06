@@ -28,16 +28,18 @@ This file is checked against `package.json`. If you add, rename, or remove a scr
 
 ## Tests
 
-| Command                     | What it does                                                                                                                             |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm run test`              | Alias for `test:unit`.                                                                                                                   |
-| `npm run test:unit`         | `jest.unit.config.ts` — `*.test.ts(x)` and `*.spec.ts(x)`, **excluding** `*.int.test.*`.                                                 |
-| `npm run test:unit:watch`   | Same, in watch mode.                                                                                                                     |
-| `npm run test:unit:ci`      | Same, with coverage. What CI runs.                                                                                                       |
-| `npm run test:integration`  | `jest.integration.config.ts` — `*.int.test.ts(x)` only. No coverage.                                                                     |
-| `npm run test:coverage:all` | Both suites via the base `jest.config.ts`. Local convenience only; CI does not use it.                                                   |
-| `npm run test:e2e`          | Cypress, headless Electron, `cypress/e2e/public/` only. Needs the app running on `CYPRESS_BASE_URL`. What CI runs.                       |
-| `npm run test:e2e:stack`    | Cypress, `cypress/e2e/stack/` only. Needs the app, backend and Mailpit locally; never in CI. See `docs/how-to/testing/run-stack-e2e.md`. |
+| Command                      | What it does                                                                                                                                                                            |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run test`               | Alias for `test:unit`.                                                                                                                                                                  |
+| `npm run test:unit`          | `jest.unit.config.ts` — `*.test.ts(x)` and `*.spec.ts(x)`, **excluding** `*.int.test.*`.                                                                                                |
+| `npm run test:unit:watch`    | Same, in watch mode.                                                                                                                                                                    |
+| `npm run test:unit:ci`       | Same, with coverage. What CI runs.                                                                                                                                                      |
+| `npm run test:integration`   | `jest.integration.config.ts` — `*.int.test.ts(x)` only. No coverage.                                                                                                                    |
+| `npm run test:coverage:all`  | Both suites via the base `jest.config.ts`. Local convenience only; CI does not use it.                                                                                                  |
+| `npm run test:e2e`           | Cypress, headless Electron, `cypress/e2e/public/` only. Needs the app running on `CYPRESS_BASE_URL`. What CI runs.                                                                      |
+| `npm run test:e2e:stack`     | Cypress, `cypress/e2e/stack/` only. Needs the app, backend and Mailpit locally; never in CI. See `docs/how-to/testing/run-stack-e2e.md`.                                                |
+| `npm run test:e2e:csp`       | Cypress, `cypress/e2e/csp/` only, with the Content Security Policy enforced by the browser (the other suites run with it stripped). Needs the app running. CI runs it after `test:e2e`. |
+| `npm run test:e2e:csp:stack` | The same enforcement on the signed-in pages, `cypress/e2e/csp-stack/`. Needs the app, backend and Mailpit locally; never in CI.                                                         |
 
 Single file:
 

@@ -180,6 +180,12 @@ jobs:
       - name: Run E2E tests
         run: npm run test:e2e
 
+      # Cypress strips Content-Security-Policy headers in the run above, so it
+      # would pass with a policy that blocked the whole app. This run keeps
+      # script-src and lets the browser enforce it (ADR-0026).
+      - name: Run E2E tests with the Content Security Policy enforced
+        run: npm run test:e2e:csp
+
       - name: Stop app
         if: always()
         run: |

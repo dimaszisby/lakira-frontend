@@ -31,6 +31,56 @@ const request = (pathname: string, token?: string) => {
   return req;
 };
 
+const CSP = "content-security-policy";
+
+/** `NextResponse.next({ request: { headers } })` exposes each forwarded header under this prefix. */
+const forwarded = (response: Response, name: string) =>
+  response.headers.get(`x-middleware-request-${name}`);
+
+const nonceIn = (policy: string | null) => /'nonce-([^']+)'/.exec(policy ?? "")?.[1];
+
+describe("proxy (the Content Security Policy nonce)", () => {
+  // ADR-0026. The policy used to be a static header that allowed inline script.
+  it.each([["/login"], ["/"], ["/forgot-password"], ["/some/unknown/page"]])(
+    "sends %s on with a nonce in the policy, on the response and on the forwarded request",
+    (pathname) => {
+      const response = proxy(request(pathname));
+
+      const nonce = nonceIn(response.headers.get(CSP));
+      expect(nonce).toBeTruthy();
+      expect(response.headers.get(CSP)).toContain("'strict-dynamic'");
+      expect(response.headers.get(CSP)).not.toContain("script-src 'self' 'unsafe-inline'");
+
+      // Next reads the nonce from the *request's* policy to stamp its own scripts,
+      // and the root layout reads `x-nonce` to hand it to next-themes.
+      expect(forwarded(response, CSP)).toBe(response.headers.get(CSP));
+      expect(forwarded(response, "x-nonce")).toBe(nonce);
+    },
+  );
+
+  it("does the same for a protected page a usable session is let into", () => {
+    const response = proxy(request(DASHBOARD, makeToken(900)));
+
+    expect(response.headers.get("location")).toBeNull();
+    expect(forwarded(response, "x-nonce")).toBe(nonceIn(response.headers.get(CSP)));
+  });
+
+  it("never issues the same nonce twice", () => {
+    const nonces = Array.from({ length: 20 }, () =>
+      nonceIn(proxy(request("/login")).headers.get(CSP)),
+    );
+    expect(new Set(nonces).size).toBe(20);
+  });
+
+  it("allows script by nonce only: no unsafe-inline in script-src", () => {
+    const policy = proxy(request("/login")).headers.get(CSP) ?? "";
+    const scriptSrc = policy.split(";").find((part) => part.trim().startsWith("script-src")) ?? "";
+
+    expect(scriptSrc).toContain("'nonce-");
+    expect(scriptSrc).not.toContain("'unsafe-inline'");
+  });
+});
+
 describe("proxy (the edge session gate)", () => {
   it("lets an unprotected path through untouched", () => {
     expect(proxy(request("/login")).headers.get("location")).toBeNull();

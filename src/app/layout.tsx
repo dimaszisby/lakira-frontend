@@ -2,8 +2,10 @@ import "@/styles/globals.css";
 
 import type { Metadata } from "next";
 import { Plus_Jakarta_Sans, Quicksand } from "next/font/google";
+import { headers } from "next/headers";
 
 import { APP_DESCRIPTION, APP_NAME, TITLE_SEPARATOR } from "@/constants/app";
+import { NONCE_HEADER } from "@/lib/csp";
 
 import WebVitalsReporter from "./_components/WebVitalsReporter";
 import { Providers } from "./providers";
@@ -37,7 +39,13 @@ const plusJakartaSans = Plus_Jakarta_Sans({
   display: "swap",
 });
 
-const RootLayout = ({ children }: { children: React.ReactNode }) => {
+const RootLayout = async ({ children }: { children: React.ReactNode }) => {
+  // Set by src/proxy.ts for this request. Next stamps it on its own scripts
+  // without being asked; next-themes' pre-paint script is the one inline script
+  // it does not own, so the nonce is handed down for that (ADR-0026). Reading a
+  // header also makes every page render per request, which a nonce requires.
+  const nonce = (await headers()).get(NONCE_HEADER) ?? undefined;
+
   return (
     <html
       lang="en"
@@ -50,7 +58,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
       </head>
       <body className=" min-h-dvh font-sans antialiased">
         <WebVitalsReporter />
-        <Providers>{children}</Providers>
+        <Providers nonce={nonce}>{children}</Providers>
       </body>
     </html>
   );

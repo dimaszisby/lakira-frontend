@@ -1,7 +1,7 @@
 # The server sets the session cookie
 
-**Status:** Done on the branch: implemented, reviewed, all gates green, checked live against the
-local stack. All ten acceptance criteria met. D-01 is ADR-0025.
+**Status:** Done. Merged in #73 (`e577731`): implemented, reviewed, all gates green, checked live
+against the local stack. All ten acceptance criteria met. D-01 is ADR-0025.
 **Slug:** `server-set-session-cookie` · **Branch:** `fix/server-set-session-cookie`
 
 - [Plan](server-set-session-cookie-plan.md) — goals, acceptance criteria, phases
