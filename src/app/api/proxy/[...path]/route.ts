@@ -70,13 +70,15 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
   const params = await context.params;
   const rawSegments = params.path ?? [];
   const targetPath = rawSegments.join("/");
+  // The caller chooses the path, and every logged string is scrubbed by pattern.
+  const loggedPath = targetPath.slice(0, MAX_LOGGED_PATH_LENGTH);
 
   // Before the session check on purpose: a path that leaves the API base is
   // refused whoever asks, and a 401 here would say only "log in and try again".
   const targetUrl = buildUpstreamUrl(apiBaseUrl, rawSegments);
   if (!targetUrl) {
     logger.warn("proxy.invalid_path", {
-      path: targetPath.slice(0, MAX_LOGGED_PATH_LENGTH),
+      path: loggedPath,
       method: request.method,
     });
     return NextResponse.json(INVALID_PATH_BODY, { status: 400 });
@@ -94,7 +96,7 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
   // `analytics/*` and `admin/_ping` were both exposed that way, and the
   // OpenAPI contract marks both as secured.
   if (!isPublicApiPath(rawSegments) && !token) {
-    logger.warn("proxy.unauthenticated", { path: targetPath, method: request.method });
+    logger.warn("proxy.unauthenticated", { path: loggedPath, method: request.method });
     return NextResponse.json(SESSION_EXPIRED_BODY, { status: 401 });
   }
 
@@ -145,7 +147,7 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
     if (response.status === 401) {
       refreshed = await refreshAccessToken(request.cookies.get(REFRESH_COOKIE_NAME)?.value);
       if (refreshed) {
-        logger.info("proxy.refreshed", { path: targetPath });
+        logger.info("proxy.refreshed", { path: loggedPath });
         response = await send(refreshed.token);
       }
     }
@@ -154,7 +156,7 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
     // itself, so it is logged at `error` here. This used to escape as an
     // unhandled rejection and a bare 500.
     logger.error("proxy.upstream_unreachable", {
-      path: targetPath,
+      path: loggedPath,
       method: request.method,
       error,
     });
@@ -172,7 +174,7 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
   // same id. `warn` keeps the line on stdout without a second event.
   if (response.status >= 500) {
     logger.warn("proxy.upstream_error", {
-      path: targetPath,
+      path: loggedPath,
       method: request.method,
       status: response.status,
       requestId: response.headers.get(REQUEST_ID_HEADER) ?? undefined,
@@ -214,7 +216,7 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
       // sign-in with no session behind it; for a switch it would leave the old
       // access token beside a refresh cookie for the new organization. Signed
       // out is the one state that is certainly consistent.
-      logger.error("proxy.session.unusable_token", { path: targetPath, status: response.status });
+      logger.error("proxy.session.unusable_token", { path: loggedPath, status: response.status });
       const unusable = NextResponse.json(UNUSABLE_SESSION_BODY, { status: 502 });
       clearSessionCookies(unusable.cookies);
       return unusable;
@@ -222,7 +224,7 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
 
     body = issued.body;
     issuedToken = issued.token;
-    logger.info("proxy.session.issued", { path: targetPath });
+    logger.info("proxy.session.issued", { path: loggedPath });
   }
 
   const proxied = new NextResponse(body, {
@@ -260,7 +262,7 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
   // 401'd, and `/login` bounced back to the dashboard because a cookie existed.
   // Clearing here means the next navigation reaches the login form.
   if (response.status === 401 && !refreshed && token && !isPublicApiPath(rawSegments)) {
-    logger.info("proxy.session.cleared", { path: targetPath });
+    logger.info("proxy.session.cleared", { path: loggedPath });
 
     // Replace the upstream body, not just the cookies. Having just ended the
     // session, the proxy knows more about this 401 than the backend does, and

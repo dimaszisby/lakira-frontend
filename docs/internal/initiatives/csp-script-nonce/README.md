@@ -1,7 +1,7 @@
 # A nonce for script in the Content Security Policy
 
-**Status:** Done on the branch: implemented, reviewed, all gates green, checked in a browser that
-enforces the policy. All nine acceptance criteria met. D-01 is ADR-0026.
+**Status:** Done, merged in #74 (0df2cdc): implemented, reviewed, all gates green, checked in a
+browser that enforces the policy. All nine acceptance criteria met. D-01 is ADR-0026.
 **Slug:** `csp-script-nonce` · **Branch:** `fix/csp-script-nonce`
 
 - [Plan](csp-script-nonce-plan.md) — goals, acceptance criteria, phases

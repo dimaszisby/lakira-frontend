@@ -1,3 +1,4 @@
+import { createFixedWindow } from "@/lib/fixed-window";
 import type { LogEntry, LogSink } from "@/lib/logger";
 import { writeToStdout } from "@/lib/logger";
 
@@ -99,24 +100,17 @@ export const createSentrySink = (reporter: ErrorReporter, options: SinkOptions =
   const now = options.now ?? Date.now;
   const write = options.write ?? writeToStdout;
 
-  let windowStart = 0;
-  let clientReports = 0;
-
-  const underClientCap = (): boolean => {
-    const time = now();
-    if (time - windowStart >= WINDOW_MS) {
-      windowStart = time;
-      clientReports = 0;
-    }
-    clientReports += 1;
-    return clientReports <= CLIENT_REPORTS_PER_MINUTE;
-  };
+  const takeClientReport = createFixedWindow({
+    limit: CLIENT_REPORTS_PER_MINUTE,
+    windowMs: WINDOW_MS,
+    now,
+  });
 
   return (entry) => {
     write(entry);
 
     if (entry.level !== "error") return;
-    if (entry.msg === CLIENT_ERROR_MSG && !underClientCap()) return;
+    if (entry.msg === CLIENT_ERROR_MSG && !takeClientReport().allowed) return;
 
     try {
       const hint = buildHint(entry);

@@ -8,7 +8,14 @@
 
 import type { LogEntry } from "../logger";
 import type * as LoggerNamespace from "../logger";
-import { logger, redact, REDACTED, SENSITIVE_KEY_PATTERN, setLogSink } from "../logger";
+import {
+  logger,
+  MAX_STRING_LENGTH,
+  redact,
+  REDACTED,
+  SENSITIVE_KEY_PATTERN,
+  setLogSink,
+} from "../logger";
 
 const AUTH_HEADER = "Bearer abc.def.ghi";
 
@@ -121,6 +128,87 @@ describe("logger", () => {
   it("works with no fields supplied", () => {
     logger.warn("bare");
     expect(entries[0]).toMatchObject({ level: "warn", msg: "bare" });
+  });
+});
+
+describe("scrubbing on the way to stdout", () => {
+  // Stdout is what a log drain ships, so it is asserted on directly rather than
+  // through a sink. Until 2026-10-06 only the copy sent to Sentry was scrubbed.
+  const ADDRESS = "ada@example.com";
+  // Built from parts so the secret scan does not read it as a credential.
+  const JWT = ["eyJhbGciOi", "eyJzdWIiOiIx", "c2lnbmF0dXJl"].join(".");
+
+  let stdout: jest.SpyInstance;
+
+  const line = (): string => String(stdout.mock.calls.at(-1)?.[0]);
+  const entry = (): Record<string, unknown> => JSON.parse(line()) as Record<string, unknown>;
+
+  beforeEach(() => {
+    setLogSink(null);
+    stdout = jest.spyOn(process.stdout, "write").mockImplementation(() => true);
+  });
+
+  afterEach(() => {
+    stdout.mockRestore();
+  });
+
+  it.each(["info", "warn", "error"] as const)(
+    "removes an address, a bearer value, a JWT and a query from a %s line",
+    (level) => {
+      logger[level]("event", {
+        message: `No account for ${ADDRESS}`,
+        detail: `sent ${AUTH_HEADER} then ${JWT}`,
+        referrer: "https://app.example/invites/accept?token=abc123&org=7",
+        nested: { list: [`again ${ADDRESS}`] },
+      });
+
+      expect(entry()).toMatchObject({
+        level,
+        message: "No account for [email]",
+        detail: `sent Bearer ${REDACTED} then ${REDACTED}`,
+        referrer: "https://app.example/invites/accept",
+        nested: { list: ["again [email]"] },
+      });
+      expect(line()).not.toContain(ADDRESS);
+      expect(line()).not.toContain(JWT);
+      expect(line()).not.toContain("abc123");
+    },
+  );
+
+  it("scrubs the message and the stack of an Error passed as a field", () => {
+    const error = new Error(`Lookup failed for ${ADDRESS}`);
+    error.stack = `Error: Lookup failed for ${ADDRESS}\n    at load (/app/page.js?token=abc123:10:20)`;
+
+    logger.error("server.request_error", { error });
+
+    expect(entry().error).toEqual({
+      name: "Error",
+      message: "Lookup failed for [email]",
+      stack: "Error: Lookup failed for [email]\n    at load (/app/page.js:10:20)",
+    });
+  });
+
+  it.each(["path", "url"])("drops the query and the fragment from a %s field", (key) => {
+    logger.info("event", { [key]: "/reset-password?expired#access=abc123" });
+
+    expect(entry()[key]).toBe("/reset-password");
+  });
+
+  it("cuts a string at the length cap before it is scrubbed", () => {
+    // The patterns run on every string, so the cap is what bounds their cost.
+    const long = "a".repeat(MAX_STRING_LENGTH + 500);
+
+    logger.warn("event", { detail: long, path: long, error: new Error(long) });
+
+    const capped = `${"a".repeat(MAX_STRING_LENGTH)}...`;
+    expect(entry()).toMatchObject({ detail: capped, path: capped, error: { message: capped } });
+    expect((entry().error as { stack: string }).stack).toHaveLength(MAX_STRING_LENGTH + 3);
+  });
+
+  it("leaves identifiers, numbers and plain text as they were", () => {
+    logger.info("proxy.refreshed", { path: "/metrics", requestId: "req-123", status: 200 });
+
+    expect(entry()).toMatchObject({ path: "/metrics", requestId: "req-123", status: 200 });
   });
 });
 
