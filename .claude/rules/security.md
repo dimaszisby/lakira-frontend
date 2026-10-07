@@ -73,7 +73,7 @@ Sentry runs on the **server only** and is off unless `SENTRY_DSN` is set ([ADR-0
 
 ## Injection
 
-- **Every string reaching `dangerouslySetInnerHTML` goes through DOMPurify.** No exceptions, including strings that "come from our own backend".
+- **The app renders no raw HTML, and lint enforces it.** `react/no-danger` is an error, so `dangerouslySetInnerHTML` does not compile past CI, and no sanitiser is installed: `dompurify` was removed on 2026-10-07 because nothing used it ([ADR-0028](../../docs/explanation/decisions/adr-0028-raw-html-is-banned-by-lint.md)). An exception needs a disable comment with its reason, a sanitiser added back as a dependency, and a decision record. That holds for strings that "come from our own backend" too. The rule sees JSX only, so never assign `innerHTML` through a ref either.
 - Error text rendered to users goes through `sanitizeErrorMessage` (`src/lib/sanitizeErrorMessage.ts`) — backend errors can carry paths and internals.
 - Never interpolate user input into a URL without encoding it.
 - `security/detect-object-injection` is disabled because it is noisy on frontend code. That means dynamic property access is unchecked — be deliberate about it on anything derived from user input.

@@ -2,7 +2,7 @@
 
 **Canonical list: [`docs/reference/commands.md`](../../docs/reference/commands.md).**
 
-That file is the single source of truth and is checked against `package.json`. Do not keep a second copy here — link instead. The backend repo learned this the hard way: `.claude/rules/commands.md` there documented a `migrate:dev` script that never existed, because it held a second copy of the command list that drifted from reality.
+That file is the single source of truth and is checked against `package.json` by `src/__tests__/commands-doc.test.ts`, which runs in the unit gate. Do not keep a second copy here — link instead. The backend repo learned this the hard way: `.claude/rules/commands.md` there documented a `migrate:dev` script that never existed, because it held a second copy of the command list that drifted from reality.
 
 Only the handful worth memorising:
 

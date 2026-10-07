@@ -45,9 +45,9 @@ const redactHeaders = (headers: Record<string, string>): Record<string, string> 
 /**
  * Strips credentials from a Sentry event before it leaves the process.
  *
- * `sendDefaultPii` is false, so the SDK attaches no headers, cookies or bodies
- * by itself. This covers what application code passes explicitly, and anything
- * a future integration adds.
+ * Every `dataCollection` category is switched off in `server.ts`, so the SDK
+ * attaches no headers, cookies or bodies by itself. This covers what
+ * application code passes explicitly, and anything a future integration adds.
  */
 export const scrubSentryEvent = <T extends ScrubbableEvent>(event: T): T => {
   if (event.message) event.message = scrubText(event.message);

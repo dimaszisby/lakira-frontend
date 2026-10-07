@@ -115,7 +115,7 @@ Anything that signs in, or reads an emailed token, goes in `stack/`. How to run 
 
 ## Coverage
 
-**Coverage gates, and has since 2026-08-27.** `jest.config.ts` sets global thresholds of 29 % statements / 29 % branches / 26 % functions / 29 % lines, ratcheted to just below measured coverage so a real regression fails while normal fluctuation does not. Per-folder goals live in `coverage-goals.json`:
+**Coverage gates, and has since 2026-08-27.** `jest.config.ts` sets global thresholds of 42 % statements / 43 % branches / 37 % functions / 41 % lines, ratcheted on 2026-10-07 to the whole number below measured coverage, less one (measured 43.54 / 44.32 / 38.01 / 42.55), so a real regression fails while normal fluctuation does not. They had sat at 29/29/26/29 since 2026-08-27 while coverage rose eight points or more past them. Per-folder goals live in `coverage-goals.json`:
 
 | Path | Statement goal |
 | --- | --- |

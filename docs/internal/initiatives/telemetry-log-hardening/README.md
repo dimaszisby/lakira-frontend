@@ -1,7 +1,7 @@
 # Bounded telemetry intake and a scrubbed log stream
 
-**Status:** Done on the branch: implemented, reviewed, all gates green, checked against the
-production build. All eight acceptance criteria met. D-01 is ADR-0027.
+**Status:** Done, merged in #75 (60edae9): implemented, reviewed, all gates green, checked
+against the production build. All eight acceptance criteria met. D-01 is ADR-0027.
 **Slug:** `telemetry-log-hardening` · **Branch:** `fix/telemetry-log-hardening`
 
 - [Checklist](telemetry-log-hardening-checklist.md) — work items, acceptance, gates

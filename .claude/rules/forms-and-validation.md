@@ -55,6 +55,6 @@ Never hand-write a type that parallels a schema — they will drift.
 - Validate on the client for feedback, never for safety.
 - Server validation errors come back as `{errors: [{path, message}]}` and are already parsed into `NormalizedApiError.messages`. Map them onto fields via `form.setError` rather than showing a generic toast, when the `path` allows it.
 - Submit handlers are async and must satisfy `no-misused-promises` — pass `form.handleSubmit(onSubmit)` directly rather than wrapping it in an inline async arrow.
-- Any string that reaches `dangerouslySetInnerHTML` goes through DOMPurify first. There is no exception to this.
+- Never render a string as HTML. `react/no-danger` is a lint error and no sanitiser is installed; see `.claude/rules/security.md` § Injection for what an exception takes.
 
 Zod is pinned at v3 (`3.25.x`). Do not use v4 syntax.

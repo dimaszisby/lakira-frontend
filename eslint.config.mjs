@@ -158,6 +158,10 @@ const config = [
       ],
       "react/jsx-no-useless-fragment": ["warn", { allowExpressions: true }],
       "react/no-unstable-nested-components": "warn",
+      // The app renders no raw HTML and ships no sanitiser (ADR-0028). An
+      // exception needs a disable comment with its reason, a sanitiser and a
+      // decision record.
+      "react/no-danger": "error",
       "react/jsx-no-leaked-render": "warn", // good for accidental hook-in-props issues
       "react-hooks/rules-of-hooks": "error",
       "react-hooks/exhaustive-deps": [
