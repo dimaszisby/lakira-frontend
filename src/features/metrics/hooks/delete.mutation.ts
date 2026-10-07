@@ -1,6 +1,7 @@
 import type { QueryKey } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { invalidateDashboardVisualizations } from "@/features/data-visualizations/cache";
 import { useOrganizationId } from "@/features/organizations/context";
 
 import { invalidateMetricLists, removeMetricDetail } from "../cache";
@@ -53,6 +54,7 @@ export function useDeleteMetric(
     },
     onSettled: async () => {
       await invalidateMetricLists(qc, organizationId);
+      await invalidateDashboardVisualizations(qc, organizationId);
     },
   });
 

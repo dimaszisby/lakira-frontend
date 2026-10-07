@@ -1,7 +1,10 @@
 import type { QueryKey } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { invalidateMetricVisualization } from "@/features/data-visualizations/cache";
+import {
+  invalidateDashboardVisualizations,
+  invalidateMetricVisualization,
+} from "@/features/data-visualizations/cache";
 import { useOrganizationId } from "@/features/organizations/context";
 import type { MetricLogResponseDTO, UpdateMetricLogRequestDTO } from "@/types/dtos/metric-log.dto";
 
@@ -52,6 +55,7 @@ export function useUpdateMetricLog(
       await invalidateLogDetail(qc, organizationId, vars.logId);
       await invalidateLogLists(qc, organizationId);
       await invalidateMetricVisualization(qc, organizationId, vars.metricId);
+      await invalidateDashboardVisualizations(qc, organizationId);
     },
 
     onSuccess: (updated) => {

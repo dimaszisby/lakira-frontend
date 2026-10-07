@@ -1,6 +1,7 @@
 import type { QueryKey } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { invalidateDashboardVisualizations } from "@/features/data-visualizations/cache";
 import { useOrganizationId } from "@/features/organizations/context";
 
 import {
@@ -60,6 +61,7 @@ export function useUpdateMetric(
     onSettled: async (_data, _err, vars) => {
       await invalidateMetricDetail(qc, organizationId, vars.metricId);
       await invalidateMetricLists(qc, organizationId);
+      await invalidateDashboardVisualizations(qc, organizationId);
     },
     // (Optional) Setup for a success callback for UI toasts
     onSuccess: (updated) => {

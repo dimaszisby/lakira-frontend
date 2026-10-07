@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { invalidateDashboardVisualizations } from "@/features/data-visualizations/cache";
 import { useOrganizationId } from "@/features/organizations/context";
 
 import { invalidateMetricLists } from "../cache";
@@ -17,6 +18,7 @@ export function useCreateMetricDummy(onSuccess?: () => void, onError?: (error: E
     mutationFn: (payload) => createMetricDummy(payload),
     onSuccess: async () => {
       await invalidateMetricLists(qc, organizationId);
+      await invalidateDashboardVisualizations(qc, organizationId);
       onSuccess?.();
     },
     onError,

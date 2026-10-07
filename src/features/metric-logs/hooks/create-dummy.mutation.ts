@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { invalidateDashboardVisualizations } from "@/features/data-visualizations/cache";
 import { useOrganizationId } from "@/features/organizations/context";
 import type {
   GenerateDummyMetricLogsRequestDTO,
@@ -23,6 +24,7 @@ export function useCreateMetricLogDummy(
     mutationFn: (payload) => createMetricLogDummy(payload),
     onSuccess: async (created) => {
       await invalidateLogLists(qc, organizationId);
+      await invalidateDashboardVisualizations(qc, organizationId);
       onSuccess?.(created.logs);
     },
     onError,

@@ -1,6 +1,7 @@
 import type { QueryKey } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { invalidateDashboardVisualizations } from "@/features/data-visualizations/cache";
 import { useOrganizationId } from "@/features/organizations/context";
 import type { MetricSettingsResponseDTO } from "@/types/dtos/metric-settings.dto";
 
@@ -52,6 +53,7 @@ export function useDeleteMetricSettings(
     },
     onSettled: async () => {
       await invalidateMetricSettingsLists(qc, organizationId);
+      await invalidateDashboardVisualizations(qc, organizationId);
     },
   });
 

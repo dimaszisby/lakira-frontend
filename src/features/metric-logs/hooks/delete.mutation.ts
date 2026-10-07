@@ -1,7 +1,10 @@
 import type { QueryKey } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { invalidateMetricVisualization } from "@/features/data-visualizations/cache";
+import {
+  invalidateDashboardVisualizations,
+  invalidateMetricVisualization,
+} from "@/features/data-visualizations/cache";
 import { useOrganizationId } from "@/features/organizations/context";
 import type { MetricLogResponseDTO } from "@/types/dtos/metric-log.dto";
 
@@ -59,6 +62,7 @@ export function useDeleteMetricLog(
     onSettled: async (_data, _err, vars) => {
       await invalidateLogLists(qc, organizationId);
       await invalidateMetricVisualization(qc, organizationId, vars.metricId);
+      await invalidateDashboardVisualizations(qc, organizationId);
     },
   });
 

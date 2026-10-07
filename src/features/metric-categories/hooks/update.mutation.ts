@@ -1,6 +1,7 @@
 import type { QueryKey } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { invalidateDashboardVisualizations } from "@/features/data-visualizations/cache";
 import { useOrganizationId } from "@/features/organizations/context";
 import type {
   MetricCategoryResponseDTO,
@@ -57,6 +58,7 @@ export const useUpdateMetricCategory = (
     onSettled: async (_data, _err, vars) => {
       await invalidateMetricCategoryDetail(qc, organizationId, vars.categoryId);
       await invalidateMetricCategoryLists(qc, organizationId);
+      await invalidateDashboardVisualizations(qc, organizationId);
     },
     // (Optional) Setup for a success callback for UI toasts
     onSuccess: (updated) => {

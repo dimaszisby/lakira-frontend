@@ -1,5 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
 
+import { vizKeys } from "./keys";
+
 const VIZ_KEY_ROOT = "viz";
 
 /**
@@ -28,4 +30,26 @@ export const invalidateMetricVisualization = async (
       );
     },
   });
+};
+
+/**
+ * Invalidate every dashboard visualization query of one organization, whatever
+ * its range, bucket or limit.
+ *
+ * Until 2026-10-07 nothing did, so a dashboard that was mounted, or restored
+ * by back/forward navigation, kept its old charts for up to a minute.
+ *
+ * Call it from every mutation that writes a field of the dashboard payload.
+ * That is wider than it sounds: a metric's settings decide whether it appears
+ * at all, and each item carries its category's name and colour. Fifteen
+ * mutations call it today, each pinned by a `dashboard-invalidation` test.
+ *
+ * This matches by **key prefix**, so it is coupled to `vizKeys.dashboard`
+ * starting with the organization's root followed by `"dashboard"`.
+ */
+export const invalidateDashboardVisualizations = async (
+  qc: QueryClient,
+  organizationId: string,
+) => {
+  await qc.invalidateQueries({ queryKey: [...vizKeys.all(organizationId), "dashboard"] });
 };
