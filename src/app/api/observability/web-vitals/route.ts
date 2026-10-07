@@ -2,15 +2,26 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { logger } from "@/lib/logger";
+import { createTelemetryIntake } from "@/lib/telemetry-intake";
 
 /**
  * Receives Core Web Vitals beacons from `WebVitalsReporter`.
  *
  * Unauthenticated and browser-driven, so the payload is treated as hostile:
- * size-capped, schema-validated, and reduced to known fields before logging.
+ * the intake bounds the body and the number of lines a minute, then the beacon
+ * is schema-validated and reduced to known fields before logging.
  */
 
 const MAX_BODY_BYTES = 2_048;
+
+/** One page load sends about six beacons, so this is roughly a hundred loads. */
+const MAX_BEACONS_PER_MINUTE = 600;
+
+const intake = createTelemetryIntake({
+  event: "web-vital",
+  maxBytes: MAX_BODY_BYTES,
+  perMinute: MAX_BEACONS_PER_MINUTE,
+});
 
 const WebVitalSchema = z.object({
   name: z.enum(["CLS", "FCP", "FID", "INP", "LCP", "TTFB", "Next.js-hydration"]).or(z.string()),
@@ -22,17 +33,11 @@ const WebVitalSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  try {
-    const raw = await request.text();
-    if (raw.length > MAX_BODY_BYTES) {
-      return new NextResponse(null, { status: 204 });
-    }
+  // A refused or malformed beacon is not worth a log line of its own.
+  const received = await intake(request);
+  const parsed = received.ok ? WebVitalSchema.safeParse(received.json) : null;
 
-    const parsed = WebVitalSchema.safeParse(JSON.parse(raw));
-    if (!parsed.success) {
-      return new NextResponse(null, { status: 204 });
-    }
-
+  if (parsed?.success) {
     const { name, value, rating, id, navigationType, path } = parsed.data;
     logger.info("web-vital", {
       metric: name,
@@ -43,8 +48,6 @@ export async function POST(request: Request) {
       navigationType,
       path,
     });
-  } catch {
-    // A malformed beacon is not worth a log line of its own.
   }
 
   return new NextResponse(null, { status: 204 });

@@ -223,6 +223,25 @@ describe("a protected path reached with no session cookie", () => {
     });
     expect(global.fetch).not.toHaveBeenCalled();
   });
+
+  it("logs no more than the first 200 characters of the path it was asked for", async () => {
+    // The caller writes the path and needs no session to get it logged, and
+    // every logged string is scrubbed by pattern, so its length is bounded.
+    const stdout = jest.spyOn(process.stdout, "write").mockImplementation(() => true);
+    global.fetch = jest.fn() as unknown as typeof fetch;
+    const segment = "a".repeat(5_000);
+
+    try {
+      await GET(request(segment), context(segment));
+
+      const lines = stdout.mock.calls.map(([line]) => JSON.parse(String(line)) as object);
+      expect(lines).toEqual([
+        expect.objectContaining({ msg: "proxy.unauthenticated", path: "a".repeat(200) }),
+      ]);
+    } finally {
+      stdout.mockRestore();
+    }
+  });
 });
 
 describe("a backend the proxy cannot reach", () => {

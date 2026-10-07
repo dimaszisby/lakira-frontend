@@ -4,3 +4,4 @@
 - [Sentry error-monitoring review](project_sentry-error-monitoring_review.md) — request changes; sink forwarding: free-text fields, per-process caps, try-scope side effects
 - [Server-set session cookie review](project_server-set-session-cookie_review.md) — approve w/ warnings; check combined cookie-writer tests, stale rule docs
 - [CSP script nonce review](project_csp-script-nonce_review.md) — request changes; probe matcher look-alike prefixes for fail-open header loss
+- [Telemetry log hardening review](project_telemetry-log-hardening_review.md) — approve w/ warnings; per-string work in shared logger needs all call sites checked, measure regexes

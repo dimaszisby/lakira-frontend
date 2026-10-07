@@ -40,9 +40,11 @@ Browser reports go through the app's own `/api/observability/client-error` endpo
 with a message, page, request ID and the browser's raw stack trace, not source lines. That is the
 stated cost of keeping the SDK out of the browser.
 
-Two limits protect the quota, because that endpoint is unauthenticated: a page sends at most 5
-reports per load, and a server process forwards at most 30 browser reports a minute. Reports past
-the cap are still written to stdout.
+Three limits apply, because that endpoint is unauthenticated: a page sends at most 5 reports per
+load, a server process writes at most 60 browser reports a minute to stdout, and it forwards at
+most 30 of those a minute. Reports between the two caps are still written to stdout. Past 60 they
+are dropped unread, and the next minute's first report is preceded by one `telemetry.suppressed`
+line with the number dropped.
 
 ## What is removed before anything is sent
 
@@ -54,6 +56,11 @@ the cap are still written to stdout.
 - Free text (messages and stack traces) is scrubbed by pattern: email addresses, bearer values,
   token-shaped strings and `?key=value` queries. Key-based redaction cannot see inside a value.
 - Paths lose their query string. Reset, verify and invite links carry their token there.
+
+The last two happen in the logger, not in the Sentry adapter, so the stdout line and any sink you
+register receive the same scrubbed entry
+([ADR-0027](../../explanation/decisions/adr-0027-log-entries-are-scrubbed-in-the-logger.md)). A
+string longer than 4,096 characters is cut first.
 
 Pattern scrubbing is a net, not a guarantee. Do not put user data in an error message.
 

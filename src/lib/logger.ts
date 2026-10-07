@@ -17,7 +17,17 @@
  * suffix-anchored**. The backend's equivalent is anchored with `$`, which means
  * it silently misses `authorization`, `cookie`, `bearer` and `dsn` — a gap
  * logged as caveat C6 in its own audit. Do not copy that shape.
+ *
+ * Key names say nothing about what a value holds, so every string is also
+ * passed through `scrubText`, which removes addresses, bearer values, token
+ * shapes and `?key=value` queries. It happens here rather than in a sink so
+ * that stdout, and whatever a log drain ships from it, is covered too: until
+ * 2026-10-06 only the copy sent to Sentry was scrubbed.
  */
+
+import { REDACTED, scrubText, stripQuery } from "@/lib/scrub-text";
+
+export { REDACTED };
 
 export type LogLevel = "debug" | "info" | "warn" | "error";
 
@@ -42,30 +52,53 @@ export type LogSink = (entry: LogEntry) => void;
 export const SENSITIVE_KEY_PATTERN =
   /(authorization|cookie|bearer|password|passwd|secret|token|api[-_]?key|apikey|credential|session|signature|private[-_]?key|dsn|otp|passcode)/i;
 
-export const REDACTED = "[redacted]";
-
 /** Guard against cycles and pathological nesting in untrusted payloads. */
 const MAX_DEPTH = 6;
 
 /**
- * Deep-copy `value`, replacing any sensitive field with {@link REDACTED}.
+ * No single string is logged past this. The scrubbing patterns run on every
+ * string, and one of them is quadratic on crafted input, so the length a caller
+ * can reach them with has to be bounded here rather than at each call site.
+ */
+export const MAX_STRING_LENGTH = 4_096;
+
+const scrubString = (value: string): string =>
+  scrubText(value.length > MAX_STRING_LENGTH ? `${value.slice(0, MAX_STRING_LENGTH)}...` : value);
+
+/** Fields that hold a URL or path and may carry a token in the query string. */
+const URL_KEYS = new Set(["path", "url"]);
+
+const redactField = (key: string, item: unknown, depth: number): unknown => {
+  if (SENSITIVE_KEY_PATTERN.test(key)) return REDACTED;
+  if (URL_KEYS.has(key) && typeof item === "string") return scrubString(stripQuery(item));
+  return redact(item, depth + 1);
+};
+
+/**
+ * Deep-copy `value`, replacing any sensitive field with {@link REDACTED} and
+ * scrubbing every string on the way.
  *
  * Errors are converted to a plain object, because `JSON.stringify(new Error())`
  * yields `{}` and would silently drop the message and stack.
  */
 export const redact = (value: unknown, depth = 0): unknown => {
   if (depth > MAX_DEPTH) return "[max depth]";
+  if (typeof value === "string") return scrubString(value);
   if (value === null || typeof value !== "object") return value;
 
   if (value instanceof Error) {
-    return { name: value.name, message: value.message, stack: value.stack };
+    return {
+      name: value.name,
+      message: scrubString(value.message),
+      stack: value.stack === undefined ? undefined : scrubString(value.stack),
+    };
   }
 
   if (Array.isArray(value)) return value.map((item) => redact(item, depth + 1));
 
   const out: Record<string, unknown> = {};
   for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
-    out[key] = SENSITIVE_KEY_PATTERN.test(key) ? REDACTED : redact(item, depth + 1);
+    out[key] = redactField(key, item, depth);
   }
   return out;
 };

@@ -26,6 +26,21 @@ describe("stripQuery", () => {
 const FAKE_JWT = ["eyJ" + "a".repeat(12), "b".repeat(12), "c".repeat(12)].join(".");
 
 describe("scrubText", () => {
+  it("stays linear on a long run that holds no address", () => {
+    // Without the lookbehind the address pattern retries from every character:
+    // 196 ms on 16 KB, so half a minute on this. The bound is loose on purpose.
+    const started = performance.now();
+    scrubText("a".repeat(200_000));
+
+    expect(performance.now() - started).toBeLessThan(1_000);
+  });
+
+  it("replaces each of several addresses that share a line", () => {
+    expect(scrubText("to a@b.co,c@d.io and <e.f+g@mail.example.org>")).toBe(
+      "to [email],[email] and <[email]>",
+    );
+  });
+
   it("masks an email address", () => {
     expect(scrubText("No user ada@example.com in org")).toBe("No user [email] in org");
   });
@@ -113,7 +128,8 @@ describe("scrubSentryEvent", () => {
       contexts: { session: { id: "abc" }, runtime: { name: "node" } },
     });
 
-    expect(event.request?.data).toEqual({ email: "a@b.co", password: REDACTED });
+    // `redact` scrubs strings as well as keys, so an address in a body goes too.
+    expect(event.request?.data).toEqual({ email: "[email]", password: REDACTED });
     expect(event.extra).toEqual({ nested: { refreshToken: REDACTED, path: DASHBOARD_PATH } });
     expect(event.contexts).toEqual({ session: REDACTED, runtime: { name: "node" } });
   });

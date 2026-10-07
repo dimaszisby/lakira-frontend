@@ -10,9 +10,11 @@ independent; pick them off singly.
       `csp-script-nonce`
 - [ ] N5: ratchet the global coverage thresholds in `jest.config.ts` to just under measured
       (37/42/32/36), and correct the sentence in `CLAUDE.md` § Known state of the repo
-- [ ] N6: the three telemetry routes read the whole body before the size test, count characters
-      rather than bytes, and log without a rate limit
-- [ ] N7: free text reaches stdout unscrubbed; `scrubText` runs on the Sentry path only
+- [x] N6: the three telemetry routes read the whole body before the size test, count characters
+      rather than bytes, and log without a rate limit. Done 2026-10-06: a streamed byte cap and a
+      per-process budget, kit `telemetry-log-hardening`. A per-client limit still waits on hosting
+- [x] N7: free text reaches stdout unscrubbed; `scrubText` runs on the Sentry path only. Done
+      2026-10-06: scrubbed in the logger, ADR-0027, same kit
 - [ ] N8: `dompurify` is in `dependencies` and nothing imports it
 - [ ] N9: `docs/reference/commands.md` says it is checked against `package.json`; add the check or
       change the sentence
