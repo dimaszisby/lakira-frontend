@@ -1,7 +1,8 @@
 # Run the stack E2E specs
 
 `cypress/e2e/stack/` holds the specs that need the real backend: the signed-in pages checked for
-accessibility in both themes, the invite-and-switch journey, and the password reset. CI cannot run
+accessibility in both themes, the invite-and-switch journey, the password reset, and the metrics
+list at four widths in both list modes. CI cannot run
 them, because it has no backend, so they run on your machine. Run them when a change touches a
 signed-in page, the app layout, or an auth or token flow, and before a release
 (`.claude/rules/workflow.md`, gate table).

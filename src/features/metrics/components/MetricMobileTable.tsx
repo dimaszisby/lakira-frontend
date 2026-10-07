@@ -17,8 +17,11 @@ export const MetricMobileTableBase = ({
   onRowHover,
   className = "",
 }: MetricTableProps) => {
+  // No breakpoint class of its own: `MetricTable` decides when this list shows. It hid itself
+  // from 640 px up until 2026-10-07, which left the page blank wherever the caller asked for the
+  // mobile variant at a wider viewport.
   return (
-    <section className={cn("space-y-4 sm:hidden", className)} aria-label="Metrics mobile list">
+    <section className={cn("space-y-4", className)} aria-label="Metrics mobile list">
       {metrics.length > 0 ? (
         <ul role="list" className="space-y-4">
           {metrics.map((item) => (
