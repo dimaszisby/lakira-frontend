@@ -275,6 +275,73 @@ describe("isTokenIssuingApiPath", () => {
   });
 });
 
+/** The synced OpenAPI snapshot, read by path so both contract checks see the same file. */
+const readContract = <T>(): T =>
+  JSON.parse(
+    readFileSync(
+      path.join(process.cwd(), "docs", "reference", "api", "lakira-backend-openapi.json"),
+      "utf8",
+    ),
+  ) as T;
+
+describe("PUBLIC_API_PATHS matches the contract", () => {
+  // The proxy forwards these paths with no session (deny by default for the
+  // rest). A path listed here that the contract secures is an authenticated
+  // operation proxied without a token; one the contract leaves open and this
+  // list omits is a sign-in step that answers 401. Until 2026-10-07 the only
+  // check was that each entry began with `auth/`.
+  type Requirement = Record<string, unknown>;
+  type Operation = { responses?: unknown; security?: Requirement[] };
+  type Contract = { security?: Requirement[]; paths: Record<string, Record<string, Operation>> };
+
+  const contract = readContract<Contract>();
+
+  /** An empty requirement object means "no credential needed", as does an empty list. */
+  const isUnsecured = (operation: Operation): boolean => {
+    const security = operation.security ?? contract.security ?? [];
+    return security.length === 0 || security.some((item) => Object.keys(item).length === 0);
+  };
+
+  /** `METHOD path`, path without its leading slash, split by whether a credential is required. */
+  const operationsBySecurity = () => {
+    const unsecured: string[] = [];
+    const secured: string[] = [];
+    for (const [apiPath, operations] of Object.entries(contract.paths)) {
+      for (const [method, operation] of Object.entries(operations)) {
+        // A path item also holds `parameters` and the like; an operation has responses.
+        if (!operation.responses) continue;
+        const name = `${method.toUpperCase()} ${apiPath.replace(/^\//, "")}`;
+        (isUnsecured(operation) ? unsecured : secured).push(name);
+      }
+    }
+    return { unsecured: unsecured.sort(), secured: secured.sort() };
+  };
+
+  const pathOf = (operation: string) => operation.slice(operation.indexOf(" ") + 1);
+
+  it("finds both secured and unsecured operations in the contract", () => {
+    // If the walk stopped telling them apart, the comparisons below would pass
+    // or fail for the wrong reason.
+    const { unsecured, secured } = operationsBySecurity();
+    expect(unsecured.length).toBeGreaterThan(0);
+    expect(secured.length).toBeGreaterThan(0);
+  });
+
+  it("lists exactly the paths the contract leaves unsecured", () => {
+    const unsecuredPaths = [...new Set(operationsBySecurity().unsecured.map(pathOf))].sort();
+    expect([...PUBLIC_API_PATHS].sort()).toEqual(unsecuredPaths);
+  });
+
+  it("lists no path that also has a secured method", () => {
+    // `isPublicApiPath` matches the path alone. A path with an open POST and a
+    // secured GET would have its GET forwarded with no session.
+    const securedOnPublicPaths = operationsBySecurity().secured.filter((operation) =>
+      PUBLIC_API_PATHS.has(pathOf(operation)),
+    );
+    expect(securedOnPublicPaths).toEqual([]);
+  });
+});
+
 describe("TOKEN_ISSUING_API_PATHS stays complete", () => {
   // The proxy strips the access token from these responses and stores it as the
   // httpOnly session cookie (ADR-0025). An operation that returns a token and is
@@ -293,12 +360,7 @@ describe("TOKEN_ISSUING_API_PATHS stays complete", () => {
   };
   type Contract = { paths: Record<string, Record<string, Operation>> };
 
-  const contract = JSON.parse(
-    readFileSync(
-      path.join(process.cwd(), "docs", "reference", "api", "lakira-backend-openapi.json"),
-      "utf8",
-    ),
-  ) as Contract;
+  const contract = readContract<Contract>();
 
   const resolve = (schema: Schema): Schema => {
     let current = schema;

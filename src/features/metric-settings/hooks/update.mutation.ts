@@ -1,6 +1,7 @@
 import type { QueryKey } from "@tanstack/react-query";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { invalidateDashboardVisualizations } from "@/features/data-visualizations/cache";
 import { useOrganizationId } from "@/features/organizations/context";
 import { toIsoFromLocalInput } from "@/src/utils/date-io";
 import type {
@@ -86,6 +87,7 @@ export function useUpdateMetricSettings(
     onSettled: async (_data, _err, vars) => {
       await invalidateMetricSettingsDetail(qc, organizationId, vars.settingsId);
       await invalidateMetricSettingsLists(qc, organizationId);
+      await invalidateDashboardVisualizations(qc, organizationId);
     },
 
     onSuccess: (updated) => {

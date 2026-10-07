@@ -4,7 +4,7 @@ As of **February 15, 2026**, this document captures backend details needed by th
 
 ## 1. Environment Status
 
-- **Staging backend is active** and currently documented as: `https://lakira-backend-staging.onrender.com/api/v1`
+- **Staging backend is not usable** as of 2026-08-22: its database was deleted and the service crash-loops. Its documented URL is `https://lakira-backend-staging.onrender.com/api/v1`. This document said "active" when it was written in February; [`../environments.md`](../environments.md) holds the current status.
 - **Production backend web-service URL is not available yet**
 
 ## 2. FE-Consumed Backend Variables

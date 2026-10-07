@@ -3,7 +3,7 @@
 **Purpose:** the single source of truth for this repo's npm scripts.
 **Owner:** whoever changes `package.json` scripts.
 
-This file is checked against `package.json`. If you add, rename, or remove a script, update this file in the same commit. Do not keep a second copy of this list anywhere — link here instead.
+This file is checked against `package.json` by `src/__tests__/commands-doc.test.ts`, in the unit gate: every script needs a table row with its name in the first cell, and every `npm run` named here has to exist. The test checks names, not descriptions. If you add, rename, or remove a script, update this file in the same commit. Do not keep a second copy of this list anywhere — link here instead.
 
 ---
 

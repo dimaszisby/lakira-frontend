@@ -1,6 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { invalidateMetricVisualization } from "@/features/data-visualizations/cache";
+import {
+  invalidateDashboardVisualizations,
+  invalidateMetricVisualization,
+} from "@/features/data-visualizations/cache";
 import { useOrganizationId } from "@/features/organizations/context";
 import type { CreateMetricLogRequestDTO, MetricLogResponseDTO } from "@/types/dtos/metric-log.dto";
 
@@ -22,6 +25,7 @@ export function useCreateMetricLog(
     onSuccess: async (created, payload) => {
       await invalidateLogLists(qc, organizationId);
       await invalidateMetricVisualization(qc, organizationId, payload.metricId);
+      await invalidateDashboardVisualizations(qc, organizationId);
       onSuccess?.(created);
     },
     onError,

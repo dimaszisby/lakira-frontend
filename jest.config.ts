@@ -48,10 +48,10 @@ const config: Config = {
   // build pass.
   coverageThreshold: {
     global: {
-      statements: 29,
-      branches: 29,
-      functions: 26,
-      lines: 29,
+      statements: 42,
+      branches: 43,
+      functions: 37,
+      lines: 41,
     },
   },
   transform: {

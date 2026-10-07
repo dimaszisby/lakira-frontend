@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { invalidateDashboardVisualizations } from "@/features/data-visualizations/cache";
 import { useOrganizationId } from "@/features/organizations/context";
 import type { MetricSettingsResponseDTO } from "@/types/dtos/metric-settings.dto";
 
@@ -18,6 +19,7 @@ export function useUpdateGoalAchievement(
     onSuccess: async (updated) => {
       await invalidateMetricSettingsDetail(qc, organizationId, updated.id);
       await invalidateMetricSettingsLists(qc, organizationId);
+      await invalidateDashboardVisualizations(qc, organizationId);
       onSuccess?.(updated);
     },
     onError,

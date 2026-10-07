@@ -50,6 +50,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0025](./adr-0025-the-proxy-sets-the-session-cookie.md)                         | The proxy sets the session cookie; the token never reaches the browser      | Accepted       | 2026-10-05 | `D-01`    |
 | [ADR-0026](./adr-0026-script-runs-by-nonce.md)                                      | Script runs by per-request nonce; the policy no longer allows inline script | Accepted       | 2026-10-05 | `D-01`    |
 | [ADR-0027](./adr-0027-log-entries-are-scrubbed-in-the-logger.md)                    | Log entries are scrubbed in the logger, before any sink sees them           | Accepted       | 2026-10-06 | `D-01`    |
+| [ADR-0028](./adr-0028-raw-html-is-banned-by-lint.md)                                | The app renders no raw HTML; lint bans it and no sanitiser is installed     | Accepted       | 2026-10-07 | `D-01`    |
 
 ## Where the other decisions went
 

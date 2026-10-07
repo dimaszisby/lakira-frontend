@@ -1,6 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
 
-import { invalidateMetricVisualization } from "../cache";
+import { invalidateDashboardVisualizations, invalidateMetricVisualization } from "../cache";
 import { vizKeys } from "../keys";
 import type { VizQuery } from "../types";
 
@@ -74,6 +74,52 @@ describe("invalidateMetricVisualization", () => {
   it("matches nothing when the organization has no cached visualizations", async () => {
     seed(qc, ORG_A, "m-1");
     await expect(invalidateMetricVisualization(qc, ORG_B, "m-1")).resolves.not.toThrow();
+    expect(isStale(qc, ORG_A, "m-1")).toBe(false);
+  });
+});
+
+describe("invalidateDashboardVisualizations", () => {
+  let qc: QueryClient;
+
+  const seedDashboard = (organizationId: string, q: VizQuery & { limit?: number } = QUERY) =>
+    qc.setQueryData(vizKeys.dashboard(organizationId, q), { seeded: true });
+
+  const isDashboardStale = (organizationId: string, q: VizQuery & { limit?: number } = QUERY) =>
+    qc.getQueryState(vizKeys.dashboard(organizationId, q))?.isInvalidated === true;
+
+  beforeEach(() => {
+    qc = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  });
+
+  afterEach(() => qc.clear());
+
+  it("invalidates every dashboard query of the organization, whatever its range or limit", async () => {
+    const wider: VizQuery & { limit?: number } = { last: "30d", bucket: "1d", limit: 6 };
+    seedDashboard(ORG_A);
+    seedDashboard(ORG_A, wider);
+
+    await invalidateDashboardVisualizations(qc, ORG_A);
+
+    expect(isDashboardStale(ORG_A)).toBe(true);
+    expect(isDashboardStale(ORG_A, wider)).toBe(true);
+  });
+
+  it("leaves another organization's dashboard untouched", async () => {
+    seedDashboard(ORG_A);
+    seedDashboard(ORG_B);
+
+    await invalidateDashboardVisualizations(qc, ORG_A);
+
+    expect(isDashboardStale(ORG_A)).toBe(true);
+    expect(isDashboardStale(ORG_B)).toBe(false);
+  });
+
+  it("does not touch a metric's own charts, which share the resource root", async () => {
+    seedDashboard(ORG_A);
+    seed(qc, ORG_A, "m-1");
+
+    await invalidateDashboardVisualizations(qc, ORG_A);
+
     expect(isStale(qc, ORG_A, "m-1")).toBe(false);
   });
 });

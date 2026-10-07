@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
+import { invalidateDashboardVisualizations } from "@/features/data-visualizations/cache";
 import { useOrganizationId } from "@/features/organizations/context";
 
 import { invalidateMetricLists } from "../cache";
@@ -20,6 +21,7 @@ export function useCreateMetric(
     mutationFn: (metric) => createMetric(metric),
     onSuccess: async (created) => {
       await invalidateMetricLists(qc, organizationId);
+      await invalidateDashboardVisualizations(qc, organizationId);
 
       // Optional: optimistic stitch into the *current* first page if you want:
       // qc.setQueryData(metricsKeys.list(organizationId, { page: 1, limit: 20, sortBy: "createdAt", sortOrder: "DESC" }), (old: any) => ...);

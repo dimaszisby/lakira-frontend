@@ -55,8 +55,9 @@ Security-relevant items already known and tracked — please do not re-report th
   to the server's log stream at `warn`, which is not forwarded.
 - The Content Security Policy still allows inline styles (`style-src 'unsafe-inline'`). Script is
   allowed by per-request nonce only (ADR-0026).
-- The three unauthenticated telemetry endpoints have no rate limit of their own (audit
-  2026-10-04, N6).
+- The three unauthenticated telemetry endpoints are bounded per server process, not per client:
+  each has a byte cap and a per-minute budget, and one caller can spend the budget for that
+  minute. A per-client limit waits on a client address the app can trust.
 
 A **fork** of this repository inherits all of the above. Read the checklist before deploying
 one.
