@@ -72,6 +72,18 @@ describe("MetricMobileTable", () => {
     expect(screen.getByRole("status")).toHaveTextContent("No metrics available");
   });
 
+  it("does not hide itself at any breakpoint, leaving that to the caller", () => {
+    // jsdom has no layout, so the class is all that can be observed here. The check that the
+    // list is actually visible is `cypress/e2e/stack/metrics-list-widths.cy.ts`, which does not
+    // run in CI; this one does.
+    render(
+      <MetricMobileTableBase metrics={metrics} sortBy="name" sortOrder="ASC" onSort={() => {}} />,
+    );
+
+    const list = screen.getByRole("region", { name: "Metrics mobile list" });
+    expect(list.className).not.toMatch(/\bhidden\b/);
+  });
+
   it("renders metrics and emits row click callback", async () => {
     const user = userEvent.setup();
     const onRowClick = jest.fn();

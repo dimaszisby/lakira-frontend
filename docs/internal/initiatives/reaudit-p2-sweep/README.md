@@ -1,6 +1,6 @@
 # The remaining P2 findings from the 2026-10-04 re-audit
 
-**Status:** Done on the branch: implemented, reviewed, all gates green. All eight acceptance
+**Status:** Done, merged in #76 (7c74c9a): implemented, reviewed, all gates green. All eight acceptance
 criteria met. D-01 is ADR-0028.
 **Slug:** `reaudit-p2-sweep` · **Branch:** `chore/reaudit-p2-sweep`
 
