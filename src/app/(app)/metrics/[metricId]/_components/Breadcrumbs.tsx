@@ -37,7 +37,9 @@ const BreadcrumbsBase = () => {
             </li>
           )}
 
-          <li className="text-brand-primary">{header.name}</li>
+          <li aria-current="page" className="text-ink">
+            {header.name}
+          </li>
         </ol>
       </nav>
     </Card>

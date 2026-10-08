@@ -55,7 +55,9 @@
     --surface-2: var(--gray-700);
     --text: var(--gray-100);
     --text-secondary: var(--gray-300);
-    --text-tertiary: var(--gray-400);
+
+    /* 6.28:1 on --surface; 400 was 3.64:1 (metric-detail-contrast D-02) */
+    --text-tertiary: var(--gray-300);
     --text-inverted: var(--gray-800);
     --text-error: var(--accent-vividcoral-100);
     --border: var(--gray-700);
