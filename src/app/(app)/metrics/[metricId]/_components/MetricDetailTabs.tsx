@@ -51,7 +51,7 @@ const MetricDetailTabs = () => {
                 aria-current={isActive ? "page" : undefined}
                 className={`relative flex w-full items-center justify-center rounded-t-xl border px-4 text-center transition-all ${
                   isActive
-                    ? "metric-tab-active -mb-px border-border border-b-surface py-3 text-sm font-semibold text-brand-primary shadow-sm"
+                    ? "metric-tab-active -mb-px border-border border-b-surface py-3 text-sm font-semibold text-ink shadow-sm"
                     : "metric-tab-inactive border-b-border bg-surface2 py-2.5 text-sm font-medium text-ink-secondary hover:bg-surface hover:text-ink"
                 }`}
               >
