@@ -1,6 +1,6 @@
 # Contrast on the metric detail page, and its first browser test
 
-**Status:** Implemented on `fix/metric-detail-contrast`, all gates green; awaiting merge. Five acceptance
+**Status:** Done, merged in #78 (862f83e): implemented, all gates green. Five acceptance
 criteria met. D-01 and D-02 stay in the kit, as `cypress-a11y-e2e` D-08 and D-09 did.
 **Slug:** `metric-detail-contrast` · **Branch:** `fix/metric-detail-contrast`
 
