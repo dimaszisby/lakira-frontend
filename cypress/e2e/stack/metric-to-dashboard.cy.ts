@@ -7,10 +7,12 @@ import { newUser, preflightStack, registerUser, signInSession } from "../../supp
 // page: every other signed-in spec uses a new account, which has no metric.
 // Needs the local stack: `npm run test:e2e:stack`.
 //
-// It asserts no count on the dashboard card. The backend takes a card's figures from the first
-// bucket of the range only, so a count there does not follow what was logged: Notion "FE and BE
-// messages", Part 1, "Dashboard stats describe the first bucket only". Add the counts when that
-// record is completed.
+// It asserts the card's count before anything is logged and not after. Once a browser has seen
+// the dashboard it keeps showing those figures after a value is logged: the backend lets the
+// response be cached for a minute, and its ETag does not change when a log does. Notion "FE and
+// BE messages", Part 1, "Dashboard responses stay cached in the browser after a log changes".
+// When that record is completed, add `n: 1` after the first value and `n: 2` through the back
+// button: docs/internal/todos/2026-10-08-todo-dashboard-count-assertions.md has both cases.
 //
 // The tests are one journey and run in order; each starts from what the one before left behind.
 const THEME = "light";
@@ -21,6 +23,14 @@ const TABS = 'nav[aria-label="Metric tabs"] a';
 const METRIC_NAME = `Daily steps ${Date.now()}`;
 const LOGGED_VALUE = "4200";
 const VISIBLE = "be.visible";
+
+/** The count line of the metric's dashboard card: `n: 2` means two logged values. */
+const cardCount = () =>
+  cy
+    .contains(METRIC_NAME)
+    .parents()
+    .filter((_index, element) => /\bn: \d+/.test(element.textContent ?? ""))
+    .first();
 
 describe("From a new metric to the dashboard", () => {
   const user = newUser("journey");
@@ -49,10 +59,11 @@ describe("From a new metric to the dashboard", () => {
     cy.contains(METRIC_NAME).should(VISIBLE);
   });
 
-  it("shows the new metric's card on the dashboard at once", () => {
+  it("shows the new metric's card on the dashboard at once, with nothing logged", () => {
     cy.visitInTheme("/dashboard", THEME);
 
     cy.contains(METRIC_NAME).should(VISIBLE);
+    cardCount().should("contain.text", "n: 0");
   });
 
   it("logs a value and lists it", () => {
