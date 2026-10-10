@@ -155,3 +155,9 @@ Not visible from the OpenAPI contract alone; found by decoding a real token.
   C5 closed. Three new P1s found by probing: the proxy leaves its API base, the fork failure, and
   the token reaching browser JavaScript. Kit
   [`saas-reaudit-2026-10-04`](../../initiatives/saas-reaudit-2026-10-04/README.md).
+- `audit-2026-10-10.md` — targeted re-audit after PRs #70 to #80: 68 pass / 8 partial / 3 missing
+  (86%). 0 P0, 3 P1, 13 P2. **Verdict not reconfirmed** — criterion 3 fails on CI/CD alone (67%);
+  the owner left ADR-001 as written. N1 to N6 and N8 to N11 closed and re-tested, N7 reduced.
+  Forkability back to 86%. Accessibility 50% on an independent grader's stricter reading, and
+  Error Handling 80% on a defect found in four forms; neither is a regression. Kit
+  [`saas-reaudit-2026-10-10`](../../initiatives/saas-reaudit-2026-10-10/README.md).
