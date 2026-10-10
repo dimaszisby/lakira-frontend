@@ -115,11 +115,38 @@ It also read ADR-001 criterion 3 as written, where the 2026-08-29 run had passed
 exception". Whether that exception should exist is an open question for the owner, in section 9
 of the audit.
 
-## 8. Related
+## 8. The 2026-10-10 run
+
+Added when that run landed. Earlier sections are left as written.
+
+| Open after 2026-10-04                       | On 2026-10-10                                                    |
+| ------------------------------------------- | ---------------------------------------------------------------- |
+| C4 — deploy config                          | Open. Waits on the hosting decision; the only cause of the verdict |
+| C6 — quarantined files                      | Two remain                                                       |
+| N1 — proxy leaves its API base              | Closed. Eight encodings refused or contained on a production build |
+| N2 — a fork fails `format`                  | Closed. Green after the step the script prints                   |
+| N3 — token in browser JavaScript            | Closed. No sign-in body carries one; ADR-0025                    |
+| N4 to N11                                   | Closed, except N7: Next prints a raw error the logger never sees |
+| ADR-001 criterion 3, the owner's question   | Answered: ADR-001 stays as written                               |
+
+What this run did that the earlier ones had not:
+
+- **It did not grade its own work.** The session had written three of the changes under audit, so
+  a second grader took the five items they touch. It lowered two that had been carried at Pass,
+  on evidence that was there all along: the accessibility check in CI is unnamed and sees public
+  pages only, and the WCAG baseline still holds seven placeholders.
+- **It said how each grade was reached.** 50 regraded from the code, 24 carried because the cited
+  file had not changed, 5 independent.
+- **It tripped over its own environment.** A variable exported for the build made one unit test
+  fail. The gate is green as CI runs it, and the test's dependence on the caller's shell is now a
+  finding (N13).
+
+## 9. Related
 
 - [`audit-2026-08-24.md`](./audit-2026-08-24.md) — baseline, immutable
 - [`audit-2026-08-29.md`](./audit-2026-08-29.md) — re-audit after phases 0-7, immutable
-- [`audit-2026-10-04.md`](./audit-2026-10-04.md) — current run, immutable
+- [`audit-2026-10-04.md`](./audit-2026-10-04.md) — re-audit on Node 24, immutable
+- [`audit-2026-10-10.md`](./audit-2026-10-10.md) — current run, immutable
 - [`decisions.md`](./decisions.md) — ADR-001 through ADR-004
 - [`iteration-plan.md`](./iteration-plan.md) — phase roadmap and status
 - [`../../../../SAAS-BASE-CHECKLIST.md`](../../../../SAAS-BASE-CHECKLIST.md) — the public one-pager
