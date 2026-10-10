@@ -1,5 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { AxiosResponse } from "axios";
+import { AxiosError } from "axios";
 
 import MetricCategoryForm from "@/features/metric-categories/components/MetricCategoryForm";
 import { CATEGORY_DEFAULTS } from "@/features/metric-categories/constants";
@@ -128,12 +130,31 @@ describe("MetricCategoryForm", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("shows hook mutation errors in the error banner", () => {
-    setupHooks({ createError: new Error("Create category failed") });
+  it("shows the server's message in the error banner when a hook reports a refused request", () => {
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+    // What the API layer throws: the Axios error, with the server's envelope on its response.
+    const refused = new AxiosError(
+      "Request failed with status code 409",
+      undefined,
+      undefined,
+      undefined,
+      {
+        status: 409,
+        data: { status: "fail", message: "A category with this name already exists" },
+      } as AxiosResponse,
+    );
 
-    render(<MetricCategoryForm onClose={() => {}} initialCategory={null} />);
+    try {
+      setupHooks({ createError: refused });
 
-    expect(screen.getByRole("alert")).toHaveTextContent("Create category failed");
+      render(<MetricCategoryForm onClose={() => {}} initialCategory={null} />);
+
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        "A category with this name already exists",
+      );
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
   });
 
   it("calls onClose and resets field values when close button is clicked", async () => {

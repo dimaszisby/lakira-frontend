@@ -27,7 +27,6 @@ import { LIST_MODE_DESKTOP_MQ } from "@/hooks/useListMode";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { isDummyActionsEnabled } from "@/lib/env";
 import { metricRoutes } from "@/lib/routes";
-import { sanitizeErrorMessage } from "@/lib/sanitizeErrorMessage";
 import { makeOnColumnSort } from "@/lib/sort/makeOnColumnSort";
 import { handleApiError } from "@/services/api/handleApiError";
 import { useMetricListSearchState } from "@/src/features/metrics/hooks/list.search-state";
@@ -184,8 +183,11 @@ const MetricsPageClient = ({ initialParams }: MetricsPageClientProps) => {
     });
   }, [currentItems, router]);
 
-  const rawErrorMsg = createDummyError?.message || deleteError?.message || "";
-  const errorMsg = rawErrorMsg ? sanitizeErrorMessage(rawErrorMsg) : "";
+  const mutationError = createDummyError ?? deleteError;
+  const errorMsg = useMemo(
+    () => (mutationError ? handleApiError(mutationError).join(", ") : ""),
+    [mutationError],
+  );
 
   const isInitialLoading = isPagesMode
     ? pages.isFetching && pages.items.length === 0

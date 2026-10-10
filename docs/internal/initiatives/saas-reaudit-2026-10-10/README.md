@@ -1,6 +1,6 @@
 # SaaS re-audit, 2026-10-10
 
-**Status:** Complete, awaiting merge. Result: FORK-READY WITH CAVEATS is not reconfirmed, on one
+**Status:** Complete. Merged in #81 (`9415547`). Result: FORK-READY WITH CAVEATS is not reconfirmed, on one
 category. ADR-001 criterion 3 fails on CI/CD alone (67%, C4); the other six critical categories
 pass. 68 of 79 items Pass (86%). N1 to N6 and N8 to N11 are closed and were re-tested, N7 is
 reduced. Five new P2 findings, N12 to N16.

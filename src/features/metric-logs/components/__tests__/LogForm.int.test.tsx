@@ -223,6 +223,41 @@ describe("MetricLogForm integration", () => {
     }
   });
 
+  it("shows the server's message when creating a log is refused", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      server.use(
+        http.post(METRIC_LOGS_API, () =>
+          HttpResponse.json(
+            {
+              status: "fail",
+              message: "A log entry already exists for this timestamp for this metric",
+              data: null,
+            },
+            { status: 409 },
+          ),
+        ),
+      );
+
+      renderWithProviders(<MetricLogForm metricId={metricId} onClose={onClose} />);
+
+      const logValueInput = screen.getByLabelText(/log value/i);
+      await user.clear(logValueInput);
+      await user.type(logValueInput, "90");
+      await user.click(screen.getByRole("button", { name: /^add$/i }));
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "A log entry already exists for this timestamp for this metric",
+      );
+      expect(onClose).not.toHaveBeenCalled();
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
+
   it("has no critical accessibility violations on initial render", async () => {
     const { container } = renderWithProviders(
       <MetricLogForm metricId={metricId} onClose={jest.fn()} />,
@@ -265,7 +300,7 @@ describe("MetricLogForm integration", () => {
       await user.click(screen.getByRole("button", { name: /^delete log$/i }));
 
       expect(await screen.findByRole("alert")).toHaveTextContent(
-        /request failed with status code 500/i,
+        /something went wrong on our side/i,
       );
       expect(onClose).not.toHaveBeenCalled();
     } finally {

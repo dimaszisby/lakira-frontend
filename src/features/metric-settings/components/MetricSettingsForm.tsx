@@ -11,6 +11,7 @@ import { metricSettingsFormSchema } from "@/features/metric-settings/form";
 import { useCreateMetricSettings, useUpdateMetricSettings } from "@/features/metric-settings/hooks";
 import type { MetricSettingsExtendedVM } from "@/features/metric-settings/view-models";
 import { cn } from "@/lib/cn";
+import { handleApiError } from "@/services/api/handleApiError";
 import { Button } from "@/ui/Button";
 import { ColorField } from "@/ui/ColorField";
 import { DateTimePicker } from "@/ui/DateTimePicker";
@@ -169,7 +170,11 @@ export const MetricSettingsForm = ({ onClose, metricId, initialSettings }: Props
     reset();
   }, [onClose, reset]);
 
-  const errorMsg = createError?.message || updateError?.message || "";
+  const mutationError = createError ?? updateError;
+  const errorMsg = useMemo(
+    () => (mutationError ? handleApiError(mutationError).join(", ") : ""),
+    [mutationError],
+  );
 
   const subSectionContainerClass =
     "flex flex-col gap-6 rounded-xl border border-border bg-surface2 p-4 transition";

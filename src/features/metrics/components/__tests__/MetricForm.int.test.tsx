@@ -246,6 +246,40 @@ describe("MetricForm integration", () => {
     }
   });
 
+  it("shows the server's message when saving a metric is refused", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      server.use(
+        mockCategoryTypeahead(),
+        http.put(`${metricsEndpoint}/:id`, () =>
+          HttpResponse.json(
+            {
+              status: "fail",
+              message: "A metric with this name already exists",
+              data: null,
+            },
+            { status: 409 },
+          ),
+        ),
+      );
+
+      renderWithProviders(<MetricForm initialMetric={existingMetric} onClose={onClose} />);
+      await waitForCategoryTypeaheadIdle();
+
+      await user.click(screen.getByRole("button", { name: /save metric/i }));
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "A metric with this name already exists",
+      );
+      expect(onClose).not.toHaveBeenCalled();
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
+
   it("deletes an existing metric and closes modal on success", async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();

@@ -15,6 +15,7 @@ import type { MetricCategoryFormInput } from "@/features/metric-categories/types
 import { metricCategoryFormSchema } from "@/features/metric-categories/types";
 import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
 import { cn } from "@/lib/cn";
+import { handleApiError } from "@/services/api/handleApiError";
 import { Button } from "@/ui/Button";
 import { ColorField } from "@/ui/ColorField";
 import { ErrorMessage } from "@/ui/ErrorMessage";
@@ -126,7 +127,11 @@ const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
     reset();
   }, [onClose, reset]);
 
-  const errorMsg = createError?.message || updateError?.message || deleteError?.message || "";
+  const mutationError = createError ?? updateError ?? deleteError;
+  const errorMsg = useMemo(
+    () => (mutationError ? handleApiError(mutationError).join(", ") : ""),
+    [mutationError],
+  );
 
   const inputBg = "bg-surface2";
 

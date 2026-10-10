@@ -65,6 +65,8 @@ The chain is `withApiErrorHandling` → `handleApiError` → `normalizeApiError`
 
 `NormalizedApiError` is `{isAbort, status, code, title, messages[], retryable, requestId?, raw}`. It already understands the backend's four error envelopes: `{message}`, `{errors:[]}`, `{error}`, and Zod `{issues:[]}`. Render `messages`; do not re-parse `raw` in a component. `requestId` is the backend's `x-request-id` for the failed call, the same id on its log lines and its Sentry events.
 
+**A component renders `handleApiError(error)`, never `error.message`.** The error a hook hands back is the Axios error, whose message is "Request failed with status code 409"; the server's own sentence is on its response. Eight components printed the transport text until 2026-10-10 (audit finding N12). The line to copy is in `LoginForm.tsx`: `useMemo(() => (error ? handleApiError(error).join(", ") : ""), [error])`.
+
 Two things to know:
 
 - `src/services/api/auth.api.ts` was converted to `withApiErrorHandling` on 2026-09-13. It had caught the Axios error and rethrown `new Error(handleApiError(error).join(", "))`, which discarded the response — the forms then normalized that plain `Error` a second time, hit the `status == null` branch, and rendered **every** auth failure as "We couldn't reach the server". Never flatten an error into a string before the point of display: `withApiErrorHandling` logs and reports, then rethrows the original so one `handleApiError` call at the UI can read the status.

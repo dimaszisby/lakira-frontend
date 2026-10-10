@@ -21,6 +21,8 @@ const existingCategory: MetricCategoryVM = {
   updatedAt: "2026-02-12T10:00:00.000Z",
 };
 
+const METRIC_CATEGORIES_API = "/api/proxy/metric-categories";
+
 describe("MetricCategoryForm integration", () => {
   it("creates a category and closes modal on success", async () => {
     const user = userEvent.setup();
@@ -28,7 +30,7 @@ describe("MetricCategoryForm integration", () => {
     const createPayloadSpy = jest.fn();
 
     server.use(
-      http.post("/api/proxy/metric-categories", async ({ request }) => {
+      http.post(METRIC_CATEGORIES_API, async ({ request }) => {
         const body = await request.json();
         createPayloadSpy(body);
 
@@ -117,7 +119,7 @@ describe("MetricCategoryForm integration", () => {
 
     try {
       server.use(
-        http.post("/api/proxy/metric-categories", () =>
+        http.post(METRIC_CATEGORIES_API, () =>
           HttpResponse.json(
             {
               status: "error",
@@ -135,6 +137,39 @@ describe("MetricCategoryForm integration", () => {
       await user.click(screen.getByRole("button", { name: /add category/i }));
 
       expect(await screen.findByRole("alert")).toBeInTheDocument();
+      expect(onClose).not.toHaveBeenCalled();
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
+
+  it("shows the server's message when creating a category is refused", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      server.use(
+        http.post(METRIC_CATEGORIES_API, () =>
+          HttpResponse.json(
+            {
+              status: "fail",
+              message: "A category with this name already exists",
+              data: null,
+            },
+            { status: 409 },
+          ),
+        ),
+      );
+
+      renderWithProviders(<MetricCategoryForm onClose={onClose} initialCategory={null} />);
+
+      await user.type(screen.getByLabelText(/category name/i), "Hydration");
+      await user.click(screen.getByRole("button", { name: /add category/i }));
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "A category with this name already exists",
+      );
       expect(onClose).not.toHaveBeenCalled();
     } finally {
       consoleErrorSpy.mockRestore();

@@ -26,6 +26,7 @@ import { useMediaQuery } from "@/hooks/useMediaQuery";
 import { isDummyActionsEnabled } from "@/lib/env";
 import { metricCategoryRoutes } from "@/lib/routes";
 import { makeOnColumnSort } from "@/lib/sort/makeOnColumnSort";
+import { handleApiError } from "@/services/api/handleApiError";
 import { useMetricCategorySearchState } from "@/src/features/metric-categories/hooks/useMetricCategorySearchState";
 import { Button } from "@/ui/Button";
 import { Card, CardHeader, CardTitle } from "@/ui/Card";
@@ -170,7 +171,10 @@ const MetricCategoriesPageClient = ({ initialParams }: MetricCategoriesPageClien
       ? pages.items.length === 0
       : infinite.items.length === 0
     : false;
-  const rawErrorMsg = createDummyError?.message ?? "";
+  const errorMsg = useMemo(
+    () => (createDummyError ? handleApiError(createDummyError).join(", ") : ""),
+    [createDummyError],
+  );
 
   const pageTitle = (
     <CardHeader className="gap-0">
@@ -217,9 +221,9 @@ const MetricCategoriesPageClient = ({ initialParams }: MetricCategoriesPageClien
         </div>
       </div>
 
-      {rawErrorMsg ? (
+      {errorMsg ? (
         <p role="alert" className="text-xs text-status-error sm:text-sm">
-          {rawErrorMsg}
+          {errorMsg}
         </p>
       ) : null}
     </div>
