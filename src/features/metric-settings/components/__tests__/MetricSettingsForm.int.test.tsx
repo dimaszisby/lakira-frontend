@@ -197,6 +197,40 @@ describe("MetricSettingsForm integration", () => {
     }
   });
 
+  it("shows the server's message when creating settings is refused", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      server.use(
+        http.post(METRIC_SETTINGS_API, () =>
+          HttpResponse.json(
+            {
+              status: "fail",
+              message: "Settings already exist for this metric",
+              data: null,
+            },
+            { status: 409 },
+          ),
+        ),
+      );
+
+      renderWithProviders(
+        <MetricSettingsForm metricId={metricId} initialSettings={null} onClose={onClose} />,
+      );
+
+      await submitMetricSettingsForm(user, /^add$/i);
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(
+        "Settings already exist for this metric",
+      );
+      expect(onClose).not.toHaveBeenCalled();
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
+
   it("shows error message and stays open when update fails", async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();

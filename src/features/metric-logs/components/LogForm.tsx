@@ -14,6 +14,7 @@ import type { LogFormInputs } from "@/features/metric-logs/types";
 import { logFormSchema } from "@/features/metric-logs/types";
 import type { MetricLogVM } from "@/features/metric-logs/view-models";
 import { cn } from "@/lib/cn";
+import { handleApiError } from "@/services/api/handleApiError";
 import type {
   CreateMetricLogRequestDTO,
   UpdateMetricLogRequestDTO,
@@ -132,7 +133,11 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
     reset();
   }, [onClose, reset]);
 
-  const errorMsg = createError?.message || updateError?.message || deleteError?.message || "";
+  const mutationError = createError ?? updateError ?? deleteError;
+  const errorMsg = useMemo(
+    () => (mutationError ? handleApiError(mutationError).join(", ") : ""),
+    [mutationError],
+  );
   const inputBg = "bg-surface2";
 
   if (!metricId) {

@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import { APP_NAME } from "@/constants/app";
 import EmailVerificationNotice from "@/features/auth/components/EmailVerificationNotice";
 import { useAuthProfileQuery } from "@/features/auth/hooks/profile.query";
+import { handleApiError } from "@/services/api/handleApiError";
 import { Button } from "@/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
 import { ErrorMessage } from "@/ui/ErrorMessage";
@@ -15,7 +16,7 @@ const AccountPage = () => {
 
   const profileError = useMemo(() => {
     if (!isError) return undefined;
-    return error instanceof Error ? error.message : "Unable to load your profile.";
+    return error ? handleApiError(error).join(", ") : "Unable to load your profile.";
   }, [error, isError]);
 
   if (isLoading && !data) {

@@ -1,5 +1,7 @@
 "use client";
 
+import { useMemo } from "react";
+
 import { DASHBOARD_VIZ_LIMIT } from "@/features/data-visualizations/dashboardConfig";
 import { useDashboardVisualizations } from "@/features/data-visualizations/hooks";
 import type { VizQuery } from "@/features/data-visualizations/types";
@@ -9,6 +11,7 @@ import {
   DEFAULT_FILL,
   DEFAULT_TZ,
 } from "@/features/data-visualizations/viz-helpers";
+import { handleApiError } from "@/services/api/handleApiError";
 
 import MetricCardFromBatch from "./MetricCardFromBatch";
 
@@ -25,8 +28,13 @@ const DashboardContent = () => {
     gcTime: 5 * 60_000,
   });
 
+  const errorMsg = useMemo(
+    () => (error ? handleApiError(error).join(", ") : "Failed to load dashboard"),
+    [error],
+  );
+
   if (isFetching && !data) return <SkeletonGrid />;
-  if (isError) return <ErrorState message={error?.message ?? "Failed to load dashboard"} />;
+  if (isError) return <ErrorState message={errorMsg} />;
 
   const items = data?.items ?? [];
   if (!items.length) return <EmptyState />;

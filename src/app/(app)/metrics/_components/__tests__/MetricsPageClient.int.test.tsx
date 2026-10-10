@@ -23,6 +23,8 @@ jest.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
+const TIMESTAMP = "2026-02-18T08:00:00.000Z";
+
 const initialParams: MetricListSearchParams = {
   ...DEFAULT_METRIC_LIST_PARAMS,
   mode: "pages",
@@ -73,8 +75,8 @@ describe("MetricsPageClient integration", () => {
             },
             logCount: 12,
             goalType: "incremental",
-            createdAt: "2026-02-18T08:00:00.000Z",
-            updatedAt: "2026-02-18T08:00:00.000Z",
+            createdAt: TIMESTAMP,
+            updatedAt: TIMESTAMP,
           },
         ],
         1,
@@ -89,6 +91,49 @@ describe("MetricsPageClient integration", () => {
     await waitFor(() => {
       expect(mockPrefetch).toHaveBeenCalledWith(`/metrics/${metricId}`);
     });
+  });
+
+  it("shows the server's message when deleting a metric is refused", async () => {
+    const user = userEvent.setup();
+    const metricId = "22222222-2222-4222-8222-222222222222";
+    const refusal = "This metric still has logs and cannot be deleted";
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      server.use(
+        mockMetricsListResponse(
+          [
+            {
+              id: metricId,
+              name: "Sleep",
+              defaultUnit: "h",
+              description: null,
+              isPublic: false,
+              originalMetricId: null,
+              category: null,
+              logCount: 3,
+              goalType: null,
+              createdAt: TIMESTAMP,
+              updatedAt: TIMESTAMP,
+            },
+          ],
+          1,
+        ),
+        http.delete("/api/proxy/metrics/:id", () =>
+          HttpResponse.json({ status: "fail", message: refusal, data: null }, { status: 409 }),
+        ),
+      );
+
+      renderWithProviders(<MetricsPageClient initialParams={initialParams} />);
+      expect(await screen.findByText("Sleep")).toBeInTheDocument();
+
+      await user.click(screen.getByRole("button", { name: /more actions/i }));
+      await user.click(screen.getByRole("button", { name: /^delete$/i }));
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(refusal);
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
   });
 
   it("shows empty state when metrics response has no items", async () => {

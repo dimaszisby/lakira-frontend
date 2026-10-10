@@ -129,6 +129,8 @@ describe("DashboardContent integration", () => {
       expect(
         await screen.findByText(/something went wrong/i, {}, { timeout: 5000 }),
       ).toBeInTheDocument();
+      // The server's own sentence, not Axios's "Request failed with status code 400".
+      expect(screen.getByText("Bad request")).toBeInTheDocument();
     } finally {
       consoleErrorSpy.mockRestore();
     }

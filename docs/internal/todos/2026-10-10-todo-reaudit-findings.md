@@ -7,7 +7,7 @@ branch when picked up.
 
 ## Checklist
 
-- [ ] **N12** — four forms print the transport error, not the server's message:
+- [x] **N12** — four forms print the transport error, not the server's message:
       `LogForm.tsx:135`, `MetricForm.tsx:165`, `MetricSettingsForm.tsx:172`,
       `MetricCategoryForm.tsx:129`. Render what `handleApiError` returns, as the sign-in forms do,
       with a test per form that mocks a 409 carrying a message. Returns "Errors normalized before
@@ -38,3 +38,50 @@ branch when picked up.
 - Running the stack suites in CI (P1, "End-to-end coverage"): an owner decision first.
 - `CODE_OF_CONDUCT.md`, the subscription surface, field vitals, route-group error boundaries and
   the two quarantined files: carried from earlier runs, unchanged.
+
+## Status
+
+**N12: done 2026-10-10 on `fix/forms-show-server-error`.** Node 24.21.0, production build, local
+backend on `a6ab1dc`. The other items are open.
+
+The owner chose to fix every site of the defect, not only the four forms the audit named. Eight
+sites now render `handleApiError(error)`, the line the sign-in forms already used:
+
+| Site                             | Test that fails without the fix                                                                                                 |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| `LogForm.tsx`                    | `LogForm.int.test.tsx`, "shows the server's message when creating a log is refused"                                             |
+| `MetricForm.tsx`                 | `MetricForm.int.test.tsx`, "… when saving a metric is refused"                                                                  |
+| `MetricSettingsForm.tsx`         | `MetricSettingsForm.int.test.tsx`, "… when creating settings is refused"                                                        |
+| `MetricCategoryForm.tsx`         | `MetricCategoryForm.int.test.tsx`, "… when creating a category is refused"; and the unit test below                             |
+| `MetricsPageClient.tsx`          | `MetricsPageClient.int.test.tsx`, "… when deleting a metric is refused"                                                         |
+| `DashboardContent.tsx`           | `DashboardContent.int.test.tsx`, "shows error state when dashboard request fails", which now also asserts the server's sentence |
+| `MetricCategoriesPageClient.tsx` | none. Its only error is from the dummy-create action, which is off unless `NEXT_PUBLIC_ENABLE_DUMMY_ACTIONS` is set             |
+| `src/app/(app)/account/page.tsx` | none. `fetchUserProfile` returns `null` instead of throwing, so the line is not reached by a failed request                     |
+
+- Each of the six new assertions was run against the unfixed code first and failed there: four
+  form cases in one run, the page and dashboard cases in a second.
+- Two existing assertions changed with the behaviour. `LogForm.int.test.tsx` expected "request
+  failed with status code 500" and now expects the 5xx copy. `MetricCategoryForm.test.tsx` handed
+  the form a plain `new Error("Create category failed")` and expected that text; a plain error with
+  no response now reads as a connection problem, so the test builds the Axios 409 the API layer
+  really throws. The owner approved that change on 2026-10-10.
+- In a browser, through the proxy: two values logged in the same minute. The dialog read "A log
+  entry already exists for this timestamp for this metric". Before, it read "Request failed with
+  status code 409".
+- Reviewed by a `code-reviewer` subagent: nothing critical, nothing at warning level.
+
+What the user sees now: a 4xx shows the server's message; a 5xx shows "Something went wrong on our
+side. Please try again later."; no response shows "We couldn't reach the server. Check your
+connection and try again."
+
+Left as found:
+
+- [ ] Found: the two route-level boundaries, `metrics/[metricId]/error.tsx:24` and
+      `dashboard/error.tsx:23`, print `error.message`. They receive Next's error, not an API error
+      → out of scope.
+- [ ] Found: a failed profile load is swallowed into `data: null` by `fetchUserProfile`, by
+      design, so the account page cannot say why it failed → out of scope.
+- [ ] Found: nothing stops the next component from rendering `error.message`. A lint rule could →
+      out of scope; the rule is now written in `.claude/rules/data-access.md`.
+- [ ] Found: in a form with several mutations, an old create or update error still wins over a
+      newer delete error, as before this change → out of scope.

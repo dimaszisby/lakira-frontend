@@ -16,6 +16,7 @@ import {
   useUpdateMetric,
 } from "@/features/metrics/hooks";
 import { cn } from "@/lib/cn";
+import { handleApiError } from "@/services/api/handleApiError";
 import { Button } from "@/ui/Button";
 import { ErrorMessage } from "@/ui/ErrorMessage";
 import { FormField } from "@/ui/FormField";
@@ -162,7 +163,11 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
     reset();
   }, [onClose, reset]);
 
-  const errorMsg = createError?.message || updateError?.message || deleteError?.message || "";
+  const mutationError = createError ?? updateError ?? deleteError;
+  const errorMsg = useMemo(
+    () => (mutationError ? handleApiError(mutationError).join(", ") : ""),
+    [mutationError],
+  );
   const inputBg = "bg-surface2";
 
   return (
