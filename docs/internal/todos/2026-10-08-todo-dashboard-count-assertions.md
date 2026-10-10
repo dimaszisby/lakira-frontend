@@ -3,11 +3,11 @@
 **Context:** `cypress/e2e/stack/metric-to-dashboard.cy.ts` (#78) asserted no count on the dashboard
 card, because the backend took a card's figures from the first bucket of the range only. Backend
 #145 (`41dba33`, merged 2026-10-08) computes them over the whole series. With the counts, a browser
-test would show a logged value reaching the dashboard, through the back button too, which is what
-the dashboard invalidation from #76 is for and which only unit tests show.
+test shows a logged value reaching the dashboard, through the back button too.
 
-Only the first count could be added. The other two are blocked by a second backend defect, found
-here and described under "What blocks the other two counts".
+It took two rounds. #79 added the first count only, because a second backend defect kept the
+dashboard's old figures in the browser. Backend #147 (`d8f5351`, merged 2026-10-09) fixed that, and
+the other two counts followed on `chore/dashboard-counts-after-log`.
 
 ## Checklist
 
@@ -18,65 +18,43 @@ here and described under "What blocks the other two counts".
 - [x] Full stack suite on the rebuilt backend (recorded under Status)
 - [x] Notion: the new record raised; "Dashboard stats describe the first bucket only" completed
 - [x] Gates
-- [ ] The spec asserts `n: 1` after the first value, and `n: 2` through the back button -> blocked
-      by the backend; the two cases are kept below
-- [ ] The back-button case fails with the invalidation removed -> waits on the item above
+- [x] The spec asserts `n: 1` after the first value, and `n: 2` through the back button
+- [x] The back-button case run with the invalidation removed -> it still passes; see "What the
+      back-button case proves"
 
-## What blocks the other two counts
+## What blocked the other two counts, until backend #147
 
 Measured on 2026-10-08 17:04 UTC through the proxy, backend `dev` at `41dba33`, frontend `dev` at
 `862f83e`. On Notion as "FE and BE messages", Part 1, "Dashboard responses stay cached in the
 browser after a log changes".
 
-- `GET /analytics/dashboard` answers with
-  `Cache-Control: private, max-age=60, stale-while-revalidate=30` (backend `controller.ts:11-18`),
-  and the proxy passes it to the browser. For 60 seconds the browser answers the dashboard request
-  from its own cache and asks nobody.
-- Its `ETag` is `sync.etagSeed`, a hash of the request's parameters and of the metrics', settings'
-  and categories' `updated_at` (`deriveEtagSeed`). A log changes none of them. With one log the
-  ETag was `"5tt8xTwECDwEgmNvpnSFIoHWwHo"`; after a second log a plain GET returned `count: 2`
-  under the same ETag, and a GET with `If-None-Match` got 304.
-- Together: a browser that has seen the dashboard keeps showing those figures after a value is
-  logged, until a metric, its settings or a category is edited or the day rolls over. The
-  invalidation from #76 marks the query stale and refetches, and the refetch is answered by the
-  browser's cache.
-- The API's figures are right: a plain GET returned `count: 1` after one log and
+- `GET /analytics/dashboard` answered with
+  `Cache-Control: private, max-age=60, stale-while-revalidate=30`, and the proxy passes it to the
+  browser. For 60 seconds the browser answered the dashboard request from its own cache.
+- Its `ETag` was `sync.etagSeed`, a hash of the request's parameters and of the metrics', settings'
+  and categories' `updated_at`. A log changes none of them. With one log the ETag was
+  `"5tt8xTwECDwEgmNvpnSFIoHWwHo"`; after a second log a plain GET returned `count: 2` under the
+  same ETag, and a GET with `If-None-Match` got 304.
+- The API's figures were right: a plain GET returned `count: 1` after one log and
   `{average: 5150, min: 4200, max: 6100, count: 2}` after two.
 
-## The two cases to add when that record is completed
+Backend #147 hashes the response body for the ETag on both analytics routes and sends
+`Cache-Control: private, no-cache`.
 
-They ran, and failed on `n: 0`, as written here. The back-button navigation after the failing
-assertion has never run.
+## What the back-button case proves
 
-```ts
-it("logs a value, lists it and counts it on the dashboard", () => {
-  // ...the existing "logs a value and lists it" test, then:
-  // A fresh visit: the page's server prefetch supplies the data whatever the client holds.
-  cy.visitInTheme("/dashboard", THEME);
-  cardCount().should("contain.text", "n: 1");
-});
+It proves that a user who logs a value and goes back to the dashboard sees the new count. It does
+not prove that the dashboard invalidation from #76 does anything.
 
-it("counts a newly logged value when the dashboard is reached with the back button", () => {
-  // Going back restores the page the browser already had, and there only a query that was
-  // marked stale refetches. Until #76 nothing marked the dashboard stale.
-  cy.visitInTheme("/dashboard", THEME);
-  cardCount().should("contain.text", "n: 1");
+Measured on 2026-10-09: with `invalidateDashboardVisualizations` removed from
+`src/features/metric-logs/hooks/create.mutation.ts` and the app rebuilt, the case still passed, and
+the browser made no request to `/api/proxy/analytics/dashboard` after going back. The new figures
+came from the server. Closing the log dialog calls `router.refresh()`
+(`src/features/metric-logs/components/MetricLogFormDialog.tsx:19-21`), so going back renders the
+dashboard page on the server again, and its prefetch hydrates the query with newer data. The file
+was restored and compared with `git diff` before the gates ran.
 
-  cy.contains("nav a", "Metrics").click();
-  cy.location("pathname").should("eq", "/metrics");
-  cy.contains("button", METRIC_NAME).click();
-  cy.location("pathname").should("match", /^\/metrics\/[^/]+$/);
-  // log 6100 from the Logs tab, as the test above logs 4200
-
-  // Dashboard, metrics, the metric, its logs tab: three steps back.
-  cy.go(-3);
-  cy.location("pathname").should("eq", "/dashboard");
-  cardCount().should("contain.text", "n: 2");
-});
-```
-
-Then mutation-check the second: remove `invalidateDashboardVisualizations` from
-`src/features/metric-logs/hooks/create.mutation.ts`, rebuild, and watch it fail.
+The owner chose to keep the case, described as what it is.
 
 Why a count is expected at all for a value logged today, read from backend `dev` at `41dba33`:
 `last=7d` with a `1d` bucket ends at 00:00 UTC today (`anchorNow`, `schema.zod.ts:44`), so the
@@ -96,17 +74,29 @@ range of its latest logs. The spec's metric is always new, so it is always on th
       ends at `lastLogAt` exclusively, and the Jakarta request passes only because `lastLogAt` is
       shifted seven hours forward -> out of scope; added to the Notion record "Relative ranges
       exclude today; lifecycle timestamps are shifted".
-- [ ] Found: the same `max-age=60` is on `GET /analytics/metrics/:id`, whose ETag is a hash of the
-      body and so does change. A metric's own chart can be up to a minute behind a new log ->
-      out of scope; named in the Notion record's ask.
+- [x] Found: the same `max-age=60` was on `GET /analytics/metrics/:id` -> fixed by backend #147.
+- [ ] Found: the dashboard invalidation from #76 has no browser evidence. No path was found on
+      which it changes what the user sees; only its unit tests show it -> out of scope.
+- [ ] Found: a second value logged in the same minute is refused. The form rounds the time to the
+      minute (`toISOZ`, `src/utils/date-io.ts:73-79`) and the backend keeps one log per timestamp
+      per metric (`CreateMetricLog.ts`, 409). The dialog then shows "Request failed with status
+      code 409", not the backend's "A log entry already exists for this timestamp for this
+      metric" -> out of scope. The spec logs its second value at another minute.
+- [ ] Found: in the log form's time picker, choosing minute 0 changed nothing when the current
+      minute was 02; the field stayed at 9:02 PM. Seen once, in Cypress. Inference: the minute
+      list steps by five, so at minute 02 no option matches, the list shows its first option, 0,
+      and choosing it is not a change -> out of scope, not reproduced by hand.
 
 ## Status
 
-Partly done on `chore/dashboard-count-assertions`, 2026-10-08. Node 24.21.0, production build.
+Done on `chore/dashboard-counts-after-log`, 2026-10-09. Node 24.21.0, production build, local
+backend rebuilt on backend `dev` at `a7b1b0d`.
 
-- All three count cases against the backend image of 2026-09-29: 4 of 6 cases pass. `n: 0` passes;
-  `n: 1` and the back-button case read `n: 0`.
-- After the owner rebuilt the container on `41dba33`: the same two fail the same way. The 22 stack
-  cases that existed before #78 pass on the rebuilt backend, the first run against a current
-  backend since 2026-09-29.
-- The owner chose to raise it with the backend and ship what passes: the `n: 0` assertion.
+- 2026-10-08, all three count cases against the backend image of 2026-09-29: `n: 0` passed; `n: 1`
+  and the back-button case read `n: 0`. The same after the owner rebuilt the container on
+  `41dba33`. #79 shipped the `n: 0` assertion.
+- 2026-10-09, after backend #147: the spec's six cases pass, and the stack suite passes with 28
+  cases.
+- The first helper for reading the count never matched a card with values: it looked for a word
+  break before `n:`, and the card's text runs together as `max: 4200n: 1`. It now matches the
+  count's own element.
