@@ -14,6 +14,11 @@ import type { Instrumentation } from "next";
 /** Runs once per server process, before it handles a request. */
 export const register = async (): Promise<void> => {
   if (process.env.NEXT_RUNTIME === "nodejs") {
+    // First, and whether or not a DSN is set: Next prints request errors with
+    // `console.error` itself (ADR-0029).
+    const { scrubConsoleErrors } = await import("@/lib/monitoring/console-scrub");
+    scrubConsoleErrors();
+
     const { startMonitoring } = await import("@/lib/monitoring/server");
     await startMonitoring();
   }

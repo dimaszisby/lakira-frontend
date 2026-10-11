@@ -16,6 +16,12 @@ jest.mock("@sentry/node", () => ({
   dedupeIntegration: () => ({ name: "Dedupe" }),
 }));
 
+const scrubConsoleErrors = jest.fn();
+
+jest.mock("@/lib/monitoring/console-scrub", () => ({
+  scrubConsoleErrors: (): unknown => scrubConsoleErrors(),
+}));
+
 const FAKE_DSN = "https://public@sentry.invalid/1";
 
 const loadInstrumentation = async () => import("../instrumentation");
@@ -59,6 +65,23 @@ describe("instrumentation", () => {
       await register();
 
       expect(init).not.toHaveBeenCalled();
+    });
+
+    it("scrubs console.error in the Node runtime when no DSN is set", async () => {
+      const { register } = await loadInstrumentation();
+
+      await register();
+
+      expect(scrubConsoleErrors).toHaveBeenCalledTimes(1);
+    });
+
+    it("leaves console.error alone outside the Node runtime", async () => {
+      process.env.NEXT_RUNTIME = "edge";
+      const { register } = await loadInstrumentation();
+
+      await register();
+
+      expect(scrubConsoleErrors).not.toHaveBeenCalled();
     });
 
     it("initialises for errors only, with every data category off and the scrubber on", async () => {
