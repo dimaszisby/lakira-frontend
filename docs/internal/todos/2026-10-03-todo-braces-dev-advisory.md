@@ -37,3 +37,9 @@ Decided 2026-10-03: record it and leave the nightly red. No exception list, and 
       changes what the gate checks, so it needs a `decisions.md` entry in the kit
 
 ## Status
+
+Still open on 2026-10-11: no patched `braces` exists. After `chore/dev-advisories-n14` updated
+`handlebars`, this is the only advisory at or above the nightly gate's level; `npm audit` reports 0
+critical, 47 high (all from `braces`) and 7 moderate. The two moderate advisories that no update
+clears are in
+[`2026-10-11-todo-dev-advisories-without-patch.md`](2026-10-11-todo-dev-advisories-without-patch.md).
