@@ -55,6 +55,10 @@ Security-relevant items already known and tracked — please do not re-report th
   to the server's log stream at `warn`, which is not forwarded.
 - The Content Security Policy still allows inline styles (`style-src 'unsafe-inline'`). Script is
   allowed by per-request nonce only (ADR-0026).
+- Log lines are scrubbed by pattern, which is a net and not a guarantee. The logger's entries and
+  whatever the server prints with `console.error` are covered (ADR-0027, ADR-0029).
+  `console.warn`, `console.log` and a dependency that writes to the output streams directly are
+  not.
 - The three unauthenticated telemetry endpoints are bounded per server process, not per client:
   each has a byte cap and a per-minute budget, and one caller can spend the budget for that
   minute. A per-client limit waits on a client address the app can trust.

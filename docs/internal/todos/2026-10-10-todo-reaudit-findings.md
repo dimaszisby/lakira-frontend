@@ -12,7 +12,7 @@ branch when picked up.
       `MetricCategoryForm.tsx:129`. Render what `handleApiError` returns, as the sign-in forms do,
       with a test per form that mocks a 409 carrying a message. Returns "Errors normalized before
       display" to Pass
-- [ ] **N7, what is left** — Next prints a Server Component's error to stdout itself, unscrubbed,
+- [x] **N7, what is left** — Next prints a Server Component's error to stdout itself, unscrubbed,
       on the line before the application's scrubbed one. Find out whether Next lets that line be
       replaced or silenced; if not, say so in ADR-0027's consequences and in `SECURITY.md`
 - [ ] **N13** — `src/lib/__tests__/csp.test.ts:127-136` fails when `NEXT_PUBLIC_API_BASE_URL` is
@@ -103,3 +103,43 @@ packages was traced; one had a patch.
   advisories.
 - The nightly `dependency-audit` job stays red. All 47 high reports trace to `braces`, which has no
   patch, and the owner's decision of 2026-10-03 to leave it red stands.
+
+**N7, what is left: done 2026-10-11 on `fix/scrub-next-error-line`.** Node 24.21.0, production
+build, `SENTRY_DSN` empty.
+
+The answer to the todo's question: Next 16.3.8 has no setting for that line under `next start`. It
+prints the error with `console.error` after calling the application's `onRequestError`
+(`next/dist/server/next-server.js`, `instrumentationOnRequestError`), and skips it only when the
+server's `quiet` option is set, which exists only on a custom server. The owner chose to scrub
+`console.error` over documenting the gap or moving to a custom server.
+[ADR-0029](../../explanation/decisions/adr-0029-the-servers-console-error-output-is-scrubbed.md)
+records the decision and its limits.
+
+- `scrubConsoleErrors` (`src/lib/monitoring/console-scrub.ts`) wraps `console.error` in the server
+  process, in production, once. `register()` in `src/instrumentation.ts` calls it first.
+- The probe, a temporary page that threw the audit's message, deleted afterwards. Before the
+  change, Next's line on stderr carried the address, the `token=` value and the bearer value, as
+  in the audit. After it, the line read as below, and neither stream held any of the three values.
+  The application's `server.request_error` line was present and scrubbed in both runs.
+
+  ```
+  ⨯ Error: audit probe failed for [email] at /reset with Bearer [redacted]
+  ```
+
+- The line is on stderr. The audit called it stdout.
+- Eight unit cases for the wrapper and two for `register()`. Against a wrapper that did nothing,
+  three of the first five failed; the other two assert what a no-op also satisfies (the thrown
+  error is untouched; nothing is wrapped outside production).
+- Reviewed by a `code-reviewer` subagent: nothing critical. Its three warnings were acted on. The
+  wrapper now prints a placeholder when an argument throws while it is formatted, where it would
+  have thrown into the code that was logging. Three cases were added (a format string, a line past
+  the limit, a throwing argument). The cut-before-scrub limit on a long line is accepted and
+  stated in the ADR.
+
+Left as found:
+
+- [ ] Found: `console.warn`, `console.log` and a dependency that writes to the streams directly
+      are not scrubbed → out of scope; stated in ADR-0029 and `SECURITY.md`.
+- [ ] Found: nothing in CI shows whether a later Next still prints through `console.error`. The
+      check is the probe above, by hand → out of scope; a candidate for the next dated audit's
+      probe list.
