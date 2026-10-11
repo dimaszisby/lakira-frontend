@@ -48,6 +48,7 @@ export interface paths {
                 };
                 401: components["responses"]["UnauthorizedError"];
                 403: components["responses"]["ForbiddenError"];
+                429: components["responses"]["TooManyRequestsError"];
             };
         };
         put?: never;
@@ -103,6 +104,7 @@ export interface paths {
                 };
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -161,6 +163,7 @@ export interface paths {
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -261,6 +264,7 @@ export interface paths {
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 409: components["responses"]["ConflictError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -302,6 +306,7 @@ export interface paths {
                     };
                 };
                 400: components["responses"]["BadRequestError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -339,6 +344,7 @@ export interface paths {
                 };
                 401: components["responses"]["UnauthorizedError"];
                 409: components["responses"]["ConflictError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -368,6 +374,7 @@ export interface paths {
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 409: components["responses"]["ConflictError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -413,6 +420,7 @@ export interface paths {
                 };
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -617,6 +625,7 @@ export interface paths {
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 403: components["responses"]["ForbiddenError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -717,6 +726,7 @@ export interface paths {
                 };
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -765,6 +775,7 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 403: components["responses"]["ForbiddenError"];
                 404: components["responses"]["NotFoundError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -803,6 +814,7 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 403: components["responses"]["ForbiddenError"];
                 404: components["responses"]["NotFoundError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -853,6 +865,7 @@ export interface paths {
                 };
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -885,6 +898,7 @@ export interface paths {
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 409: components["responses"]["ConflictError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -978,6 +992,7 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
                 409: components["responses"]["ConflictError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1013,6 +1028,7 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
                 409: components["responses"]["ConflictError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1043,6 +1059,7 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
                 409: components["responses"]["ConflictError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1097,6 +1114,7 @@ export interface paths {
                 };
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1130,6 +1148,7 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
                 409: components["responses"]["ConflictError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1174,6 +1193,7 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
                 409: components["responses"]["ConflictError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1223,6 +1243,7 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
                 409: components["responses"]["ConflictError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1258,6 +1279,7 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
                 409: components["responses"]["ConflictError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1290,6 +1312,7 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
                 409: components["responses"]["ConflictError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1340,6 +1363,7 @@ export interface paths {
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 403: components["responses"]["ForbiddenError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1395,6 +1419,7 @@ export interface paths {
                 };
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1428,6 +1453,7 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
                 409: components["responses"]["ConflictError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1472,6 +1498,7 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
                 409: components["responses"]["ConflictError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1506,6 +1533,7 @@ export interface paths {
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1535,6 +1563,7 @@ export interface paths {
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1583,6 +1612,7 @@ export interface paths {
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1641,6 +1671,7 @@ export interface paths {
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1692,6 +1723,7 @@ export interface paths {
                 };
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1725,6 +1757,7 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
                 409: components["responses"]["ConflictError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1821,6 +1854,7 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
                 409: components["responses"]["ConflictError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1856,6 +1890,7 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
                 409: components["responses"]["ConflictError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1888,6 +1923,7 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
                 409: components["responses"]["ConflictError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1930,6 +1966,7 @@ export interface paths {
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -1971,6 +2008,7 @@ export interface paths {
                     };
                 };
                 401: components["responses"]["UnauthorizedError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -2023,6 +2061,7 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 403: components["responses"]["ForbiddenError"];
                 409: components["responses"]["ConflictError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -2065,6 +2104,7 @@ export interface paths {
                 };
                 401: components["responses"]["UnauthorizedError"];
                 403: components["responses"]["ForbiddenError"];
+                429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
         };
@@ -3081,7 +3121,7 @@ export interface components {
                 };
             };
         };
-        /** @description Rate limit exceeded */
+        /** @description Rate limit exceeded. Any operation can return this: an app-wide limit applies to every request, and some operations have a stricter limit of their own. */
         TooManyRequestsError: {
             headers: {
                 [name: string]: unknown;
