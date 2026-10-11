@@ -17,7 +17,7 @@ branch when picked up.
       replaced or silenced; if not, say so in ADR-0027's consequences and in `SECURITY.md`
 - [ ] **N13** — `src/lib/__tests__/csp.test.ts:127-136` fails when `NEXT_PUBLIC_API_BASE_URL` is
       exported in the shell. Make the test set or clear the variable itself
-- [ ] **N14** — the development-only audit reports six advisories; only `braces` has a todo.
+- [x] **N14** — the development-only audit reports six advisories; only `braces` has a todo.
       `handlebars` (critical, through `ts-jest`), `postcss-selector-parser` and `sprintf-js` need
       the same treatment: trace, update where a patch exists, record the rest
 - [ ] **N15** — a second value logged in the same minute is refused with a 409. Decide whether the
@@ -42,7 +42,7 @@ branch when picked up.
 ## Status
 
 **N12: done 2026-10-10 on `fix/forms-show-server-error`.** Node 24.21.0, production build, local
-backend on `a6ab1dc`. The other items are open.
+backend on `a6ab1dc`. N14 is done too; see the end of this section. The other items are open.
 
 The owner chose to fix every site of the defect, not only the four forms the audit named. Eight
 sites now render `handleApiError(error)`, the line the sign-in forms already used:
@@ -85,3 +85,21 @@ Left as found:
       out of scope; the rule is now written in `.claude/rules/data-access.md`.
 - [ ] Found: in a form with several mutations, an old create or update error still wins over a
       newer delete error, as before this change → out of scope.
+
+**N14: done 2026-10-11 on `chore/dev-advisories-n14`.** Node 24.21.0, npm 11.19.0. Each of the four
+packages was traced; one had a patch.
+
+| Package                   | Outcome                                                                                                                                                    |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `handlebars`              | Updated, 4.7.9 to 4.7.10, with `npm update handlebars`. One lockfile entry changed; `package.json` did not                                                 |
+| `postcss-selector-parser` | No update possible under `tailwindcss` 3. Recorded in [`2026-10-11-todo-dev-advisories-without-patch.md`](2026-10-11-todo-dev-advisories-without-patch.md) |
+| `sprintf-js`              | No patched version exists. Recorded in the same file                                                                                                       |
+| `braces`                  | No patched version exists. Already tracked in [`2026-10-03-todo-braces-dev-advisory.md`](2026-10-03-todo-braces-dev-advisory.md)                           |
+
+- `npm audit` before: 55 packages reported (1 critical, 47 high, 7 moderate). After: 54 (0
+  critical, 47 high, 7 moderate). `handlebars` was the one critical package and is gone from the
+  report; nothing new appeared.
+- `npm audit fix` was not used: it would have moved packages that have nothing to do with these
+  advisories.
+- The nightly `dependency-audit` job stays red. All 47 high reports trace to `braces`, which has no
+  patch, and the owner's decision of 2026-10-03 to leave it red stands.
