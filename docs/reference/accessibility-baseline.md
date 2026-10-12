@@ -43,10 +43,14 @@ Each “page” (route) must define clear landmarks:
 
 Guideline:
 
-- Every route rendered under `/app` should have **exactly one** `<main>` container.
+- Every route should have **exactly one** `<main>` container.
 
-<!-- SPECIAL NOTE: Once layout shell is finalized, document component path, e.g.:
-     - `src/app/(app)/layout.tsx` wraps pages with `<main>`. -->
+Where it comes from, so a page does not add a second one:
+
+- Signed-in pages (`src/app/(app)/`): `src/components/layout/Layout.tsx` renders `<main id="main">`,
+  and a "Skip to content" link ahead of the navigation that targets it.
+- Sign-in and token pages (`src/app/(auth)/`): `src/app/(auth)/layout.tsx`.
+- `src/app/page.tsx`, `src/app/not-found.tsx` and `src/app/global-error.tsx` render their own.
 
 ### 2.2 Headings
 
@@ -73,8 +77,9 @@ All interactive controls must have accessible names:
   - `aria-label`, or
   - visually hidden text (e.g., screen-reader-only class).
 
-<!-- SPECIAL NOTE: Document the actual SR-only utility class once defined,
-     e.g. `.sr-only` in `globals.css` or Tailwind’s `sr-only` class. -->
+The visually hidden class is Tailwind's `sr-only`. The token system defines no class of its own
+for this. `focus:not-sr-only` brings an element back when it takes focus, as the skip link in
+`src/components/layout/Layout.tsx` does.
 
 Examples:
 
@@ -97,7 +102,10 @@ Guideline:
 
 - Use consistent focus styles defined in design tokens (e.g., focus ring using semantic colors).
 
-<!-- SPECIAL NOTE: Link to focus style tokens once defined (e.g., `--focus-ring`, Tailwind classes). -->
+The tokens: `--focus-ring-width` and `--focus-ring-offset` in `src/styles/tokens/scales.css`, drawn
+in the colour `--ring` from `src/styles/tokens/semantic.css`, which is set per theme. Component
+recipes use them on `:focus-visible`; `src/styles/tokens/components/button.recipe.css` is the
+pattern to copy. See [`design-tokens.md`](design-tokens.md).
 
 ### 4.2 Dialogs / Modals / Drawers
 
@@ -131,7 +139,7 @@ If components behave like:
 Avoid reinventing these from scratch; prefer:
 
 - Simpler native controls when possible, or
-- Well-maintained accessible headless UI libraries (if adopted later).
+- Ariakit, the headless library this project uses (`.claude/rules/accessibility.md`).
 
 ---
 
@@ -192,7 +200,9 @@ existing ramps reaches AA. Measurements, rejected options and the reversal condi
 `jest-axe` does not catch it — colour contrast is not evaluated in jsdom — so a green integration
 suite is not evidence here.
 
-<!-- SPECIAL NOTE: Add explicit link/reference to `color-palette.md` and any contrast checks you perform (e.g., tooling or Figma plugins). -->
+The palette is in [`style/color-palette.md`](style/color-palette.md). Contrast is checked by axe in
+a real browser, in both themes, by the Cypress accessibility specs (section 11); the two exclusions
+are listed in `cypress/support/a11y.ts`.
 
 ### 6.2 Don’t Use Color Alone
 
@@ -229,7 +239,10 @@ Disabled state must use actual `disabled` attribute or `aria-disabled`, not just
   - conveyed via more than color alone (underline, icon, bold text),
   - and announced via attributes (`aria-current="page"` where logical).
 
-<!-- SPECIAL NOTE: Once navigation layout is finalized, add component path and any helper hooks for active state. -->
+The components, all in `src/components/layout/`: `Sidebar.tsx` renders
+`SideBarNavigationItems.tsx` for the desktop and the mobile drawer, each with its own `aria-label`,
+and `BottomNavigationBar.tsx` is the bar below the `lg` breakpoint. There is no helper hook: each
+compares the current pathname with the item's link and sets `aria-current="page"` on the match.
 
 ### 7.2 Tables & Data Grids
 
@@ -259,7 +272,10 @@ Implementation ideas:
 - Provide a list/table under the chart summarizing data points or aggregates.
 - Use `aria-label` or `aria-describedby` for the canvas/chart container.
 
-<!-- SPECIAL NOTE: After you finalize the Chart.js wrapper component, document its path and any built-in a11y helpers used. -->
+The wrapper is `src/features/data-visualizations/components/MetricChart.tsx`. It gives the chart
+`role="img"` and an `aria-label`, and shows "No data" with `role="status"` when the series is
+empty. It renders no text summary of the values itself, so a page that shows a chart has to
+provide one.
 
 ### 7.4 Toasts & Notifications
 
@@ -299,7 +315,9 @@ Guidelines:
 - All text must remain readable and functional with up to **200% zoom** without horizontal scrolling on typical phone widths (where possible).
 - Components should wrap or stack appropriately at defined breakpoints.
 
-<!-- SPECIAL NOTE: Reference actual responsive breakpoints used in Tailwind once finalized. -->
+The breakpoints are Tailwind's defaults; `tailwind.config.mjs` sets no `screens`. In use: `sm`
+(640px), `md` (768px), `lg` (1024px) and `xl` (1280px). `lg` is where the sidebar replaces the
+bottom navigation bar.
 
 ---
 
@@ -331,7 +349,7 @@ Accessibility is enforced through:
    - Integration a11y checks via `jest-axe` on key components/pages.
    - E2E a11y checks via `cypress-axe` on full pages, in both themes. CI checks the eight public
      pages (home, login, register, forgot password, reset password, verify email, accept invite,
-     not found). The five signed-in pages (dashboard, metrics, metric categories, organization,
+     not found) in a step of its own, `npm run test:e2e:a11y`. The five signed-in pages (dashboard, metrics, metric categories, organization,
      account) are checked by `npm run test:e2e:stack`, which needs the backend and runs locally
      only. See `.claude/rules/testing.md` § E2E.
 

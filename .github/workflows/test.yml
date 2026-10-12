@@ -178,7 +178,13 @@ jobs:
           exit 1
 
       - name: Run E2E tests
-        run: npm run test:e2e
+        run: npm run test:e2e:public
+
+      # Its own step so that an accessibility failure is named as one in the
+      # run. The signed-in pages are not checked here: that needs the backend
+      # (kit cypress-a11y-e2e, D-01).
+      - name: Run accessibility checks on the public pages (axe, WCAG 2.1 A and AA)
+        run: npm run test:e2e:a11y
 
       # Cypress strips Content-Security-Policy headers in the run above, so it
       # would pass with a policy that blocked the whole app. This run keeps

@@ -78,7 +78,7 @@ Cypress, in four folders. The first pair differ in what they may touch (kit `cyp
 
 | Folder | Needs | Runs with | In CI |
 |---|---|---|---|
-| `cypress/e2e/public/` | the app only | `npm run test:e2e` | yes, the `e2e` job |
+| `cypress/e2e/public/` | the app only | `npm run test:e2e` | yes, the `e2e` job, as two steps |
 | `cypress/e2e/stack/` | the app, the backend and Mailpit | `npm run test:e2e:stack` | **no** |
 | `cypress/e2e/csp/` | the app only | `npm run test:e2e:csp` | yes, the `e2e` job |
 | `cypress/e2e/csp-stack/` | the app, the backend and Mailpit | `npm run test:e2e:csp:stack` | **no** |
@@ -86,6 +86,11 @@ Cypress, in four folders. The first pair differ in what they may touch (kit `cyp
 **The folder is the contract.** A spec in `public/` must not call the backend, because CI runs none.
 Anything that signs in, or reads an emailed token, goes in `stack/`. How to run it:
 `docs/how-to/testing/run-stack-e2e.md`.
+
+**The filename decides the CI step.** `npm run test:e2e` is two scripts run in turn, and CI runs
+each as its own step: `test:e2e:a11y` takes every `*.a11y.cy.ts` in `public/`, so an accessibility
+failure is named as one in the run, and `test:e2e:public` takes the rest. Name an axe spec
+`<name>.a11y.cy.ts` and it lands in the right step with no list to edit.
 
 - **Accessibility:** `cy.visitInTheme(path, theme)` then `cy.checkPageA11y(label)`, from
   `cypress/support/a11y.ts`. It runs axe's WCAG 2.0/2.1 A and AA rules in a real browser, contrast

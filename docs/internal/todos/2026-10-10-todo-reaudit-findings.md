@@ -26,7 +26,7 @@ branch when picked up.
 - [x] **N16** — three statements that no longer hold: `.claude/rules/testing.md:22` ("Cypress 14"),
       `.claude/rules/accessibility.md:82` ("all 19 integration suites"),
       `docs/reference/accessibility-baseline.md:332` (which pages the end-to-end checks cover)
-- [ ] **Accessibility, two items at Partial** — name the accessibility check as its own step in
+- [x] **Accessibility, two items at Partial** — name the accessibility check as its own step in
       `.github/workflows/test.yml`, and resolve or remove the seven "SPECIAL NOTE" placeholders in
       `docs/reference/accessibility-baseline.md`. The signed-in pages stay outside CI until the
       stack suites run there, which is an owner decision (audit section 9)
@@ -42,8 +42,8 @@ branch when picked up.
 ## Status
 
 **N12: done 2026-10-10 on `fix/forms-show-server-error`.** Node 24.21.0, production build, local
-backend on `a6ab1dc`. N14, N7, N13 and N16 are done too; see the later entries in this section. N15 and the two
-accessibility items are open.
+backend on `a6ab1dc`. N14, N7, N13, N16 and the two accessibility items are done too; see the later
+entries in this section. N15 is open.
 
 The owner chose to fix every site of the defect, not only the four forms the audit named. Eight
 sites now render `handleApiError(error)`, the line the sign-in forms already used:
@@ -175,3 +175,35 @@ the repository before it was rewritten.
 - Left as written: `adr-0017` and `adr-0018` each say "19" suites. Both are dated statements in
   immutable records, true when written.
 - No other live copy of either statement exists outside `docs/internal/` and those two records.
+
+**Accessibility, two items: done 2026-10-12 on `chore/a11y-named-ci-step`.** Node 24.21.0,
+production build.
+
+The named step. The owner chose to split the run, over running the check twice or renaming the
+shared step.
+
+| Script            | Runs                                                 | Result, this branch |
+| ----------------- | ---------------------------------------------------- | ------------------- |
+| `test:e2e:public` | `cypress/e2e/public/` without `*.a11y.cy.ts`         | 2 specs, 2 tests    |
+| `test:e2e:a11y`   | `cypress/e2e/public/**/*.a11y.cy.ts`                 | 1 spec, 16 tests    |
+| `test:e2e`        | the two above, in turn; what it ran before the split | 3 specs, 18 tests   |
+
+- CI's `e2e` job runs the first two as separate steps. The new one is named "Run accessibility
+  checks on the public pages (axe, WCAG 2.1 A and AA)".
+- The split is by filename: `excludeSpecPattern` keeps `*.a11y.cy.ts` out of `test:e2e:public`, so
+  a new public spec lands in the right step with no list to edit.
+- No ADR: no interface, dependency or security boundary changed.
+- The signed-in pages are still checked only by `npm run test:e2e:stack`, outside CI. A later audit
+  may keep this item at Partial for that reason.
+
+The baseline. All seven "SPECIAL NOTE" placeholders in `docs/reference/accessibility-baseline.md`
+are replaced by the fact each asked for, checked against the code: where `<main>` comes from, the
+`sr-only` class, the focus tokens, the palette and how contrast is checked, the navigation
+components, the chart wrapper, and the breakpoints. Two stale phrases in the same sections were
+corrected: "`/app`" for the routes, and a headless library "if adopted later" (Ariakit is in use).
+
+Left as found:
+
+- [ ] Found: the baseline says a chart must have a text summary of its values. `MetricChart.tsx`
+      gives the chart a role and a label and renders no summary. Whether each page that shows a
+      chart provides one was not checked → out of scope; a candidate for the next audit.

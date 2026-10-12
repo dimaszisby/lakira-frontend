@@ -7,7 +7,9 @@ Two Jest configs and a Cypress suite. **The filename decides which one a test be
 ```bash
 npm run test:unit          # *.test.ts(x), *.spec.ts(x) — excludes *.int.test.*
 npm run test:integration   # *.int.test.ts(x) only
-npm run test:e2e           # Cypress, headless Electron, public pages (what CI runs)
+npm run test:e2e           # Cypress, headless Electron, public pages: the two scripts below, in turn
+npm run test:e2e:public    # the public specs without the accessibility one (a step in CI)
+npm run test:e2e:a11y      # axe on every public page, both themes (its own step in CI)
 npm run test:e2e:stack     # Cypress against the local backend and Mailpit; see run-stack-e2e.md
 npm run test:e2e:csp       # the public pages again, with the Content Security Policy enforced
 npm run test:e2e:csp:stack # the signed-in pages with it enforced; needs the local stack
