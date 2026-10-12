@@ -4,8 +4,9 @@
  * `createNonce` uses the Web Crypto global, which the proxy has and jsdom does not.
  */
 
-import nextConfig from "../../../next.config";
-import { buildContentSecurityPolicy, createNonce, NONCE_HEADER } from "../csp";
+import type { NextConfig } from "next";
+
+import { buildContentSecurityPolicy, createNonce, NONCE_HEADER, originOf } from "../csp";
 
 const directive = (policy: string, name: string): string[] => {
   const found = policy
@@ -97,12 +98,34 @@ describe("the static policy in next.config.ts", () => {
   // they get a policy from next.config.ts, which cannot import the builder: it
   // runs before the app's module graph exists. The two are written out twice,
   // and this is what notices when only one of them is edited.
+  //
+  // next.config.ts reads NEXT_PUBLIC_API_BASE_URL once, when it is imported, so
+  // each case loads it under an environment the case chose. Imported at the top
+  // of the file it would carry whatever the shell had exported (audit N13).
   type HeaderRule = { source: string; headers: { key: string; value: string }[] };
 
-  const rules = async (): Promise<HeaderRule[]> => (await nextConfig.headers?.()) ?? [];
+  const ORIGINAL_ENV = process.env;
+  const API_BASE_URL = "https://api.example.test/api/v1";
 
-  const staticPolicies = async () =>
-    (await rules())
+  const loadConfig = (apiBaseUrl: string | undefined): NextConfig => {
+    process.env = { ...ORIGINAL_ENV, NEXT_PUBLIC_API_BASE_URL: apiBaseUrl } as NodeJS.ProcessEnv;
+    if (apiBaseUrl === undefined) delete process.env.NEXT_PUBLIC_API_BASE_URL;
+    let config!: NextConfig;
+    jest.isolateModules(() => {
+      config = (require("../../../next.config") as { default: NextConfig }).default;
+    });
+    return config;
+  };
+
+  afterEach(() => {
+    process.env = ORIGINAL_ENV;
+  });
+
+  const rules = async (apiBaseUrl: string | undefined): Promise<HeaderRule[]> =>
+    (await loadConfig(apiBaseUrl).headers?.()) ?? [];
+
+  const staticPolicies = async (apiBaseUrl?: string) =>
+    (await rules(apiBaseUrl))
       .map((rule) => ({
         source: rule.source,
         policy: rule.headers.find((header) => header.key === "Content-Security-Policy")?.value,
@@ -129,6 +152,22 @@ describe("the static policy in next.config.ts", () => {
     for (const { policy } of await staticPolicies()) {
       const fixed = split(policy);
       expect(Object.keys(fixed).sort()).toEqual(Object.keys(page).sort());
+      for (const name of Object.keys(page).filter((key) => key !== SCRIPT_SRC)) {
+        expect(fixed[name]).toBe(page[name]);
+      }
+    }
+  });
+
+  it("matches the page policy when an API origin is configured", async () => {
+    const page = split(
+      buildContentSecurityPolicy({ nonce: NONCE, isDev: false, apiOrigin: originOf(API_BASE_URL) }),
+    );
+    const policies = await staticPolicies(API_BASE_URL);
+
+    expect(policies).toHaveLength(2);
+    for (const { policy } of policies) {
+      const fixed = split(policy);
+      expect(fixed["connect-src"]).toBe("'self' https://api.example.test");
       for (const name of Object.keys(page).filter((key) => key !== SCRIPT_SRC)) {
         expect(fixed[name]).toBe(page[name]);
       }

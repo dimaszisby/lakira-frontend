@@ -15,7 +15,7 @@ branch when picked up.
 - [x] **N7, what is left** — Next prints a Server Component's error to stdout itself, unscrubbed,
       on the line before the application's scrubbed one. Find out whether Next lets that line be
       replaced or silenced; if not, say so in ADR-0027's consequences and in `SECURITY.md`
-- [ ] **N13** — `src/lib/__tests__/csp.test.ts:127-136` fails when `NEXT_PUBLIC_API_BASE_URL` is
+- [x] **N13** — `src/lib/__tests__/csp.test.ts:127-136` fails when `NEXT_PUBLIC_API_BASE_URL` is
       exported in the shell. Make the test set or clear the variable itself
 - [x] **N14** — the development-only audit reports six advisories; only `braces` has a todo.
       `handlebars` (critical, through `ts-jest`), `postcss-selector-parser` and `sprintf-js` need
@@ -42,7 +42,8 @@ branch when picked up.
 ## Status
 
 **N12: done 2026-10-10 on `fix/forms-show-server-error`.** Node 24.21.0, production build, local
-backend on `a6ab1dc`. N14 is done too; see the end of this section. The other items are open.
+backend on `a6ab1dc`. N14, N7 and N13 are done too; see the later entries in this section. N15, N16 and the two
+accessibility items are open.
 
 The owner chose to fix every site of the defect, not only the four forms the audit named. Eight
 sites now render `handleApiError(error)`, the line the sign-in forms already used:
@@ -143,3 +144,19 @@ Left as found:
 - [ ] Found: nothing in CI shows whether a later Next still prints through `console.error`. The
       check is the probe above, by hand → out of scope; a candidate for the next dated audit's
       probe list.
+
+**N13: done 2026-10-11 on `fix/csp-test-own-env`.** Node 24.21.0. One file changed,
+`src/lib/__tests__/csp.test.ts`; no source file did.
+
+- Reproduced first on `dev` at `98a7316`. With `NEXT_PUBLIC_API_BASE_URL` exported, "matches the
+  page policy in every directive except script-src" failed: expected `'self'`, received
+  `'self' http://localhost:8001`. Without it, all 12 cases passed.
+- The cause: the test imported `next.config.ts` at the top of the file, and that file reads the
+  variable once, on import. The test now loads it under `jest.isolateModules` with the variable
+  set or cleared by the case, the pattern `src/lib/__tests__/env.test.ts` uses, and restores the
+  environment afterwards.
+- One case is new: with an API origin configured, the static policy matches the page policy in
+  every directive except `script-src`, and `connect-src` carries the origin. Nothing tested that
+  shape before. It was run once against a page policy built with no origin and failed on
+  `connect-src`, so it can fail.
+- The unit gate passes both ways now: 954 tests with the variable unset, 954 with it exported.
