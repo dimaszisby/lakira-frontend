@@ -23,7 +23,7 @@ branch when picked up.
 - [ ] **N15** — a second value logged in the same minute is refused with a 409. Decide whether the
       form should stop rounding to the minute or the backend should allow it; if the backend, raise
       it on the shared Notion page
-- [ ] **N16** — three statements that no longer hold: `.claude/rules/testing.md:22` ("Cypress 14"),
+- [x] **N16** — three statements that no longer hold: `.claude/rules/testing.md:22` ("Cypress 14"),
       `.claude/rules/accessibility.md:82` ("all 19 integration suites"),
       `docs/reference/accessibility-baseline.md:332` (which pages the end-to-end checks cover)
 - [ ] **Accessibility, two items at Partial** — name the accessibility check as its own step in
@@ -42,7 +42,7 @@ branch when picked up.
 ## Status
 
 **N12: done 2026-10-10 on `fix/forms-show-server-error`.** Node 24.21.0, production build, local
-backend on `a6ab1dc`. N14, N7 and N13 are done too; see the later entries in this section. N15, N16 and the two
+backend on `a6ab1dc`. N14, N7, N13 and N16 are done too; see the later entries in this section. N15 and the two
 accessibility items are open.
 
 The owner chose to fix every site of the defect, not only the four forms the audit named. Eight
@@ -160,3 +160,18 @@ Left as found:
   shape before. It was run once against a page policy built with no origin and failed on
   `connect-src`, so it can fail.
 - The unit gate passes both ways now: 954 tests with the variable unset, 954 with it exported.
+
+**N16: done 2026-10-12 on `docs/reaudit-n16-stale-statements`.** Each statement was checked against
+the repository before it was rewritten.
+
+| File                                       | Said                                                  | Now says                                                                           |
+| ------------------------------------------ | ----------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `.claude/rules/testing.md`                 | "Cypress 14"                                          | "Cypress 15". `package.json` has `^15.21.0`                                        |
+| `.claude/rules/accessibility.md`           | "all 19 integration suites"                           | "every integration suite". There are 22 and all 22 carry `toHaveNoViolations`      |
+| `docs/reference/accessibility-baseline.md` | E2E checks on "login, dashboard, metrics, main forms" | The eight public pages in CI; the five signed-in pages by the stack suite, locally |
+
+- The count was dropped, not raised to 22: a written-out count is right once and wrong after the
+  next suite is added.
+- Left as written: `adr-0017` and `adr-0018` each say "19" suites. Both are dated statements in
+  immutable records, true when written.
+- No other live copy of either statement exists outside `docs/internal/` and those two records.

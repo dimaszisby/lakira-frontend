@@ -79,7 +79,7 @@ Know these so you do not mistake a passing lint run for a passing a11y check:
   and Safari + VoiceOver then drop list semantics — item count and boundaries stop being announced.
   The three mobile lists restate the role for that reason. **Do not remove those roles**, and do not
   re-enable the rule without a plan for them.
-- **`npm run check-accessibility` was removed on 2026-08-27.** It ran `npm install axe-core && echo` and asserted nothing. It was not replaced: all 19 integration suites already carry `toHaveNoViolations`, so a dedicated script would be an exact alias for `npm run test:integration`, which gates CI. Run that.
+- **`npm run check-accessibility` was removed on 2026-08-27.** It ran `npm install axe-core && echo` and asserted nothing. It was not replaced: every integration suite already carries `toHaveNoViolations`, so a dedicated script would be an exact alias for `npm run test:integration`, which gates CI. Run that.
 - **Real-browser checks exist since 2026-09-29**, contrast included: `cypress-axe` over every
   public page in both themes, in CI, and over the signed-in pages with `npm run test:e2e:stack`,
   locally only. See `.claude/rules/testing.md` § E2E. Two exclusions from `color-contrast`, both in

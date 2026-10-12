@@ -19,7 +19,7 @@ paths:
 
 Full strategy: [`docs/explanation/testing-strategy.md`](../../docs/explanation/testing-strategy.md).
 
-Stack: **Jest 29** (two configs) + React Testing Library + MSW 2 + `jest-axe` + Cypress 14. There is no Vitest and no Playwright — do not introduce either without a decision doc.
+Stack: **Jest 29** (two configs) + React Testing Library + MSW 2 + `jest-axe` + Cypress 15. There is no Vitest and no Playwright — do not introduce either without a decision doc.
 
 ## The filename decides the suite
 
