@@ -80,6 +80,27 @@ export function toISOZ(v?: string | Date | null): ISODateTimeString | undefined 
 
 /**
  * @category IO: API Serializers
+ * Serializes a value to **UTC** ISO-8601 ending with `Z`, keeping its seconds and milliseconds.
+ *
+ * - Uses `parseDate` rules, then converts to UTC. Nothing is rounded.
+ * - Returns `undefined` when invalid, as `toISOZ` does.
+ *
+ * Use when the instant itself is the data, as with the time a value was logged: the backend keeps
+ * one log per exact timestamp, so a time rounded to the minute makes a second value in that minute
+ * a duplicate. `toISOZ` is for values typed to the minute, such as a start or a deadline.
+ *
+ * @example
+ * toISOZExact(new Date("2025-11-04T02:30:45.678Z")); // -> "2025-11-04T02:30:45.678Z"
+ * toISOZExact("bad");                                // -> undefined
+ */
+export function toISOZExact(v?: string | Date | null): ISODateTimeString | undefined {
+  const d = parseDate(v ?? null);
+  if (!d) return undefined;
+  return d.toISOString() as ISODateTimeString;
+}
+
+/**
+ * @category IO: API Serializers
  * Serializes a value to a local **date-only** ISO string `YYYY-MM-DD`.
  *
  * - Uses `parseDate` rules.

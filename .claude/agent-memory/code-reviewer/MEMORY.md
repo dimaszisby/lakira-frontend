@@ -6,3 +6,4 @@
 - [CSP script nonce review](project_csp-script-nonce_review.md) — request changes; probe matcher look-alike prefixes for fail-open header loss
 - [Telemetry log hardening review](project_telemetry-log-hardening_review.md) — approve w/ warnings; per-string work in shared logger needs all call sites checked, measure regexes
 - [Reaudit P2 sweep review](project_reaudit-p2-sweep_review.md) — request changes; derive invalidator callers from payload fields, verify 'rules now say' claims
+- [Log keeps exact time review](project_log-keeps-exact-time_review.md) — approve w/ notes; trace every producer of a serialized value, test names must match assertions

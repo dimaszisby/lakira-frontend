@@ -20,7 +20,7 @@ branch when picked up.
 - [x] **N14** — the development-only audit reports six advisories; only `braces` has a todo.
       `handlebars` (critical, through `ts-jest`), `postcss-selector-parser` and `sprintf-js` need
       the same treatment: trace, update where a patch exists, record the rest
-- [ ] **N15** — a second value logged in the same minute is refused with a 409. Decide whether the
+- [x] **N15** — a second value logged in the same minute is refused with a 409. Decide whether the
       form should stop rounding to the minute or the backend should allow it; if the backend, raise
       it on the shared Notion page
 - [x] **N16** — three statements that no longer hold: `.claude/rules/testing.md:22` ("Cypress 14"),
@@ -42,8 +42,8 @@ branch when picked up.
 ## Status
 
 **N12: done 2026-10-10 on `fix/forms-show-server-error`.** Node 24.21.0, production build, local
-backend on `a6ab1dc`. N14, N7, N13, N16 and the two accessibility items are done too; see the later
-entries in this section. N15 is open.
+backend on `a6ab1dc`. N14, N7, N13, N16, the two accessibility items and N15 are done too; see the
+later entries in this section. Nothing in the checklist is open.
 
 The owner chose to fix every site of the defect, not only the four forms the audit named. Eight
 sites now render `handleApiError(error)`, the line the sign-in forms already used:
@@ -207,3 +207,38 @@ Left as found:
 - [ ] Found: the baseline says a chart must have a text summary of its values. `MetricChart.tsx`
       gives the chart a role and a label and renders no summary. Whether each page that shows a
       chart provides one was not checked → out of scope; a candidate for the next audit.
+
+**N15: done 2026-10-13 on `fix/log-keeps-exact-time`.** Node 24.21.0, production build, local
+backend and Mailpit.
+
+The owner chose the form over the backend. The backend refuses a log only at the exact timestamp of
+another log for the same metric (`CreateMetricLog.ts`, `existsAtTimestamp`, backend `origin/dev`),
+which stops a form submitted twice from saving two entries. The form made that "one per minute" by
+rounding the time before sending it. The backend's rule stays.
+
+- `toISOZExact` (`src/utils/date-io.ts`) serializes without rounding. `LogForm.tsx` uses it for
+  both requests. `toISOZ` is unchanged: the metric settings use it for start and deadline dates.
+
+| Case                             | Before                                              | After                                   |
+| -------------------------------- | --------------------------------------------------- | --------------------------------------- |
+| Add, time left as it is          | rounded to the minute; a second log there got a 409 | sent to the millisecond; both are saved |
+| Edit, time left as it is         | the log's time rounded to the minute on every save  | the log's time is unchanged             |
+| Add or edit, time picked by hand | seconds are zero                                    | the same: the picker only has minutes   |
+
+- Two integration cases, both failing against the unfixed form: one freezes the clock and expects
+  that instant in the request (received `…:00.000Z`), one edits only the value of a log stored at
+  `08:00:37.250Z` and expects that time back (received `08:00:00.000Z`).
+- In a browser: `metric-to-dashboard.cy.ts` no longer moves its second log to another minute.
+  Against a build of the unfixed code the dialog stayed open and the case failed; against the fix
+  the stack suite passes, 28 of 28. The two logs are seconds apart, so they usually share a minute;
+  the integration cases are what pin the behaviour.
+- Reviewed by a `code-reviewer` subagent: nothing critical, nothing at warning level. One note was
+  acted on: the first integration case claimed millisecond precision and only compared against the
+  clock, so it now freezes the clock and expects the exact instant.
+
+Left as found:
+
+- [ ] Found: two entries picked by hand for the same minute are still refused, with the server's
+      sentence in the dialog. Allowing them is a backend decision -> out of scope.
+- [ ] Found: an edit that changes the time through the picker sets that log's seconds to zero ->
+      out of scope; the picker has no seconds.

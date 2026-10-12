@@ -88,11 +88,12 @@ The audit lists every item's grade and how it was graded.
 | **N12** | P2       | **Fixed, pending a dated run.** Four forms printed the transport error, not the server's message.                                                                                       |
 | **N13** | P2       | **Fixed, pending a dated run.** The CSP unit test sets `NEXT_PUBLIC_API_BASE_URL` itself, so the unit gate no longer depends on the shell.                                              |
 | **N14** | P2       | **Reduced, pending a dated run.** `handlebars` updated, so no critical advisory is left. `braces`, `postcss-selector-parser` and `sprintf-js` have no patch and are tracked.            |
+| **N15** | P2       | **Fixed, pending a dated run.** The log form sends the exact time, so a second value in the same minute is saved.                                                                       |
 | **N16** | P2       | **Fixed, pending a dated run.** Three stale statements in the rules and the accessibility baseline corrected.                                                                           |
 |         | P2       | **Improved, pending a dated run.** The accessibility check is its own step in CI, and the WCAG baseline has no placeholder left. The signed-in pages are still checked outside CI only. |
 | **N7**  | P2       | **Fixed, pending a dated run.** The application's log lines are scrubbed (ADR-0027), and so is the error line Next prints itself (ADR-0029).                                            |
 | **C6**  | P2       | Two files still quarantined from the layer rule.                                                                                                                                        |
-|         | P2       | Five more, listed in the audit: N15, no `CODE_OF_CONDUCT.md`, no plan surface, field vitals not aggregated, and route groups without error boundaries.                                  |
+|         | P2       | Four more, listed in the audit: no `CODE_OF_CONDUCT.md`, no plan surface, field vitals not aggregated, and route groups without error boundaries.                                       |
 
 Closed since 2026-10-04, each re-tested in this run: **N1** (proxy path escape), **N2** (fork fails
 `format`), **N3** (token in browser JavaScript), **N4** (inline script in the CSP), **N5**, **N6**,
