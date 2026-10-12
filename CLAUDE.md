@@ -73,6 +73,7 @@ Worth knowing about:
 - [`docs/explanation/testing-strategy.md`](docs/explanation/testing-strategy.md) — the full pyramid.
 - [`docs/reference/components/README.md`](docs/reference/components/README.md) — UI standards, read in the order that README gives.
 - [`docs/internal/todos/`](docs/internal/todos/) — active backlogs.
+- [`docs/internal/initiatives/frontend-debt-register/register.md`](docs/internal/initiatives/frontend-debt-register/register.md) — every open item, ranked. **"What's next" is answered from here** (`.claude/rules/workflow.md` § What's next).
 - [`docs/explanation/decisions/`](docs/explanation/decisions/) — the ADR registry, one decision per file. Check **Status** before trusting one.
 - [`docs/reference/commands.md`](docs/reference/commands.md) — canonical npm scripts. Do not keep a second copy elsewhere.
 

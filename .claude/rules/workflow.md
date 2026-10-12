@@ -156,6 +156,35 @@ Work that sizes to the ephemeral row gets one `docs/internal/todos/YYYY-MM-DD-to
 
 Todo files are tracked in git but user-controlled — deletable without a follow-up PR. If one grows into a real initiative, promote it to a kit under the relevant domain folder (see `.claude/rules/documentation.md`).
 
+## What's next
+
+When the user asks what to do next, with or without a merge to close out, **answer from the debt
+register**: `docs/internal/initiatives/frontend-debt-register/register.md`. It lists every open
+item from the todo folder, the dated audit and the Notion page shared with lakira-backend, ranked
+by a rule fixed in that kit's D-01. Do not rank from memory of the conversation. The backend keeps
+the same register (lakira-backend #159); a row that exists on both sides names the other's id.
+
+- **Recommend the first row whose state is `ready`**, and cite it by id (`F-08`). Read its
+  analysis file if it has one before proposing a kit size.
+- **Report any row above it that is waiting on someone** as a gap, with who it waits on. A blocked
+  row is not skipped silently; the owner's open questions are the `O-NN` rows.
+- **Check the row is still open** before recommending it: a merged PR or a commit that references
+  it means the register is stale, and fixing the row comes first.
+- **If `FINAL-AUDIT-SUMMARY.md` or `SAAS-BASE-CHECKLIST.md` orders things differently, say so**
+  and name both. They record what a dated run asked for; the register is where that is ranked
+  against everything else.
+- **A new todo, audit finding or Notion record gets a register row in the same PR that files it**,
+  placed by D-01. A todo with no row is invisible to this rule. That includes a "Found, out of
+  scope" line left in a todo's Status section.
+- **A fix PR moves its row to the register's Closed section** with the PR number, in the same PR.
+  A row a dated audit must confirm says so until the run does.
+- **Re-rank only by the rule.** If the rule gives the wrong answer, change D-01 with a new
+  decision entry, not the order of one row.
+
+Nothing checks the register against the todo folder mechanically (row F-43). Until something
+does, a "what's next" answer starts by listing `docs/internal/todos/` files newer than the
+register's "As of" date and adding any that are missing.
+
 ## Core principles
 
 - **Simplicity first.** The smallest change that fully solves the problem.

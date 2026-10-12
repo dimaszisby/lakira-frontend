@@ -1,0 +1,153 @@
+# Frontend debt register
+
+**As of:** 2026-10-13, frontend `dev` at `f67716e`. Ranked by [D-01](decisions.md).
+
+**"What's next" is the first row below whose state is `ready`.** A row above it that is waiting on
+someone is reported with it, as a gap. How rows are added and closed:
+`.claude/rules/workflow.md` § What's next.
+
+Columns. **Sev** is what the source recorded; `—` means ungraded, and a todo's own "low" is shown
+as written. **Owed to** is who is waiting: `verdict` (the audit's FORK-READY verdict), `BE`
+(lakira-backend), `fork` (someone forking the template), `us`. **State** is `ready`, `owner`
+(waiting on the owner's decision, with its `O-NN` question), `BE` (waiting on the backend),
+`upstream` (waiting on a package's maintainers) or `unexplained`.
+
+Sources are abbreviated: `A10 § 6` is `docs/internal/audits/saas-readiness/audit-2026-10-10.md`
+§ 6; `FINAL` is `FINAL-AUDIT-SUMMARY.md` in the same folder; `N1` and `N2` are Part 1 and Part 2 of
+the Notion page "FE and BE messages"; `B-NN` is a row of the backend's register (lakira-backend
+`docs/internal/initiatives/backend-debt-register/register.md`); a bare filename is under
+`docs/internal/todos/`. [`SAAS-BASE-CHECKLIST.md`](../../../../SAAS-BASE-CHECKLIST.md) summarises
+the same audit and is not a separate source.
+
+## Tier 1 — keeps the audit verdict open
+
+| ID   | Item                                               | Sev | Owed to | State        | Size                 | Source                                                                            | Analysis                                        |
+| ---- | -------------------------------------------------- | --- | ------- | ------------ | -------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------- |
+| F-01 | No deploy job and no deployment configuration (C4) | P1  | verdict | owner (O-01) | ≤1d after the choice | A10 § 3.1 category 8, § 9; FINAL § 8; `2026-08-24-todo-saas-readiness.md` phase 7 | [analysis](analysis-c4-deploy-configuration.md) |
+
+After F-01 merges, a dated audit run is owed: only a run can restate the verdict (ADR-002).
+
+## Tier 2 — P1 or P2 owed to the backend
+
+| ID   | Item                                                                                                | Sev | Owed to | State        | Size | Source                                                                           | Analysis                                             |
+| ---- | --------------------------------------------------------------------------------------------------- | --- | ------- | ------------ | ---- | -------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| F-02 | The frontend's preview and production origins are not chosen, so the backend cannot set CORS (B-03) | P2  | BE      | owner (O-01) | —    | N1 "CORS for every frontend origin"; `2026-02-16-todo-cicd-overview.md`          | [analysis](analysis-decisions-owed-between-repos.md) |
+| F-03 | The browser's IP is not forwarded through `/api/proxy`, so proxied users share per-IP limits (B-05) | P2  | BE, us  | owner (O-01) | ≤½d  | N2 "Client IP is lost"; `2026-10-02-todo-proxy-client-ip-forwarding.md`; A10 § 7 | [analysis](analysis-client-ip-through-proxy.md)      |
+
+## Tier 3 — P2 security
+
+Both wait on a package's maintainers, and each todo already says what to do when a patch ships, so
+neither is analysed ([D-03](decisions.md)).
+
+| ID   | Item                                                                                  | Sev | Owed to | State                        | Size | Source                                                | Analysis |
+| ---- | ------------------------------------------------------------------------------------- | --- | ------- | ---------------------------- | ---- | ----------------------------------------------------- | -------- |
+| F-04 | The nightly `dependency-audit` is red on `braces`, which has no patched version (N14) | P2  | us      | upstream; revisit 2026-11-03 | ≤1h  | `2026-10-03-todo-braces-dev-advisory.md`; A10 § 6 N14 |          |
+| F-05 | `postcss-selector-parser` and `sprintf-js` advisories that no update clears (N14)     | P2  | us      | upstream                     | ≤1h  | `2026-10-11-todo-dev-advisories-without-patch.md`     |          |
+
+## Tier 4 — other P1 and P2
+
+The P1 first, then smaller first.
+
+| ID   | Item                                                                                               | Sev | Owed to | State        | Size | Source                                                                                              | Analysis                                             |
+| ---- | -------------------------------------------------------------------------------------------------- | --- | ------- | ------------ | ---- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| F-06 | No spec that signs in runs in CI: end-to-end coverage, and the accessibility gate's signed-in half | P1  | us      | owner (O-02) | ≤1d  | A10 § 3.1 categories 7 and 9, § 7, § 9; kit `cypress-a11y-e2e` D-01                                 | [analysis](analysis-stack-suites-in-ci.md)           |
+| F-07 | No `CODE_OF_CONDUCT.md`                                                                            | P2  | fork    | owner (O-03) | ≤1h  | A10 § 3.1 category 13                                                                               |                                                      |
+| F-08 | Neither route group has an error boundary, and the two route boundaries print `error.message`      | P2  | us      | ready        | ≤½d  | A10 § 3.1 "Root error boundary and 404"; `2026-10-10-todo-reaudit-findings.md` (N12, left as found) | [analysis](analysis-route-group-error-boundaries.md) |
+| F-09 | Two layout files are quarantined from the layer rule (C6)                                          | P2  | us      | ready        | ≤½d  | A10 § 3.1 "Files quarantined"; FINAL § 8; `eslint.config.mjs`                                       | [analysis](analysis-c6-quarantined-layout-files.md)  |
+| F-10 | A value logged today does not reach the dashboard for a metric with older logs (B-02)              | P2  | us      | BE; O-04     | —    | N1 "Relative ranges exclude today"; A10 § 7                                                         | [analysis](analysis-decisions-owed-between-repos.md) |
+| F-11 | The production backend URL is undecided, so production environment config waits (B-04)             | P2  | us      | owner, BE    | —    | N1 "Production backend URL"; `2026-02-16-todo-cicd-overview.md`                                     | [analysis](analysis-decisions-owed-between-repos.md) |
+| F-12 | Field web vitals are logged and nothing aggregates them or compares them with the budget           | P2  | us      | owner (O-01) | ?    | A10 § 3.1 "Field performance data"                                                                  | [analysis](analysis-field-vitals.md)                 |
+| F-13 | No subscription or plan surface                                                                    | P2  | us      | owner (O-10) | ?    | A10 § 3.1 "Subscription or plan surface"; `iteration-plan.md` § P2-only items                       |                                                      |
+
+## Tier 5 — P3 and ungraded
+
+Analysed, because the backend is party to it:
+
+| ID   | Item                                                              | Sev | Owed to | State                             | Size | Source                                                       | Analysis                             |
+| ---- | ----------------------------------------------------------------- | --- | ------- | --------------------------------- | ---- | ------------------------------------------------------------ | ------------------------------------ |
+| F-14 | The proxy forwards whatever `x-request-id` a browser sends (B-14) | —   | BE, us  | BE; the proxy's own part is ready | ≤1h  | `2026-10-04-todo-backend-request-id-unvalidated.md`; A10 § 7 | [analysis](analysis-x-request-id.md) |
+
+Listed, not analysed ([D-03](decisions.md)). Between the repos:
+
+| ID   | Item                                                                                                                   | Sev | State | Source                                                                                           |
+| ---- | ---------------------------------------------------------------------------------------------------------------------- | --- | ----- | ------------------------------------------------------------------------------------------------ |
+| F-15 | One spec sync and type regeneration when the backend documents `Set-Cookie` and the 304 (B-13)                         | P3  | BE    | N2 "Set-Cookie documented on the four auth endpoints"                                            |
+| F-16 | Link the shared pre-production smoke sequence once the backend writes it (B-15)                                        | P3  | BE    | N1 "Pre-production smoke-check sequence"; `2026-02-16-todo-cicd-overview.md`                     |
+| F-17 | The `@sentry/node` 11 note was never raised on the Notion page                                                         | —   | ready | `2026-10-04-todo-backend-request-id-unvalidated.md`, "A second note"                             |
+| F-18 | The backend's answer of 2026-10-13 on relative ranges is not acknowledged on the Notion page                           | —   | ready | N1 "Relative ranges exclude today"                                                               |
+| F-19 | Two todos say things that are no longer true: an item already raised, stale line numbers, an inference since confirmed | —   | ready | `2026-10-02-todo-proxy-client-ip-forwarding.md`; `2026-10-08-todo-dashboard-count-assertions.md` |
+
+Security, the proxy and the repository:
+
+| ID   | Item                                                                                                                  | Sev | State                                              | Source                                                             |
+| ---- | --------------------------------------------------------------------------------------------------------------------- | --- | -------------------------------------------------- | ------------------------------------------------------------------ |
+| F-20 | The proxy forwards upstream error bodies verbatim                                                                     | low | owner (O-06)                                       | `2026-09-20-todo-proxy-forwards-upstream-error-bodies.md`; A10 § 7 |
+| F-21 | `style-src` still allows `'unsafe-inline'`                                                                            | —   | ready                                              | `todo-security-20251126.md`, next cycle, item 3                    |
+| F-22 | `console.warn` and `console.log` are not scrubbed; nothing in CI shows that Next still prints through `console.error` | —   | accepted in ADR-0029; one probe for the next audit | `2026-10-10-todo-reaudit-findings.md` (N7, left as found)          |
+| F-23 | `next.config.ts` reads `NEXT_PUBLIC_API_BASE_URL` raw, outside the validated environment                              | —   | kept on purpose                                    | `2026-08-24-todo-saas-readiness.md` phase 3                        |
+| F-24 | `dev` and `main` have no server-side branch protection                                                                | —   | owner (an action, not code)                        | `2026-08-17-todo-claude-code-setup.md`                             |
+| F-25 | `main` shares no history with `dev`                                                                                   | —   | owner (O-08)                                       | `2026-09-24-todo-main-has-unrelated-history.md`                    |
+| F-26 | Security follow-ups of 2025-11-26, never triaged: moving protected fetching into Server Components                    | —   | owner                                              | `todo-security-20251126.md`, next cycle, item 2                    |
+
+Errors and forms:
+
+| ID   | Item                                                                                                  | Sev | State            | Source                                                     |
+| ---- | ----------------------------------------------------------------------------------------------------- | --- | ---------------- | ---------------------------------------------------------- |
+| F-27 | A failed profile load is swallowed into `null`, so the account page cannot say why it failed          | —   | ready            | `2026-10-10-todo-reaudit-findings.md` (N12, left as found) |
+| F-28 | Nothing stops the next component from rendering `error.message`; a lint rule could                    | —   | ready            | same                                                       |
+| F-29 | In a form with several mutations an old error wins over a newer one                                   | —   | ready            | same                                                       |
+| F-30 | Two entries picked by hand for the same minute are refused; an edit through the picker zeroes seconds | —   | owner (O-05), BE | `2026-10-10-todo-reaudit-findings.md` (N15, left as found) |
+| F-31 | In the log form's time picker, choosing minute 0 changed nothing when the current minute was 02       | —   | unexplained      | `2026-10-08-todo-dashboard-count-assertions.md`; A10 § 7   |
+
+Interface, accessibility and end-to-end checks:
+
+| ID   | Item                                                                                                                                                                               | Sev | State                                      | Source                                                               |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | ------------------------------------------ | -------------------------------------------------------------------- |
+| F-32 | A chart has no text summary of its values, which the accessibility baseline requires                                                                                               | —   | ready                                      | `2026-10-10-todo-reaudit-findings.md` (accessibility, left as found) |
+| F-33 | No suite runs axe on a dashboard with cards or a metrics list with rows                                                                                                            | —   | ready                                      | A10 § 7                                                              |
+| F-34 | Metrics list leftovers: the variant switches at 1024 px in JavaScript and 640 px in CSS; two mobile tables carry the same latent `sm:hidden`; infinite mode is not browser-checked | —   | owner (O-07) for the first; the rest ready | `2026-10-07-todo-metrics-list-hidden-above-640.md`                   |
+| F-35 | The dashboard invalidation of #76 has no browser evidence                                                                                                                          | —   | ready                                      | `2026-10-08-todo-dashboard-count-assertions.md`; A10 § 7             |
+| F-36 | The journey spec does not take a metric off the dashboard and put it back                                                                                                          | —   | ready                                      | `2026-10-08-todo-dashboard-count-assertions.md`                      |
+| F-37 | Whether the `/metric-logs` lists changed order after backend #125 was never checked                                                                                                | —   | ready                                      | `2026-09-30-todo-npm-audit-brace-expansion.md`                       |
+
+Performance:
+
+| ID   | Item                                                         | Sev | State        | Source                                                    |
+| ---- | ------------------------------------------------------------ | --- | ------------ | --------------------------------------------------------- |
+| F-38 | The signed-in routes are not under the Lighthouse gate       | —   | owner, BE    | `2026-09-24-todo-authenticated-perf-routes.md`            |
+| F-39 | A cold load can paint one frame before the theme script runs | low | owner (O-09) | `2026-09-24-todo-cold-load-paint-before-theme-script.md`  |
+| F-40 | The bundle impact of the phosphor migration was not measured | —   | ready        | `2026-09-15-todo-phosphor-icons-migration.md`, "Not done" |
+
+Tests, docs and this register:
+
+| ID   | Item                                                                                         | Sev | State                        | Source                                   |
+| ---- | -------------------------------------------------------------------------------------------- | --- | ---------------------------- | ---------------------------------------- |
+| F-41 | Integration coverage is still being widened; a unit and integration folder split is deferred | P3  | ready; the split is deferred | `2026-02-18-tests-structure-overhaul.md` |
+| F-42 | Two documentation-hygiene items of the CI/CD overview                                        | —   | ready                        | `2026-02-16-todo-cicd-overview.md`       |
+| F-43 | Nothing checks this register against the todo folder                                         | —   | ready                        | this kit, plan § Risks                   |
+
+## Waiting on the owner, not code
+
+| ID   | Question                                                                                               | Rows                         | Source                                                    |
+| ---- | ------------------------------------------------------------------------------------------------------ | ---------------------------- | --------------------------------------------------------- |
+| O-01 | Where is the frontend hosted, per environment, and does that host set `X-Forwarded-For`?               | F-01, F-02, F-03, F-11, F-12 | A10 § 9; N2; the backend's O-04                           |
+| O-02 | Should the stack suites run in CI? The backend repository is public now, which removes one stated cost | F-06                         | A10 § 9, item 1                                           |
+| O-03 | Which code of conduct text, and which contact address?                                                 | F-07                         | A10 § 3.1 category 13                                     |
+| O-04 | Until the backend's fix ships, should the dashboard ask for an explicit range through today?           | F-10                         | N1, the backend's answer of 2026-10-13                    |
+| O-05 | Should two entries picked for the same minute be allowed? That would be a backend change               | F-30                         | A10 § 9, item 2; settled for the common case by #88       |
+| O-06 | Should the proxy filter upstream error bodies to the keys the frontend reads?                          | F-20                         | `2026-09-20-todo-proxy-forwards-upstream-error-bodies.md` |
+| O-07 | Which list variant should a 640 to 1023 px viewport get: cards or the table?                           | F-34                         | `2026-10-07-todo-metrics-list-hidden-above-640.md`        |
+| O-08 | How does `main` become a release branch: a reset, or a one-time merge?                                 | F-25                         | `2026-09-24-todo-main-has-unrelated-history.md`           |
+| O-09 | Is one cold-load frame worth a second script?                                                          | F-39                         | `2026-09-24-todo-cold-load-paint-before-theme-script.md`  |
+| O-10 | Is a subscription or plan surface in scope for the template? The backend defers its equivalent         | F-13                         | `iteration-plan.md` § P2-only items                       |
+
+## Settled just before this register, noted so they are not re-raised
+
+The findings of the 2026-10-10 audit that needed code are closed, each pending a dated run:
+N12 (#82), N14 (#83), N7 (#84), N13 (#85), N16 (#86), the two accessibility items (#87) and N15
+(#88). The backend's register lists N15 as this side's to raise on the Notion page. #88 settled it
+in the form, so there is nothing to raise; what is left of it is F-30.
+
+## Closed
+
+Rows move here when their fix merges, with the PR. None yet.
