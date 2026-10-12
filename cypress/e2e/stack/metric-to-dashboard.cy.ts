@@ -52,22 +52,13 @@ const cardCount = () =>
     .first()
     .contains("span", COUNT);
 
-/**
- * From the metric's page: opens the Logs tab, logs a value and waits for it in the list.
- * `atMinute` moves the log to that minute of the current hour.
- */
-const logValue = (value: string, atMinute?: string) => {
+/** From the metric's page: opens the Logs tab, logs a value and waits for it in the list. */
+const logValue = (value: string) => {
   cy.contains(TABS, "Logs").click();
   cy.get('button[aria-label="Create New Log"]').click();
   cy.get(DIALOG).within(() => {
     cy.get('input[name="logValue"]').type(value);
   });
-  if (atMinute !== undefined) {
-    // The picker's popover is rendered outside the dialog.
-    cy.get('button[aria-label="Log date and time"]').click();
-    cy.get('select[aria-label="Select minute"]').select(atMinute);
-    cy.get('button[aria-label="Log date and time"]').click();
-  }
   cy.get(`${DIALOG} ${SUBMIT}`).click();
 
   cy.get(DIALOG).should("not.exist");
@@ -136,10 +127,10 @@ describe("From a new metric to the dashboard", () => {
     cy.get(`a[href="${METRICS}"]:visible`).click();
     cy.location("pathname").should("eq", METRICS);
     openMetricFromList();
-    // The backend keeps one log per timestamp and the form rounds to the minute, so a second value
-    // in the same minute is refused with a 409. Minute 30 of this hour is a different timestamp
-    // and a different option from the one the picker shows, unless it is minute 30 now.
-    logValue(SECOND_VALUE, new Date().getMinutes() === 30 ? "35" : "30");
+    // Seconds after the first value, with the time left alone: usually the same minute. The
+    // backend keeps one log per exact timestamp, and until the form sent the exact time this was
+    // refused with a 409 (audit 2026-10-10, N15).
+    logValue(SECOND_VALUE);
 
     // Dashboard, metrics, the metric, its logs tab: three steps back.
     cy.go(-3);

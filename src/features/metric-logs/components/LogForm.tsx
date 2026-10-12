@@ -25,7 +25,7 @@ import { ErrorMessage } from "@/ui/ErrorMessage";
 import { FormField } from "@/ui/FormField";
 import { Modal } from "@/ui/Modal";
 import { TextField } from "@/ui/TextField";
-import { parseDate, toISOWithOffset, toISOZ } from "@/utils/date-io";
+import { parseDate, toISOWithOffset, toISOZExact } from "@/utils/date-io";
 
 interface Props {
   onClose: () => void;
@@ -76,14 +76,16 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
   const onValid = useCallback(
     async (data: LogFormInputs) => {
       try {
+        // The exact time, not rounded to the minute: the backend keeps one log per timestamp, so
+        // rounding refused a second value in the same minute and moved a log's time on every edit.
         const payloadCreate = {
           ...data, // TODO: Normalize DTO payload helper
-          loggedAt: toISOZ(data.loggedAt),
+          loggedAt: toISOZExact(data.loggedAt),
         } satisfies CreateMetricLogRequestDTO;
 
         const payloadUpdate = {
           ...data,
-          loggedAt: toISOZ(data.loggedAt),
+          loggedAt: toISOZExact(data.loggedAt),
         } satisfies UpdateMetricLogRequestDTO;
 
         if (isEditMode && initialLog) {

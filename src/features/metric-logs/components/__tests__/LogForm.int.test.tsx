@@ -76,6 +76,94 @@ describe("MetricLogForm integration", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  // The backend keeps one log per exact timestamp. A time rounded to the minute made a second
+  // value in the same minute a duplicate (audit 2026-10-10, N15).
+  it("sends the time the form was opened, to the millisecond, when the time is left alone", async () => {
+    // Only the clock is faked, and it stands still: timers stay real for user-event and MSW.
+    const openedAt = "2026-03-05T10:15:37.250Z";
+    jest.useFakeTimers({
+      now: new Date(openedAt),
+      doNotFake: [
+        "setTimeout",
+        "clearTimeout",
+        "setInterval",
+        "clearInterval",
+        "setImmediate",
+        "clearImmediate",
+        "nextTick",
+        "queueMicrotask",
+        "performance",
+        "hrtime",
+        "requestAnimationFrame",
+        "cancelAnimationFrame",
+        "requestIdleCallback",
+        "cancelIdleCallback",
+      ],
+    });
+
+    try {
+      const user = userEvent.setup();
+      const createPayloadSpy = jest.fn();
+
+      server.use(
+        http.post(METRIC_LOGS_API, async ({ request }) => {
+          const body = (await request.json()) as { loggedAt?: string };
+          createPayloadSpy(body.loggedAt);
+
+          return HttpResponse.json({
+            status: "success",
+            message: "Log created",
+            data: { ...existingLog, id: "log-new", loggedAt: String(body.loggedAt) },
+          });
+        }),
+      );
+
+      renderWithProviders(<MetricLogForm metricId={metricId} onClose={jest.fn()} />);
+
+      await user.type(screen.getByLabelText(/log value/i), "5");
+      await user.click(screen.getByRole("button", { name: /^add$/i }));
+
+      await waitFor(() => {
+        expect(createPayloadSpy).toHaveBeenCalledWith(openedAt);
+      });
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("leaves a log's time as it was when only its value is edited", async () => {
+    const user = userEvent.setup();
+    const updatePayloadSpy = jest.fn();
+    const exactLoggedAt = "2026-02-18T08:00:37.250Z";
+    const logWithSeconds: MetricLogVM = { ...existingLog, loggedAt: exactLoggedAt };
+
+    server.use(
+      http.put(`${METRIC_LOGS_API}/:id`, async ({ request }) => {
+        const body = (await request.json()) as { loggedAt?: string };
+        updatePayloadSpy(body.loggedAt);
+
+        return HttpResponse.json({
+          status: "success",
+          message: "Log updated",
+          data: { ...logWithSeconds, logValue: 200 },
+        });
+      }),
+    );
+
+    renderWithProviders(
+      <MetricLogForm metricId={metricId} initialLog={logWithSeconds} onClose={jest.fn()} />,
+    );
+
+    const logValueInput = screen.getByLabelText(/log value/i);
+    await user.clear(logValueInput);
+    await user.type(logValueInput, "200");
+    await user.click(screen.getByRole("button", { name: /^save$/i }));
+
+    await waitFor(() => {
+      expect(updatePayloadSpy).toHaveBeenCalledWith(exactLoggedAt);
+    });
+  });
+
   it("updates an existing metric log and closes modal on success", async () => {
     const user = userEvent.setup();
     const onClose = jest.fn();

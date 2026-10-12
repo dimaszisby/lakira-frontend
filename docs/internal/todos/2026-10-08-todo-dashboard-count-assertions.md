@@ -77,7 +77,9 @@ range of its latest logs. The spec's metric is always new, so it is always on th
 - [x] Found: the same `max-age=60` was on `GET /analytics/metrics/:id` -> fixed by backend #147.
 - [ ] Found: the dashboard invalidation from #76 has no browser evidence. No path was found on
       which it changes what the user sees; only its unit tests show it -> out of scope.
-- [ ] Found: a second value logged in the same minute is refused. The form rounds the time to the
+- [x] Found: a second value logged in the same minute is refused. Fixed 2026-10-13 as N15, see
+      [`2026-10-10-todo-reaudit-findings.md`](2026-10-10-todo-reaudit-findings.md); the spec no
+      longer moves its second value. As found: the form rounds the time to the
       minute (`toISOZ`, `src/utils/date-io.ts:73-79`) and the backend keeps one log per timestamp
       per metric (`CreateMetricLog.ts`, 409). The dialog then shows "Request failed with status
       code 409", not the backend's "A log entry already exists for this timestamp for this

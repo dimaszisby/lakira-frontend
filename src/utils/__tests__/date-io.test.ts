@@ -8,10 +8,12 @@ import {
   toISODateOnly,
   toISOWithOffset,
   toISOZ,
+  toISOZExact,
 } from "@/utils/date-io";
 
 const DATE_ONLY = "2025-11-04";
 const DATE_TIME = "2025-11-04T09:30";
+const EXACT_INSTANT = "2025-11-04T02:30:45.678Z";
 
 describe("date-io utilities", () => {
   describe("parseDate", () => {
@@ -40,6 +42,23 @@ describe("date-io utilities", () => {
       expected?.setSeconds(0, 0);
       expect(toISOZ("2025-11-04T09:30:45")).toBe(expected?.toISOString());
       expect(toISOZ("bad")).toBeUndefined();
+    });
+
+    it("keeps seconds and milliseconds when asked for the exact instant", () => {
+      const instant = new Date(EXACT_INSTANT);
+
+      expect(toISOZExact(instant)).toBe(EXACT_INSTANT);
+      expect(toISOZExact(EXACT_INSTANT)).toBe(EXACT_INSTANT);
+      // The rounding serializer is unchanged: other forms depend on it.
+      expect(toISOZ(instant)).toBe("2025-11-04T02:30:00.000Z");
+      // Neither changes the date it was given.
+      expect(instant.toISOString()).toBe(EXACT_INSTANT);
+    });
+
+    it("returns undefined for an invalid exact instant", () => {
+      expect(toISOZExact("bad")).toBeUndefined();
+      expect(toISOZExact(null)).toBeUndefined();
+      expect(toISOZExact(new Date(Number.NaN))).toBeUndefined();
     });
 
     it("emits date-only ISO strings or undefined when invalid", () => {
