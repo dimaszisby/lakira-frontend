@@ -37,26 +37,28 @@ secret-scan    (independent)
 Each job in the chain `needs` the one before it, so the first failure stops the rest. The three
 independent jobs start immediately and do not gate the chain.
 
-| Job            | Name               | Timeout | Runs, in order                                                                                                     | Uploads                                          |
-| -------------- | ------------------ | ------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
-| `checks`       | Static checks      | 15 min  | `lint`, `lint:css`, `typecheck`, `format`                                                                          | none                                             |
-| `unit`         | Unit tests         | 20 min  | `test:unit:ci` (global coverage thresholds), `coverage:check` (per-folder goals, `--strict`)                       | `coverage-report` (always)                       |
-| `integration`  | Integration tests  | 20 min  | `test:integration`                                                                                                 | none                                             |
-| `build`        | Build              | 20 min  | `build`                                                                                                            | `next-build` (`.next`, hidden files included)    |
-| `e2e`          | E2E tests          | 30 min  | downloads `next-build`, `npm run start` on `127.0.0.1:3000`, waits up to 120 s for it, `test:e2e`, stops the app   | `cypress-videos`, `cypress-screenshots` (always) |
-| `api-contract` | API Contract Drift | 10 min  | `api:spec:check`, `api:types:check`                                                                                | none                                             |
-| `security`     | Security Scan      | 20 min  | `security:scan`: `lint`, `lint:css`, then `npm audit --omit=dev --audit-level=high` (production dependencies only) | none                                             |
-| `secret-scan`  | Secret Scan        | 10 min  | full-history checkout, gitleaks `8.30.1` binary verified against a hard-coded SHA-256, `gitleaks git . --redact`   | none                                             |
+| Job            | Name               | Timeout | Runs, in order                                                                                                                                                                    | Uploads                                          |
+| -------------- | ------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `checks`       | Static checks      | 15 min  | `lint`, `lint:css`, `typecheck`, `format`                                                                                                                                         | none                                             |
+| `unit`         | Unit tests         | 20 min  | `test:unit:ci` (global coverage thresholds), `coverage:check` (per-folder goals, `--strict`)                                                                                      | `coverage-report` (always)                       |
+| `integration`  | Integration tests  | 20 min  | `test:integration`                                                                                                                                                                | none                                             |
+| `build`        | Build              | 20 min  | `build`                                                                                                                                                                           | `next-build` (`.next`, hidden files included)    |
+| `e2e`          | E2E tests          | 30 min  | downloads `next-build`, `npm run start` on `127.0.0.1:3000`, waits up to 120 s for it, `test:e2e:public`, `test:e2e:a11y` (the accessibility step), `test:e2e:csp`, stops the app | `cypress-videos`, `cypress-screenshots` (always) |
+| `api-contract` | API Contract Drift | 10 min  | `api:spec:check`, `api:types:check`                                                                                                                                               | none                                             |
+| `security`     | Security Scan      | 20 min  | `security:scan`: `lint`, `lint:css`, then `npm audit --omit=dev --audit-level=high` (production dependencies only)                                                                | none                                             |
+| `secret-scan`  | Secret Scan        | 10 min  | full-history checkout, gitleaks `8.30.1` binary verified against a hard-coded SHA-256, `gitleaks git . --redact`                                                                  | none                                             |
 
 Details that decide whether a job fails:
 
 - `format` is deliberately last in `checks`: a formatting failure is auto-fixable, so it must not
   hide a lint or type error in the same run.
 - `lint` runs with `--max-warnings=0`, so a warning fails `checks` and `security` alike.
-- `e2e` runs `cypress/e2e/public/` only: the home spec, axe over every public page in both themes
-  (contrast included), and the `/login` keyboard check. It has no backend, so `cypress/e2e/stack/`
-  never runs here (kit `cypress-a11y-e2e`, D-01). An accessibility failure prints the rule, the
-  element and axe's reason in the job log.
+- `e2e` runs `cypress/e2e/public/` in two steps. "Run E2E tests" takes the home spec and the
+  `/login` keyboard check. "Run accessibility checks on the public pages" takes axe over every
+  public page in both themes, contrast included, so an accessibility failure is named as one; it
+  prints the rule, the element and axe's reason in the job log. Then `cypress/e2e/csp/` runs with
+  the Content Security Policy enforced. The job has no backend, so `cypress/e2e/stack/` never runs
+  here (kit `cypress-a11y-e2e`, D-01).
 - `checks` covers the Cypress specs anyway: `typecheck` includes `cypress/tsconfig.json`, and
   `lint` covers `cypress/`.
 - `e2e` sets `CYPRESS_BASE_URL=http://127.0.0.1:3000`. `cypress-screenshots` warns "No files were
