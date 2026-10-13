@@ -1,6 +1,6 @@
 # Frontend debt register
 
-**As of:** 2026-10-13, frontend `dev` at `f67716e`. Ranked by [D-01](decisions.md).
+**As of:** 2026-10-13, frontend `dev` at `ec96668`, with F-08 closed. Ranked by [D-01](decisions.md).
 
 **"What's next" is the first row below whose state is `ready`.** A row above it that is waiting on
 someone is reported with it, as a gap. How rows are added and closed:
@@ -48,16 +48,15 @@ neither is analysed ([D-03](decisions.md)).
 
 The P1 first, then smaller first.
 
-| ID   | Item                                                                                               | Sev | Owed to | State        | Size | Source                                                                                              | Analysis                                             |
-| ---- | -------------------------------------------------------------------------------------------------- | --- | ------- | ------------ | ---- | --------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| F-06 | No spec that signs in runs in CI: end-to-end coverage, and the accessibility gate's signed-in half | P1  | us      | owner (O-02) | ≤1d  | A10 § 3.1 categories 7 and 9, § 7, § 9; kit `cypress-a11y-e2e` D-01                                 | [analysis](analysis-stack-suites-in-ci.md)           |
-| F-07 | No `CODE_OF_CONDUCT.md`                                                                            | P2  | fork    | owner (O-03) | ≤1h  | A10 § 3.1 category 13                                                                               |                                                      |
-| F-08 | Neither route group has an error boundary, and the two route boundaries print `error.message`      | P2  | us      | ready        | ≤½d  | A10 § 3.1 "Root error boundary and 404"; `2026-10-10-todo-reaudit-findings.md` (N12, left as found) | [analysis](analysis-route-group-error-boundaries.md) |
-| F-09 | Two layout files are quarantined from the layer rule (C6)                                          | P2  | us      | ready        | ≤½d  | A10 § 3.1 "Files quarantined"; FINAL § 8; `eslint.config.mjs`                                       | [analysis](analysis-c6-quarantined-layout-files.md)  |
-| F-10 | A value logged today does not reach the dashboard for a metric with older logs (B-02)              | P2  | us      | BE; O-04     | —    | N1 "Relative ranges exclude today"; A10 § 7                                                         | [analysis](analysis-decisions-owed-between-repos.md) |
-| F-11 | The production backend URL is undecided, so production environment config waits (B-04)             | P2  | us      | owner, BE    | —    | N1 "Production backend URL"; `2026-02-16-todo-cicd-overview.md`                                     | [analysis](analysis-decisions-owed-between-repos.md) |
-| F-12 | Field web vitals are logged and nothing aggregates them or compares them with the budget           | P2  | us      | owner (O-01) | ?    | A10 § 3.1 "Field performance data"                                                                  | [analysis](analysis-field-vitals.md)                 |
-| F-13 | No subscription or plan surface                                                                    | P2  | us      | owner (O-10) | ?    | A10 § 3.1 "Subscription or plan surface"; `iteration-plan.md` § P2-only items                       |                                                      |
+| ID   | Item                                                                                               | Sev | Owed to | State        | Size | Source                                                                        | Analysis                                             |
+| ---- | -------------------------------------------------------------------------------------------------- | --- | ------- | ------------ | ---- | ----------------------------------------------------------------------------- | ---------------------------------------------------- |
+| F-06 | No spec that signs in runs in CI: end-to-end coverage, and the accessibility gate's signed-in half | P1  | us      | owner (O-02) | ≤1d  | A10 § 3.1 categories 7 and 9, § 7, § 9; kit `cypress-a11y-e2e` D-01           | [analysis](analysis-stack-suites-in-ci.md)           |
+| F-07 | No `CODE_OF_CONDUCT.md`                                                                            | P2  | fork    | owner (O-03) | ≤1h  | A10 § 3.1 category 13                                                         |                                                      |
+| F-09 | Two layout files are quarantined from the layer rule (C6)                                          | P2  | us      | ready        | ≤½d  | A10 § 3.1 "Files quarantined"; FINAL § 8; `eslint.config.mjs`                 | [analysis](analysis-c6-quarantined-layout-files.md)  |
+| F-10 | A value logged today does not reach the dashboard for a metric with older logs (B-02)              | P2  | us      | BE; O-04     | —    | N1 "Relative ranges exclude today"; A10 § 7                                   | [analysis](analysis-decisions-owed-between-repos.md) |
+| F-11 | The production backend URL is undecided, so production environment config waits (B-04)             | P2  | us      | owner, BE    | —    | N1 "Production backend URL"; `2026-02-16-todo-cicd-overview.md`               | [analysis](analysis-decisions-owed-between-repos.md) |
+| F-12 | Field web vitals are logged and nothing aggregates them or compares them with the budget           | P2  | us      | owner (O-01) | ?    | A10 § 3.1 "Field performance data"                                            | [analysis](analysis-field-vitals.md)                 |
+| F-13 | No subscription or plan surface                                                                    | P2  | us      | owner (O-10) | ?    | A10 § 3.1 "Subscription or plan surface"; `iteration-plan.md` § P2-only items |                                                      |
 
 ## Tier 5 — P3 and ungraded
 
@@ -120,11 +119,15 @@ Performance:
 
 Tests, docs and this register:
 
-| ID   | Item                                                                                         | Sev | State                        | Source                                   |
-| ---- | -------------------------------------------------------------------------------------------- | --- | ---------------------------- | ---------------------------------------- |
-| F-41 | Integration coverage is still being widened; a unit and integration folder split is deferred | P3  | ready; the split is deferred | `2026-02-18-tests-structure-overhaul.md` |
-| F-42 | Two documentation-hygiene items of the CI/CD overview                                        | —   | ready                        | `2026-02-16-todo-cicd-overview.md`       |
-| F-43 | Nothing checks this register against the todo folder                                         | —   | ready                        | this kit, plan § Risks                   |
+| ID   | Item                                                                                         | Sev | State                        | Source                                               |
+| ---- | -------------------------------------------------------------------------------------------- | --- | ---------------------------- | ---------------------------------------------------- |
+| F-41 | Integration coverage is still being widened; a unit and integration folder split is deferred | P3  | ready; the split is deferred | `2026-02-18-tests-structure-overhaul.md`             |
+| F-42 | Two documentation-hygiene items of the CI/CD overview                                        | —   | ready                        | `2026-02-16-todo-cicd-overview.md`                   |
+| F-43 | Nothing checks this register against the todo folder                                         | —   | ready                        | this kit, plan § Risks                               |
+| F-44 | The dashboard and the metric detail page have no `h1`                                        | —   | ready                        | kit `route-error-boundaries`, checklist § Discovered |
+| F-45 | After a successful "Try again", focus falls to the document body                             | —   | ready                        | same                                                 |
+| F-46 | `global-error.tsx` still calls `reset`, which does not fetch again                           | —   | ready                        | same; kit D-01                                       |
+| F-47 | An error in an intercepted `@modal` route replaces the list under it, not only the dialog    | —   | ready                        | same                                                 |
 
 ## Waiting on the owner, not code
 
@@ -150,4 +153,8 @@ in the form, so there is nothing to raise; what is left of it is F-30.
 
 ## Closed
 
-Rows move here when their fix merges, with the PR. None yet.
+Rows move here when their fix merges, with the PR.
+
+| ID   | Item                                                                                          | Closed by | Note                                                                                             |
+| ---- | --------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------ |
+| F-08 | Neither route group has an error boundary, and the two route boundaries print `error.message` | #90       | Pending a dated run for the audit's "Root error boundary and 404". Kit `route-error-boundaries`. |

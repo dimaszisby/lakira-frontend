@@ -77,9 +77,10 @@ connection and try again."
 
 Left as found:
 
-- [ ] Found: the two route-level boundaries, `metrics/[metricId]/error.tsx:24` and
+- [x] Found: the two route-level boundaries, `metrics/[metricId]/error.tsx:24` and
       `dashboard/error.tsx:23`, print `error.message`. They receive Next's error, not an API error
-      → out of scope.
+      → out of scope. Fixed 2026-10-13 as register row F-08, kit
+      [`route-error-boundaries`](../initiatives/route-error-boundaries/README.md).
 - [ ] Found: a failed profile load is swallowed into `data: null` by `fetchUserProfile`, by
       design, so the account page cannot say why it failed → out of scope.
 - [ ] Found: nothing stops the next component from rendering `error.message`. A lint rule could →
