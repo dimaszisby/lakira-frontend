@@ -102,3 +102,6 @@ backend rebuilt on backend `dev` at `a7b1b0d`.
 - The first helper for reading the count never matched a card with values: it looked for a word
   break before `n:`, and the card's text runs together as `max: 4200n: 1`. It now matches the
   count's own element.
+- 2026-10-13: backend #163 changed why a value logged today is counted. The paragraph above on
+  why a count is expected describes the backend before it; what is true now, and the case this
+  spec could not show, is in `2026-10-13-todo-relative-range-includes-today.md`.

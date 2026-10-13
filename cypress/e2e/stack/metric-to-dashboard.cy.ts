@@ -1,4 +1,5 @@
 import { THEMES } from "../../support/a11y";
+import { cardCount } from "../../support/dashboard";
 import { newUser, preflightStack, registerUser, signInSession } from "../../support/stack";
 
 // The app's core journey: create a metric, see its card on the dashboard, log a value and see it
@@ -17,9 +18,10 @@ import { newUser, preflightStack, registerUser, signInSession } from "../../supp
 // browser). Closing the log dialog refreshes the router (`MetricLogFormDialog`), so going back
 // renders the dashboard on the server again and its prefetch supplies the new figures.
 //
-// A value logged today is counted only because the metric is new: `last=7d` ends at the start of
-// today in UTC, and a metric with nothing in that range is answered from the range of its latest
-// logs. Notion "FE and BE messages", Part 1, "Relative ranges exclude today".
+// A value logged today is inside the requested range since backend #163: a relative range ends
+// with the current bucket. Before that it was counted here only because the metric is new, and a
+// metric with nothing in the range was answered from the range of its latest logs. The case that
+// used to fail, a metric with older logs, is `dashboard-counts-today.cy.ts`.
 //
 // The tests are one journey and run in order; each starts from what the one before left behind.
 const THEME = "light";
@@ -33,24 +35,6 @@ const SECOND_VALUE = "6100";
 const VISIBLE = "be.visible";
 const DASHBOARD = "/dashboard";
 const HAVE_TEXT = "have.text";
-
-const COUNT = /^n: \d+$/;
-
-/**
- * The count on the metric's dashboard card: `n: 2` means two logged values. Matched on its own
- * element, because the card's text runs together ("max: 4200n: 1") and "min: 4200" holds "n: 4".
- */
-const cardCount = () =>
-  cy
-    .contains(METRIC_NAME)
-    .parents()
-    .filter((_index, element) =>
-      Array.from(element.querySelectorAll("span")).some((span) =>
-        COUNT.test(span.textContent ?? ""),
-      ),
-    )
-    .first()
-    .contains("span", COUNT);
 
 /** From the metric's page: opens the Logs tab, logs a value and waits for it in the list. */
 const logValue = (value: string) => {
@@ -101,7 +85,7 @@ describe("From a new metric to the dashboard", () => {
     cy.visitInTheme(DASHBOARD, THEME);
 
     cy.contains(METRIC_NAME).should(VISIBLE);
-    cardCount().should(HAVE_TEXT, "n: 0");
+    cardCount(METRIC_NAME).should(HAVE_TEXT, "n: 0");
   });
 
   it("logs a value, lists it and counts it on the dashboard", () => {
@@ -116,12 +100,12 @@ describe("From a new metric to the dashboard", () => {
 
     // A fresh visit: the page's server prefetch supplies the data whatever the client holds.
     cy.visitInTheme(DASHBOARD, THEME);
-    cardCount().should(HAVE_TEXT, "n: 1");
+    cardCount(METRIC_NAME).should(HAVE_TEXT, "n: 1");
   });
 
   it("counts a newly logged value when the dashboard is reached with the back button", () => {
     cy.visitInTheme(DASHBOARD, THEME);
-    cardCount().should(HAVE_TEXT, "n: 1");
+    cardCount(METRIC_NAME).should(HAVE_TEXT, "n: 1");
 
     // The sidebar holds the same link, hidden below the `lg` breakpoint.
     cy.get(`a[href="${METRICS}"]:visible`).click();
@@ -135,7 +119,7 @@ describe("From a new metric to the dashboard", () => {
     // Dashboard, metrics, the metric, its logs tab: three steps back.
     cy.go(-3);
     cy.location("pathname").should("eq", DASHBOARD);
-    cardCount().should(HAVE_TEXT, "n: 2");
+    cardCount(METRIC_NAME).should(HAVE_TEXT, "n: 2");
   });
 
   for (const theme of THEMES) {
