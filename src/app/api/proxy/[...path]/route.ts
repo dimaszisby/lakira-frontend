@@ -20,7 +20,21 @@ import {
 import { getApiBaseUrl } from "@/lib/env";
 import { logger } from "@/lib/logger";
 
-const FORWARDED_HEADER_BLOCKLIST = new Set(["connection", "content-length", "host"]);
+/** The header `lakira-backend` sets on every response and tags its own errors with. */
+const REQUEST_ID_HEADER = "x-request-id";
+
+/**
+ * Request headers that are not passed on. The request id is one of them: the
+ * backend takes an incoming id as the request's own, so a forwarded one would
+ * let a browser choose what is written on the backend's log lines and on the
+ * line this proxy logs for a 5xx. Left out, the backend mints it.
+ */
+const FORWARDED_HEADER_BLOCKLIST = new Set([
+  "connection",
+  "content-length",
+  "host",
+  REQUEST_ID_HEADER,
+]);
 
 /**
  * The body this proxy returns for the two 401s it issues on its own behalf:
@@ -47,9 +61,6 @@ const INVALID_PATH_BODY = { error: "Invalid path" } as const;
 
 /** Long enough to recognise a probe in the log, short enough not to be a payload. */
 const MAX_LOGGED_PATH_LENGTH = 200;
-
-/** The header `lakira-backend` sets on every response and tags its own errors with. */
-const REQUEST_ID_HEADER = "x-request-id";
 
 type RouteContext = {
   params: Promise<{ path?: string[] }>;

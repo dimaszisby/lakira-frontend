@@ -1,6 +1,6 @@
 # Frontend debt register
 
-**As of:** 2026-10-13, frontend `dev` at `116136d`, with F-08 and F-09 closed. Ranked by [D-01](decisions.md).
+**As of:** 2026-10-13, frontend `dev` at `590e935`, with F-08, F-09 and F-14 closed. Ranked by [D-01](decisions.md).
 
 **"What's next" is the first row below whose state is `ready`.** A row above it that is waiting on
 someone is reported with it, as a gap. How rows are added and closed:
@@ -58,12 +58,6 @@ The P1 first, then smaller first.
 | F-13 | No subscription or plan surface                                                                    | P2  | us      | owner (O-10) | ?    | A10 § 3.1 "Subscription or plan surface"; `iteration-plan.md` § P2-only items |                                                      |
 
 ## Tier 5 — P3 and ungraded
-
-Analysed, because the backend is party to it:
-
-| ID   | Item                                                              | Sev | Owed to | State                             | Size | Source                                                       | Analysis                             |
-| ---- | ----------------------------------------------------------------- | --- | ------- | --------------------------------- | ---- | ------------------------------------------------------------ | ------------------------------------ |
-| F-14 | The proxy forwards whatever `x-request-id` a browser sends (B-14) | —   | BE, us  | BE; the proxy's own part is ready | ≤1h  | `2026-10-04-todo-backend-request-id-unvalidated.md`; A10 § 7 | [analysis](analysis-x-request-id.md) |
 
 Listed, not analysed ([D-03](decisions.md)). Between the repos:
 
@@ -158,7 +152,8 @@ in the form, so there is nothing to raise; what is left of it is F-30.
 
 Rows move here when their fix merges, with the PR.
 
-| ID   | Item                                                                                          | Closed by | Note                                                                                             |
-| ---- | --------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------ |
-| F-08 | Neither route group has an error boundary, and the two route boundaries print `error.message` | #90       | Pending a dated run for the audit's "Root error boundary and 404". Kit `route-error-boundaries`. |
-| F-09 | Two layout files are quarantined from the layer rule (C6)                                     | #91       | Pending a dated run for the audit's "Files quarantined". Kit `unquarantine-layout-files`.        |
+| ID   | Item                                                                                          | Closed by | Note                                                                                                                                            |
+| ---- | --------------------------------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| F-08 | Neither route group has an error boundary, and the two route boundaries print `error.message` | #90       | Pending a dated run for the audit's "Root error boundary and 404". Kit `route-error-boundaries`.                                                |
+| F-09 | Two layout files are quarantined from the layer rule (C6)                                     | #91       | Pending a dated run for the audit's "Files quarantined". Kit `unquarantine-layout-files`.                                                       |
+| F-14 | The proxy forwards whatever `x-request-id` a browser sends (B-14)                             | #92       | The proxy drops the header. The backend's own check is its row B-14; the Notion note is F-17, still open. [Analysis](analysis-x-request-id.md). |
