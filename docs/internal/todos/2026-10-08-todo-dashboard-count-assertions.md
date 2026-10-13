@@ -69,11 +69,13 @@ range of its latest logs. The spec's metric is always new, so it is always on th
       `docs/how-to/testing/run-stack-e2e.md` already says to rebuild; nothing checks it.
 - [ ] Found: the parked draft also took the metric off the dashboard from its settings and put it
       back. Not a count assertion -> out of scope.
-- [ ] Found: with `tz=UTC` the same metric came back with `count: 0` and an empty series, its one
+- [x] Found: with `tz=UTC` the same metric came back with `count: 0` and an empty series, its one
       log dated that day; with `tz=Asia/Jakarta` it was counted. Inference: the fallback range
       ends at `lastLogAt` exclusively, and the Jakarta request passes only because `lastLogAt` is
       shifted seven hours forward -> out of scope; added to the Notion record "Relative ranges
-      exclude today; lifecycle timestamps are shifted".
+      exclude today; lifecycle timestamps are shifted". The backend confirmed the inference on
+      2026-10-13 as a third defect and fixed it in backend #163: the fallback range now ends
+      with the bucket that holds the newest log.
 - [x] Found: the same `max-age=60` was on `GET /analytics/metrics/:id` -> fixed by backend #147.
 - [ ] Found: the dashboard invalidation from #76 has no browser evidence. No path was found on
       which it changes what the user sees; only its unit tests show it -> out of scope.
