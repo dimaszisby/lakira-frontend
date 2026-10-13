@@ -1,41 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
+import { RouteErrorPanel } from "@/ui/RouteErrorPanel";
 
-import { reportClientError } from "@/lib/monitoring/report-client-error";
-import { Button } from "@/ui/Button";
-
-const MetricDetailError = ({
-  error,
-  reset,
-}: {
+type MetricDetailErrorProps = {
   error: Error & { digest?: string };
-  reset: () => void;
-}) => {
-  useEffect(() => {
-    console.error("Metric detail route error:", error);
-    reportClientError(error, "boundary");
-  }, [error]);
-
-  return (
-    <section className="rounded-xl border border-status-error bg-surface p-8 text-center">
-      <h2 className="text-2xl font-semibold text-ink-error">Unable to load metric</h2>
-      <p className="mt-2 text-sm text-ink-secondary">
-        {error.message || "Please refresh and try again."}
-      </p>
-      <div className="mt-6 flex justify-center">
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => {
-            reset();
-          }}
-        >
-          Try again
-        </Button>
-      </div>
-    </section>
-  );
+  retry: () => void;
 };
+
+// The metric's layout stays above this boundary: breadcrumbs, the header card and the tabs. The
+// heading keeps the level it had. That page has no h1 of its own today, which is a separate gap.
+const MetricDetailError = ({ error, retry }: MetricDetailErrorProps) => (
+  <RouteErrorPanel error={error} retry={retry} title="Unable to load metric" headingLevel={2} />
+);
 
 export default MetricDetailError;

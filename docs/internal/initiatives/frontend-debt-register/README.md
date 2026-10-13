@@ -1,8 +1,8 @@
 # Frontend debt register
 
-**Status:** Register and eight analyses written; nothing is fixed here. Top ready row: F-08. Of the
-seven rows above it, five wait on the owner (three of them on one decision, O-01) and two on a
-package's maintainers.
+**Status:** Register and eight analyses written. One row closed since (F-08). Top ready row: F-09.
+Of the seven rows above it, five wait on the owner (three of them on one decision, O-01) and two on
+a package's maintainers.
 **Slug:** `frontend-debt-register` · **Branch:** `docs/frontend-debt-register`
 
 The same scheme as lakira-backend's register (lakira-backend #159), so the two can be read side by

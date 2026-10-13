@@ -1,40 +1,19 @@
 "use client";
 
-import { useEffect } from "react";
-
-import { reportClientError } from "@/lib/monitoring/report-client-error";
-import { Button } from "@/ui/Button";
+import { RouteErrorPanel } from "@/ui/RouteErrorPanel";
 
 type DashboardErrorProps = {
   error: Error & { digest?: string };
-  reset: () => void;
+  retry: () => void;
 };
 
-const DashboardError = ({ error, reset }: DashboardErrorProps) => {
-  useEffect(() => {
-    console.error("Dashboard route error:", error);
-    reportClientError(error, "boundary");
-  }, [error]);
-
-  return (
-    <section className="mx-auto max-w-2xl rounded-xl border border-status-error bg-surface p-8 text-center">
-      <h2 className="text-2xl font-semibold text-ink-error">Unable to load dashboard</h2>
-      <p className="mt-2 text-sm text-ink-secondary">
-        {error.message || "Please try refreshing the page."}
-      </p>
-      <div className="mt-6 flex justify-center">
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => {
-            reset();
-          }}
-        >
-          Try again
-        </Button>
-      </div>
-    </section>
-  );
-};
+const DashboardError = ({ error, retry }: DashboardErrorProps) => (
+  <RouteErrorPanel
+    error={error}
+    retry={retry}
+    title="Unable to load dashboard"
+    className="mx-auto max-w-2xl"
+  />
+);
 
 export default DashboardError;
