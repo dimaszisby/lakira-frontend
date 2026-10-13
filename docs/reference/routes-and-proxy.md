@@ -37,7 +37,9 @@ Prefer `API_URL`: it is server-only, so it never ships to the browser. See
 1. Joins the catch-all segments onto the base URL and copies the query string across.
 2. Reads the `lakira_token` cookie. If present, sets `Authorization: Bearer <token>`; if absent,
    explicitly deletes any inbound `Authorization` header rather than forwarding it.
-3. Forwards all headers except `connection`, `content-length`, and `host`.
+3. Forwards all headers except `connection`, `content-length`, `host` and `x-request-id`. The
+   backend takes an incoming request id as its own, so a browser may not send one; the backend
+   mints it, and the id on the response still reaches the browser.
 4. Streams the request and response bodies (`duplex: "half"`), so uploads are not buffered.
 5. Uses `redirect: "manual"` — upstream redirects are passed through, not followed.
 6. On a `401`, redeems the refresh cookie once and retries. If that fails, clears both session

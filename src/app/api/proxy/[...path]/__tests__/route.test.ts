@@ -21,6 +21,7 @@ const LOGIN_PATH = "auth/login";
 const SWITCH_PATH = "auth/switch-org";
 const SWITCH_SEGMENTS = ["auth", "switch-org"];
 const FETCH_FAILED = "fetch failed";
+const REQUEST_ID_HEADER = "x-request-id";
 
 const context = (...segments: string[]) => ({ params: Promise.resolve({ path: segments }) });
 
@@ -326,7 +327,7 @@ describe("a backend 5xx", () => {
   it("passes through, logged at warn with the backend's request id", async () => {
     const stdout = jest.spyOn(process.stdout, "write").mockImplementation(() => true);
     const failed = upstream(500);
-    failed.headers.set("x-request-id", "req-123");
+    failed.headers.set(REQUEST_ID_HEADER, "req-123");
     global.fetch = jest.fn().mockResolvedValue(failed) as typeof fetch;
 
     try {
@@ -336,7 +337,7 @@ describe("a backend 5xx", () => {
       );
 
       expect(response.status).toBe(500);
-      expect(response.headers.get("x-request-id")).toBe("req-123");
+      expect(response.headers.get(REQUEST_ID_HEADER)).toBe("req-123");
       const lines = stdout.mock.calls.map(([line]) => JSON.parse(String(line)) as object);
       expect(lines).toEqual([
         expect.objectContaining({
@@ -415,6 +416,31 @@ describe("a path that tries to leave the API base", () => {
     expect(String(fetchMock.mock.calls[0][0])).toBe(
       "http://backend.test/api/v1/metrics/8f14e45f-ceea-467f-a9d1-3f0b2c1d9e77?limit=10&sort=name",
     );
+  });
+});
+
+describe("the headers a request carries to the backend", () => {
+  it("leaves out the ones the proxy must not forward, the request id included", async () => {
+    const fetchMock = jest.fn().mockResolvedValue(upstream(200));
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const req = request("metrics", { [SESSION_COOKIE_NAME]: "any-value" });
+    req.headers.set(REQUEST_ID_HEADER, "chosen-by-the-browser");
+    req.headers.set("host", "localhost:3000");
+    req.headers.set("connection", "keep-alive");
+    req.headers.set("content-length", "0");
+    req.headers.set("accept-language", "id-ID");
+
+    await GET(req, context("metrics"));
+
+    const sent = (fetchMock.mock.calls[0][1] as RequestInit).headers as Headers;
+    // The backend takes an incoming id as the request's own, so a forwarded one
+    // would let a browser choose what is written on the backend's log lines.
+    expect(sent.has(REQUEST_ID_HEADER)).toBe(false);
+    expect(sent.has("host")).toBe(false);
+    expect(sent.has("connection")).toBe(false);
+    expect(sent.has("content-length")).toBe(false);
+    expect(sent.get("accept-language")).toBe("id-ID");
   });
 });
 
