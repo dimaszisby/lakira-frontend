@@ -6,7 +6,8 @@ import { SESSION_COOKIE_NAME } from "@/constants/app";
 import { OrganizationProvider } from "@/features/organizations/context";
 import { decodeJwtPayload } from "@/lib/jwt";
 import { authRoutes } from "@/lib/routes";
-import AppShell from "@/src/components/layout/Layout";
+
+import AppShell from "./_components/AppShell";
 
 const AppAreaLayout = async ({ children }: { children: ReactNode }) => {
   const token = (await cookies()).get(SESSION_COOKIE_NAME);

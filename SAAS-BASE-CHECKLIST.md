@@ -92,7 +92,7 @@ The audit lists every item's grade and how it was graded.
 | **N16** | P2       | **Fixed, pending a dated run.** Three stale statements in the rules and the accessibility baseline corrected.                                                                           |
 |         | P2       | **Improved, pending a dated run.** The accessibility check is its own step in CI, and the WCAG baseline has no placeholder left. The signed-in pages are still checked outside CI only. |
 | **N7**  | P2       | **Fixed, pending a dated run.** The application's log lines are scrubbed (ADR-0027), and so is the error line Next prints itself (ADR-0029).                                            |
-| **C6**  | P2       | Two files still quarantined from the layer rule.                                                                                                                                        |
+| **C6**  | P2       | **Fixed, pending a dated run.** No file is quarantined from the layer rule (register row F-09).                                                                                         |
 |         | P2       | **Fixed, pending a dated run.** Each route group has an error boundary, and no boundary prints the error's message (register row F-08).                                                 |
 |         | P2       | Three more, listed in the audit: no `CODE_OF_CONDUCT.md`, no plan surface, and field vitals not aggregated.                                                                             |
 

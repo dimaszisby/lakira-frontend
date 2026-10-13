@@ -39,7 +39,7 @@ Three things to know about the enforcement:
 
 - The rule set is disabled for `**/*.{test,spec}.{ts,tsx}` and `cypress/**`.
 - `app → types` is **not** in the allow list. Route files that need a DTO type should reach it through the feature module.
-- **Two files are quarantined** at the bottom of `eslint.config.mjs` with the rule turned off — `Header.tsx` and `Sidebar.tsx`. They are known inversions awaiting a refactor. Do not add to that list, and do not copy their import pattern. The list has only ever shrunk: `CategorySelect` and `Visualization` moved into their feature modules on 2026-09-11, and `withAuth.tsx` and `HydrateUser.tsx` were deleted on 2026-09-22 — both dead, and `withAuth`'s gating was already covered by `src/proxy.ts` and `(app)/layout.tsx`.
+- **No file is exempt.** Six `components` files were once quarantined at the bottom of `eslint.config.mjs` with the rule turned off. `CategorySelect` and `Visualization` moved into their feature modules on 2026-09-11; `withAuth.tsx` and `HydrateUser.tsx` were deleted on 2026-09-22; `Header.tsx` and `Sidebar.tsx` were inverted on 2026-10-13 (kit `unquarantine-layout-files`). Do not start a new list. When a shared component needs application state, the `app` or `features` caller passes it in as props: `src/app/(app)/_components/AppShell.tsx` owns the sign-out mutation and hands `Layout` and `Sidebar` an `onLogout` handler.
 
 If you add a directory that should be its own layer, add it to **both** `settings["boundaries/elements"]` and the `boundaries/element-types` rules. A `from: <type>` rule with no matching `elements` entry silently matches nothing — that exact mistake left the `components` layer unenforced until 2026-08-17, and 18 inversions accumulated behind it (see `.claude/lessons.md`).
 

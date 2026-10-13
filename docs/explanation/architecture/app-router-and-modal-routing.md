@@ -5,8 +5,8 @@ Why dialogs in this app are URLs, and what that costs.
 ## Route groups
 
 `(app)` and `(auth)` are organisational only — the parentheses keep them out of the URL. They exist
-so the two shells can differ: `(app)` renders the sidebar and header, `(auth)` renders a bare
-centred card.
+so the two shells can differ: `(app)` renders the sidebar and, below the `lg` breakpoint, the
+bottom navigation bar; `(auth)` renders a header, a centred card and a footer.
 
 ## The idea behind intercepted routes
 

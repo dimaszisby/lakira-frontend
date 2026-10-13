@@ -8,3 +8,4 @@
 - [Reaudit P2 sweep review](project_reaudit-p2-sweep_review.md) — request changes; derive invalidator callers from payload fields, verify 'rules now say' claims
 - [Log keeps exact time review](project_log-keeps-exact-time_review.md) — approve w/ notes; trace every producer of a serialized value, test names must match assertions
 - [Route error boundaries review](project_route-error-boundaries_review.md) — approve w/ warnings; mocked deduping fns hide Strict Mode, verify heading claims by grep
+- [Unquarantine layout files review](project_unquarantine-layout-files_review.md) — approve w/ warnings; grep whole tree for removed exemption names, trace state-writers before deleting a branch

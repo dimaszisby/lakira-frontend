@@ -45,8 +45,8 @@ Two consequences that catch people out:
   `src/features/shared/` (`buildQueryString`, `buildCursorQueryString`, `CursorListParams`).
 - **`app → types` is not allowed.** Route files reach DTOs through the feature, not directly.
 
-Six files are quarantined with the rule disabled at the bottom of `eslint.config.mjs`. **Do not add
-to that list.**
+No file is exempt from the rule. Six once were, quarantined at the bottom of `eslint.config.mjs`;
+the last two were brought inside it on 2026-10-13. **Do not start a new list.**
 
 ## Checklist
 

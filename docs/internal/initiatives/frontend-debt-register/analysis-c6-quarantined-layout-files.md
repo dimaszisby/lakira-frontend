@@ -2,6 +2,11 @@
 
 Register row [F-09](register.md). Read at `f67716e`.
 
+> **Fixed on 2026-10-13** by kit
+> [`unquarantine-layout-files`](../unquarantine-layout-files/README.md). The premise section 4
+> rests on for `Header` did not hold; that kit's D-01 records what was found instead. This file
+> is left as written.
+
 ## 1. What is wrong
 
 `boundaries/element-types` is switched off for two files, `src/components/layout/Header.tsx` and

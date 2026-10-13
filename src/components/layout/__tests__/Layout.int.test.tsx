@@ -40,7 +40,7 @@ describe("Layout integration", () => {
 
   it("renders child content inside main landmark", () => {
     renderWithProviders(
-      <Layout>
+      <Layout onLogout={jest.fn()} isLoggingOut={false}>
         <div>Metrics content</div>
       </Layout>,
     );
@@ -50,7 +50,7 @@ describe("Layout integration", () => {
 
   it("exposes skip link and primary navigation landmarks", () => {
     renderWithProviders(
-      <Layout>
+      <Layout onLogout={jest.fn()} isLoggingOut={false}>
         <div>Main area</div>
       </Layout>,
     );
@@ -64,7 +64,7 @@ describe("Layout integration", () => {
 
   it("has no critical accessibility violations", async () => {
     const { container } = renderWithProviders(
-      <Layout>
+      <Layout onLogout={jest.fn()} isLoggingOut={false}>
         <div>Main area</div>
       </Layout>,
     );

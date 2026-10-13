@@ -394,29 +394,11 @@ const config = [
     },
   },
 
-  /* Known layer inversions, quarantined.
-   *
-   * These files live in `components` but reach up into `features`/`services`.
-   * The boundary rule was inert until 2026-08-17 (src/components/** was never
-   * mapped in boundaries/elements), so this debt accumulated unseen.
-   *
-   * Tracked in docs/internal/todos/2026-08-17-todo-claude-code-setup.md:
-   * Header and Sidebar are app-shell concerns that need auth state; they belong
-   * under src/app/ or need state injected.
-   *
-   * The list has only ever shrunk. CategorySelect and Visualization moved into
-   * their feature modules on 2026-09-11; withAuth and HydrateUser were deleted
-   * on 2026-09-22 — both were dead, and withAuth's job was already done by
-   * src/proxy.ts, (app)/layout.tsx and useAuthProfileQuery.
-   *
-   * Do not add to this list. New code must satisfy the boundary rule.
+  /* No file is exempt from the boundary rule. Six files in `components` once
+   * were, quarantined here while they reached up into `features`/`services`;
+   * the last two, Header and Sidebar, were brought inside it on 2026-10-13
+   * (kit `unquarantine-layout-files`). Do not start a new list.
    */
-  {
-    files: ["src/components/layout/Header.tsx", "src/components/layout/Sidebar.tsx"],
-    rules: {
-      "boundaries/element-types": "off",
-    },
-  },
 
   /*
    * React Context files export a Provider and its consumer hook together — the
