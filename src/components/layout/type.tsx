@@ -30,4 +30,6 @@ export interface SidebarProps {
   onLinkClick?: () => void;
   isMobileOpen: boolean;
   onClose: () => void;
+  onLogout: () => void;
+  isLoggingOut: boolean;
 }

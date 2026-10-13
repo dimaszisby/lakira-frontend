@@ -1,21 +1,12 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
-import { http, HttpResponse } from "msw";
 import type { ComponentPropsWithoutRef, MouseEvent } from "react";
 
 import Sidebar from "@/components/layout/Sidebar";
+import type { SidebarProps } from "@/components/layout/type";
 import { navItems } from "@/components/layout/type";
-import { server } from "@/src/test-utils/msw/server";
 import { renderWithProviders } from "@/src/test-utils/renderWithProviders";
-
-const mockPush = jest.fn();
-
-jest.mock("next/navigation", () => ({
-  useRouter: () => ({
-    push: mockPush,
-  }),
-}));
 
 jest.mock("next/link", () => {
   type LinkShimProps = Omit<ComponentPropsWithoutRef<"a">, "href"> & { href: string };
@@ -36,15 +27,22 @@ jest.mock("next/link", () => {
   return LinkShim;
 });
 
-describe("Sidebar integration", () => {
-  beforeEach(() => {
-    mockPush.mockReset();
-  });
+const renderSidebar = (props: Partial<SidebarProps> = {}) =>
+  renderWithProviders(
+    <Sidebar
+      navItems={navItems}
+      pathname="/dashboard"
+      isMobileOpen={false}
+      onClose={jest.fn()}
+      onLogout={jest.fn()}
+      isLoggingOut={false}
+      {...props}
+    />,
+  );
 
+describe("Sidebar integration", () => {
   it("renders navigation items and marks active route", () => {
-    renderWithProviders(
-      <Sidebar navItems={navItems} pathname="/metrics" isMobileOpen={false} onClose={jest.fn()} />,
-    );
+    renderSidebar({ pathname: "/metrics" });
 
     expect(screen.getAllByRole("link", { name: /dashboard/i }).length).toBeGreaterThan(0);
 
@@ -54,15 +52,9 @@ describe("Sidebar integration", () => {
 
   it("opens logout confirmation modal and closes it on cancel", async () => {
     const user = userEvent.setup();
+    const onLogout = jest.fn();
 
-    renderWithProviders(
-      <Sidebar
-        navItems={navItems}
-        pathname="/dashboard"
-        isMobileOpen={false}
-        onClose={jest.fn()}
-      />,
-    );
+    renderSidebar({ onLogout });
 
     const logoutButtons = screen.getAllByRole("button", { name: /logout/i });
     await user.click(logoutButtons[0]);
@@ -71,75 +63,42 @@ describe("Sidebar integration", () => {
 
     await user.click(screen.getByRole("button", { name: /cancel logout/i }));
     expect(screen.queryByRole("dialog", { name: /logout/i })).not.toBeInTheDocument();
+    expect(onLogout).not.toHaveBeenCalled();
   });
 
-  /**
-   * Sign-out used to post to `/api/proxy/auth/logout`. That revoked the token
-   * family upstream and changed nothing on this origin — the proxy strips
-   * `Set-Cookie`, and the route that deletes the cookies was never reached. The
-   * app then reported success and pushed to `/login`, which redirected back to
-   * the dashboard on the cookie that was still there. The endpoint is the whole
-   * fix, so it is what this asserts.
-   */
-  it("signs out through the session route, not the backend proxy", async () => {
+  // What signing out does is the caller's: `AppShell.int.test.tsx` asserts the
+  // endpoint and the redirect. The sidebar only asks, then hands over.
+  it("calls onLogout once when the confirmation is accepted", async () => {
     const user = userEvent.setup();
-    const logoutCall = jest.fn();
+    const onLogout = jest.fn();
 
-    server.use(
-      http.post("/api/auth/logout", () => {
-        logoutCall();
-        return HttpResponse.json({ ok: true });
-      }),
-    );
-
-    renderWithProviders(
-      <Sidebar
-        navItems={navItems}
-        pathname="/dashboard"
-        isMobileOpen={false}
-        onClose={jest.fn()}
-      />,
-    );
+    renderSidebar({ onLogout });
 
     await user.click(screen.getAllByRole("button", { name: /logout/i })[0]);
-    await user.click(screen.getByRole("button", { name: /confirm logout/i }));
+    expect(onLogout).not.toHaveBeenCalled();
 
-    await waitFor(() => expect(logoutCall).toHaveBeenCalledTimes(1));
-    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/login"));
+    await user.click(screen.getByRole("button", { name: /confirm logout/i }));
+    expect(onLogout).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps the user where they are when sign-out fails", async () => {
+  it("disables the confirm button while sign-out is in flight", async () => {
     const user = userEvent.setup();
+    const onLogout = jest.fn();
 
-    server.use(http.post("/api/auth/logout", () => new HttpResponse(null, { status: 500 })));
-
-    renderWithProviders(
-      <Sidebar
-        navItems={navItems}
-        pathname="/dashboard"
-        isMobileOpen={false}
-        onClose={jest.fn()}
-      />,
-    );
+    renderSidebar({ onLogout, isLoggingOut: true });
 
     await user.click(screen.getAllByRole("button", { name: /logout/i })[0]);
-    await user.click(screen.getByRole("button", { name: /confirm logout/i }));
 
-    await waitFor(() =>
-      expect(screen.getByRole("button", { name: /confirm logout/i })).toBeEnabled(),
-    );
-    expect(mockPush).not.toHaveBeenCalled();
+    const confirm = screen.getByRole("button", { name: /confirm logout/i });
+    expect(confirm).toBeDisabled();
+    expect(confirm).toHaveTextContent("Logging Out...");
+
+    await user.click(confirm);
+    expect(onLogout).not.toHaveBeenCalled();
   });
 
   it("has no critical accessibility violations", async () => {
-    const { container } = renderWithProviders(
-      <Sidebar
-        navItems={navItems}
-        pathname="/dashboard"
-        isMobileOpen={false}
-        onClose={jest.fn()}
-      />,
-    );
+    const { container } = renderSidebar();
 
     const results = await axe(container);
     expect(results).toHaveNoViolations();

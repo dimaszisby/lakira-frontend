@@ -51,23 +51,23 @@ let a rendering concern force a change in a pure utility.
 - **`app → types` is not allowed.** Route files reach DTOs through the feature that owns them, so
   that a route never binds directly to the wire format.
 
-## The quarantine
+## The quarantine, now empty
 
 `src/components/**` was unmapped in `boundaries/elements` until 2026-08-17, so the `components`
-boundary never ran and 18 inversions accumulated. The rule is live now, with two files exempted at
-the bottom of `eslint.config.mjs`:
+boundary never ran and 18 inversions accumulated. When the rule went live, six files were exempted
+at the bottom of `eslint.config.mjs`. None is exempt now, and the three ways off the list are all
+visible in its history.
 
-```
-Header.tsx · Sidebar.tsx
-```
+- `CategorySelect.tsx` and `Visualization.tsx` left on 2026-09-11 by being **moved** into the
+  feature modules they were reaching into.
+- `withAuth.tsx` and `HydrateUser.tsx` left on 2026-09-22 by being **deleted**: `HydrateUser` was
+  referenced nowhere, and `withAuth` guarded a single route that `src/proxy.ts` and
+  `(app)/layout.tsx` already gate, while duplicating a profile fetch the page was making anyway.
+  An inversion that exists only to serve dead code is removed, not inverted.
+- `Header.tsx` and `Sidebar.tsx` left on 2026-10-13 by being **inverted**. `Sidebar` is handed its
+  sign-out handler as props, and `src/app/(app)/_components/AppShell.tsx`, a route file that may
+  import a feature, owns the mutation. `Header` lost a signed-in check that hid nothing on load
+  (kit `unquarantine-layout-files`, D-01 and D-02).
 
-The list has only ever shrunk, and the two ways off it are both visible in its history.
-`CategorySelect.tsx` and `Visualization.tsx` left on 2026-09-11 by being **moved** into the feature
-modules they were reaching into. `withAuth.tsx` and `HydrateUser.tsx` left on 2026-09-22 by being
-**deleted** — `HydrateUser` was referenced nowhere, and `withAuth` guarded a single route that
-`src/proxy.ts` and `(app)/layout.tsx` already gate, while duplicating a profile fetch the page was
-making anyway. An inversion that exists only to serve dead code is removed, not inverted.
-
-They import from `features`, which the graph forbids. **Do not add to that list.** It is a debt
-register, not an escape hatch — each entry is a component that should be inverted so the feature
-passes data in rather than the component reaching out.
+**Do not start a new list.** A component that needs application state takes it as props from the
+caller above it.

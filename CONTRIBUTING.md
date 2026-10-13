@@ -61,8 +61,8 @@ Follow `.claude/rules/code-style.md`. Prettier owns formatting — do not hand-f
 Run `npm run lint:fix && npm run format:fix` before committing.
 
 Layer boundaries are enforced by ESLint (`boundaries` plugin, eight elements, error level).
-Six files are quarantined from the rule pending a refactor; the list in `eslint.config.mjs`
-says "do not add to this list" and means it.
+No file is exempt from the rule. Six once were, pending a refactor; the last two were brought
+inside it on 2026-10-13. Do not start a new exemption list.
 
 ## Testing
 

@@ -1,6 +1,6 @@
 # Frontend debt register
 
-**As of:** 2026-10-13, frontend `dev` at `ec96668`, with F-08 closed. Ranked by [D-01](decisions.md).
+**As of:** 2026-10-13, frontend `dev` at `116136d`, with F-08 and F-09 closed. Ranked by [D-01](decisions.md).
 
 **"What's next" is the first row below whose state is `ready`.** A row above it that is waiting on
 someone is reported with it, as a gap. How rows are added and closed:
@@ -52,7 +52,6 @@ The P1 first, then smaller first.
 | ---- | -------------------------------------------------------------------------------------------------- | --- | ------- | ------------ | ---- | ----------------------------------------------------------------------------- | ---------------------------------------------------- |
 | F-06 | No spec that signs in runs in CI: end-to-end coverage, and the accessibility gate's signed-in half | P1  | us      | owner (O-02) | ≤1d  | A10 § 3.1 categories 7 and 9, § 7, § 9; kit `cypress-a11y-e2e` D-01           | [analysis](analysis-stack-suites-in-ci.md)           |
 | F-07 | No `CODE_OF_CONDUCT.md`                                                                            | P2  | fork    | owner (O-03) | ≤1h  | A10 § 3.1 category 13                                                         |                                                      |
-| F-09 | Two layout files are quarantined from the layer rule (C6)                                          | P2  | us      | ready        | ≤½d  | A10 § 3.1 "Files quarantined"; FINAL § 8; `eslint.config.mjs`                 | [analysis](analysis-c6-quarantined-layout-files.md)  |
 | F-10 | A value logged today does not reach the dashboard for a metric with older logs (B-02)              | P2  | us      | BE; O-04     | —    | N1 "Relative ranges exclude today"; A10 § 7                                   | [analysis](analysis-decisions-owed-between-repos.md) |
 | F-11 | The production backend URL is undecided, so production environment config waits (B-04)             | P2  | us      | owner, BE    | —    | N1 "Production backend URL"; `2026-02-16-todo-cicd-overview.md`               | [analysis](analysis-decisions-owed-between-repos.md) |
 | F-12 | Field web vitals are logged and nothing aggregates them or compares them with the budget           | P2  | us      | owner (O-01) | ?    | A10 § 3.1 "Field performance data"                                            | [analysis](analysis-field-vitals.md)                 |
@@ -108,6 +107,9 @@ Interface, accessibility and end-to-end checks:
 | F-35 | The dashboard invalidation of #76 has no browser evidence                                                                                                                          | —   | ready                                      | `2026-10-08-todo-dashboard-count-assertions.md`; A10 § 7             |
 | F-36 | The journey spec does not take a metric off the dashboard and put it back                                                                                                          | —   | ready                                      | `2026-10-08-todo-dashboard-count-assertions.md`                      |
 | F-37 | Whether the `/metric-logs` lists changed order after backend #125 was never checked                                                                                                | —   | ready                                      | `2026-09-30-todo-npm-audit-brace-expansion.md`                       |
+| F-48 | Below 1024 px there is no visible way to sign out: nothing opens the mobile drawer, and its Sign Out button is the only one                                                        | —   | owner (O-11)                               | kit `unquarantine-layout-files`, checklist § Discovered              |
+| F-49 | The closed mobile drawer is moved off screen and not hidden, so its links and Sign Out button stay in the tab order                                                                | —   | with F-48                                  | same                                                                 |
+| F-50 | No Cypress spec signs out, public or stack                                                                                                                                         | —   | ready                                      | same                                                                 |
 
 Performance:
 
@@ -131,18 +133,19 @@ Tests, docs and this register:
 
 ## Waiting on the owner, not code
 
-| ID   | Question                                                                                               | Rows                         | Source                                                    |
-| ---- | ------------------------------------------------------------------------------------------------------ | ---------------------------- | --------------------------------------------------------- |
-| O-01 | Where is the frontend hosted, per environment, and does that host set `X-Forwarded-For`?               | F-01, F-02, F-03, F-11, F-12 | A10 § 9; N2; the backend's O-04                           |
-| O-02 | Should the stack suites run in CI? The backend repository is public now, which removes one stated cost | F-06                         | A10 § 9, item 1                                           |
-| O-03 | Which code of conduct text, and which contact address?                                                 | F-07                         | A10 § 3.1 category 13                                     |
-| O-04 | Until the backend's fix ships, should the dashboard ask for an explicit range through today?           | F-10                         | N1, the backend's answer of 2026-10-13                    |
-| O-05 | Should two entries picked for the same minute be allowed? That would be a backend change               | F-30                         | A10 § 9, item 2; settled for the common case by #88       |
-| O-06 | Should the proxy filter upstream error bodies to the keys the frontend reads?                          | F-20                         | `2026-09-20-todo-proxy-forwards-upstream-error-bodies.md` |
-| O-07 | Which list variant should a 640 to 1023 px viewport get: cards or the table?                           | F-34                         | `2026-10-07-todo-metrics-list-hidden-above-640.md`        |
-| O-08 | How does `main` become a release branch: a reset, or a one-time merge?                                 | F-25                         | `2026-09-24-todo-main-has-unrelated-history.md`           |
-| O-09 | Is one cold-load frame worth a second script?                                                          | F-39                         | `2026-09-24-todo-cold-load-paint-before-theme-script.md`  |
-| O-10 | Is a subscription or plan surface in scope for the template? The backend defers its equivalent         | F-13                         | `iteration-plan.md` § P2-only items                       |
+| ID   | Question                                                                                                      | Rows                         | Source                                                    |
+| ---- | ------------------------------------------------------------------------------------------------------------- | ---------------------------- | --------------------------------------------------------- |
+| O-01 | Where is the frontend hosted, per environment, and does that host set `X-Forwarded-For`?                      | F-01, F-02, F-03, F-11, F-12 | A10 § 9; N2; the backend's O-04                           |
+| O-02 | Should the stack suites run in CI? The backend repository is public now, which removes one stated cost        | F-06                         | A10 § 9, item 1                                           |
+| O-03 | Which code of conduct text, and which contact address?                                                        | F-07                         | A10 § 3.1 category 13                                     |
+| O-04 | Until the backend's fix ships, should the dashboard ask for an explicit range through today?                  | F-10                         | N1, the backend's answer of 2026-10-13                    |
+| O-05 | Should two entries picked for the same minute be allowed? That would be a backend change                      | F-30                         | A10 § 9, item 2; settled for the common case by #88       |
+| O-06 | Should the proxy filter upstream error bodies to the keys the frontend reads?                                 | F-20                         | `2026-09-20-todo-proxy-forwards-upstream-error-bodies.md` |
+| O-07 | Which list variant should a 640 to 1023 px viewport get: cards or the table?                                  | F-34                         | `2026-10-07-todo-metrics-list-hidden-above-640.md`        |
+| O-08 | How does `main` become a release branch: a reset, or a one-time merge?                                        | F-25                         | `2026-09-24-todo-main-has-unrelated-history.md`           |
+| O-09 | Is one cold-load frame worth a second script?                                                                 | F-39                         | `2026-09-24-todo-cold-load-paint-before-theme-script.md`  |
+| O-10 | Is a subscription or plan surface in scope for the template? The backend defers its equivalent                | F-13                         | `iteration-plan.md` § P2-only items                       |
+| O-11 | Below 1024 px, where does signing out live: a button that opens the drawer, or a control on the account page? | F-48, F-49                   | kit `unquarantine-layout-files`, checklist § Discovered   |
 
 ## Settled just before this register, noted so they are not re-raised
 
@@ -158,3 +161,4 @@ Rows move here when their fix merges, with the PR.
 | ID   | Item                                                                                          | Closed by | Note                                                                                             |
 | ---- | --------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------ |
 | F-08 | Neither route group has an error boundary, and the two route boundaries print `error.message` | #90       | Pending a dated run for the audit's "Root error boundary and 404". Kit `route-error-boundaries`. |
+| F-09 | Two layout files are quarantined from the layer rule (C6)                                     | #91       | Pending a dated run for the audit's "Files quarantined". Kit `unquarantine-layout-files`.        |

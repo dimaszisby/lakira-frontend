@@ -1,15 +1,11 @@
 "use client";
 
 import { SignOut, X } from "@phosphor-icons/react";
-import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useCallback, useState } from "react";
-import { toast } from "react-hot-toast";
 
 import { APP_NAME } from "@/constants/app";
-import { useLogoutUserMutation } from "@/features/auth/hooks/logout.mutation";
 import { cn } from "@/lib/cn";
-import { authRoutes } from "@/lib/routes";
 import { Button } from "@/ui/Button";
 import { Card } from "@/ui/Card";
 import { Modal } from "@/ui/Modal";
@@ -47,32 +43,16 @@ const SidebarContentWrapper = ({ includeCloseButton, onClose, children }: Sideba
   </div>
 );
 
-const Sidebar = ({ navItems, pathname, onLinkClick, isMobileOpen, onClose }: SidebarProps) => {
-  const router = useRouter();
+const Sidebar = ({
+  navItems,
+  pathname,
+  onLinkClick,
+  isMobileOpen,
+  onClose,
+  onLogout,
+  isLoggingOut,
+}: SidebarProps) => {
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
-
-  // The feature hook, not a second inline mutation. The one this replaced
-  // posted to the backend through the proxy and cleared nothing on this origin,
-  // so "Logged out successfully" was followed by `/login` redirecting back to
-  // the dashboard on a cookie that had never been removed.
-  const { logoutUser, isPending } = useLogoutUserMutation(
-    () => {
-      toast.success("Logged out successfully");
-      router.push(authRoutes.login());
-    },
-    (error) => {
-      console.error("Logout failed:", error);
-      toast.error("Logout failed. Please try again.");
-    },
-  );
-
-  // `onClick` may not be async — see `no-misused-promises` in
-  // `.claude/rules/code-style.md`. The rejection is swallowed here rather than
-  // left floating: `onError` above is what reports a failure to the user, and
-  // an uncaught `mutateAsync` rejection would surface as an unhandled promise.
-  const handleLogout = useCallback(() => {
-    logoutUser().catch(() => undefined);
-  }, [logoutUser]);
 
   const handleNavigationSelection = useCallback(() => {
     if (isMobileOpen) {
@@ -164,12 +144,12 @@ const Sidebar = ({ navItems, pathname, onLinkClick, isMobileOpen, onClose }: Sid
 
           <Button
             variant="destructive"
-            onClick={handleLogout}
-            disabled={isPending}
+            onClick={onLogout}
+            disabled={isLoggingOut}
             className="w-full"
             aria-label="Confirm logout"
           >
-            {isPending ? "Logging Out..." : "Log Out"}
+            {isLoggingOut ? "Logging Out..." : "Log Out"}
           </Button>
         </div>
       </Modal>

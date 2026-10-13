@@ -10,9 +10,11 @@ import { navItems } from "./type";
 
 interface LayoutProps {
   children: ReactNode;
+  onLogout: () => void;
+  isLoggingOut: boolean;
 }
 
-const Layout = ({ children }: LayoutProps) => {
+const Layout = ({ children, onLogout, isLoggingOut }: LayoutProps) => {
   const pathname = usePathname() ?? "/";
   const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
@@ -27,6 +29,8 @@ const Layout = ({ children }: LayoutProps) => {
         pathname={pathname}
         isMobileOpen={isMobileSidebarOpen}
         onClose={() => setMobileSidebarOpen(false)}
+        onLogout={onLogout}
+        isLoggingOut={isLoggingOut}
       />
 
       <div className="flex min-h-screen flex-1 flex-col lg:pl-64">
