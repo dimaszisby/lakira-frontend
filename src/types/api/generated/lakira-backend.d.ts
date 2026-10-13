@@ -80,7 +80,7 @@ export interface paths {
                     start?: string;
                     /** @description Absolute end ISO timestamp. Must be paired with `start` (and occur after it). */
                     end?: string;
-                    /** @description Relative range such as 7d or 12m (defaults to 30d; minimum is 1). Provide either this parameter or both `start` and `end`, not both; large windows may be rejected based on the bucket size. */
+                    /** @description Relative range such as 7d or 12m (defaults to 30d; minimum is 1). The range runs through the end of the current bucket in the `tz` zone, so it includes values logged today, and it starts that many hours, days, weeks, months or years before that end; `meta.range.endISO` is therefore in the future. Provide either this parameter or both `start` and `end`, not both; large windows may be rejected based on the bucket size. */
                     last?: string;
                     /** @description Maximum number of metrics to include */
                     limit?: number;
@@ -137,7 +137,7 @@ export interface paths {
                     start?: string;
                     /** @description Absolute end ISO timestamp. Must be paired with `start` (and occur after it). */
                     end?: string;
-                    /** @description Relative range such as 7d or 12m (defaults to 30d; minimum is 1). Provide either this parameter or both `start` and `end`, not both; large windows may be rejected based on the bucket size. */
+                    /** @description Relative range such as 7d or 12m (defaults to 30d; minimum is 1). The range runs through the end of the current bucket in the `tz` zone, so it includes values logged today, and it starts that many hours, days, weeks, months or years before that end; `meta.range.endISO` is therefore in the future. Provide either this parameter or both `start` and `end`, not both; large windows may be rejected based on the bucket size. */
                     last?: string;
                 };
                 header?: never;

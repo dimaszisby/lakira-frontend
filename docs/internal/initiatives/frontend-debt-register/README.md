@@ -1,8 +1,9 @@
 # Frontend debt register
 
 **Status:** Register and eight analyses written. Three rows closed since (F-08, F-09, F-14).
-Nothing in tiers 1 to 4 is ready: every row there waits on the owner, the backend or a package's
-maintainers. Top ready rows, in tier 5: F-17 to F-19, which the owner has on hold, then F-21.
+Top ready row: F-10, in tier 4, since backend #163 shipped the fix it waited on. Every other row
+in tiers 1 to 4 waits on the owner, the backend or a package's maintainers. In tier 5, F-17 to
+F-19 are ready and on hold by the owner, then F-21.
 **Slug:** `frontend-debt-register` · **Branch:** `docs/frontend-debt-register`
 
 The same scheme as lakira-backend's register (lakira-backend #159), so the two can be read side by
