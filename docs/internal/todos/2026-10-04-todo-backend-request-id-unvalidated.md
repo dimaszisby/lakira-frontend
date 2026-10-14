@@ -25,7 +25,7 @@ header before forwarding). It touches the same boundary as
 
 ## Checklist
 
-- [ ] Ask the user: raise both notes with the backend on the shared Notion page
+- [x] Ask the user: raise both notes with the backend on the shared Notion page
 - [x] Decide which side fixes the header: backend validation, or the proxy dropping it
 - [x] If the proxy drops it, add `x-request-id` to `FORWARDED_HEADER_BLOCKLIST` with a test
 
@@ -38,11 +38,14 @@ headers it leaves out, which it did not have before for any of them. The case wa
 against the unchanged route. On a production build against the local stack, a sign-in sent with
 `x-request-id: chosen-by-the-browser` came back with an id the backend minted.
 
+**2026-10-14, register row F-17.** Both notes are on the Notion page "FE and BE messages",
+Part 1, as two records raised that day: "`@sentry/node` 11 collects request data by default" and
+"The frontend proxy no longer forwards a browser's `x-request-id`". The backend's own check on
+the header is its row B-14. Re-read for the first record on backend `dev` at `1b868ff`: still on
+`@sentry/node` 10, with no `dataCollection` block.
+
 Still open:
 
-- The first item. Neither note has been raised on the Notion page; that is register row F-17,
-  which the owner has on hold. The backend found the header independently and tracks its own
-  check as B-14.
 - The line the proxy logs for a backend 5xx carries the backend's id as it arrives. With the
   header dropped that id is the backend's own for browser traffic; nothing here bounds its
   length before logging beyond the logger's 4,096-character cut.
