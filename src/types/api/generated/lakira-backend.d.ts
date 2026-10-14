@@ -85,7 +85,9 @@ export interface paths {
                     /** @description Maximum number of metrics to include */
                     limit?: number;
                 };
-                header?: never;
+                header?: {
+                    "If-None-Match"?: string;
+                };
                 path?: never;
                 cookie?: never;
             };
@@ -94,6 +96,8 @@ export interface paths {
                 /** @description Dashboard visualization payload */
                 200: {
                     headers: {
+                        "Cache-Control": components["headers"]["VisualizationCacheControl"];
+                        ETag: components["headers"]["ETag"];
                         [name: string]: unknown;
                     };
                     content: {
@@ -101,6 +105,15 @@ export interface paths {
                             data?: components["schemas"]["DashboardVisualizationResponse"];
                         };
                     };
+                };
+                /** @description Not modified: `If-None-Match` matched the current `ETag`. No body; reuse the stored response. */
+                304: {
+                    headers: {
+                        "Cache-Control": components["headers"]["VisualizationCacheControl"];
+                        ETag: components["headers"]["ETag"];
+                        [name: string]: unknown;
+                    };
+                    content?: never;
                 };
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
@@ -140,7 +153,9 @@ export interface paths {
                     /** @description Relative range such as 7d or 12m (defaults to 30d; minimum is 1). The range runs through the end of the current bucket in the `tz` zone, so it includes values logged today, and it starts that many hours, days, weeks, months or years before that end; `meta.range.endISO` is therefore in the future. Provide either this parameter or both `start` and `end`, not both; large windows may be rejected based on the bucket size. */
                     last?: string;
                 };
-                header?: never;
+                header?: {
+                    "If-None-Match"?: string;
+                };
                 path: {
                     /** @description UUID identifier of the metric */
                     metricId: components["schemas"]["Uuid"];
@@ -152,6 +167,8 @@ export interface paths {
                 /** @description Visualization payload for the requested metric */
                 200: {
                     headers: {
+                        "Cache-Control": components["headers"]["VisualizationCacheControl"];
+                        ETag: components["headers"]["ETag"];
                         [name: string]: unknown;
                     };
                     content: {
@@ -159,6 +176,15 @@ export interface paths {
                             data?: components["schemas"]["VisualizationResponse"];
                         };
                     };
+                };
+                /** @description Not modified: `If-None-Match` matched the current `ETag`. No body; reuse the stored response. */
+                304: {
+                    headers: {
+                        "Cache-Control": components["headers"]["VisualizationCacheControl"];
+                        ETag: components["headers"]["ETag"];
+                        [name: string]: unknown;
+                    };
+                    content?: never;
                 };
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
@@ -255,6 +281,7 @@ export interface paths {
                 /** @description User logged in successfully */
                 200: {
                     headers: {
+                        "Set-Cookie": components["headers"]["RefreshCookie"];
                         [name: string]: unknown;
                     };
                     content: {
@@ -299,6 +326,7 @@ export interface paths {
                 /** @description User logged out successfully */
                 200: {
                     headers: {
+                        "Set-Cookie": components["headers"]["ClearedRefreshCookie"];
                         [name: string]: unknown;
                     };
                     content: {
@@ -412,6 +440,7 @@ export interface paths {
                 /** @description New access token issued; new refresh cookie set */
                 200: {
                     headers: {
+                        "Set-Cookie": components["headers"]["RefreshCookie"];
                         [name: string]: unknown;
                     };
                     content: {
@@ -456,6 +485,7 @@ export interface paths {
                 /** @description User registered successfully */
                 201: {
                     headers: {
+                        "Set-Cookie": components["headers"]["RefreshCookie"];
                         [name: string]: unknown;
                     };
                     content: {
@@ -616,6 +646,7 @@ export interface paths {
                 /** @description Organization switched; new tokens issued */
                 200: {
                     headers: {
+                        "Set-Cookie": components["headers"]["RefreshCookie"];
                         [name: string]: unknown;
                     };
                     content: {
@@ -3152,7 +3183,28 @@ export interface components {
     };
     parameters: never;
     requestBodies: never;
-    headers: never;
+    headers: {
+        /**
+         * @description Clears the `lakira_refresh` cookie: an empty value with an expiry in the past, on the same `Path=/api/v1/auth/refresh`, `HttpOnly` and `SameSite=Strict`.
+         * @example lakira_refresh=; Path=/api/v1/auth/refresh; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Strict
+         */
+        ClearedRefreshCookie: string;
+        /**
+         * @description A strong validator for the response body: a quoted digest that changes whenever the body does. Send it back in `If-None-Match` to get a 304 when nothing changed.
+         * @example "mJ3k0sVw2xQ9uYtR1aBcDeFgHiJ"
+         */
+        ETag: string;
+        /**
+         * @description Sets the `lakira_refresh` cookie to a new opaque refresh token. The cookie is `HttpOnly` and `SameSite=Strict`, scoped to `Path=/api/v1/auth/refresh`, with `Max-Age` set to the refresh token's lifetime. `Secure` is added in staging and production. A browser sends it to `POST /auth/refresh` only; script cannot read it.
+         * @example lakira_refresh=dGVzdC1yZWZyZXNoLXRva2Vu; Max-Age=604800; Path=/api/v1/auth/refresh; HttpOnly; SameSite=Strict
+         */
+        RefreshCookie: string;
+        /**
+         * @description Always `private, no-cache`: a client may store the response and must revalidate it with `If-None-Match` before each reuse.
+         * @example private, no-cache
+         */
+        VisualizationCacheControl: string;
+    };
     pathItems: never;
 }
 export type $defs = Record<string, never>;
