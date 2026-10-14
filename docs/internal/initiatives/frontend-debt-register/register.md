@@ -1,6 +1,6 @@
 # Frontend debt register
 
-**As of:** 2026-10-14, frontend `dev` at `14cbed5`, with F-08, F-09, F-10, F-14 and F-17 to F-19 closed. Ranked by [D-01](decisions.md).
+**As of:** 2026-10-14, frontend `dev` at `be6b88d`, with F-08, F-09, F-10, F-14, F-17 to F-19 and F-21 closed. Ranked by [D-01](decisions.md).
 
 **"What's next" is the first row below whose state is `ready`.** A row above it that is waiting on
 someone is reported with it, as a gap. How rows are added and closed:
@@ -62,21 +62,21 @@ Listed, not analysed ([D-03](decisions.md)). Between the repos:
 
 | ID   | Item                                                                                                                                                                                | Sev | State                                                   | Source                                                                       |
 | ---- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | ------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| F-15 | One spec sync and type regeneration when the backend documents `Set-Cookie` and the 304 (B-13)                                                                                      | P3  | BE                                                      | N2 "Set-Cookie documented on the four auth endpoints"                        |
+| F-15 | One spec sync and type regeneration when the backend documents `Set-Cookie` and the 304 (B-13)                                                                                      | P3  | ready; backend #168 shipped it                          | N2 "Set-Cookie documented on the four auth endpoints"                        |
 | F-16 | Link the shared pre-production smoke sequence once the backend writes it (B-15)                                                                                                     | P3  | BE                                                      | N1 "Pre-production smoke-check sequence"; `2026-02-16-todo-cicd-overview.md` |
 | F-52 | Three Part 1 records stay on the Notion page until they can be archived: the `@sentry/node` 11 note, the `x-request-id` heads-up (B-14), and the acknowledged relative-range record | —   | BE for the first two; the third at the next Notion edit | N1; closed rows F-17 and F-18                                                |
 
 Security, the proxy and the repository:
 
-| ID   | Item                                                                                                                  | Sev | State                                              | Source                                                             |
-| ---- | --------------------------------------------------------------------------------------------------------------------- | --- | -------------------------------------------------- | ------------------------------------------------------------------ |
-| F-20 | The proxy forwards upstream error bodies verbatim                                                                     | low | owner (O-06)                                       | `2026-09-20-todo-proxy-forwards-upstream-error-bodies.md`; A10 § 7 |
-| F-21 | `style-src` still allows `'unsafe-inline'`                                                                            | —   | ready                                              | `todo-security-20251126.md`, next cycle, item 3                    |
-| F-22 | `console.warn` and `console.log` are not scrubbed; nothing in CI shows that Next still prints through `console.error` | —   | accepted in ADR-0029; one probe for the next audit | `2026-10-10-todo-reaudit-findings.md` (N7, left as found)          |
-| F-23 | `next.config.ts` reads `NEXT_PUBLIC_API_BASE_URL` raw, outside the validated environment                              | —   | kept on purpose                                    | `2026-08-24-todo-saas-readiness.md` phase 3                        |
-| F-24 | `dev` and `main` have no server-side branch protection                                                                | —   | owner (an action, not code)                        | `2026-08-17-todo-claude-code-setup.md`                             |
-| F-25 | `main` shares no history with `dev`                                                                                   | —   | owner (O-08)                                       | `2026-09-24-todo-main-has-unrelated-history.md`                    |
-| F-26 | Security follow-ups of 2025-11-26, never triaged: moving protected fetching into Server Components                    | —   | owner                                              | `todo-security-20251126.md`, next cycle, item 2                    |
+| ID   | Item                                                                                                                     | Sev | State                                              | Source                                                             |
+| ---- | ------------------------------------------------------------------------------------------------------------------------ | --- | -------------------------------------------------- | ------------------------------------------------------------------ |
+| F-20 | The proxy forwards upstream error bodies verbatim                                                                        | low | owner (O-06)                                       | `2026-09-20-todo-proxy-forwards-upstream-error-bodies.md`; A10 § 7 |
+| F-54 | The policy allows `https://fonts.googleapis.com` and `https://fonts.gstatic.com`, which `next/font` may make unnecessary | —   | ready; not verified                                | `2026-10-14-todo-inline-style-stays.md` § Discovered               |
+| F-22 | `console.warn` and `console.log` are not scrubbed; nothing in CI shows that Next still prints through `console.error`    | —   | accepted in ADR-0029; one probe for the next audit | `2026-10-10-todo-reaudit-findings.md` (N7, left as found)          |
+| F-23 | `next.config.ts` reads `NEXT_PUBLIC_API_BASE_URL` raw, outside the validated environment                                 | —   | kept on purpose                                    | `2026-08-24-todo-saas-readiness.md` phase 3                        |
+| F-24 | `dev` and `main` have no server-side branch protection                                                                   | —   | owner (an action, not code)                        | `2026-08-17-todo-claude-code-setup.md`                             |
+| F-25 | `main` shares no history with `dev`                                                                                      | —   | owner (O-08)                                       | `2026-09-24-todo-main-has-unrelated-history.md`                    |
+| F-26 | Security follow-ups of 2025-11-26, never triaged: moving protected fetching into Server Components                       | —   | owner                                              | `todo-security-20251126.md`, next cycle, item 2                    |
 
 Errors and forms:
 
@@ -102,6 +102,7 @@ Interface, accessibility and end-to-end checks:
 | F-49 | The closed mobile drawer is moved off screen and not hidden, so its links and Sign Out button stay in the tab order                                                                | —   | with F-48                                  | same                                                                                                             |
 | F-50 | No Cypress spec signs out, public or stack                                                                                                                                         | —   | ready                                      | same                                                                                                             |
 | F-51 | Nothing checks the age of the local backend image before a stack run; twice the suite ran against a backend days behind `dev`                                                      | —   | ready                                      | `2026-10-13-todo-relative-range-includes-today.md` § Discovered; `2026-10-08-todo-dashboard-count-assertions.md` |
+| F-53 | No `<Toaster>` is mounted, so the sign-out toasts in `AppShell.tsx` show nothing                                                                                                   | —   | ready                                      | `2026-10-14-todo-inline-style-stays.md` § Discovered                                                             |
 
 Performance:
 
@@ -158,3 +159,4 @@ Rows move here when their fix merges, with the PR.
 | F-17 | The `@sentry/node` 11 note was never raised on the Notion page                                                         | #95       | Raised 2026-10-14 as a Part 1 record, with a second record saying the proxy no longer forwards `x-request-id`. The backend's part is its to schedule.                                                                                      |
 | F-18 | The backend's answer of 2026-10-13 on relative ranges is not acknowledged on the Notion page                           | #95       | Acknowledged 2026-10-14 on the record, by then Completed by backend #163, naming #93 and #94. Left on the live page; archiving it is open to either side.                                                                                  |
 | F-19 | Two todos say things that are no longer true: an item already raised, stale line numbers, an inference since confirmed | #95       | Corrected in `2026-10-02-todo-proxy-client-ip-forwarding.md` and `2026-10-08-todo-dashboard-count-assertions.md`, and in `2026-10-04-todo-backend-request-id-unvalidated.md`, which F-17 made stale.                                       |
+| F-21 | `style-src` still allows `'unsafe-inline'`                                                                             | #96       | Decided to keep, not fixed: [ADR-0030](../../../explanation/decisions/adr-0030-inline-style-stays-allowed.md). A unit test now pins what CSS may fetch. `2026-10-14-todo-inline-style-stays.md`.                                           |

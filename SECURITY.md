@@ -53,8 +53,9 @@ Security-relevant items already known and tracked — please do not re-report th
 - Error monitoring is off unless the deployment sets `SENTRY_DSN`. It runs on the server only,
   and browser stack traces are not symbolicated (ADR-0024). CSP violation reports are written
   to the server's log stream at `warn`, which is not forwarded.
-- The Content Security Policy still allows inline styles (`style-src 'unsafe-inline'`). Script is
-  allowed by per-request nonce only (ADR-0026).
+- The Content Security Policy still allows inline styles (`style-src 'unsafe-inline'`), by
+  decision: what CSS may fetch is limited to known origins instead (ADR-0030). Script is allowed
+  by per-request nonce only (ADR-0026).
 - Log lines are scrubbed by pattern, which is a net and not a guarantee. The logger's entries and
   whatever the server prints with `console.error` are covered (ADR-0027, ADR-0029).
   `console.warn`, `console.log` and a dependency that writes to the output streams directly are

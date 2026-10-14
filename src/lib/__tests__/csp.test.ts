@@ -19,6 +19,8 @@ const directive = (policy: string, name: string): string[] => {
 const NONCE = "abc123";
 const SCRIPT_SRC = "script-src";
 const UNSAFE_INLINE = "'unsafe-inline'";
+const CONNECT_SRC = "connect-src";
+const API_ORIGIN = "https://api.example.test";
 const production = buildContentSecurityPolicy({ nonce: NONCE, isDev: false, apiOrigin: "" });
 const development = buildContentSecurityPolicy({ nonce: NONCE, isDev: true, apiOrigin: "" });
 
@@ -60,14 +62,41 @@ describe("buildContentSecurityPolicy", () => {
   });
 
   it("adds the API origin to connect-src when there is one", () => {
-    expect(directive(production, "connect-src")).toEqual(["'self'"]);
+    expect(directive(production, CONNECT_SRC)).toEqual(["'self'"]);
 
     const withApi = buildContentSecurityPolicy({
       nonce: NONCE,
       isDev: false,
-      apiOrigin: "https://api.example.test",
+      apiOrigin: API_ORIGIN,
     });
-    expect(directive(withApi, "connect-src")).toEqual(["'self'", "https://api.example.test"]);
+    expect(directive(withApi, CONNECT_SRC)).toEqual(["'self'", API_ORIGIN]);
+  });
+
+  // Inline style stays allowed because CSS can leak data only by fetching
+  // something, and these directives decide what it may fetch (ADR-0030). A
+  // wildcard, a bare scheme or a new host here would undo that.
+  it("keeps every source a stylesheet can fetch from on a short list (ADR-0030)", () => {
+    const allowed = new Set([
+      "'self'",
+      UNSAFE_INLINE,
+      "data:",
+      "blob:",
+      "https://fonts.googleapis.com",
+      "https://fonts.gstatic.com",
+      API_ORIGIN,
+    ]);
+    const withApi = buildContentSecurityPolicy({
+      nonce: NONCE,
+      isDev: false,
+      apiOrigin: API_ORIGIN,
+    });
+
+    for (const policy of [production, withApi]) {
+      for (const name of ["default-src", "style-src", "img-src", "font-src", CONNECT_SRC]) {
+        const outside = directive(policy, name).filter((source) => !allowed.has(source));
+        expect({ [name]: outside }).toEqual({ [name]: [] });
+      }
+    }
   });
 
   it("is a single line with no stray separators", () => {

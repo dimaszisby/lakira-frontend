@@ -53,8 +53,10 @@ export const buildContentSecurityPolicy = ({ nonce, isDev, apiOrigin }: PolicyIn
   return [
     "default-src 'self'",
     `script-src ${scriptSrc.join(" ")}`,
-    // Inline styles stay allowed: React style attributes and next/font need
-    // them. Narrower than script, and recorded in ADR-0026.
+    // Inline styles stay allowed (ADR-0030). Style attributes cannot carry a
+    // nonce, and the app sets user-chosen colours and measured sizes through
+    // them. CSS leaks data only by fetching, and img-src, font-src and
+    // connect-src keep that to known origins; csp.test.ts pins those lists.
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "img-src 'self' data: blob:",
     `connect-src ${connectSrc.join(" ")}`,
