@@ -13,14 +13,14 @@ import {
   TimeScale,
   Tooltip,
 } from "chart.js";
-import { memo, useMemo } from "react";
+import { memo, useId, useMemo } from "react";
 import { Line } from "react-chartjs-2";
 
 import { cn } from "@/lib/cn";
 
 import { chartHeightStyle } from "../chartHeightStyle";
 import type { VizResponse } from "../types";
-import { isAllMissing, seriesToXY, toTimeUnit } from "../viz-helpers";
+import { buildChartSummary, isAllMissing, seriesToXY, toTimeUnit } from "../viz-helpers";
 
 // Prevent double register on HMR
 let registered = false;
@@ -37,6 +37,7 @@ type Props = {
 };
 
 const MetricChart = ({ data, goalValue, height = 260, className }: Props) => {
+  const summaryId = useId();
   const xy = useMemo(() => seriesToXY(data.series), [data.series]);
   const hasGoal = Number.isFinite(goalValue ?? Number.NaN);
   const normalizedUnit = normalizeUnit(data.meta.unit);
@@ -116,15 +117,22 @@ const MetricChart = ({ data, goalValue, height = 260, className }: Props) => {
     },
   };
 
+  // The summary is a sibling, not a child: the children of role="img" are presentational.
   return (
-    <div
-      role="img"
-      aria-label={`Metric chart for ${metricIdLabel}`}
-      className={cn("chart-box", className)}
-      style={chartHeightStyle(height)}
-    >
-      <Line data={{ datasets }} options={options} />
-    </div>
+    <>
+      <div
+        role="img"
+        aria-label={`Metric chart for ${metricIdLabel}`}
+        aria-describedby={summaryId}
+        className={cn("chart-box", className)}
+        style={chartHeightStyle(height)}
+      >
+        <Line data={{ datasets }} options={options} />
+      </div>
+      <p id={summaryId} className="sr-only">
+        {buildChartSummary(data, hasGoal ? goalValue : null)}
+      </p>
+    </>
   );
 };
 

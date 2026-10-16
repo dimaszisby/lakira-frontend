@@ -274,8 +274,14 @@ Implementation ideas:
 
 The wrapper is `src/features/data-visualizations/components/MetricChart.tsx`. It gives the chart
 `role="img"` and an `aria-label`, and shows "No data" with `role="status"` when the series is
-empty. It renders no text summary of the values itself, so a page that shows a chart has to
-provide one.
+empty. It also renders the text summary, so a page that shows a chart does not add its own: a
+visually hidden paragraph beside the chart, which the chart's `aria-describedby` points at. It is
+built by `buildChartSummary` in `src/features/data-visualizations/viz-helpers.ts`, for example
+"From 1 Feb 2026 to 3 Feb 2026: average 16 kg, minimum 12 kg, maximum 20 kg, from 2 logs." Dates
+are written in the zone the backend bucketed in and in a fixed locale, because the dashboard
+renders the chart on the server too.
+
+The label still names the metric by its id, not its name: register row F-55.
 
 ### 7.4 Toasts & Notifications
 

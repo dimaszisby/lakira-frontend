@@ -208,9 +208,12 @@ corrected: "`/app`" for the routes, and a headless library "if adopted later" (A
 
 Left as found:
 
-- [ ] Found: the baseline says a chart must have a text summary of its values. `MetricChart.tsx`
+- [x] Found: the baseline says a chart must have a text summary of its values. `MetricChart.tsx`
       gives the chart a role and a label and renders no summary. Whether each page that shows a
-      chart provides one was not checked → out of scope; a candidate for the next audit.
+      chart provides one was not checked → out of scope; a candidate for the next audit. Done
+      2026-10-17 on `fix/chart-text-summary`, register row F-32: neither page provided one, and
+      `MetricChart` now renders it (kit `chart-text-summary`). The label naming the metric by its
+      id is F-55.
 
 **N15: done 2026-10-13 on `fix/log-keeps-exact-time`.** Node 24.21.0, production build, local
 backend and Mailpit.
