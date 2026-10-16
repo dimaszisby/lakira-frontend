@@ -63,6 +63,7 @@ For what classes to reach for, see `.claude/rules/styling.md`.
 
 ## Other active rules worth knowing
 
+- `no-restricted-syntax` rejects reading `.message` off an error in a component file (`src/components/{ui,layout}`, `src/features`, `src/app`, `.tsx`, tests excluded): render `handleApiError(error)`, or fixed copy in a boundary. It matches by name — `error`, `err`, `e`, `<anything>Error`, read directly or as a property such as `mutation.error` — so React Hook Form's `errors.<field>?.message` stays allowed. It cannot see a destructured `{ message }`, `String(error)`, or an error held under another name. `src/__tests__/eslint-error-message.test.ts` fails if a later config block drops the selectors. Added 2026-10-16 (register row F-28).
 - `react/jsx-no-leaked-render` — `{count && <X/>}` renders a literal `0`. Use a ternary or `Boolean()`.
 - `react/no-unstable-nested-components` — do not define a component inside another component's body.
 - `promise/catch-or-return`, `promise/no-nesting`.

@@ -84,8 +84,9 @@ Left as found:
 - [x] Found: a failed profile load is swallowed into `data: null` by `fetchUserProfile`, by
       design, so the account page cannot say why it failed → out of scope. Fixed 2026-10-16,
       register row F-27, kit `profile-load-errors`.
-- [ ] Found: nothing stops the next component from rendering `error.message`. A lint rule could →
-      out of scope; the rule is now written in `.claude/rules/data-access.md`.
+- [x] Found: nothing stops the next component from rendering `error.message`. A lint rule could →
+      out of scope; the rule is now written in `.claude/rules/data-access.md`. Fixed 2026-10-16,
+      register row F-28, `2026-10-16-todo-error-message-lint-rule.md`.
 - [ ] Found: in a form with several mutations, an old create or update error still wins over a
       newer delete error, as before this change → out of scope.
 
