@@ -53,6 +53,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0028](./adr-0028-raw-html-is-banned-by-lint.md)                                | The app renders no raw HTML; lint bans it and no sanitiser is installed     | Accepted       | 2026-10-07 | `D-01`    |
 | [ADR-0029](./adr-0029-the-servers-console-error-output-is-scrubbed.md)              | The server's `console.error` output is scrubbed                             | Accepted       | 2026-10-11 | —         |
 | [ADR-0030](./adr-0030-inline-style-stays-allowed.md)                                | Inline style stays allowed; what CSS may fetch is what is guarded           | Accepted       | 2026-10-14 | —         |
+| [ADR-0031](./adr-0031-fonts-are-self-hosted.md)                                     | Fonts are self-hosted; the CSP names no font host                           | Accepted       | 2026-10-16 | —         |
 
 ## Where the other decisions went
 

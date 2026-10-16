@@ -3,7 +3,7 @@
 - **Status:** Accepted
 - **Date:** 2026-10-14
 - **Origin:** debt register row F-21 — [`2026-10-14-todo-inline-style-stays.md`](../../internal/todos/2026-10-14-todo-inline-style-stays.md)
-- **Related:** [ADR-0026](./adr-0026-script-runs-by-nonce.md), which made script nonce-only and left this exposure recorded
+- **Related:** [ADR-0026](./adr-0026-script-runs-by-nonce.md), which made script nonce-only and left this exposure recorded; [ADR-0031](./adr-0031-fonts-are-self-hosted.md), which removes the two Google Fonts hosts from the list below
 
 ---
 

@@ -41,16 +41,8 @@ describe("buildContentSecurityPolicy", () => {
   it("keeps the directives the static policy had", () => {
     expect(directive(production, "default-src")).toEqual(["'self'"]);
     expect(directive(production, "img-src")).toEqual(["'self'", "data:", "blob:"]);
-    expect(directive(production, "font-src")).toEqual([
-      "'self'",
-      "https://fonts.gstatic.com",
-      "data:",
-    ]);
-    expect(directive(production, "style-src")).toEqual([
-      "'self'",
-      UNSAFE_INLINE,
-      "https://fonts.googleapis.com",
-    ]);
+    expect(directive(production, "font-src")).toEqual(["'self'", "data:"]);
+    expect(directive(production, "style-src")).toEqual(["'self'", UNSAFE_INLINE]);
     expect(directive(production, "frame-ancestors")).toEqual(["'self'"]);
     expect(directive(production, "base-uri")).toEqual(["'self'"]);
     expect(directive(production, "form-action")).toEqual(["'self'"]);
@@ -74,17 +66,10 @@ describe("buildContentSecurityPolicy", () => {
 
   // Inline style stays allowed because CSS can leak data only by fetching
   // something, and these directives decide what it may fetch (ADR-0030). A
-  // wildcard, a bare scheme or a new host here would undo that.
+  // wildcard, a bare scheme or a new host here would undo that. Fonts are
+  // self-hosted, so no font host is on the list (ADR-0031).
   it("keeps every source a stylesheet can fetch from on a short list (ADR-0030)", () => {
-    const allowed = new Set([
-      "'self'",
-      UNSAFE_INLINE,
-      "data:",
-      "blob:",
-      "https://fonts.googleapis.com",
-      "https://fonts.gstatic.com",
-      API_ORIGIN,
-    ]);
+    const allowed = new Set(["'self'", UNSAFE_INLINE, "data:", "blob:", API_ORIGIN]);
     const withApi = buildContentSecurityPolicy({
       nonce: NONCE,
       isDev: false,
