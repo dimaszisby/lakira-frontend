@@ -62,6 +62,17 @@ describe("MetricChart", () => {
     expect(screen.getByRole("status")).toHaveTextContent("No data");
     expect(screen.getByRole("status")).toHaveClass(EMPTY_CLASS);
     expect(screen.queryByTestId("metric-chart-line")).not.toBeInTheDocument();
+    expect(screen.queryByText(/from \d+ logs?\./)).not.toBeInTheDocument();
+  });
+
+  it("describes the chart with a summary of its values", () => {
+    render(<MetricChart data={baseData} goalValue={18} />);
+
+    expect(
+      screen.getByRole("img", { name: /metric chart for metric-1/i }),
+    ).toHaveAccessibleDescription(
+      /average 16 kg, minimum 12 kg, maximum 20 kg, from 2 logs\. Goal 18 kg\.$/,
+    );
   });
 
   it("renders chart with metric dataset and expected options", () => {
