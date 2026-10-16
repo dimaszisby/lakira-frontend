@@ -445,6 +445,18 @@ const config = [
       "promise/no-nesting": "off",
     },
   },
+
+  /* Types generated from the OpenAPI snapshot.
+   *
+   * `npm run api:types:generate` writes this file and nothing edits it by hand, so a
+   * repeated literal there cannot become a constant. Header names repeat once per
+   * operation that declares them (backend #168). Every other rule still runs. */
+  {
+    files: ["src/types/api/generated/**"],
+    rules: {
+      "sonarjs/no-duplicate-string": "off",
+    },
+  },
 ];
 
 export default config;
