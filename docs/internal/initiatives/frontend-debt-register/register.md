@@ -1,6 +1,6 @@
 # Frontend debt register
 
-**As of:** 2026-10-16, frontend `dev` at `2c97769`, with F-08, F-09, F-10, F-14, F-15, F-17 to F-19, F-21 and F-54 closed. Ranked by [D-01](decisions.md).
+**As of:** 2026-10-16, frontend `dev` at `8596d43`, with F-08, F-09, F-10, F-14, F-15, F-17 to F-19, F-21, F-27 and F-54 closed. Ranked by [D-01](decisions.md).
 
 **"What's next" is the first row below whose state is `ready`.** A row above it that is waiting on
 someone is reported with it, as a gap. How rows are added and closed:
@@ -80,7 +80,6 @@ Errors and forms:
 
 | ID   | Item                                                                                                  | Sev | State            | Source                                                     |
 | ---- | ----------------------------------------------------------------------------------------------------- | --- | ---------------- | ---------------------------------------------------------- |
-| F-27 | A failed profile load is swallowed into `null`, so the account page cannot say why it failed          | —   | ready            | `2026-10-10-todo-reaudit-findings.md` (N12, left as found) |
 | F-28 | Nothing stops the next component from rendering `error.message`; a lint rule could                    | —   | ready            | same                                                       |
 | F-29 | In a form with several mutations an old error wins over a newer one                                   | —   | ready            | same                                                       |
 | F-30 | Two entries picked by hand for the same minute are refused; an edit through the picker zeroes seconds | —   | owner (O-05), BE | `2026-10-10-todo-reaudit-findings.md` (N15, left as found) |
@@ -159,4 +158,5 @@ Rows move here when their fix merges, with the PR.
 | F-18 | The backend's answer of 2026-10-13 on relative ranges is not acknowledged on the Notion page                             | #95       | Acknowledged 2026-10-14 on the record, by then Completed by backend #163, naming #93 and #94. Left on the live page; archiving it is open to either side.                                                                                         |
 | F-19 | Two todos say things that are no longer true: an item already raised, stale line numbers, an inference since confirmed   | #95       | Corrected in `2026-10-02-todo-proxy-client-ip-forwarding.md` and `2026-10-08-todo-dashboard-count-assertions.md`, and in `2026-10-04-todo-backend-request-id-unvalidated.md`, which F-17 made stale.                                              |
 | F-21 | `style-src` still allows `'unsafe-inline'`                                                                               | #96       | Decided to keep, not fixed: [ADR-0030](../../../explanation/decisions/adr-0030-inline-style-stays-allowed.md). A unit test now pins what CSS may fetch. `2026-10-14-todo-inline-style-stays.md`.                                                  |
+| F-27 | A failed profile load is swallowed into `null`, so the account page cannot say why it failed                             | #100      | `fetchUserProfile` rethrows, and the profile query does not retry a 4xx, so the page names the failure at once. Kit `profile-load-errors`, D-01.                                                                                                  |
 | F-54 | The policy allows `https://fonts.googleapis.com` and `https://fonts.gstatic.com`, which `next/font` may make unnecessary | #99       | Both removed: `next/font` self-hosts the fonts, and a browser run with the policy enforced loaded both with no violation. [ADR-0031](../../../explanation/decisions/adr-0031-fonts-are-self-hosted.md). `2026-10-16-todo-csp-drop-font-hosts.md`. |
