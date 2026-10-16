@@ -23,11 +23,12 @@ reasons are in [ADR-0030](../../explanation/decisions/adr-0030-inline-style-stay
 - [ ] Found: no `<Toaster>` is mounted anywhere under `src/`, so the two `toast()` calls in
       `src/app/(app)/_components/AppShell.tsx` (signing out, and a failed sign-out) show nothing
       -> out of scope; register row F-53.
-- [ ] Found: the fonts come from `next/font/google`, which downloads them at build time and serves
+- [x] Found: the fonts come from `next/font/google`, which downloads them at build time and serves
       them from this origin, so `https://fonts.googleapis.com` in `style-src` and
       `https://fonts.gstatic.com` in `font-src` may be unused. Inference from how `next/font`
       works; no request was observed -> out of scope; register row F-54. Removing them would
-      shorten the list ADR-0030 guards.
+      shorten the list ADR-0030 guards. Confirmed and removed 2026-10-16:
+      `2026-10-16-todo-csp-drop-font-hosts.md`, ADR-0031.
 - [x] Found: `api:spec:check` fails since backend #168 changed the published spec -> out of
       scope; it is register row F-15, whose state now says it is ready.
 

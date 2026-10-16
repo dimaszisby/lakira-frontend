@@ -57,10 +57,11 @@ export const buildContentSecurityPolicy = ({ nonce, isDev, apiOrigin }: PolicyIn
     // nonce, and the app sets user-chosen colours and measured sizes through
     // them. CSS leaks data only by fetching, and img-src, font-src and
     // connect-src keep that to known origins; csp.test.ts pins those lists.
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    // Fonts come from next/font on this origin, so no font host is named (ADR-0031).
+    "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     `connect-src ${connectSrc.join(" ")}`,
-    "font-src 'self' https://fonts.gstatic.com data:",
+    "font-src 'self' data:",
     "object-src 'none'",
     "frame-ancestors 'self'",
     "base-uri 'self'",

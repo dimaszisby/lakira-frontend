@@ -28,10 +28,10 @@ const staticContentSecurityPolicy = {
   value: [
     "default-src 'self'",
     "script-src 'self'",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     `connect-src ${connectSources.join(" ")}`,
-    "font-src 'self' https://fonts.gstatic.com data:",
+    "font-src 'self' data:",
     "object-src 'none'",
     "frame-ancestors 'self'",
     "base-uri 'self'",
