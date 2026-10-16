@@ -1,5 +1,39 @@
 {
   "components": {
+    "headers": {
+      "ClearedRefreshCookie": {
+        "description": "Clears the `lakira_refresh` cookie: an empty value with an expiry in the past, on the same `Path=/api/v1/auth/refresh`, `HttpOnly` and `SameSite=Strict`.",
+        "example": "lakira_refresh=; Path=/api/v1/auth/refresh; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Strict",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "ETag": {
+        "description": "A strong validator for the response body: a quoted digest that changes whenever the body does. Send it back in `If-None-Match` to get a 304 when nothing changed.",
+        "example": "\"mJ3k0sVw2xQ9uYtR1aBcDeFgHiJ\"",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "RefreshCookie": {
+        "description": "Sets the `lakira_refresh` cookie to a new opaque refresh token. The cookie is `HttpOnly` and `SameSite=Strict`, scoped to `Path=/api/v1/auth/refresh`, with `Max-Age` set to the refresh token's lifetime. `Secure` is added in staging and production. A browser sends it to `POST /auth/refresh` only; script cannot read it.",
+        "example": "lakira_refresh=dGVzdC1yZWZyZXNoLXRva2Vu; Max-Age=604800; Path=/api/v1/auth/refresh; HttpOnly; SameSite=Strict",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      },
+      "VisualizationCacheControl": {
+        "description": "Always `private, no-cache`: a client may store the response and must revalidate it with `If-None-Match` before each reuse.",
+        "example": "private, no-cache",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
+    },
     "parameters": {},
     "responses": {
       "BadRequestError": {
@@ -2575,6 +2609,16 @@
               "minimum": 1,
               "type": "integer"
             }
+          },
+          {
+            "in": "header",
+            "name": "If-None-Match",
+            "required": false,
+            "schema": {
+              "description": "The `ETag` of a response stored earlier. When it still matches, the answer is a 304 with no body.",
+              "example": "\"mJ3k0sVw2xQ9uYtR1aBcDeFgHiJ\"",
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -2598,7 +2642,26 @@
                 }
               }
             },
-            "description": "Dashboard visualization payload"
+            "description": "Dashboard visualization payload",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/VisualizationCacheControl"
+              },
+              "ETag": {
+                "$ref": "#/components/headers/ETag"
+              }
+            }
+          },
+          "304": {
+            "description": "Not modified: `If-None-Match` matched the current `ETag`. No body; reuse the stored response.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/VisualizationCacheControl"
+              },
+              "ETag": {
+                "$ref": "#/components/headers/ETag"
+              }
+            }
           },
           "400": {
             "$ref": "#/components/responses/BadRequestError"
@@ -2709,6 +2772,16 @@
               "pattern": "^[1-9][0-9]*(h|d|w|m|y)$",
               "type": "string"
             }
+          },
+          {
+            "in": "header",
+            "name": "If-None-Match",
+            "required": false,
+            "schema": {
+              "description": "The `ETag` of a response stored earlier. When it still matches, the answer is a 304 with no body.",
+              "example": "\"mJ3k0sVw2xQ9uYtR1aBcDeFgHiJ\"",
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -2732,7 +2805,26 @@
                 }
               }
             },
-            "description": "Visualization payload for the requested metric"
+            "description": "Visualization payload for the requested metric",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/VisualizationCacheControl"
+              },
+              "ETag": {
+                "$ref": "#/components/headers/ETag"
+              }
+            }
+          },
+          "304": {
+            "description": "Not modified: `If-None-Match` matched the current `ETag`. No body; reuse the stored response.",
+            "headers": {
+              "Cache-Control": {
+                "$ref": "#/components/headers/VisualizationCacheControl"
+              },
+              "ETag": {
+                "$ref": "#/components/headers/ETag"
+              }
+            }
           },
           "400": {
             "$ref": "#/components/responses/BadRequestError"
@@ -2829,7 +2921,12 @@
                 }
               }
             },
-            "description": "User logged in successfully"
+            "description": "User logged in successfully",
+            "headers": {
+              "Set-Cookie": {
+                "$ref": "#/components/headers/RefreshCookie"
+              }
+            }
           },
           "400": {
             "$ref": "#/components/responses/BadRequestError"
@@ -2865,7 +2962,12 @@
                 }
               }
             },
-            "description": "User logged out successfully"
+            "description": "User logged out successfully",
+            "headers": {
+              "Set-Cookie": {
+                "$ref": "#/components/headers/ClearedRefreshCookie"
+              }
+            }
           },
           "400": {
             "$ref": "#/components/responses/BadRequestError"
@@ -2992,7 +3094,12 @@
                 }
               }
             },
-            "description": "New access token issued; new refresh cookie set"
+            "description": "New access token issued; new refresh cookie set",
+            "headers": {
+              "Set-Cookie": {
+                "$ref": "#/components/headers/RefreshCookie"
+              }
+            }
           },
           "400": {
             "$ref": "#/components/responses/BadRequestError"
@@ -3034,7 +3141,12 @@
                 }
               }
             },
-            "description": "User registered successfully"
+            "description": "User registered successfully",
+            "headers": {
+              "Set-Cookie": {
+                "$ref": "#/components/headers/RefreshCookie"
+              }
+            }
           },
           "400": {
             "$ref": "#/components/responses/BadRequestError"
@@ -3176,7 +3288,12 @@
                 }
               }
             },
-            "description": "Organization switched; new tokens issued"
+            "description": "Organization switched; new tokens issued",
+            "headers": {
+              "Set-Cookie": {
+                "$ref": "#/components/headers/RefreshCookie"
+              }
+            }
           },
           "400": {
             "$ref": "#/components/responses/BadRequestError"
