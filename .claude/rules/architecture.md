@@ -74,7 +74,7 @@ App Router only. There is no `src/pages`. Route groups: `(app)` for the authed s
 Each route group has an `error.tsx`, so a render error keeps the group's layout around it. `dashboard` and `metrics/[metricId]` have their own with a more specific title. `src/app/global-error.tsx` is the last resort: it replaces the whole document, and it is what an error thrown by a group's own `layout.tsx` still reaches.
 
 - **Every `error.tsx` renders `RouteErrorPanel`** (`src/components/ui/RouteErrorPanel.tsx`) and passes a title. Do not write a second fallback.
-- **Never render `error.message` in a boundary.** The panel shows fixed copy and the `digest`. Same rule as `.claude/rules/data-access.md` for API errors.
+- **Never render `error.message` in a boundary.** The panel shows fixed copy and the `digest`. Same rule as `.claude/rules/data-access.md` for API errors, and the same lint rule enforces it.
 - **Pass Next's `retry`, not `reset`.** `retry` fetches the segment again; `reset` only clears the error (Next 16.3; kit `route-error-boundaries`, D-01).
 - A new `error.tsx` must be added to the list in `src/app/__tests__/route-error-boundaries.test.tsx`, which fails otherwise.
 

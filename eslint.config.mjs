@@ -52,6 +52,29 @@ const OPACITY_TINT_PATTERN =
 const TINT_MESSAGE =
   "Opacity tints belong in a token recipe (src/styles/tokens/components), not a class string.";
 
+/* A component never renders an error's own message. For an API error that is the
+ * Axios transport text ("Request failed with status code 409"), not the server's
+ * sentence; a route boundary shows fixed copy. See .claude/rules/data-access.md.
+ *
+ * Matched by name: `error`, `err`, `e` or `<anything>Error`, read directly or as a
+ * property (`mutation.error`). React Hook Form's `errors.<field>?.message` ends in a
+ * field name and stays allowed. src/__tests__/eslint-error-message.test.ts fails if a
+ * component directory loses them. */
+const ERROR_MESSAGE_TEXT =
+  "Render handleApiError(error) for an API error, or fixed copy in an error boundary. error.message is transport text such as 'Request failed with status code 409'. See .claude/rules/data-access.md.";
+const errorMessageSelectors = [
+  {
+    selector:
+      "MemberExpression[property.name='message'][object.type='Identifier'][object.name=/^(e|err|error|.+Error)$/]",
+    message: ERROR_MESSAGE_TEXT,
+  },
+  {
+    selector:
+      "MemberExpression[property.name='message'][object.type='MemberExpression'][object.property.name=/^(error|.+Error)$/]",
+    message: ERROR_MESSAGE_TEXT,
+  },
+];
+
 const config = [
   // What to ignore
   {
@@ -330,7 +353,10 @@ const config = [
    * mode cannot override it independently; a non-custom-property inline style
    * puts styling in the markup where no recipe can reach it.
    *
-   * Widened from `ui/` on 2026-09-15. See .claude/rules/styling.md. */
+   * Widened from `ui/` on 2026-09-15. See .claude/rules/styling.md.
+   *
+   * The same block keeps a component from rendering `error.message`, since it is
+   * the one that sets no-restricted-syntax for component files (2026-10-16). */
   {
     files: [
       "src/components/ui/**/*.tsx",
@@ -343,6 +369,7 @@ const config = [
       "no-restricted-syntax": [
         "error",
         ...memoComponentSelectors,
+        ...errorMessageSelectors,
         { selector: `Literal[value=${OPACITY_TINT_PATTERN}]`, message: TINT_MESSAGE },
         { selector: `TemplateElement[value.raw=${OPACITY_TINT_PATTERN}]`, message: TINT_MESSAGE },
         {
