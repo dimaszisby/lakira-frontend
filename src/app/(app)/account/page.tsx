@@ -14,10 +14,10 @@ import { ThemeSwitcher } from "@/ui/ThemeSwitcher";
 const AccountPage = () => {
   const { data, isLoading, isFetching, isError, error, refetch } = useAuthProfileQuery();
 
-  const profileError = useMemo(() => {
-    if (!isError) return undefined;
-    return error ? handleApiError(error).join(", ") : "Unable to load your profile.";
-  }, [error, isError]);
+  const profileError = useMemo(
+    () => (isError ? handleApiError(error).join(", ") : undefined),
+    [error, isError],
+  );
 
   if (isLoading && !data) {
     return (

@@ -81,8 +81,9 @@ Left as found:
       `dashboard/error.tsx:23`, print `error.message`. They receive Next's error, not an API error
       → out of scope. Fixed 2026-10-13 as register row F-08, kit
       [`route-error-boundaries`](../initiatives/route-error-boundaries/README.md).
-- [ ] Found: a failed profile load is swallowed into `data: null` by `fetchUserProfile`, by
-      design, so the account page cannot say why it failed → out of scope.
+- [x] Found: a failed profile load is swallowed into `data: null` by `fetchUserProfile`, by
+      design, so the account page cannot say why it failed → out of scope. Fixed 2026-10-16,
+      register row F-27, kit `profile-load-errors`.
 - [ ] Found: nothing stops the next component from rendering `error.message`. A lint rule could →
       out of scope; the rule is now written in `.claude/rules/data-access.md`.
 - [ ] Found: in a form with several mutations, an old create or update error still wins over a

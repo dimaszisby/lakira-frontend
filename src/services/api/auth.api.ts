@@ -1,6 +1,6 @@
 import type { AuthResponseDTO, CreateUserRequestDTO, LoginRequestDTO } from "@/types/dtos/user.dto";
 import type ApiResponse from "@/types/generics/ApiResponse";
-import { unwrap, unwrapOrNull } from "@/types/generics/ApiResponse";
+import { unwrap } from "@/types/generics/ApiResponse";
 
 import type { UserAtom } from "../state/atoms.js";
 import api from "./api";
@@ -29,7 +29,7 @@ const LOGOUT_ENDPOINT = "/api/auth/logout";
  * Seen on 2026-09-13 against a rate-limited local backend: the browser logged
  * `status: 429` while the form showed the connection error.
  *
- * `withApiErrorHandling` logs and reports, then rethrows the **original** error,
+ * `withApiErrorHandling` logs outside production, then rethrows the **original** error,
  * so the one `handleApiError` call at the point of display sees a real
  * `AxiosError` and maps the status. This is what every other feature `api.ts`
  * already does.
@@ -50,21 +50,15 @@ export const loginUser = (credentials: LoginRequestDTO): Promise<AuthResponseDTO
 /**
  * Fetches the profile of the logged-in user.
  *
- * Returns `null` on failure rather than throwing — callers treat "no profile"
- * and "could not load the profile" alike, and an unauthenticated read here is
- * routine rather than exceptional.
+ * Rethrows on failure, like the calls above. It returned `null` until
+ * 2026-10-16, which made a 401, a 403 and an outage look the same to the
+ * account page, its only caller (kit `profile-load-errors`, D-01).
  */
-export const fetchUserProfile = async (): Promise<UserAtom | null> => {
-  try {
-    const response = await api.get<ApiResponse<UserAtom>>("/auth/profile");
-    return unwrapOrNull(response);
-  } catch (error) {
-    if (process.env.NODE_ENV !== "production") {
-      console.error("[API ERROR] fetchUserProfile:", error);
-    }
-    return null;
-  }
-};
+export const fetchUserProfile = (): Promise<UserAtom> =>
+  withApiErrorHandling(
+    () => api.get<ApiResponse<UserAtom>>("/auth/profile").then(unwrap),
+    "fetchUserProfile",
+  );
 
 /**
  * Logs out the user.
