@@ -1,6 +1,6 @@
 # Frontend debt register
 
-**As of:** 2026-10-16, frontend `dev` at `4d9e065`, with F-08, F-09, F-10, F-14, F-15, F-17 to F-19, F-21, F-27, F-28 and F-54 closed. Ranked by [D-01](decisions.md).
+**As of:** 2026-10-16, frontend `dev` at `6250227`, with F-08, F-09, F-10, F-14, F-15, F-17 to F-19, F-21, F-27 to F-29 and F-54 closed. Ranked by [D-01](decisions.md).
 
 **"What's next" is the first row below whose state is `ready`.** A row above it that is waiting on
 someone is reported with it, as a gap. How rows are added and closed:
@@ -80,7 +80,6 @@ Errors and forms:
 
 | ID   | Item                                                                                                  | Sev | State            | Source                                                     |
 | ---- | ----------------------------------------------------------------------------------------------------- | --- | ---------------- | ---------------------------------------------------------- |
-| F-29 | In a form with several mutations an old error wins over a newer one                                   | —   | ready            | `2026-10-10-todo-reaudit-findings.md` (N12, left as found) |
 | F-30 | Two entries picked by hand for the same minute are refused; an edit through the picker zeroes seconds | —   | owner (O-05), BE | `2026-10-10-todo-reaudit-findings.md` (N15, left as found) |
 | F-31 | In the log form's time picker, choosing minute 0 changed nothing when the current minute was 02       | —   | unexplained      | `2026-10-08-todo-dashboard-count-assertions.md`; A10 § 7   |
 
@@ -159,4 +158,5 @@ Rows move here when their fix merges, with the PR.
 | F-21 | `style-src` still allows `'unsafe-inline'`                                                                               | #96       | Decided to keep, not fixed: [ADR-0030](../../../explanation/decisions/adr-0030-inline-style-stays-allowed.md). A unit test now pins what CSS may fetch. `2026-10-14-todo-inline-style-stays.md`.                                                        |
 | F-27 | A failed profile load is swallowed into `null`, so the account page cannot say why it failed                             | #100      | `fetchUserProfile` rethrows, and the profile query does not retry a 4xx, so the page names the failure at once. Kit `profile-load-errors`, D-01.                                                                                                        |
 | F-28 | Nothing stops the next component from rendering `error.message`; a lint rule could                                       | #101      | Two `no-restricted-syntax` selectors in component files; React Hook Form's field messages stay allowed. A unit test fails if a later config block drops them. A destructured `{ message }` is not caught. `2026-10-16-todo-error-message-lint-rule.md`. |
+| F-29 | In a form with several mutations an old error wins over a newer one                                                      | #102      | The five sites keep their latest action's error in state, cleared when an action starts. Kit `form-shows-latest-error`, D-01.                                                                                                                           |
 | F-54 | The policy allows `https://fonts.googleapis.com` and `https://fonts.gstatic.com`, which `next/font` may make unnecessary | #99       | Both removed: `next/font` self-hosts the fonts, and a browser run with the policy enforced loaded both with no violation. [ADR-0031](../../../explanation/decisions/adr-0031-fonts-are-self-hosted.md). `2026-10-16-todo-csp-drop-font-hosts.md`.       |

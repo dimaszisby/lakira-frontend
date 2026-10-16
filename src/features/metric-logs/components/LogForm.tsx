@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FloppyDisk, Lightning, Trash } from "@phosphor-icons/react";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import {
@@ -65,16 +65,21 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
     reset(defaults);
   }, [defaults, reset]);
 
-  const { createMetricLog, isPending: isCreating, error: createError } = useCreateMetricLog();
+  const { createMetricLog, isPending: isCreating } = useCreateMetricLog();
 
-  const { updateMetricLog, isPending: isUpdating, error: updateError } = useUpdateMetricLog();
+  const { updateMetricLog, isPending: isUpdating } = useUpdateMetricLog();
 
-  const { deleteMetricLog, isPending: isDeleting, error: deleteError } = useDeleteMetricLog();
+  const { deleteMetricLog, isPending: isDeleting } = useDeleteMetricLog();
+
+  // The error of the latest action. Each mutation keeps its own `error` until it runs again, so
+  // picking among them would show a Save refusal after a newer Delete refusal.
+  const [actionError, setActionError] = useState<Error | null>(null);
 
   const isBusyInputs = isSubmitting || isCreating || isUpdating || isDeleting;
 
   const onValid = useCallback(
     async (data: LogFormInputs) => {
+      setActionError(null);
       try {
         // The exact time, not rounded to the minute: the backend keeps one log per timestamp, so
         // rounding refused a second value in the same minute and moved a log's time on every edit.
@@ -99,8 +104,8 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
         }
         reset();
         onClose();
-      } catch {
-        // Mutation error state is handled by hook `error` values rendered below.
+      } catch (error) {
+        setActionError(error as Error);
       }
     },
     [isEditMode, initialLog, metricId, updateMetricLog, createMetricLog, reset, onClose],
@@ -117,12 +122,13 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
 
   const deleteLogAsync = useCallback(async () => {
     if (!initialLog) return;
+    setActionError(null);
     try {
       await deleteMetricLog({ logId: initialLog.id, metricId });
       reset();
       onClose();
-    } catch {
-      // Mutation error state is handled by hook `error` values rendered below.
+    } catch (error) {
+      setActionError(error as Error);
     }
   }, [initialLog, metricId, deleteMetricLog, reset, onClose]);
 
@@ -135,10 +141,9 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
     reset();
   }, [onClose, reset]);
 
-  const mutationError = createError ?? updateError ?? deleteError;
   const errorMsg = useMemo(
-    () => (mutationError ? handleApiError(mutationError).join(", ") : ""),
-    [mutationError],
+    () => (actionError ? handleApiError(actionError).join(", ") : ""),
+    [actionError],
   );
   const inputBg = "bg-surface2";
 

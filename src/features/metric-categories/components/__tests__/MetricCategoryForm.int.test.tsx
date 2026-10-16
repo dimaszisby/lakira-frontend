@@ -22,6 +22,7 @@ const existingCategory: MetricCategoryVM = {
 };
 
 const METRIC_CATEGORIES_API = "/api/proxy/metric-categories";
+const NAME_TAKEN = "A category with this name already exists";
 
 describe("MetricCategoryForm integration", () => {
   it("creates a category and closes modal on success", async () => {
@@ -63,6 +64,42 @@ describe("MetricCategoryForm integration", () => {
       });
     });
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the delete error when a refused delete follows a refused save", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      server.use(
+        http.put(`${METRIC_CATEGORIES_API}/:id`, () =>
+          HttpResponse.json({ status: "fail", message: NAME_TAKEN, data: null }, { status: 409 }),
+        ),
+        http.delete(`${METRIC_CATEGORIES_API}/:id`, () =>
+          HttpResponse.json(
+            { status: "fail", message: "This category still has metrics", data: null },
+            { status: 409 },
+          ),
+        ),
+      );
+
+      renderWithProviders(
+        <MetricCategoryForm onClose={onClose} initialCategory={existingCategory} />,
+      );
+
+      await user.click(screen.getByRole("button", { name: /^save$/i }));
+      expect(await screen.findByRole("alert")).toHaveTextContent(/already exists/i);
+
+      await user.click(screen.getByRole("button", { name: /^delete category$/i }));
+      await waitFor(() => {
+        expect(screen.getByRole("alert")).toHaveTextContent("This category still has metrics");
+      });
+      expect(screen.getByRole("alert")).not.toHaveTextContent(/already exists/i);
+      expect(onClose).not.toHaveBeenCalled();
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
   });
 
   it("updates an existing category and closes modal on success", async () => {
@@ -154,7 +191,7 @@ describe("MetricCategoryForm integration", () => {
           HttpResponse.json(
             {
               status: "fail",
-              message: "A category with this name already exists",
+              message: NAME_TAKEN,
               data: null,
             },
             { status: 409 },
@@ -167,9 +204,7 @@ describe("MetricCategoryForm integration", () => {
       await user.type(screen.getByLabelText(/category name/i), "Hydration");
       await user.click(screen.getByRole("button", { name: /add category/i }));
 
-      expect(await screen.findByRole("alert")).toHaveTextContent(
-        "A category with this name already exists",
-      );
+      expect(await screen.findByRole("alert")).toHaveTextContent(NAME_TAKEN);
       expect(onClose).not.toHaveBeenCalled();
     } finally {
       consoleErrorSpy.mockRestore();
