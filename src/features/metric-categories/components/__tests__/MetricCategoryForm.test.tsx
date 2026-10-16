@@ -36,9 +36,6 @@ const existingCategory = {
 };
 
 const setupHooks = (options?: {
-  createError?: Error | null;
-  updateError?: Error | null;
-  deleteError?: Error | null;
   isCreating?: boolean;
   isUpdating?: boolean;
   isDeleting?: boolean;
@@ -46,17 +43,14 @@ const setupHooks = (options?: {
   mockUseCreateMetricCategory.mockReturnValue({
     createMetricCategory: mockCreateMetricCategory,
     isPending: options?.isCreating ?? false,
-    error: options?.createError ?? null,
   });
   mockUseUpdateMetricCategory.mockReturnValue({
     updateMetricCategory: mockUpdateMetricCategory,
     isPending: options?.isUpdating ?? false,
-    error: options?.updateError ?? null,
   });
   mockUseDeleteMetricCategory.mockReturnValue({
     deleteMetricCategory: mockDeleteMetricCategory,
     isPending: options?.isDeleting ?? false,
-    error: options?.deleteError ?? null,
   });
 };
 
@@ -130,7 +124,8 @@ describe("MetricCategoryForm", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("shows the server's message in the error banner when a hook reports a refused request", () => {
+  it("shows the server's message in the error banner when a request is refused", async () => {
+    const user = userEvent.setup();
     const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
     // What the API layer throws: the Axios error, with the server's envelope on its response.
     const refused = new AxiosError(
@@ -145,11 +140,15 @@ describe("MetricCategoryForm", () => {
     );
 
     try {
-      setupHooks({ createError: refused });
+      // The form shows what the call it made rejected with, not a hook's `error` (F-29).
+      mockCreateMetricCategory.mockRejectedValueOnce(refused);
 
       render(<MetricCategoryForm onClose={() => {}} initialCategory={null} />);
 
-      expect(screen.getByRole("alert")).toHaveTextContent(
+      await user.type(screen.getByLabelText(/category name/i), "Hydration");
+      await user.click(screen.getByRole("button", { name: /add category/i }));
+
+      expect(await screen.findByRole("alert")).toHaveTextContent(
         "A category with this name already exists",
       );
     } finally {

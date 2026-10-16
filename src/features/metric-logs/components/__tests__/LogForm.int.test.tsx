@@ -11,6 +11,8 @@ import { renderWithProviders } from "@/src/test-utils/renderWithProviders";
 const metricId = "11111111-1111-4111-8111-111111111111";
 const loggedAtIso = "2026-02-18T08:00:00.000Z";
 const METRIC_LOGS_API = "/api/proxy/metric-logs";
+const LOG_UPDATED = "Log updated";
+const DELETE_REFUSED = "This log can no longer be deleted";
 
 const existingLog: MetricLogVM = {
   id: "log-1",
@@ -144,7 +146,7 @@ describe("MetricLogForm integration", () => {
 
         return HttpResponse.json({
           status: "success",
-          message: "Log updated",
+          message: LOG_UPDATED,
           data: { ...logWithSeconds, logValue: 200 },
         });
       }),
@@ -179,7 +181,7 @@ describe("MetricLogForm integration", () => {
 
         return HttpResponse.json({
           status: "success",
-          message: "Log updated",
+          message: LOG_UPDATED,
           data: {
             ...existingLog,
             logValue: Number((body as { logValue?: number }).logValue ?? existingLog.logValue),
@@ -391,6 +393,84 @@ describe("MetricLogForm integration", () => {
         /something went wrong on our side/i,
       );
       expect(onClose).not.toHaveBeenCalled();
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
+
+  it("shows the delete error when a refused delete follows a refused save", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      server.use(
+        http.put(`${METRIC_LOGS_API}/:id`, () =>
+          HttpResponse.json(
+            {
+              status: "fail",
+              message: "A log entry already exists for this timestamp",
+              data: null,
+            },
+            { status: 409 },
+          ),
+        ),
+        http.delete(`${METRIC_LOGS_API}/:id`, () =>
+          HttpResponse.json(
+            { status: "fail", message: DELETE_REFUSED, data: null },
+            { status: 403 },
+          ),
+        ),
+      );
+
+      renderWithProviders(
+        <MetricLogForm metricId={metricId} initialLog={existingLog} onClose={onClose} />,
+      );
+
+      await user.click(screen.getByRole("button", { name: /^save$/i }));
+      expect(await screen.findByRole("alert")).toHaveTextContent(/already exists/i);
+
+      await user.click(screen.getByRole("button", { name: /^delete log$/i }));
+      await waitFor(() => {
+        expect(screen.getByRole("alert")).toHaveTextContent(DELETE_REFUSED);
+      });
+      expect(screen.getByRole("alert")).not.toHaveTextContent(/already exists/i);
+      expect(onClose).not.toHaveBeenCalled();
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
+
+  it("clears an earlier error when a later action succeeds", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      server.use(
+        http.delete(`${METRIC_LOGS_API}/:id`, () =>
+          HttpResponse.json(
+            { status: "fail", message: DELETE_REFUSED, data: null },
+            { status: 403 },
+          ),
+        ),
+        http.put(`${METRIC_LOGS_API}/:id`, () =>
+          HttpResponse.json({ status: "success", message: LOG_UPDATED, data: existingLog }),
+        ),
+      );
+
+      renderWithProviders(
+        <MetricLogForm metricId={metricId} initialLog={existingLog} onClose={onClose} />,
+      );
+
+      await user.click(screen.getByRole("button", { name: /^delete log$/i }));
+      expect(await screen.findByRole("alert")).toHaveTextContent(DELETE_REFUSED);
+
+      await user.click(screen.getByRole("button", { name: /^save$/i }));
+      await waitFor(() => {
+        expect(onClose).toHaveBeenCalledTimes(1);
+      });
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
     } finally {
       consoleErrorSpy.mockRestore();
     }

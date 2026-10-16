@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FloppyDisk, Tag, TrendUp } from "@phosphor-icons/react";
-import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { CATEGORY_DEFAULTS } from "@/features/metric-categories/constants";
@@ -108,22 +108,19 @@ export const MetricSettingsForm = ({ onClose, metricId, initialSettings }: Props
   const goalTypeOptions: SegmentOption<GoalType>[] = GOAL_TYPE_OPT;
   const priorityOptions: SegmentOption<number>[] = PRIORITY_OPT;
 
-  const {
-    createMetricSettings,
-    isPending: isCreating,
-    error: createError,
-  } = useCreateMetricSettings();
+  const { createMetricSettings, isPending: isCreating } = useCreateMetricSettings();
 
-  const {
-    updateMetricSettings,
-    isPending: isUpdating,
-    error: updateError,
-  } = useUpdateMetricSettings();
+  const { updateMetricSettings, isPending: isUpdating } = useUpdateMetricSettings();
+
+  // The error of the latest action. Each mutation keeps its own `error` until it runs again, so
+  // picking among them could show a create refusal after a newer update refusal.
+  const [actionError, setActionError] = useState<Error | null>(null);
 
   const isBusyInputs = isSubmitting || isCreating || isUpdating;
 
   const onValid = useCallback(
     async (data: MetricSettingsFormInputs) => {
+      setActionError(null);
       try {
         const payloadCreate = {
           ...data, // TODO: Normalize DTO payload helper
@@ -141,8 +138,8 @@ export const MetricSettingsForm = ({ onClose, metricId, initialSettings }: Props
         }
         reset();
         onClose();
-      } catch {
-        // Mutation error state is handled by hook `error` values rendered below.
+      } catch (error) {
+        setActionError(error as Error);
       }
     },
     [
@@ -170,10 +167,9 @@ export const MetricSettingsForm = ({ onClose, metricId, initialSettings }: Props
     reset();
   }, [onClose, reset]);
 
-  const mutationError = createError ?? updateError;
   const errorMsg = useMemo(
-    () => (mutationError ? handleApiError(mutationError).join(", ") : ""),
-    [mutationError],
+    () => (actionError ? handleApiError(actionError).join(", ") : ""),
+    [actionError],
   );
 
   const subSectionContainerClass =

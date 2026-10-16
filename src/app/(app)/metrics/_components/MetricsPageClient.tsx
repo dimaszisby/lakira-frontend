@@ -85,13 +85,13 @@ const MetricsPageClient = ({ initialParams }: MetricsPageClientProps) => {
     handleParamsChange({ q: debouncedSearch ?? "", page: 1 });
   }, [debouncedSearch, handleParamsChange, params.q]);
 
-  const {
-    createMetricDummy,
-    isPending: isCreatingDummy,
-    error: createDummyError,
-  } = useCreateMetricDummy();
+  const { createMetricDummy, isPending: isCreatingDummy } = useCreateMetricDummy();
 
-  const { deleteMetric, error: deleteError } = useDeleteMetric();
+  const { deleteMetric } = useDeleteMetric();
+
+  // The error of the latest action. Each mutation keeps its own `error` until it runs again, so
+  // picking among them would leave a dummy-create refusal on screen through later deletes.
+  const [actionError, setActionError] = useState<Error | null>(null);
 
   const handleModeChange = useCallback(
     (mode: "pages" | "scroll") => {
@@ -136,10 +136,11 @@ const MetricsPageClient = ({ initialParams }: MetricsPageClientProps) => {
 
   const deleteMetricAsync = useCallback(
     async (metric: MetricPreviewVM) => {
+      setActionError(null);
       try {
         await deleteMetric(metric.id);
       } catch (error) {
-        console.error("Error deleting metric:", error);
+        setActionError(error as Error);
       }
     },
     [deleteMetric],
@@ -154,11 +155,11 @@ const MetricsPageClient = ({ initialParams }: MetricsPageClientProps) => {
 
   const dummyMetricAsync = useCallback(async () => {
     if (!isDummyActionsEnabled) return;
+    setActionError(null);
     try {
       await createMetricDummy({ count: 50 });
     } catch (error) {
-      const msgs = handleApiError(error as Error);
-      console.error("Mutation error:", msgs);
+      setActionError(error as Error);
     }
   }, [createMetricDummy]);
 
@@ -183,10 +184,9 @@ const MetricsPageClient = ({ initialParams }: MetricsPageClientProps) => {
     });
   }, [currentItems, router]);
 
-  const mutationError = createDummyError ?? deleteError;
   const errorMsg = useMemo(
-    () => (mutationError ? handleApiError(mutationError).join(", ") : ""),
-    [mutationError],
+    () => (actionError ? handleApiError(actionError).join(", ") : ""),
+    [actionError],
   );
 
   const isInitialLoading = isPagesMode

@@ -9,6 +9,7 @@ import { server } from "@/src/test-utils/msw/server";
 import { renderWithProviders } from "@/src/test-utils/renderWithProviders";
 
 const SERVER_ERROR_MESSAGE = "Internal server error";
+const NAME_TAKEN = "A metric with this name already exists";
 
 const metricId = "metric-1";
 const defaultUnit = "kg";
@@ -258,7 +259,7 @@ describe("MetricForm integration", () => {
           HttpResponse.json(
             {
               status: "fail",
-              message: "A metric with this name already exists",
+              message: NAME_TAKEN,
               data: null,
             },
             { status: 409 },
@@ -271,9 +272,7 @@ describe("MetricForm integration", () => {
 
       await user.click(screen.getByRole("button", { name: /save metric/i }));
 
-      expect(await screen.findByRole("alert")).toHaveTextContent(
-        "A metric with this name already exists",
-      );
+      expect(await screen.findByRole("alert")).toHaveTextContent(NAME_TAKEN);
       expect(onClose).not.toHaveBeenCalled();
     } finally {
       consoleErrorSpy.mockRestore();
@@ -352,6 +351,42 @@ describe("MetricForm integration", () => {
       await user.click(screen.getByRole("button", { name: /save metric/i }));
 
       expect(await screen.findByRole("alert")).toBeInTheDocument();
+      expect(onClose).not.toHaveBeenCalled();
+    } finally {
+      consoleErrorSpy.mockRestore();
+    }
+  });
+
+  it("shows the delete error when a refused delete follows a refused save", async () => {
+    const user = userEvent.setup();
+    const onClose = jest.fn();
+    const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
+
+    try {
+      server.use(
+        mockCategoryTypeahead(),
+        http.put(`${metricsEndpoint}/:id`, () =>
+          HttpResponse.json({ status: "fail", message: NAME_TAKEN, data: null }, { status: 409 }),
+        ),
+        http.delete(`${metricsEndpoint}/:id`, () =>
+          HttpResponse.json(
+            { status: "fail", message: "This metric can no longer be deleted", data: null },
+            { status: 403 },
+          ),
+        ),
+      );
+
+      renderWithProviders(<MetricForm initialMetric={existingMetric} onClose={onClose} />);
+      await waitForCategoryTypeaheadIdle();
+
+      await user.click(screen.getByRole("button", { name: /save metric/i }));
+      expect(await screen.findByRole("alert")).toHaveTextContent(/already exists/i);
+
+      await user.click(screen.getByRole("button", { name: /delete metric/i }));
+      await waitFor(() => {
+        expect(screen.getByRole("alert")).toHaveTextContent("This metric can no longer be deleted");
+      });
+      expect(screen.getByRole("alert")).not.toHaveTextContent(/already exists/i);
       expect(onClose).not.toHaveBeenCalled();
     } finally {
       consoleErrorSpy.mockRestore();

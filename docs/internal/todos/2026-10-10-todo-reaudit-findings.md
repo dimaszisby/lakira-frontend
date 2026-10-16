@@ -87,8 +87,9 @@ Left as found:
 - [x] Found: nothing stops the next component from rendering `error.message`. A lint rule could →
       out of scope; the rule is now written in `.claude/rules/data-access.md`. Fixed 2026-10-16,
       register row F-28, `2026-10-16-todo-error-message-lint-rule.md`.
-- [ ] Found: in a form with several mutations, an old create or update error still wins over a
-      newer delete error, as before this change → out of scope.
+- [x] Found: in a form with several mutations, an old create or update error still wins over a
+      newer delete error, as before this change → out of scope. Fixed 2026-10-16, register row
+      F-29, kit `form-shows-latest-error`.
 
 **N14: done 2026-10-11 on `chore/dev-advisories-n14`.** Node 24.21.0, npm 11.19.0. Each of the four
 packages was traced; one had a patch.

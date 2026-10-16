@@ -102,16 +102,21 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
     }
   }, [hasConflict, shouldCheckDup, hasValidateError, setError, clearErrors]);
 
-  const { createMetric, isPending: isCreating, error: createError } = useCreateMetric();
+  const { createMetric, isPending: isCreating } = useCreateMetric();
 
-  const { updateMetric, isPending: isUpdating, error: updateError } = useUpdateMetric();
+  const { updateMetric, isPending: isUpdating } = useUpdateMetric();
 
-  const { deleteMetric, isPending: isDeleting, error: deleteError } = useDeleteMetric();
+  const { deleteMetric, isPending: isDeleting } = useDeleteMetric();
+
+  // The error of the latest action. Each mutation keeps its own `error` until it runs again, so
+  // picking among them would show a Save refusal after a newer Delete refusal.
+  const [actionError, setActionError] = useState<Error | null>(null);
 
   const isBusyInputs = isSubmitting || isCreating || isUpdating || isDeleting;
 
   const onValid = useCallback(
     async (data: MetricFormInputs) => {
+      setActionError(null);
       try {
         const payload = {
           ...data, // TODO: Normalize DTO payload helper
@@ -126,8 +131,8 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
 
         reset();
         onClose();
-      } catch {
-        // Mutation error state is handled by hook `error` values rendered below.
+      } catch (error) {
+        setActionError(error as Error);
       }
     },
     [isEditMode, initialMetric, updateMetric, createMetric, reset, onClose],
@@ -145,12 +150,13 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
   const deleteMetricAsync = useCallback(async () => {
     const metricId = initialMetric?.id;
     if (!metricId) return;
+    setActionError(null);
     try {
       await deleteMetric(metricId);
       reset();
       onClose();
-    } catch {
-      // Mutation error state is handled by hook `error` values rendered below.
+    } catch (error) {
+      setActionError(error as Error);
     }
   }, [initialMetric, deleteMetric, reset, onClose]);
 
@@ -163,10 +169,9 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
     reset();
   }, [onClose, reset]);
 
-  const mutationError = createError ?? updateError ?? deleteError;
   const errorMsg = useMemo(
-    () => (mutationError ? handleApiError(mutationError).join(", ") : ""),
-    [mutationError],
+    () => (actionError ? handleApiError(actionError).join(", ") : ""),
+    [actionError],
   );
   const inputBg = "bg-surface2";
 

@@ -67,6 +67,8 @@ The chain is `withApiErrorHandling` → `handleApiError` → `normalizeApiError`
 
 **A component renders `handleApiError(error)`, never `error.message`.** The error a hook hands back is the Axios error, whose message is "Request failed with status code 409"; the server's own sentence is on its response. Eight components printed the transport text until 2026-10-10 (audit finding N12). The line to copy is in `LoginForm.tsx`: `useMemo(() => (error ? handleApiError(error).join(", ") : ""), [error])`. Lint enforces it in component files since 2026-10-16; see `.claude/rules/code-style.md` for what the rule cannot see.
 
+**A component with several mutations shows the error of its latest action, not `createError ?? updateError`.** Each mutation keeps its `error` until it runs again, so that order showed a Save refusal after a newer Delete refusal (register row F-29). Keep the error in state: clear it when an action starts, set it in the action's `catch`, and render `handleApiError` on it. `LogForm.tsx` is the one to copy (kit `form-shows-latest-error`, D-01).
+
 Two things to know:
 
 - `src/services/api/auth.api.ts` was converted to `withApiErrorHandling` on 2026-09-13. It had caught the Axios error and rethrown `new Error(handleApiError(error).join(", "))`, which discarded the response — the forms then normalized that plain `Error` a second time, hit the `status == null` branch, and rendered **every** auth failure as "We couldn't reach the server". Never flatten an error into a string before the point of display: `withApiErrorHandling` logs outside production, then rethrows the original so one `handleApiError` call at the UI can read the status.

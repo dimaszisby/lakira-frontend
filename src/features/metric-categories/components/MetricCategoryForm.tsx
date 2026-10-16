@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FloppyDisk, Folder, Trash } from "@phosphor-icons/react";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 import { CATEGORY_DEFAULTS } from "@/features/metric-categories/constants";
@@ -60,28 +60,21 @@ const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
     reset(defaults);
   }, [defaults, reset]);
 
-  const {
-    createMetricCategory,
-    isPending: isCreating,
-    error: createError,
-  } = useCreateMetricCategory();
+  const { createMetricCategory, isPending: isCreating } = useCreateMetricCategory();
 
-  const {
-    updateMetricCategory,
-    isPending: isUpdating,
-    error: updateError,
-  } = useUpdateMetricCategory();
+  const { updateMetricCategory, isPending: isUpdating } = useUpdateMetricCategory();
 
-  const {
-    deleteMetricCategory,
-    isPending: isDeleting,
-    error: deleteError,
-  } = useDeleteMetricCategory();
+  const { deleteMetricCategory, isPending: isDeleting } = useDeleteMetricCategory();
+
+  // The error of the latest action. Each mutation keeps its own `error` until it runs again, so
+  // picking among them would show a Save refusal after a newer Delete refusal.
+  const [actionError, setActionError] = useState<Error | null>(null);
 
   const isBusyInputs = isSubmitting || isCreating || isUpdating || isDeleting;
 
   const onValid = useCallback(
     async (data: MetricCategoryFormInput) => {
+      setActionError(null);
       try {
         if (isEditMode && initialCategory) {
           await updateMetricCategory({ categoryId: initialCategory.id, category: data });
@@ -91,8 +84,8 @@ const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
 
         reset();
         onClose();
-      } catch {
-        // Mutation error state is handled by hook `error` values rendered below.
+      } catch (error) {
+        setActionError(error as Error);
       }
     },
     [initialCategory, isEditMode, updateMetricCategory, createMetricCategory, reset, onClose],
@@ -109,12 +102,13 @@ const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
 
   const deleteCategoryAsync = useCallback(async () => {
     if (!initialCategory) return;
+    setActionError(null);
     try {
       await deleteMetricCategory(initialCategory.id);
       reset();
       onClose();
-    } catch {
-      // Mutation error state is handled by hook `error` values rendered below.
+    } catch (error) {
+      setActionError(error as Error);
     }
   }, [initialCategory, deleteMetricCategory, reset, onClose]);
 
@@ -127,10 +121,9 @@ const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
     reset();
   }, [onClose, reset]);
 
-  const mutationError = createError ?? updateError ?? deleteError;
   const errorMsg = useMemo(
-    () => (mutationError ? handleApiError(mutationError).join(", ") : ""),
-    [mutationError],
+    () => (actionError ? handleApiError(actionError).join(", ") : ""),
+    [actionError],
   );
 
   const inputBg = "bg-surface2";
