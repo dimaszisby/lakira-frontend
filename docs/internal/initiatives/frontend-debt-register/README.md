@@ -1,9 +1,9 @@
 # Frontend debt register
 
-**Status:** Register and eight analyses written. Eight rows closed since (F-08, F-09, F-10, F-14,
-F-17 to F-19, F-21). Every row in tiers 1 to 4 waits on the owner, the backend or a package's
-maintainers. In tier 5, the first ready row is F-15, since backend #168 published the spec
-change it waited on; F-16, F-52 and F-20 wait on the backend or the owner.
+**Status:** Register and eight analyses written. Nine rows closed since (F-08, F-09, F-10, F-14,
+F-15, F-17 to F-19, F-21). Every row in tiers 1 to 4 waits on the owner, the backend or a package's
+maintainers. In tier 5, F-16, F-52 and F-20 wait on the backend or the owner; the first ready
+row is F-54.
 **Slug:** `frontend-debt-register` · **Branch:** `docs/frontend-debt-register`
 
 The same scheme as lakira-backend's register (lakira-backend #159), so the two can be read side by
