@@ -86,11 +86,17 @@ const buildSyncedParams = (
 
 type VisualizationProps = {
   metricId: string;
+  metricName: string;
   goalValue?: number | null;
   searchParamKey?: string;
 };
 
-const Visualization = ({ metricId, goalValue, searchParamKey = "view" }: VisualizationProps) => {
+const Visualization = ({
+  metricId,
+  metricName,
+  goalValue,
+  searchParamKey = "view",
+}: VisualizationProps) => {
   const rawSearchParams = useSearchParams();
   const router = useRouter();
   const searchParams = useMemo(
@@ -154,7 +160,7 @@ const Visualization = ({ metricId, goalValue, searchParamKey = "view" }: Visuali
       </div>
     );
   } else {
-    body = <MetricChart data={data} goalValue={goalValue ?? null} />;
+    body = <MetricChart data={data} metricName={metricName} goalValue={goalValue ?? null} />;
   }
 
   return (

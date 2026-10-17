@@ -31,17 +31,18 @@ if (!registered) {
 
 type Props = {
   data: VizResponse;
+  metricName: string;
   goalValue?: number | null;
   height?: number;
   className?: string;
 };
 
-const MetricChart = ({ data, goalValue, height = 260, className }: Props) => {
+const MetricChart = ({ data, metricName, goalValue, height = 260, className }: Props) => {
   const summaryId = useId();
   const xy = useMemo(() => seriesToXY(data.series), [data.series]);
   const hasGoal = Number.isFinite(goalValue ?? Number.NaN);
   const normalizedUnit = normalizeUnit(data.meta.unit);
-  const metricIdLabel = normalizeMetricId(data.meta.metricId);
+  const nameLabel = normalizeMetricName(metricName);
   const metricLabel = normalizedUnit.length > 0 ? normalizedUnit : "Value";
 
   if (isAllMissing(xy)) {
@@ -122,7 +123,7 @@ const MetricChart = ({ data, goalValue, height = 260, className }: Props) => {
     <>
       <div
         role="img"
-        aria-label={`Metric chart for ${metricIdLabel}`}
+        aria-label={`Metric chart for ${nameLabel}`}
         aria-describedby={summaryId}
         className={cn("chart-box", className)}
         style={chartHeightStyle(height)}
@@ -178,7 +179,7 @@ function normalizeUnit(unit: unknown): string {
   return typeof unit === "string" ? unit.trim() : "";
 }
 
-function normalizeMetricId(metricId: unknown): string {
-  if (typeof metricId === "string" && metricId.trim().length > 0) return metricId.trim();
+function normalizeMetricName(metricName: unknown): string {
+  if (typeof metricName === "string" && metricName.trim().length > 0) return metricName.trim();
   return "unknown metric";
 }

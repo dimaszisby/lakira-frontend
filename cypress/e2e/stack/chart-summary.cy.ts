@@ -16,9 +16,9 @@ const FIGURES = "average 7 cups, minimum 6 cups, maximum 8 cups, from 2 logs.";
 type CreatedMetric = { data: { id: string } };
 
 // The chart of one metric, found by its label, and the text its aria-describedby points at.
-const chartSummary = (metricId: string) =>
+const chartSummary = (metricName: string) =>
   cy
-    .get(`[role="img"][aria-label="Metric chart for ${metricId}"]`)
+    .get(`[role="img"][aria-label="Metric chart for ${metricName}"]`)
     .should("have.attr", "aria-describedby")
     .then((summaryId) => cy.get(`[id="${String(summaryId)}"]`));
 
@@ -59,10 +59,10 @@ describe("A metric chart's text summary", () => {
 
       cy.visitInTheme("/dashboard", THEME);
       cy.contains(METRIC_NAME).should("be.visible");
-      chartSummary(metricId).should("contain.text", FIGURES);
+      chartSummary(METRIC_NAME).should("contain.text", FIGURES);
 
       cy.visitInTheme(`/metrics/${metricId}`, THEME);
-      chartSummary(metricId).should("contain.text", FIGURES);
+      chartSummary(METRIC_NAME).should("contain.text", FIGURES);
     });
   });
 });

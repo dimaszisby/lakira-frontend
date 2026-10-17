@@ -78,7 +78,7 @@ describe("DashboardContent integration", () => {
     expect(await screen.findByText("Body Weight")).toBeInTheDocument();
     expect(screen.getByText(/n:\s*3/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("img", { name: /metric chart for 11111111-1111-4111-8111-111111111111/i }),
+      screen.getByRole("img", { name: /metric chart for body weight/i }),
     ).toHaveAccessibleDescription(
       /average 69\.8 kg, minimum 69\.5 kg, maximum 70 kg, from 3 logs\.$/,
     );

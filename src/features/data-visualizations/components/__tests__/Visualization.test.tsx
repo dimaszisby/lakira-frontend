@@ -93,7 +93,7 @@ describe("Visualization", () => {
   it("shows placeholder skeleton when loading", () => {
     mockUseMetricVisualization.mockReturnValue({ data: undefined, isLoading: true });
 
-    render(<Visualization metricId="metric-1" goalValue={100} />);
+    render(<Visualization metricId="metric-1" metricName="Body Weight" goalValue={100} />);
 
     expect(screen.getByText("Visualization")).toBeInTheDocument();
     expect(screen.getByRole("status", { name: /loading visualization/i })).toBeInTheDocument();
@@ -111,7 +111,7 @@ describe("Visualization", () => {
       isLoading: false,
     });
 
-    render(<Visualization metricId="metric-2" />);
+    render(<Visualization metricId="metric-2" metricName="Body Weight" />);
 
     expect(screen.getByTestId("metric-chart")).toHaveTextContent(/"goalValue":null/);
     expect(screen.getByTestId("metric-chart")).toHaveTextContent(/"points":\[1,2,3\]/);
@@ -124,7 +124,7 @@ describe("Visualization", () => {
       isLoading: false,
     });
 
-    render(<Visualization metricId="metric-3" />);
+    render(<Visualization metricId="metric-3" metricName="Body Weight" />);
 
     await user.click(screen.getByTestId(GRANULARITY_PICKER_TEST_ID));
     expect(mockReplace).toHaveBeenCalledWith(
@@ -151,7 +151,7 @@ describe("Visualization", () => {
       isLoading: false,
     });
 
-    render(<Visualization metricId="metric-4" />);
+    render(<Visualization metricId="metric-4" metricName="Body Weight" />);
 
     expect(screen.getByTestId(GRANULARITY_PICKER_TEST_ID)).toHaveTextContent("granularity-1m");
     expect(screen.getByTestId(TIME_RANGE_PICKER_REL_TEST_ID)).toHaveTextContent("range-absolute");
@@ -177,7 +177,7 @@ describe("Visualization", () => {
       isLoading: false,
     });
 
-    render(<Visualization metricId="metric-6" />);
+    render(<Visualization metricId="metric-6" metricName="Body Weight" />);
 
     expect(screen.getByTestId(GRANULARITY_PICKER_TEST_ID)).toHaveTextContent(
       DEFAULT_GRANULARITY_LABEL,
@@ -195,7 +195,7 @@ describe("Visualization", () => {
       isLoading: false,
     });
 
-    render(<Visualization metricId="metric-7" />);
+    render(<Visualization metricId="metric-7" metricName="Body Weight" />);
 
     await user.click(screen.getByTestId(TIME_RANGE_PICKER_REL_TEST_ID));
 
@@ -211,7 +211,7 @@ describe("Visualization", () => {
       isLoading: false,
     });
 
-    render(<Visualization metricId="metric-8" />);
+    render(<Visualization metricId="metric-8" metricName="Body Weight" />);
 
     expect(screen.getByText("No visualization data available.")).toBeInTheDocument();
   });
@@ -223,7 +223,7 @@ describe("Visualization", () => {
       isLoading: false,
     });
 
-    render(<Visualization metricId="metric-5" />);
+    render(<Visualization metricId="metric-5" metricName="Body Weight" />);
 
     await user.click(screen.getByTestId("granularity-picker-invalid"));
 
@@ -239,7 +239,7 @@ describe("Visualization", () => {
       isLoading: false,
     });
 
-    const { rerender } = render(<Visualization metricId="metric-9" />);
+    const { rerender } = render(<Visualization metricId="metric-9" metricName="Body Weight" />);
 
     expect(screen.getByTestId(GRANULARITY_PICKER_TEST_ID)).toHaveTextContent(
       DEFAULT_GRANULARITY_LABEL,
@@ -249,7 +249,7 @@ describe("Visualization", () => {
     );
 
     mockSearchParams = new URLSearchParams(RELATIVE_SYNC_SEARCH);
-    rerender(<Visualization metricId="metric-9" />);
+    rerender(<Visualization metricId="metric-9" metricName="Body Weight" />);
 
     await waitFor(() => {
       expect(screen.getByTestId(GRANULARITY_PICKER_TEST_ID)).toHaveTextContent("granularity-1w");

@@ -16,7 +16,9 @@
 
 - [x] Found: the chart's label is `Metric chart for <metric id>`, a UUID, so the baseline's
       "label describing what the chart shows" holds only in form. Naming the metric needs a new
-      `MetricChart` prop → out of scope, register row F-55.
+      `MetricChart` prop → out of scope, register row F-55. Fixed 2026-10-17 in #106 on
+      `fix/chart-label-metric-name` (D-03): a required `metricName` on `MetricChart` and
+      `Visualization`.
 - [x] Found in review: the dashboard renders the chart on the server, so dates and numbers in the
       runtime's zone and locale could differ between server and browser → in scope, D-02.
 
