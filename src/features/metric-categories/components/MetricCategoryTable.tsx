@@ -36,6 +36,7 @@ export const MetricCategoryTableBase = ({
         onEdit={onEdit}
         onDelete={onDelete}
         onRowClick={onRowClick}
+        className="sm:hidden"
       />
     </>
   );

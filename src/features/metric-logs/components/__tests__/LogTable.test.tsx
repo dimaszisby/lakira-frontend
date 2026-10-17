@@ -100,4 +100,13 @@ describe("LogTable", () => {
     expect(mobileProps.onDelete).toBe(onDelete);
     expect(mobileProps.onRowClick).toBe(onRowClick);
   });
+
+  it("hides the mobile list from the sm breakpoint up, where the desktop table shows", () => {
+    // The mobile list carries no breakpoint class of its own, so without this both variants
+    // would show from 640 px up.
+    render(<LogTableBase logs={logs} sortBy="loggedAt" sortOrder="ASC" onSort={() => {}} />);
+
+    const mobileProps = mobileSpy.mock.calls[0]?.[0] as { className?: string };
+    expect(mobileProps.className).toMatch(/\bsm:hidden\b/);
+  });
 });

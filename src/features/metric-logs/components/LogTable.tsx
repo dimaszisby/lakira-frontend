@@ -38,6 +38,7 @@ export const LogTableBase = ({
         onDelete={onDelete}
         onRowClick={onRowClick}
         mobileClassName={mobileClassName}
+        className="sm:hidden"
       />
     </>
   );

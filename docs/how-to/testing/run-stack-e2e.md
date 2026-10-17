@@ -2,7 +2,7 @@
 
 `cypress/e2e/stack/` holds the specs that need the real backend: the signed-in pages checked for
 accessibility in both themes, the invite-and-switch journey, the password reset, the metrics
-list at four widths in both list modes, and the journey from a new metric to its dashboard card
+list and a category's metric list at four widths in both list modes, and the journey from a new metric to its dashboard card
 and a logged value, with a metric's own pages checked for accessibility. CI cannot run
 them, because it has no backend, so they run on your machine. Run them when a change touches a
 signed-in page, the app layout, or an auth or token flow, and before a release

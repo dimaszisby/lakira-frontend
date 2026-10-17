@@ -17,8 +17,10 @@ export const LogMobileTableBase = ({
   className = "",
   mobileClassName,
 }: LogTableProps) => {
+  // No breakpoint class of its own: `LogTable` decides when this list shows. The same class on
+  // `MetricMobileTable` left the metrics list blank from 640 px up until 2026-10-07.
   return (
-    <section className={cn("space-y-4 sm:hidden", className)} aria-label="Metric logs mobile list">
+    <section className={cn("space-y-4", className)} aria-label="Metric logs mobile list">
       {logs.length > 0 ? (
         <ul role="list" className="space-y-4">
           {logs.map((item) => (

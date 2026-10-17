@@ -63,6 +63,15 @@ describe("LogMobileTable", () => {
     expect(screen.getByRole("status")).toHaveTextContent("No logs available");
   });
 
+  it("does not hide itself at any breakpoint, leaving that to the caller", () => {
+    // jsdom has no layout, so the class is all that can be observed here. `MetricMobileTable`
+    // hid itself the same way and left the metrics list blank from 640 px up (2026-10-07).
+    render(<LogMobileTableBase logs={logs} sortBy="loggedAt" sortOrder="ASC" onSort={() => {}} />);
+
+    const list = screen.getByRole("region", { name: "Metric logs mobile list" });
+    expect(list.className).not.toMatch(/\bhidden\b/);
+  });
+
   it("renders logs and emits row click callback", async () => {
     const user = userEvent.setup();
     const onRowClick = jest.fn();
