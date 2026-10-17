@@ -48,9 +48,10 @@ patched versions sit inside ranges the parents already declare.
       in `src` (Inference: the RCE was not reachable); `axios` is the HTTP client in
       `src/services/api/api.ts`. Verified with every gate, coverage, and both Cypress suites
       against a fresh build on `:3100` (public 18/18, stack 13/13).
-- [ ] Found: #125 also orders logs by logged time, which the spec documents only for trends.
+- [x] Found: #125 also orders logs by logged time, which the spec documents only for trends.
       The `/metric-logs` lists may now come back in a different order -> out of scope; check
-      separately.
+      separately. Checked 2026-10-18: they did not change order.
+      `2026-10-18-todo-metric-logs-order-after-backend-125.md`.
 
 ## Status
 
