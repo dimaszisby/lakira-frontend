@@ -47,7 +47,7 @@ const MetricCardFromBatch = memo(function MetricCardFromBatch({
       </CardHeader>
 
       <div className="h-64">
-        <MetricChart data={data} goalValue={null} />
+        <MetricChart data={data} metricName={item.name} goalValue={null} />
       </div>
 
       <div className="flex gap-4 text-xs text-ink-secondary">

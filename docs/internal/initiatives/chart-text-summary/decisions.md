@@ -67,3 +67,33 @@ example gives). An unknown zone falls back to UTC rather than throwing.
 
 **Consequences.** The summary reads the same everywhere, in English, matching the rest of the
 app's copy. A reader whose own locale writes dates another way still sees "1 Feb 2026".
+
+---
+
+## D-03 — MetricChart and Visualization take the metric's name as a required prop
+
+- **Status:** Accepted
+- **Date:** 2026-10-17
+
+**Context.** F-55: the chart's label was `Metric chart for <metric id>`, so a screen reader
+announced a UUID where `docs/reference/accessibility-baseline.md` asks for a label describing what
+the chart shows. `MetricChart` only had the `VizResponse`, and the single-metric response's `meta`
+carries `metricId`, `unit`, `bucket`, `tz` and `range`, no name (`VisualizationResponse` in
+`docs/reference/api/lakira-backend-openapi.json`). Both callers already hold the name: the
+dashboard card has `item.name`, and the metric page has `header.name` from `useMetricDetail()`.
+
+**Decision.** `MetricChart` takes a required `metricName` and labels itself
+`Metric chart for <name>`, falling back to `unknown metric` when the name is blank, as it did for
+a missing id. `Visualization` takes the same required prop and passes it through.
+
+**Options considered.**
+
+- _Read the name from `VizResponse.meta`._ The backend does not send it on the single-metric route,
+  so the type would claim a field the response lacks, and the dashboard would have to copy the
+  name into `meta` to satisfy it.
+- _An optional prop._ A caller that forgot it would fall back to the id or the fallback text with
+  nothing to say so. Required, a missed call site is a compile error.
+
+**Consequences.** Every render of either component passes a name, tests included. The label
+repeats the dashboard card's visible title; the image is not interactive, so it has no name to
+match against WCAG 2.5.3.

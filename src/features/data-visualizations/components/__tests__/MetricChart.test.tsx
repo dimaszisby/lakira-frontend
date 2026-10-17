@@ -8,6 +8,7 @@ const BUCKET_1 = "2026-02-01T00:00:00.000Z";
 const BUCKET_2 = "2026-02-02T00:00:00.000Z";
 const ROOT_CLASS = "chart-root";
 const EMPTY_CLASS = "chart-empty";
+const METRIC_NAME = "Body Weight";
 
 jest.mock("react-chartjs-2", () => ({
   __esModule: true,
@@ -48,6 +49,7 @@ describe("MetricChart", () => {
   it("renders empty state when all datapoints are missing", () => {
     render(
       <MetricChart
+        metricName={METRIC_NAME}
         className={EMPTY_CLASS}
         data={{
           ...baseData,
@@ -66,20 +68,22 @@ describe("MetricChart", () => {
   });
 
   it("describes the chart with a summary of its values", () => {
-    render(<MetricChart data={baseData} goalValue={18} />);
+    render(<MetricChart metricName={METRIC_NAME} data={baseData} goalValue={18} />);
 
     expect(
-      screen.getByRole("img", { name: /metric chart for metric-1/i }),
+      screen.getByRole("img", { name: /metric chart for body weight/i }),
     ).toHaveAccessibleDescription(
       /average 16 kg, minimum 12 kg, maximum 20 kg, from 2 logs\. Goal 18 kg\.$/,
     );
   });
 
   it("renders chart with metric dataset and expected options", () => {
-    render(<MetricChart data={baseData} className={ROOT_CLASS} />);
+    render(<MetricChart metricName={METRIC_NAME} data={baseData} className={ROOT_CLASS} />);
 
-    expect(screen.getByRole("img", { name: /metric chart for metric-1/i })).toBeInTheDocument();
-    expect(screen.getByRole("img", { name: /metric chart for metric-1/i })).toHaveClass(ROOT_CLASS);
+    expect(screen.getByRole("img", { name: /metric chart for body weight/i })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /metric chart for body weight/i })).toHaveClass(
+      ROOT_CLASS,
+    );
     expect(screen.getByTestId("metric-chart-line")).toBeInTheDocument();
 
     const props = lineSpy.mock.calls[0]?.[0] as {
@@ -96,15 +100,22 @@ describe("MetricChart", () => {
     expect(props.options.scales.x.time.unit).toBe("day");
   });
 
+  it("names the metric in the label instead of its id", () => {
+    render(<MetricChart data={baseData} metricName={METRIC_NAME} />);
+
+    expect(screen.getByRole("img")).toHaveAccessibleName(`Metric chart for ${METRIC_NAME}`);
+    expect(screen.getByRole("img")).not.toHaveAccessibleName(/metric-1/);
+  });
+
   it("hides the canvas, which react-chartjs-2 gives role img, behind the labelled wrapper", () => {
-    render(<MetricChart data={baseData} />);
+    render(<MetricChart metricName={METRIC_NAME} data={baseData} />);
 
     expect(lineSpy.mock.calls[0]?.[0]).toEqual(expect.objectContaining({ "aria-hidden": true }));
     expect(screen.getAllByRole("img")).toHaveLength(1);
   });
 
   it("adds goal dataset and enables legend when goal value is finite", () => {
-    render(<MetricChart data={baseData} goalValue={18} />);
+    render(<MetricChart metricName={METRIC_NAME} data={baseData} goalValue={18} />);
 
     const props = lineSpy.mock.calls[0]?.[0] as {
       data: { datasets: Array<{ label: string; data: Array<{ x: string; y: number }> }> };
@@ -121,7 +132,7 @@ describe("MetricChart", () => {
   });
 
   it("does not add goal dataset when goal value is not finite", () => {
-    render(<MetricChart data={baseData} goalValue={Number.NaN} />);
+    render(<MetricChart metricName={METRIC_NAME} data={baseData} goalValue={Number.NaN} />);
 
     const props = lineSpy.mock.calls[0]?.[0] as {
       data: { datasets: unknown[] };
@@ -133,7 +144,7 @@ describe("MetricChart", () => {
   });
 
   it("formats tooltip label with unit and handles missing values", () => {
-    render(<MetricChart data={baseData} />);
+    render(<MetricChart metricName={METRIC_NAME} data={baseData} />);
 
     const props = lineSpy.mock.calls[0]?.[0] as {
       options: {
@@ -156,7 +167,12 @@ describe("MetricChart", () => {
   });
 
   it("falls back to default dataset label and trims unitless tooltip output", () => {
-    render(<MetricChart data={{ ...baseData, meta: { ...baseData.meta, unit: "   " } }} />);
+    render(
+      <MetricChart
+        metricName={METRIC_NAME}
+        data={{ ...baseData, meta: { ...baseData.meta, unit: "   " } }}
+      />,
+    );
 
     const props = lineSpy.mock.calls[0]?.[0] as {
       data: { datasets: Array<{ label: string }> };
@@ -180,6 +196,7 @@ describe("MetricChart", () => {
   it("sanitizes non-finite datapoints to NaN in dataset", () => {
     render(
       <MetricChart
+        metricName={METRIC_NAME}
         data={{
           ...baseData,
           series: [
@@ -203,6 +220,7 @@ describe("MetricChart", () => {
   it("falls back safely when unit is not a string at runtime", () => {
     render(
       <MetricChart
+        metricName={METRIC_NAME}
         data={{
           ...baseData,
           meta: {
@@ -230,18 +248,8 @@ describe("MetricChart", () => {
     expect(props.options.plugins.tooltip.callbacks.label({ raw: { y: 5 } })).toBe("5");
   });
 
-  it("falls back safely when metricId is not a string at runtime", () => {
-    render(
-      <MetricChart
-        data={{
-          ...baseData,
-          meta: {
-            ...baseData.meta,
-            metricId: null as unknown as string,
-          },
-        }}
-      />,
-    );
+  it("falls back to unknown metric when the name is blank", () => {
+    render(<MetricChart data={baseData} metricName="   " />);
 
     expect(
       screen.getByRole("img", { name: /metric chart for unknown metric/i }),
