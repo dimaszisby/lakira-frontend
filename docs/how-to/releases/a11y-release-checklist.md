@@ -79,7 +79,11 @@ Verify E2E a11y coverage for full pages:
 
 - Public pages, both themes, in CI: `cypress/e2e/public/auth-pages.a11y.cy.ts`.
 - Dashboard, metrics, metric categories, organization and account, both themes, stack suite only:
-  `cypress/e2e/stack/app-pages.a11y.cy.ts`.
+  `cypress/e2e/stack/app-pages.a11y.cy.ts`. A new account, so every list is empty.
+- The dashboard with a card and the metrics list with a row, at 1000 px and 1280 px, both themes,
+  stack suite only: `cypress/e2e/stack/app-pages-with-data.a11y.cy.ts`. It leaves out the
+  categories list (register row F-57) and the dark desktop metrics table (F-56) until those close.
+- A metric's own pages with a log, both themes: `cypress/e2e/stack/metric-to-dashboard.cy.ts`.
 - Keyboard order and visible focus on `/login`: `cypress/e2e/public/login-keyboard.cy.ts`.
 
 - [ ] Both E2E suites pass against the build being released.

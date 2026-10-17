@@ -127,7 +127,8 @@ const MetricChart = ({ data, goalValue, height = 260, className }: Props) => {
         className={cn("chart-box", className)}
         style={chartHeightStyle(height)}
       >
-        <Line data={{ datasets }} options={options} />
+        {/* react-chartjs-2 gives its canvas role="img"; the wrapper is the image readers get. */}
+        <Line data={{ datasets }} options={options} aria-hidden />
       </div>
       <p id={summaryId} className="sr-only">
         {buildChartSummary(data, hasGoal ? goalValue : null)}

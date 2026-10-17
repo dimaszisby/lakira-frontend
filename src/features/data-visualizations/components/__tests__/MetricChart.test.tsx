@@ -96,6 +96,13 @@ describe("MetricChart", () => {
     expect(props.options.scales.x.time.unit).toBe("day");
   });
 
+  it("hides the canvas, which react-chartjs-2 gives role img, behind the labelled wrapper", () => {
+    render(<MetricChart data={baseData} />);
+
+    expect(lineSpy.mock.calls[0]?.[0]).toEqual(expect.objectContaining({ "aria-hidden": true }));
+    expect(screen.getAllByRole("img")).toHaveLength(1);
+  });
+
   it("adds goal dataset and enables legend when goal value is finite", () => {
     render(<MetricChart data={baseData} goalValue={18} />);
 
