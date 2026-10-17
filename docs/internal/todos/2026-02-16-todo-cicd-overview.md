@@ -71,7 +71,8 @@ Frontend CI has been expanded to a gated chain in `.github/workflows/test.yml` (
 - [ ] FE production domain finalized and documented.
 - [ ] FE env alignment applied in all environments (`API_URL` equals `NEXT_PUBLIC_API_BASE_URL` per environment).
 - [ ] Backend CORS coverage confirmed for FE local/preview/prod origins.
-- [ ] Backend smoke check sequence confirmed for pre-production promotion.
+- [x] Backend smoke check sequence confirmed for pre-production promotion: lakira-backend #171
+      wrote it on 2026-10-16, and `docs/how-to/releases/release-checklist.md` links it.
 
 ## Done Criteria
 

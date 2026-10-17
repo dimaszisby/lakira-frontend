@@ -30,11 +30,10 @@ Notes:
 
 ## 4. Smoke Checks Before Full FE CD
 
-Recommended backend checks to keep in release flow:
-
-- `GET /api/v1/health`
-- auth login/profile flow
-- one protected metrics endpoint fetch
+The backend wrote the sequence on 2026-10-16 (lakira-backend #171):
+[run the pre-production smoke sequence](https://github.com/dimaszisby/lakira-backend/blob/dev/docs/how-to/ci-cd/run-the-pre-production-smoke-sequence.md).
+It replaces the three checks this section listed in February. The release checklist,
+[`release-checklist.md`](../../how-to/releases/release-checklist.md), links it.
 
 ## 5. Backend-Only References (External)
 

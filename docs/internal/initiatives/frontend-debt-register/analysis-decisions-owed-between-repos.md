@@ -60,3 +60,6 @@ still `TBD` there. Closes with F-01's AC-3.
 
 **What unblocks it.** The backend's row B-15, which is `ready` on its register. Only needed once
 there is a production environment to promote to.
+
+**Closed 2026-10-17.** lakira-backend #171 wrote the sequence on 2026-10-16, and the release
+checklist links it. The frontend's own half through `/api/proxy` is F-59.
