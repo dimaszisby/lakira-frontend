@@ -16,11 +16,10 @@ export const MetricCategoryMobileTableBase = ({
   onRowClick,
   className = "",
 }: CategoryTableProps) => {
+  // No breakpoint class of its own: `MetricCategoryTable` decides when this list shows. The same
+  // class on `MetricMobileTable` left the metrics list blank from 640 px up until 2026-10-07.
   return (
-    <section
-      className={cn("space-y-4 sm:hidden", className)}
-      aria-label="Metric categories mobile list"
-    >
+    <section className={cn("space-y-4", className)} aria-label="Metric categories mobile list">
       {categories.length > 0 ? (
         <ul role="list" className="space-y-4">
           {categories.map((item) => (
