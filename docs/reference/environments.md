@@ -42,8 +42,12 @@ Test tooling only, read in `cypress.config.ts` and never by the app:
 - `CYPRESS_BASE_URL`: the app Cypress targets, default `http://127.0.0.1:3000`.
 - `E2E_MAILPIT_URL`: Mailpit for the stack specs, default `http://localhost:8025`.
 - `E2E_BACKEND_URL`: the backend the stack preflight probes, default `http://localhost:8001/api/v1`.
+- `E2E_BACKEND_CONTAINER`: the backend's Docker container, whose image age the stack preflight
+  checks, default `node_app`.
+- `E2E_ALLOW_STALE_BACKEND`: `1` lets a stack run go on against a backend image older than
+  backend `dev`, and says so in the output.
 
-The stack specs refuse to run unless all three are local hosts.
+The stack specs refuse to run unless all three URLs are local hosts.
 
 ## 5. CI Secrets
 

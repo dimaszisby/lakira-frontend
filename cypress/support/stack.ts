@@ -1,6 +1,7 @@
 // Helpers for cypress/e2e/stack/: specs that need the backend and Mailpit, run locally with
 // `npm run test:e2e:stack` and never in CI (cypress-a11y-e2e D-01).
 
+import type { BackendFreshness } from "./backend-image";
 import type { MailKind } from "./mailpit";
 
 export type StackUser = { email: string; username: string; password: string };
@@ -61,6 +62,15 @@ export const preflightStack = (): void => {
       );
     }
   });
+
+  // An image older than backend `dev` fails the run; one the run allows, or one whose age could
+  // not be read, is reported and the run goes on (register row F-51).
+  cy.task<BackendFreshness>("backendFreshness", null, { log: false }).then(
+    ({ status, message }) => {
+      if (status === "stale") throw new Error(message);
+      if (status !== "fresh") cy.task("log", message, { log: false });
+    },
+  );
 };
 
 let sequence = 0;

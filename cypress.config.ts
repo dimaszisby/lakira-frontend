@@ -1,9 +1,15 @@
 import { defineConfig } from "cypress";
 
+import { backendFreshness } from "./cypress/support/backend-image";
 import type { MailKind } from "./cypress/support/mailpit";
 import { probe, tokenFromMailpit } from "./cypress/support/mailpit";
 
 const MAILPIT_URL = process.env.E2E_MAILPIT_URL || "http://localhost:8025";
+
+// The stack preflight refuses a backend image older than backend `dev` (cypress/support/backend-image.ts).
+// `node_app` is the backend's Compose `container_name`.
+const BACKEND_CONTAINER = process.env.E2E_BACKEND_CONTAINER || "node_app";
+const ALLOW_STALE_BACKEND = process.env.E2E_ALLOW_STALE_BACKEND === "1";
 
 /**
  * Cypress removes Content-Security-Policy headers from the app's responses by default, and with
@@ -45,6 +51,9 @@ export default defineConfig({
         },
         mailpitToken({ email, kind }: { email: string; kind: MailKind }) {
           return tokenFromMailpit(MAILPIT_URL, email, kind);
+        },
+        backendFreshness() {
+          return backendFreshness(BACKEND_CONTAINER, ALLOW_STALE_BACKEND);
         },
       });
     },
