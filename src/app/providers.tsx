@@ -4,8 +4,20 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Provider as JotaiProvider } from "jotai";
 import { ThemeProvider } from "next-themes";
 import { useState } from "react";
+import { Toaster } from "react-hot-toast";
 
 import { THEME_STORAGE_KEY } from "@/constants/app";
+
+// The library's own look is a fixed white card that ignores the theme. Its styles
+// are injected unlayered, so a recipe in `@layer components` would lose to them;
+// these values are semantic tokens only, and follow the theme.
+const TOAST_OPTIONS = {
+  style: {
+    background: "hsl(var(--surface))",
+    color: "hsl(var(--text))",
+    border: "1px solid hsl(var(--border))",
+  },
+};
 
 type ProvidersProps = {
   children: React.ReactNode;
@@ -39,6 +51,9 @@ export const Providers = ({ children, nonce }: ProvidersProps) => {
             version that was never wired up, plus a second QueryClientProvider
             nested inside the first on the same client. */}
         <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        {/* At the root, not in the `(app)` shell: signing out raises its toast and
+            navigates to `/login` in the same breath, which unmounts that shell. */}
+        <Toaster toastOptions={TOAST_OPTIONS} />
       </JotaiProvider>
     </ThemeProvider>
   );
