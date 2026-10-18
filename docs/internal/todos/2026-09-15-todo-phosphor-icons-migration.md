@@ -58,3 +58,34 @@ misreport what it does.
 **Bundle impact was not measured.** The stated reason for this migration is maintenance, not size,
 and `npm run perf:bundle-size` needs a full perf run to compare meaningfully. If the number matters,
 run it against `dev` and this branch.
+
+## Bundle impact, measured 2026-10-18
+
+Register row F-40. The migration is one commit, `3b84022`, so it was measured against its parent,
+`822bff1`, the only difference between the two being the icon package. Each commit was exported with
+`git archive`, installed with `npm ci` from its own lockfile and built on Node 24.21.0 with no
+`.env`. Then `npm run perf:bundle-size` ran on each, and a throwaway script summed each chunk's
+gzip size (level 9).
+
+| `.next/static/chunks` | Before, `phosphor-react` 1.4.1 | After, `@phosphor-icons/react` 2.1.10 | Change             |
+| --------------------- | ------------------------------ | ------------------------------------- | ------------------ |
+| Total JS, raw         | 2,220,553 B                    | 2,149,957 B                           | -70,596 B (-3.2 %) |
+| Total JS, gzip        | 662,230 B                      | 692,217 B                             | +29,987 B (+4.5 %) |
+| Chunk files           | 56                             | 56                                    | 0                  |
+| Largest chunk         | 233,213 B                      | 233,213 B                             | 0                  |
+
+- **Not noise.** A second build of `822bff1` was byte-identical to the first.
+- **Both versions tree-shake.** An icon the app never imports is in no chunk, while one it does
+  import is there:
+  - v1: `Activity` in no chunk, `Trash` in 7;
+  - v2: `Acorn` in no chunk, `Trash` in 7.
+- **What it means against the budget.** The budget CI enforces counts raw bytes
+  (`performance-thresholds.json`: 3,000,000 total, 300,000 largest chunk). By that measure the
+  migration made the bundle smaller. What a browser downloads, the gzip size, grew by about 29 KB
+  summed over every chunk. A single page loads only some of the chunks, and per-route sizes were not
+  measured.
+- **Why gzip went up while raw went down** is not established. Inference: v2's icon modules compress
+  less well than v1's, which repeated the same structure for each weight.
+
+No change follows from this. The migration was for maintenance, the enforced budget improved, and
+nothing reached a threshold.

@@ -1,6 +1,6 @@
 # Frontend debt register
 
-**As of:** 2026-10-18, frontend `dev` at `346d808`, with F-08, F-09, F-10, F-14 to F-19, F-21, F-27 to F-29, F-32, F-33, F-35 to F-37, F-50, F-51, F-53, F-54 and F-55 closed, and F-34 narrowed to its O-07 item. Ranked by [D-01](decisions.md).
+**As of:** 2026-10-18, frontend `dev` at `eefa0a9`, with F-08, F-09, F-10, F-14 to F-19, F-21, F-27 to F-29, F-32, F-33, F-35 to F-37, F-40, F-50, F-51, F-53, F-54 and F-55 closed, and F-34 narrowed to its O-07 item. Ranked by [D-01](decisions.md).
 
 **"What's next" is the first row below whose state is `ready`.** A row above it that is waiting on
 someone is reported with it, as a gap. How rows are added and closed:
@@ -98,11 +98,10 @@ Interface, accessibility and end-to-end checks:
 
 Performance:
 
-| ID   | Item                                                         | Sev | State        | Source                                                    |
-| ---- | ------------------------------------------------------------ | --- | ------------ | --------------------------------------------------------- |
-| F-38 | The signed-in routes are not under the Lighthouse gate       | —   | owner, BE    | `2026-09-24-todo-authenticated-perf-routes.md`            |
-| F-39 | A cold load can paint one frame before the theme script runs | low | owner (O-09) | `2026-09-24-todo-cold-load-paint-before-theme-script.md`  |
-| F-40 | The bundle impact of the phosphor migration was not measured | —   | ready        | `2026-09-15-todo-phosphor-icons-migration.md`, "Not done" |
+| ID   | Item                                                         | Sev | State        | Source                                                   |
+| ---- | ------------------------------------------------------------ | --- | ------------ | -------------------------------------------------------- |
+| F-38 | The signed-in routes are not under the Lighthouse gate       | —   | owner, BE    | `2026-09-24-todo-authenticated-perf-routes.md`           |
+| F-39 | A cold load can paint one frame before the theme script runs | low | owner (O-09) | `2026-09-24-todo-cold-load-paint-before-theme-script.md` |
 
 Tests, docs and this register:
 
@@ -164,6 +163,7 @@ Rows move here when their fix merges, with the PR.
 | F-35 | The dashboard invalidation of #76 has no browser evidence                                                                     | #108      | Deleting a log, which has no dialog and so no `router.refresh()`, then going back: `metric-to-dashboard.cy.ts` reads `n: 1`, and `n: 2` with the delete-log mutation's invalidation removed. Shown for that one of the fifteen calls; the rest stay unit-tested. Pending a dated run for A10 § 7. `2026-10-18-todo-dashboard-invalidation-evidence.md`. |
 | F-36 | The journey spec does not take a metric off the dashboard and put it back                                                     | #108      | The same spec switches "Show on Dashboard" off, sees the dashboard's empty state, and switches it back on. `2026-10-18-todo-dashboard-invalidation-evidence.md`.                                                                                                                                                                                        |
 | F-37 | Whether the `/metric-logs` lists changed order after backend #125 was never checked                                           | #109      | They did not: the list sends its own sort (`-createdAt` by default) to a query #125 did not touch, and the logs #125 reordered, those embedded in `GET /metrics/:id`, are never requested. The question it raised is F-60. `2026-10-18-todo-metric-logs-order-after-backend-125.md`.                                                                    |
+| F-40 | The bundle impact of the phosphor migration was not measured                                                                  | #112      | Measured `822bff1` against `3b84022`: raw JS -70,596 B (-3.2 %), gzip +29,987 B (+4.5 %), chunk count and largest chunk unchanged; both versions tree-shake. No threshold reached, nothing to fix. `2026-09-15-todo-phosphor-icons-migration.md`.                                                                                                       |
 | F-50 | No Cypress spec signs out, public or stack                                                                                    | #110      | `sign-out.cy.ts` signs out from the sidebar at 1280 px in both themes and checks the session ended; `csp-stack/app-pages.cy.ts` does it with the policy enforced. Below 1024 px there is no control to use (F-48). `2026-10-18-todo-sign-out-toast-and-spec.md`.                                                                                        |
 | F-51 | Nothing checks the age of the local backend image before a stack run; twice the suite ran against a backend days behind `dev` | #111      | `preflightStack()` fails a run whose backend image is older than backend `dev`'s newest commit, naming what it lacks; `E2E_ALLOW_STALE_BACKEND=1` overrides. By date, not commit (F-61). Found a third time when written: 18 commits behind, now rebuilt and the suites re-run. `2026-10-18-todo-stack-backend-freshness.md`.                           |
 | F-53 | No `<Toaster>` is mounted, so the sign-out toasts in `AppShell.tsx` show nothing                                              | #110      | `providers.tsx` mounts one at the root, styled with semantic tokens; the sign-out spec sees the toast and runs axe on it in both themes. `2026-10-18-todo-sign-out-toast-and-spec.md`.                                                                                                                                                                  |
