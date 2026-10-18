@@ -59,7 +59,9 @@ sweep owes one, because the two files needed different answers.
 - [ ] Found: that off-screen button has `tabIndex` 0 and no `inert` or `aria-hidden` ancestor, so
       the closed drawer's controls are in the tab order. Same browser run → out of scope,
       register row F-49
-- [ ] Found: no Cypress spec signs out, public or stack → out of scope, register row F-50
+- [x] Found: no Cypress spec signs out, public or stack → out of scope, register row F-50. Done
+      2026-10-18, `cypress/e2e/stack/sign-out.cy.ts`:
+      `docs/internal/todos/2026-10-18-todo-sign-out-toast-and-spec.md`
 - [x] Noted, not checked: after signing in, the browser's Back button returns to `/login` by a
       client navigation with the user atom still set. The old header would have been hidden
       there and now shows; the page's own redirect for a usable session runs either way (review)

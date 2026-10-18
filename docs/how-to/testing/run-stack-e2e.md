@@ -1,7 +1,7 @@
 # Run the stack E2E specs
 
 `cypress/e2e/stack/` holds the specs that need the real backend: the signed-in pages checked for
-accessibility in both themes, the invite-and-switch journey, the password reset, the metrics
+accessibility in both themes, the invite-and-switch journey, the password reset, signing out, the metrics
 list and a category's metric list at four widths in both list modes, and the journey from a new metric to its dashboard card
 and a logged value, through deleting that value and taking the metric off the dashboard and
 back, with a metric's own pages checked for accessibility. CI cannot run
