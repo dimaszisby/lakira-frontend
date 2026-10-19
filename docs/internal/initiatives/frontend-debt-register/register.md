@@ -1,6 +1,6 @@
 # Frontend debt register
 
-**As of:** 2026-10-18, frontend `dev` at `eefa0a9`, with F-08, F-09, F-10, F-14 to F-19, F-21, F-27 to F-29, F-32, F-33, F-35 to F-37, F-40, F-50, F-51, F-53, F-54 and F-55 closed, and F-34 narrowed to its O-07 item. Ranked by [D-01](decisions.md).
+**As of:** 2026-10-18, frontend `dev` at `d38ccf4`, with F-08, F-09, F-10, F-14 to F-19, F-21, F-27 to F-29, F-32, F-33, F-35 to F-37, F-40, F-50, F-51, F-53, F-54 and F-55 closed, F-34 narrowed to its O-07 item, and F-41 to its deferred folder split. Ranked by [D-01](decisions.md).
 
 **"What's next" is the first row below whose state is `ready`.** A row above it that is waiting on
 someone is reported with it, as a gap. How rows are added and closed:
@@ -105,15 +105,15 @@ Performance:
 
 Tests, docs and this register:
 
-| ID   | Item                                                                                         | Sev | State                        | Source                                               |
-| ---- | -------------------------------------------------------------------------------------------- | --- | ---------------------------- | ---------------------------------------------------- |
-| F-41 | Integration coverage is still being widened; a unit and integration folder split is deferred | P3  | ready; the split is deferred | `2026-02-18-tests-structure-overhaul.md`             |
-| F-42 | Two documentation-hygiene items of the CI/CD overview                                        | —   | ready                        | `2026-02-16-todo-cicd-overview.md`                   |
-| F-43 | Nothing checks this register against the todo folder                                         | —   | ready                        | this kit, plan § Risks                               |
-| F-44 | The dashboard and the metric detail page have no `h1`                                        | —   | ready                        | kit `route-error-boundaries`, checklist § Discovered |
-| F-45 | After a successful "Try again", focus falls to the document body                             | —   | ready                        | same                                                 |
-| F-46 | `global-error.tsx` still calls `reset`, which does not fetch again                           | —   | ready                        | same; kit D-01                                       |
-| F-47 | An error in an intercepted `@modal` route replaces the list under it, not only the dialog    | —   | ready                        | same                                                 |
+| ID   | Item                                                                                                                      | Sev | State    | Source                                                                                                                 |
+| ---- | ------------------------------------------------------------------------------------------------------------------------- | --- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| F-41 | A unit and integration folder split (`__tests__/unit`, `__tests__/integration`), to evaluate only if readability degrades | P3  | deferred | `2026-02-18-tests-structure-overhaul.md`; its coverage item done in #113, `2026-10-19-todo-form-integration-suites.md` |
+| F-42 | Two documentation-hygiene items of the CI/CD overview                                                                     | —   | ready    | `2026-02-16-todo-cicd-overview.md`                                                                                     |
+| F-43 | Nothing checks this register against the todo folder                                                                      | —   | ready    | this kit, plan § Risks                                                                                                 |
+| F-44 | The dashboard and the metric detail page have no `h1`                                                                     | —   | ready    | kit `route-error-boundaries`, checklist § Discovered                                                                   |
+| F-45 | After a successful "Try again", focus falls to the document body                                                          | —   | ready    | same                                                                                                                   |
+| F-46 | `global-error.tsx` still calls `reset`, which does not fetch again                                                        | —   | ready    | same; kit D-01                                                                                                         |
+| F-47 | An error in an intercepted `@modal` route replaces the list under it, not only the dialog                                 | —   | ready    | same                                                                                                                   |
 
 ## Waiting on the owner, not code
 

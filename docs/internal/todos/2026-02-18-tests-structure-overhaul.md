@@ -68,7 +68,8 @@
 ### P2 Guardrails and Coverage Backfill
 
 - [x] Add CI-safe discovery checks in docs/runbook.
-- [ ] Continue integration coverage expansion after boundary hardening (progress: added `LogForm.int.test.tsx`, `MetricForm.int.test.tsx`, `MetricSettingsForm.int.test.tsx`, `MetricsPageClient.int.test.tsx`, `DashboardContent.int.test.tsx`, `MetricDetailComposite.int.test.tsx`, `MetricCategoryHeaderSection.int.test.tsx`, `MetricListSection.int.test.tsx`, and `RegisterForm.int.test.tsx` baselines on 2026-02-18).
+- [x] Continue integration coverage expansion after boundary hardening (progress: added `LogForm.int.test.tsx`, `MetricForm.int.test.tsx`, `MetricSettingsForm.int.test.tsx`, `MetricsPageClient.int.test.tsx`, `DashboardContent.int.test.tsx`, `MetricDetailComposite.int.test.tsx`, `MetricCategoryHeaderSection.int.test.tsx`, `MetricListSection.int.test.tsx`, and `RegisterForm.int.test.tsx` baselines on 2026-02-18).
+      Done 2026-10-19 against a stated end, every component that calls a query or mutation hook has an integration suite: `ForgotPasswordForm`, `ResetPasswordForm`, `EmailVerificationNotice` and `InviteMemberForm` were the last four (`2026-10-19-todo-form-integration-suites.md`).
 
 ### P3 Optional Future Reorg
 
