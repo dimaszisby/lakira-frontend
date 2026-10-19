@@ -41,7 +41,7 @@ Server-only vars (no prefix) are readable in route handlers, `src/proxy.ts` (the
 | `E2E_MAILPIT_URL` | local | Cypress stack specs, Mailpit, default `http://localhost:8025`; read in `cypress.config.ts`, exposed as `mailpitUrl` |
 | `E2E_BACKEND_URL` | local | Cypress stack preflight, default `http://localhost:8001/api/v1`; exposed as `backendUrl` |
 | `E2E_BACKEND_CONTAINER` | local | Cypress stack preflight, the backend container whose image age is checked, default `node_app`; read in `cypress.config.ts` |
-| `E2E_ALLOW_STALE_BACKEND` | local | `1` lets a stack run go on against a backend image older than backend `dev`; read in `cypress.config.ts` |
+| `E2E_ALLOW_STALE_BACKEND` | local | `1` lets a stack run go on against a backend image behind backend `dev`; read in `cypress.config.ts` |
 
 Per environment:
 

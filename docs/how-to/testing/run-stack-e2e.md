@@ -21,16 +21,18 @@ That starts the API on `:8001`, its database, Redis, RabbitMQ and Mailpit on `:8
 `app` service always sends mail to Mailpit, whatever the backend's `.env` says (lakira-backend
 `docs/how-to/development/read-outbound-email.md`).
 
-The image has to be newer than backend `dev`, or the stack specs refuse to run. Their preflight
-compares the image's creation time with the commits on backend `dev` and names the ones the image
-lacks. Rebuild it from an up-to-date `dev` checkout:
+The image has to have every commit on backend `dev`, or the stack specs refuse to run. Their
+preflight names the commits the image lacks. Rebuild it from an up-to-date `dev` checkout, passing
+the commit, so the image reports it on `/health`:
 
 ```bash
-docker compose -f ../lakira-backend/docker-compose.yml up -d --build mailpit app
+APP_RELEASE=$(git -C ../lakira-backend rev-parse HEAD) docker compose -f ../lakira-backend/docker-compose.yml up -d --build mailpit app
 ```
 
-The check is by date, so an image built from another branch after the newest `dev` commit also
-passes. To run against an older image on purpose, set `E2E_ALLOW_STALE_BACKEND=1`; the output says
+With the commit, the check asks GitHub which `dev` commits it lacks. Without it the image reports
+`release: "unknown"`, and the check falls back to comparing the image's creation time with the
+commits on `dev`, which an image built from another branch after the newest `dev` commit also
+passes; the output says which it used. To run against an older image on purpose, set `E2E_ALLOW_STALE_BACKEND=1`; the output says
 so. If Docker or GitHub cannot be reached, the check reports that it did not run and the specs go
 on. The container is `node_app` unless `E2E_BACKEND_CONTAINER` names another.
 

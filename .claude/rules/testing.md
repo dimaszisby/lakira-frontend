@@ -100,7 +100,7 @@ failure is named as one in the run, and `test:e2e:public` takes the rest. Name a
   `before`, then `newUser()`, `registerUser()`, `signIn()` / `signInSession()` and `tokenFor()`.
   Users are created fresh per run; no credential is stored anywhere. The helpers refuse to run
   unless the app, backend and Mailpit URLs are all local, and the preflight refuses a backend image
-  older than backend `dev` (`cypress/support/backend-image.ts`; override `E2E_ALLOW_STALE_BACKEND=1`).
+  behind backend `dev`: by commit when the image names one on `/health` (build it with `APP_RELEASE`), else by date (`cypress/support/backend-image.ts`; override `E2E_ALLOW_STALE_BACKEND=1`).
 - **Email templates** are known only to `cypress/support/mailpit.ts`. When the backend changes a
   subject or a link, that file is the one edit.
 - **Configuration** is public and goes through `expose` in `cypress.config.ts`, read with
