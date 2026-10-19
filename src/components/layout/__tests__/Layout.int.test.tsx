@@ -46,6 +46,8 @@ describe("Layout integration", () => {
     );
 
     expect(screen.getByRole("main")).toHaveTextContent("Metrics content");
+    // Focusable from script, for the skip link and for RouteErrorPanel after a retry; not tabbable.
+    expect(screen.getByRole("main")).toHaveAttribute("tabindex", "-1");
   });
 
   it("exposes skip link and primary navigation landmarks", () => {

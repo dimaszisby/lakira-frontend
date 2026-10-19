@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
+import type { ReactNode } from "react";
 
 import { RouteErrorPanel } from "@/components/ui/RouteErrorPanel";
 import { reportClientError } from "@/lib/monitoring/report-client-error";
@@ -85,6 +86,64 @@ describe("RouteErrorPanel", () => {
     rerender(<RouteErrorPanel error={second} retry={jest.fn()} title={TITLE} />);
     expect(reportClientError).toHaveBeenCalledTimes(2);
     expect(reportClientError).toHaveBeenLastCalledWith(second, "boundary");
+  });
+
+  describe("when the panel unmounts, as after a successful retry", () => {
+    const Page = ({ hasError, children }: { hasError: boolean; children?: ReactNode }) => (
+      <main tabIndex={-1}>
+        {hasError ? <RouteErrorPanel error={errorWith()} retry={jest.fn()} title={TITLE} /> : null}
+        {children}
+      </main>
+    );
+
+    it("moves focus from the Try again button to main", () => {
+      const { rerender } = render(<Page hasError />);
+      screen.getByRole("button", { name: "Try again" }).focus();
+
+      rerender(<Page hasError={false} />);
+
+      expect(screen.getByRole("main")).toHaveFocus();
+    });
+
+    it("leaves focus where the user put it", () => {
+      const { rerender } = render(
+        <Page hasError>
+          <button type="button">Metrics</button>
+        </Page>,
+      );
+      // Into the panel, then out to the page, as a user who presses Try again and then picks a link.
+      screen.getByRole("button", { name: "Try again" }).focus();
+      screen.getByRole("button", { name: "Metrics" }).focus();
+
+      rerender(
+        <Page hasError={false}>
+          <button type="button">Metrics</button>
+        </Page>,
+      );
+
+      expect(screen.getByRole("button", { name: "Metrics" })).toHaveFocus();
+    });
+
+    it("leaves focus alone when it never entered the panel, as on Strict Mode's extra mount", () => {
+      // `next dev` mounts, cleans up and mounts again (reactStrictMode: true), so the cleanup runs
+      // while the panel is still showing and focus is on the body.
+      render(<Page hasError />, { reactStrictMode: true });
+
+      expect(document.body).toHaveFocus();
+    });
+
+    it("does nothing when no main is above it", () => {
+      const { rerender } = render(
+        <div>
+          <RouteErrorPanel error={errorWith()} retry={jest.fn()} title={TITLE} />
+        </div>,
+      );
+      screen.getByRole("button", { name: "Try again" }).focus();
+
+      rerender(<div />);
+
+      expect(document.body).toHaveFocus();
+    });
   });
 
   it("has no accessibility violations", async () => {

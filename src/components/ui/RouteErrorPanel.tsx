@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import { cn } from "@/lib/cn";
 import { reportClientError } from "@/lib/monitoring/report-client-error";
@@ -39,10 +39,35 @@ export const RouteErrorPanel = ({
     reportClientError(error, "boundary");
   }, [error, title]);
 
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // A successful retry unmounts the panel with focus on its button, and focus would fall to the
+  // body, sending a keyboard or screen-reader user back to the top of the document. So on unmount
+  // it goes to the page's `main` (register row F-45), but only if focus has been in the panel and
+  // is lost now. If the user had moved on, to a link say, focus is left where they put it; and a
+  // panel focus never entered, as on Strict Mode's extra cleanup in `next dev`, moves nothing.
+  useEffect(() => {
+    const section = sectionRef.current;
+    const main = section?.closest("main");
+    let hasHadFocus = false;
+    const onFocusIn = () => {
+      hasHadFocus = true;
+    };
+    section?.addEventListener("focusin", onFocusIn);
+
+    return () => {
+      section?.removeEventListener("focusin", onFocusIn);
+      const active = document.activeElement;
+      const isLost = !active || active === document.body || !active.isConnected;
+      if (main && hasHadFocus && isLost) main.focus();
+    };
+  }, []);
+
   const Heading = headingLevel === 1 ? "h1" : "h2";
 
   return (
     <section
+      ref={sectionRef}
       role="alert"
       className={cn("rounded-xl border border-status-error bg-surface p-8 text-center", className)}
     >
