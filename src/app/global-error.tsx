@@ -19,10 +19,13 @@ import { Button } from "@/ui/Button";
 
 type GlobalErrorProps = {
   error: Error & { digest?: string };
-  reset: () => void;
+  /** Next's `retry`: fetches and renders again. `reset` only clears the error and re-renders the
+   * same failed payload, so it could not recover a server error (kit `route-error-boundaries`,
+   * D-01; register row F-46). */
+  retry: () => void;
 };
 
-const GlobalError = ({ error, reset }: GlobalErrorProps) => {
+const GlobalError = ({ error, retry }: GlobalErrorProps) => {
   useEffect(() => {
     // `digest` is the server-side correlation id; the message is omitted on the
     // server for security, so the digest is what ties this to a server log line.
@@ -42,7 +45,12 @@ const GlobalError = ({ error, reset }: GlobalErrorProps) => {
               Reference: <code>{error.digest}</code>
             </p>
           ) : null}
-          <Button variant="primary" onClick={reset}>
+          <Button
+            variant="primary"
+            onClick={() => {
+              retry();
+            }}
+          >
             Try again
           </Button>
         </main>
