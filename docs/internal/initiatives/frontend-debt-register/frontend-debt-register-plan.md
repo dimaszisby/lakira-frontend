@@ -80,7 +80,9 @@ Eight files, in register order, each read from the code at `f67716e`.
 ## Risks and trade-offs
 
 - **It goes stale.** A register nobody updates is worse than none. The rule makes a row part of
-  filing a todo and part of closing one; nothing enforces it mechanically yet (F-43).
+  filing a todo and part of closing one; nothing enforces it mechanically yet (F-43). Since
+  #115, `src/__tests__/register-todos.test.ts` enforces the filing half for any todo with an
+  unticked box ([D-04](decisions.md)).
 - **Severities are inherited.** The register ranks by what each source recorded. Twenty-seven of the
   43 rows have no P-level and sit in tier 5 until an audit grades them.
 - **Most of the top is blocked.** Eleven of the first thirteen rows are waiting on someone, five of
