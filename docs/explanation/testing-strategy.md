@@ -240,9 +240,9 @@ Docs
 - High-level budgets/specs:
   - [Performance Budget](../reference/performance-budget.md)
 - Testing details:
-  - [Lighthouse Plan](5-performance-and-web-vitals-tests/lighthouse-plan.md)
-  - [Web Vitals Plan](5-performance-and-web-vitals-tests/web-vitals-plan.md)
-  - [Bundle Size Checklist](5-performance-and-web-vitals-tests/bundle-size-checklist.md)
+  - [Lighthouse Plan](../internal/initiatives/tests-overhaul/5-performance-and-web-vitals-tests/lighthouse-plan.md)
+  - [Web Vitals Plan](../internal/initiatives/tests-overhaul/5-performance-and-web-vitals-tests/web-vitals-plan.md)
+  - [Bundle Size Checklist](../internal/initiatives/tests-overhaul/5-performance-and-web-vitals-tests/bundle-size-checklist.md)
 - Release checks:
   - [Performance Release Checklist](../how-to/releases/performance-release-checklist.md)
 
@@ -272,11 +272,11 @@ Guidelines (spec):
 
 Integration tests:
 
-- [Integration A11y Checklist](3-integration-tests/a11y-testing-checklist.md)
+- [Integration A11y Checklist](../internal/initiatives/tests-overhaul/3-integration-tests/a11y-testing-checklist.md)
 
 E2E tests:
 
-- [E2E A11y Checklist](4-end-to-end-tests/a11y-e2e-checklist.md)
+- [E2E A11y Checklist](../internal/initiatives/tests-overhaul/4-end-to-end-tests/a11y-e2e-checklist.md)
 
 Release checklist:
 
@@ -391,11 +391,11 @@ _Note: concrete script names may differ; this is the intended structure._
 ## 9. Related Documents
 
 - [Accessibility Guidelines](../reference/accessibility-baseline.md)
-- [Integration A11y Checklist](3-integration-tests/a11y-testing-checklist.md)
-- [E2E A11y Checklist](4-end-to-end-tests/a11y-e2e-checklist.md)
+- [Integration A11y Checklist](../internal/initiatives/tests-overhaul/3-integration-tests/a11y-testing-checklist.md)
+- [E2E A11y Checklist](../internal/initiatives/tests-overhaul/4-end-to-end-tests/a11y-e2e-checklist.md)
 - [A11y Release Checklist](../how-to/releases/a11y-release-checklist.md)
 - [Performance Budget](../reference/performance-budget.md)
-- [Lighthouse Plan](5-performance-and-web-vitals-tests/lighthouse-plan.md)
-- [Web Vitals Plan](5-performance-and-web-vitals-tests/web-vitals-plan.md)
-- [Bundle Size Checklist](5-performance-and-web-vitals-tests/bundle-size-checklist.md)
+- [Lighthouse Plan](../internal/initiatives/tests-overhaul/5-performance-and-web-vitals-tests/lighthouse-plan.md)
+- [Web Vitals Plan](../internal/initiatives/tests-overhaul/5-performance-and-web-vitals-tests/web-vitals-plan.md)
+- [Bundle Size Checklist](../internal/initiatives/tests-overhaul/5-performance-and-web-vitals-tests/bundle-size-checklist.md)
 - [Performance Release Checklist](../how-to/releases/performance-release-checklist.md)

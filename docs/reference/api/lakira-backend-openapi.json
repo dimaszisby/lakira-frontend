@@ -25,6 +25,15 @@
           "type": "string"
         }
       },
+      "RetryAfter": {
+        "description": "How many seconds to wait before retrying. Every 429 carries it: each rate limiter sets it to the seconds left in its window, and a locked-out login to the lockout's length.",
+        "example": 900,
+        "required": true,
+        "schema": {
+          "minimum": 0,
+          "type": "integer"
+        }
+      },
       "VisualizationCacheControl": {
         "description": "Always `private, no-cache`: a client may store the response and must revalidate it with `If-None-Match` before each reuse.",
         "example": "private, no-cache",
@@ -198,7 +207,12 @@
             }
           }
         },
-        "description": "Rate limit exceeded. Any operation can return this: an app-wide limit applies to every request, and some operations have a stricter limit of their own."
+        "description": "Rate limit exceeded. Any operation can return this: an app-wide limit applies to every request, and some operations have a stricter limit of their own.",
+        "headers": {
+          "Retry-After": {
+            "$ref": "#/components/headers/RetryAfter"
+          }
+        }
       },
       "UnauthorizedError": {
         "content": {
@@ -2888,7 +2902,12 @@
                 }
               }
             },
-            "description": "Rate limit exceeded for password reset requests"
+            "description": "Rate limit exceeded for password reset requests",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/RetryAfter"
+              }
+            }
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -3162,7 +3181,12 @@
                 }
               }
             },
-            "description": "Too many registration attempts from this IP (RATE_LIMIT_REGISTER_IP_MAX per hour)"
+            "description": "Too many registration attempts from this IP (RATE_LIMIT_REGISTER_IP_MAX per hour)",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/RetryAfter"
+              }
+            }
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -3202,7 +3226,12 @@
                 }
               }
             },
-            "description": "Rate limit exceeded for resend verification requests"
+            "description": "Rate limit exceeded for resend verification requests",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/RetryAfter"
+              }
+            }
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -3254,7 +3283,12 @@
                 }
               }
             },
-            "description": "Rate limit exceeded for password reset requests"
+            "description": "Rate limit exceeded for password reset requests",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/RetryAfter"
+              }
+            }
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
@@ -3357,7 +3391,12 @@
                 }
               }
             },
-            "description": "Rate limit exceeded for email verification requests"
+            "description": "Rate limit exceeded for email verification requests",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/RetryAfter"
+              }
+            }
           },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
