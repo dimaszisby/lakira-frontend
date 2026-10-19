@@ -121,7 +121,9 @@ failure is named as one in the run, and `test:e2e:public` takes the rest. Name a
 
 ## Coverage
 
-**Coverage gates, and has since 2026-08-27.** `jest.config.ts` sets global thresholds of 42 % statements / 43 % branches / 37 % functions / 41 % lines, ratcheted on 2026-10-07 to the whole number below measured coverage, less one (measured 43.54 / 44.32 / 38.01 / 42.55), so a real regression fails while normal fluctuation does not. They had sat at 29/29/26/29 since 2026-08-27 while coverage rose eight points or more past them. Per-folder goals live in `coverage-goals.json`:
+**Coverage gates, and has since 2026-08-27.** `jest.config.ts` sets global thresholds of 54 % statements / 45 % branches / 48 % functions / 54 % lines, ratcheted on 2026-10-19 to the whole number below measured coverage, less one (measured 55.61 / 46.14 / 49.74 / 55.13), so a real regression fails while normal fluctuation does not.
+
+**Coverage measures source, not tests.** `collectCoverageFrom` excludes `__tests__/`, `*.test.*` and `src/test-utils/` since 2026-10-19. Before that, the unit run counted its own test files as covered source and every integration test file, which it never executes, as uncovered, so adding an integration suite lowered the figure and four new suites failed the gate. The thresholds before that date (42/43/37/41, and 29/29/26/29 before them) were on that basis and do not compare with today's. Per-folder goals live in `coverage-goals.json`:
 
 | Path | Statement goal |
 | --- | --- |

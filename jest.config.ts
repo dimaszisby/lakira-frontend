@@ -38,6 +38,12 @@ const config: Config = {
     "!src/**/index.{ts,tsx}",
     "!src/**/stories.{ts,tsx}",
     "!src/styles/**",
+    // Tests are not the code under test. Counted as source, every unit test file read as covered
+    // and every integration test file, which this run never executes, read as uncovered, so adding
+    // an integration suite lowered the figure (2026-10-19, register row F-41).
+    "!src/**/__tests__/**",
+    "!src/**/*.test.{ts,tsx}",
+    "!src/test-utils/**",
   ],
   coverageReporters: ["text", "lcov", "json-summary"],
   // Ratcheted to just below measured coverage on 2026-08-27
@@ -46,12 +52,16 @@ const config: Config = {
   // roughly a tenth of actual, which meant the gate could not fail for the
   // reason it exists. Raise them as suites grow; never lower them to make a
   // build pass.
+  //
+  // Ratcheted again on 2026-10-19, when test files stopped counting as source: measured
+  // 55.61 / 46.14 / 49.74 / 55.13, so the whole number below each, less one. The old figures
+  // (42 / 43 / 37 / 41) were on the old basis and do not compare with these.
   coverageThreshold: {
     global: {
-      statements: 42,
-      branches: 43,
-      functions: 37,
-      lines: 41,
+      statements: 54,
+      branches: 45,
+      functions: 48,
+      lines: 54,
     },
   },
   transform: {
