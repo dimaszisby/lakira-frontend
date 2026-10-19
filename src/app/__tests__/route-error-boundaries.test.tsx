@@ -9,6 +9,7 @@ import DashboardError from "@/src/app/(app)/dashboard/error";
 import AppAreaError from "@/src/app/(app)/error";
 import MetricDetailError from "@/src/app/(app)/metrics/[metricId]/error";
 import AuthAreaError from "@/src/app/(auth)/error";
+import GlobalError from "@/src/app/global-error";
 
 jest.mock("@/lib/monitoring/report-client-error", () => ({
   reportClientError: jest.fn(),
@@ -118,6 +119,28 @@ describe("route error boundaries", () => {
 
       expect(reportClientError).toHaveBeenCalledTimes(1);
       expect(reportClientError).toHaveBeenCalledWith(error, "boundary");
+    });
+  });
+
+  // Not in the table: it renders its own document, and its copy is its own.
+  describe("global-error", () => {
+    it("shows fixed copy and never the error's message", () => {
+      render(<GlobalError error={new Error(SECRET_MESSAGE)} retry={jest.fn()} />);
+
+      expect(screen.getByRole("heading", { name: "Something went wrong" })).toBeInTheDocument();
+      expect(document.body).not.toHaveTextContent("jane.doe@example.com");
+    });
+
+    it("re-fetches when the user tries again", async () => {
+      const user = userEvent.setup();
+      const retry = jest.fn();
+      render(<GlobalError error={new Error(SECRET_MESSAGE)} retry={retry} />);
+
+      await user.click(screen.getByRole("button", { name: "Try again" }));
+
+      // `retry`, as every boundary above: with `reset` this page could not recover a server
+      // error, since it re-rendered the same failed payload (register row F-46).
+      expect(retry).toHaveBeenCalledTimes(1);
     });
   });
 });
