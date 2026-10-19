@@ -104,3 +104,27 @@ line; F-09's found that one of the two files may need no state at all.
 **Consequences.** A tier 5 row picked up later starts from its todo, not from an analysis.
 Twenty-seven rows carry no P-level; the next dated audit is asked to grade them, F-32 first, since
 a chart with no text alternative is a WCAG 1.1.1 question and reads as more than polish.
+
+## D-04 — What makes a todo open, for the check that every open todo has a row
+
+- **Status:** Proposed
+- **Date:** 2026-10-19
+
+**Context.** Row F-43: the rule that a new todo gets a register row in the same PR
+(`.claude/rules/workflow.md` § What's next) was enforced by memory only. A check needs a definition
+of an open todo that a machine can read. On 2026-10-19, 68 todo files: 14 have an unticked box and
+all 14 are named in a row above `## Closed`; the 40 the register never names have no unticked box,
+37 being fully ticked checklists with a Status section and 3 being write-ups of finished work with
+no boxes at all.
+**Decision.** A todo is open when it has a line that begins, after any indent, with `- [ ]`. Every
+open todo's filename must appear in `register.md` above the `## Closed` heading.
+`src/__tests__/register-todos.test.ts` checks it in the unit gate.
+**Options considered.** Every todo must be named somewhere in the register: rejected, it would
+demand rows for forty finished todos written before the register existed. A todo is open when it
+has no `## Status` section: rejected, eight open todos have one, since a Status section records
+progress, not completion. Also checking the inverse, that each todo a row names still exists:
+rejected, todos are user-controlled and deletable (`.claude/rules/workflow.md` § Ephemeral todos),
+and the check would make deleting one fail CI.
+**Consequences.** A finding written as prose, not as a box, is invisible to the check, as is a row
+left open after its todo was fully ticked. The "what's next" answer still lists todos newer than
+the register's "As of" date by hand, for those cases only.

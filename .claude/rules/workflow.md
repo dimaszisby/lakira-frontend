@@ -181,9 +181,11 @@ the same register (lakira-backend #159); a row that exists on both sides names t
 - **Re-rank only by the rule.** If the rule gives the wrong answer, change D-01 with a new
   decision entry, not the order of one row.
 
-Nothing checks the register against the todo folder mechanically (row F-43). Until something
-does, a "what's next" answer starts by listing `docs/internal/todos/` files newer than the
-register's "As of" date and adding any that are missing.
+`src/__tests__/register-todos.test.ts` fails the unit gate when a todo with an unticked box
+(`- [ ]`) is not named in a row above the register's `## Closed` heading (register D-04, row F-43,
+2026-10-19). It cannot see a finding written as prose instead of a box, or a row left open after
+its todo was fully ticked, so a "what's next" answer still starts by reading the `docs/internal/todos/`
+files newer than the register's "As of" date for those two cases.
 
 ## Core principles
 
