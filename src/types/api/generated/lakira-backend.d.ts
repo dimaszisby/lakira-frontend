@@ -240,6 +240,7 @@ export interface paths {
                 /** @description Rate limit exceeded for password reset requests */
                 429: {
                     headers: {
+                        "Retry-After": components["headers"]["RetryAfter"];
                         [name: string]: unknown;
                     };
                     content: {
@@ -497,6 +498,7 @@ export interface paths {
                 /** @description Too many registration attempts from this IP (RATE_LIMIT_REGISTER_IP_MAX per hour) */
                 429: {
                     headers: {
+                        "Retry-After": components["headers"]["RetryAfter"];
                         [name: string]: unknown;
                     };
                     content: {
@@ -548,6 +550,7 @@ export interface paths {
                 /** @description Rate limit exceeded for resend verification requests */
                 429: {
                     headers: {
+                        "Retry-After": components["headers"]["RetryAfter"];
                         [name: string]: unknown;
                     };
                     content: {
@@ -602,6 +605,7 @@ export interface paths {
                 /** @description Rate limit exceeded for password reset requests */
                 429: {
                     headers: {
+                        "Retry-After": components["headers"]["RetryAfter"];
                         [name: string]: unknown;
                     };
                     content: {
@@ -705,6 +709,7 @@ export interface paths {
                 /** @description Rate limit exceeded for email verification requests */
                 429: {
                     headers: {
+                        "Retry-After": components["headers"]["RetryAfter"];
                         [name: string]: unknown;
                     };
                     content: {
@@ -3155,6 +3160,7 @@ export interface components {
         /** @description Rate limit exceeded. Any operation can return this: an app-wide limit applies to every request, and some operations have a stricter limit of their own. */
         TooManyRequestsError: {
             headers: {
+                "Retry-After": components["headers"]["RetryAfter"];
                 [name: string]: unknown;
             };
             content: {
@@ -3199,6 +3205,11 @@ export interface components {
          * @example lakira_refresh=dGVzdC1yZWZyZXNoLXRva2Vu; Max-Age=604800; Path=/api/v1/auth/refresh; HttpOnly; SameSite=Strict
          */
         RefreshCookie: string;
+        /**
+         * @description How many seconds to wait before retrying. Every 429 carries it: each rate limiter sets it to the seconds left in its window, and a locked-out login to the lockout's length.
+         * @example 900
+         */
+        RetryAfter: number;
         /**
          * @description Always `private, no-cache`: a client may store the response and must revalidate it with `If-None-Match` before each reuse.
          * @example private, no-cache
