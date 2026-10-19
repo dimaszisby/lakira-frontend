@@ -10,6 +10,7 @@ const MAILPIT_URL = process.env.E2E_MAILPIT_URL || "http://localhost:8025";
 // `node_app` is the backend's Compose `container_name`.
 const BACKEND_CONTAINER = process.env.E2E_BACKEND_CONTAINER || "node_app";
 const ALLOW_STALE_BACKEND = process.env.E2E_ALLOW_STALE_BACKEND === "1";
+const BACKEND_URL = process.env.E2E_BACKEND_URL || "http://localhost:8001/api/v1";
 
 /**
  * Cypress removes Content-Security-Policy headers from the app's responses by default, and with
@@ -32,7 +33,7 @@ export default defineConfig({
   experimentalCspAllowList: isCspEnforced ? ENFORCED_CSP_DIRECTIVES : false,
   expose: {
     mailpitUrl: MAILPIT_URL,
-    backendUrl: process.env.E2E_BACKEND_URL || "http://localhost:8001/api/v1",
+    backendUrl: BACKEND_URL,
   },
   e2e: {
     baseUrl: process.env.CYPRESS_BASE_URL || "http://127.0.0.1:3000",
@@ -53,7 +54,7 @@ export default defineConfig({
           return tokenFromMailpit(MAILPIT_URL, email, kind);
         },
         backendFreshness() {
-          return backendFreshness(BACKEND_CONTAINER, ALLOW_STALE_BACKEND);
+          return backendFreshness(BACKEND_CONTAINER, ALLOW_STALE_BACKEND, BACKEND_URL);
         },
       });
     },
