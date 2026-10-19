@@ -23,6 +23,7 @@ const MetricHeaderSectionBase = () => {
 
   const initialMetric = fromDetail(header);
   const category = toCategoryUI(initialMetric.category);
+  const name = safeLabel(header.name, "Not Set");
 
   const handleEditClick = () => {
     router.push(metricRoutes.modal.edit(header.id));
@@ -39,9 +40,12 @@ const MetricHeaderSectionBase = () => {
         <PencilSimple size={22} />
       </Button>
 
+      {/* The name is the page's h1. `data-label-text` keeps the label's size and weight, and
+          `font-sans` the body font, over the base h1 rule's. */}
       <DataLabel
         title="Metric Name"
-        value={safeLabel(header.name, "Not Set")}
+        value={name}
+        renderValue={<h1 className="data-label-text font-sans">{name}</h1>}
         size="lg"
         className="mb-4"
       />

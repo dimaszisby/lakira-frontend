@@ -8,7 +8,7 @@ backend's register, lakira-backend `docs/internal/initiatives/backend-debt-regis
 
 ## D-01 — The ranking rule, fixed before any row is ranked
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-13
 
 **Context.** Open work is recorded in five places that do not rank against each other: the todo
@@ -47,7 +47,7 @@ when its recorded severity does.
 
 ## D-02 — How rows group into fix PRs
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-13
 
 **Context.** Forty-three rows do not mean forty-three PRs. Some share the same few lines, some are
@@ -78,7 +78,7 @@ advice; a fix's own plan can split a group and should say why.
 
 ## D-03 — What is listed and not analysed
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-13
 
 **Context.** The appetite is one session. An in-depth analysis of every row would take several,
@@ -107,7 +107,7 @@ a chart with no text alternative is a WCAG 1.1.1 question and reads as more than
 
 ## D-04 — What makes a todo open, for the check that every open todo has a row
 
-- **Status:** Proposed
+- **Status:** Accepted
 - **Date:** 2026-10-19
 
 **Context.** Row F-43: the rule that a new todo gets a register row in the same PR

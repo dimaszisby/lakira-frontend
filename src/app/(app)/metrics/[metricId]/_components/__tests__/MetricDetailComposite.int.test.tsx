@@ -44,10 +44,11 @@ jest.mock("next/navigation", () => ({
 
 const metricId = "metric-1";
 const fixedTimestamp = "2026-02-01T00:00:00.000Z";
+const METRIC_NAME = "Body Weight";
 
 const header: MetricHeaderVM = {
   id: metricId,
-  name: "Body Weight",
+  name: METRIC_NAME,
   defaultUnit: "kg",
   description: "Weekly tracking metric",
   isPublic: false,
@@ -118,7 +119,7 @@ describe("Metric detail composite integration", () => {
       "/metric-categories/cat-1",
     );
 
-    expect(screen.getAllByText("Body Weight").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText(METRIC_NAME).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("Metric Settings")).toBeInTheDocument();
     expect(screen.getByText("Goal Settings")).toBeInTheDocument();
     expect(screen.getByText("Display Options")).toBeInTheDocument();
@@ -128,6 +129,13 @@ describe("Metric detail composite integration", () => {
     // state, and the recipe owns the colour.
     expect(logsTab).toHaveClass("metric-tab-active");
     expect(logsTab).toHaveAttribute("href", `/metrics/${metricId}/logs`);
+  });
+
+  it("names the page by the metric, in its one h1", () => {
+    renderMetricDetailComposite(`/metrics/${metricId}`);
+
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(screen.getByRole("heading", { level: 1, name: METRIC_NAME })).toBeInTheDocument();
   });
 
   it("routes to edit screens from metric header and settings actions", async () => {
