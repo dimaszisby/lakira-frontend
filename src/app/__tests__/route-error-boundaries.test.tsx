@@ -29,36 +29,44 @@ type BoundaryProps = {
 /**
  * Every `error.tsx` under `src/app`, with the title it shows. `global-error.tsx` is not here: it
  * renders its own document and has its own copy.
+ *
+ * `level` is the title's heading level: 1 where the panel is the page's only heading, 2 where a
+ * layout above the boundary keeps the page's h1 (the dashboard's title, the metric's name).
  */
 const BOUNDARIES: readonly {
   name: string;
   file: string;
   Boundary: ComponentType<BoundaryProps>;
   title: string;
+  level: 1 | 2;
 }[] = [
   {
     name: "(app) group",
     file: "src/app/(app)/error.tsx",
     Boundary: AppAreaError,
     title: "Unable to load this page",
+    level: 1,
   },
   {
     name: "(auth) group",
     file: "src/app/(auth)/error.tsx",
     Boundary: AuthAreaError,
     title: "Unable to load this page",
+    level: 1,
   },
   {
     name: "dashboard",
     file: "src/app/(app)/dashboard/error.tsx",
     Boundary: DashboardError,
     title: "Unable to load dashboard",
+    level: 2,
   },
   {
     name: "metric detail",
     file: "src/app/(app)/metrics/[metricId]/error.tsx",
     Boundary: MetricDetailError,
     title: "Unable to load metric",
+    level: 2,
   },
 ];
 
@@ -82,11 +90,11 @@ describe("route error boundaries", () => {
     consoleErrorSpy.mockRestore();
   });
 
-  describe.each(BOUNDARIES)("$name", ({ Boundary, title }) => {
+  describe.each(BOUNDARIES)("$name", ({ Boundary, title, level }) => {
     it("shows its title and never the error's message", () => {
       render(<Boundary error={new Error(SECRET_MESSAGE)} retry={jest.fn()} />);
 
-      expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
+      expect(screen.getByRole("heading", { name: title, level })).toBeInTheDocument();
       expect(screen.queryByText(/ECONNREFUSED/)).not.toBeInTheDocument();
       expect(document.body).not.toHaveTextContent("jane.doe@example.com");
     });

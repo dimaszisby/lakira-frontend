@@ -8,7 +8,7 @@ type MetricDetailErrorProps = {
 };
 
 // The metric's layout stays above this boundary: breadcrumbs, the header card and the tabs. The
-// heading keeps the level it had. That page has no h1 of its own today, which is a separate gap.
+// header card holds the page's h1, the metric's name, so the panel's heading is an h2.
 const MetricDetailError = ({ error, retry }: MetricDetailErrorProps) => (
   <RouteErrorPanel error={error} retry={retry} title="Unable to load metric" headingLevel={2} />
 );
