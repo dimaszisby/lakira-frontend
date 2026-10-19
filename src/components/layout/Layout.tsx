@@ -36,9 +36,12 @@ const Layout = ({ children, onLogout, isLoggingOut }: LayoutProps) => {
       <div className="flex min-h-screen flex-1 flex-col lg:pl-64">
         {/* pb-20 below lg clears the fixed BottomNavigationBar, which would otherwise cover the last
             control on the page (cypress-a11y-e2e, finding F-3). */}
+        {/* tabIndex -1: the skip link's target, and where focus goes after an error boundary
+            recovers (RouteErrorPanel). Not operable, so no focus ring. */}
         <main
           id="main"
-          className="flex-1 overflow-x-hidden bg-bg pb-20 sm:px-6 lg:px-8 lg:pb-8 lg:pt-6"
+          tabIndex={-1}
+          className="flex-1 overflow-x-hidden bg-bg pb-20 focus:outline-none sm:px-6 lg:px-8 lg:pb-8 lg:pt-6"
         >
           {children}
         </main>
