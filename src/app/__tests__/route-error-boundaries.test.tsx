@@ -4,6 +4,7 @@ import { readdirSync } from "fs";
 import path from "path";
 import type { ComponentType } from "react";
 
+import { THEME_STORAGE_KEY } from "@/constants/app";
 import { reportClientError } from "@/lib/monitoring/report-client-error";
 import { MODAL_ROUTE_ERROR_TITLE } from "@/src/app/(app)/_components/ModalRouteError";
 import DashboardError from "@/src/app/(app)/dashboard/error";
@@ -21,6 +22,12 @@ import GlobalError from "@/src/app/global-error";
 
 jest.mock("@/lib/monitoring/report-client-error", () => ({
   reportClientError: jest.fn(),
+}));
+
+// `next/font` loaders only run under Next's compiler, and this suite runs under ts-jest.
+jest.mock("@/src/app/fonts", () => ({
+  quicksand: { variable: "font-quicksand-variable" },
+  plusJakartaSans: { variable: "font-plus-jakarta-variable" },
 }));
 
 const mockBack = jest.fn();
@@ -219,6 +226,58 @@ describe("route error boundaries", () => {
       // `retry`, as every boundary above: with `reset` this page could not recover a server
       // error, since it re-rendered the same failed payload (register row F-46).
       expect(retry).toHaveBeenCalledTimes(1);
+    });
+
+    // It replaces the root layout, so next-themes never sets `data-theme` here (register row F-64).
+    describe("theme", () => {
+      const realMatchMedia = window.matchMedia;
+
+      /** Reports the OS colour scheme as dark or light. */
+      const setOsDark = (isDark: boolean) => {
+        window.matchMedia = (query: string) =>
+          ({
+            ...realMatchMedia(query),
+            matches: isDark && query === "(prefers-color-scheme: dark)",
+          }) as MediaQueryList;
+      };
+
+      afterEach(() => {
+        window.matchMedia = realMatchMedia;
+        window.localStorage.removeItem(THEME_STORAGE_KEY);
+        delete document.documentElement.dataset.theme;
+        document.documentElement.style.colorScheme = "";
+      });
+
+      it("applies the stored dark theme when the OS is light", () => {
+        setOsDark(false);
+        window.localStorage.setItem(THEME_STORAGE_KEY, "dark");
+        render(<GlobalError error={new Error(SECRET_MESSAGE)} retry={jest.fn()} />);
+
+        expect(document.documentElement.dataset.theme).toBe("dark");
+      });
+
+      it("applies the stored light theme when the OS is dark", () => {
+        setOsDark(true);
+        window.localStorage.setItem(THEME_STORAGE_KEY, "light");
+        render(<GlobalError error={new Error(SECRET_MESSAGE)} retry={jest.fn()} />);
+
+        expect(document.documentElement.dataset.theme).toBe("light");
+      });
+
+      it("follows the OS when the stored choice is system", () => {
+        setOsDark(true);
+        window.localStorage.setItem(THEME_STORAGE_KEY, "system");
+        render(<GlobalError error={new Error(SECRET_MESSAGE)} retry={jest.fn()} />);
+
+        expect(document.documentElement.dataset.theme).toBe("dark");
+      });
+
+      it("follows the OS when nothing is stored", () => {
+        setOsDark(true);
+        render(<GlobalError error={new Error(SECRET_MESSAGE)} retry={jest.fn()} />);
+
+        expect(document.documentElement.dataset.theme).toBe("dark");
+      });
     });
   });
 });

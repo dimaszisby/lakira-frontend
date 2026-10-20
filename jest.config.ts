@@ -5,6 +5,9 @@ const config: Config = {
   testEnvironment: "jest-environment-jsdom",
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts", "<rootDir>/jest.integration.setup.ts"],
   moduleNameMapper: {
+    // First: the first matching pattern wins, and `@/styles/*` below would otherwise hand Jest the
+    // real stylesheet (`global-error.tsx` imports `@/styles/globals.css`).
+    "\\.(css|pcss)$": "identity-obj-proxy",
     "^@/src/(.*)$": "<rootDir>/src/$1",
     "^@/app/(.*)$": "<rootDir>/src/app/$1",
     "^@/features/(.*)$": "<rootDir>/src/features/$1",
@@ -20,7 +23,6 @@ const config: Config = {
     "^@/styles/(.*)$": "<rootDir>/src/styles/$1",
     "^@/components/(.*)$": "<rootDir>/src/components/$1",
     "^@/ui/(.*)$": "<rootDir>/src/components/ui/$1",
-    "\\.(css|pcss)$": "identity-obj-proxy",
   },
   testPathIgnorePatterns: [
     "<rootDir>/node_modules/",
