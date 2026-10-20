@@ -1,7 +1,7 @@
 # Frontend debt register
 
-**Status:** Register and eight analyses written. Thirty-six rows closed since (F-08, F-09,
-F-10, F-14 to F-19, F-21, F-27 to F-29, F-32, F-33, F-35 to F-37, F-40, F-42 to F-47, F-50, F-51, F-52, F-53, F-54, F-55, F-57, F-61, F-62, F-63, F-64). Every row in tiers 1 to 4
+**Status:** Register and eight analyses written. Thirty-seven rows closed since (F-08, F-09,
+F-10, F-14 to F-19, F-21, F-27 to F-29, F-32, F-33, F-35 to F-37, F-40, F-42 to F-47, F-50, F-51, F-52, F-53, F-54, F-55, F-57, F-61, F-62, F-63, F-64, F-66). Every row in tiers 1 to 4
 waits on the owner, the backend or a package's maintainers. In tier 5, F-58, F-59, F-20
 and F-24 to F-26 wait on the backend or the owner, F-65 on the owner (O-14), F-30 on the owner and the backend, F-31 is
 unexplained, F-22 and F-23 are settled, and F-56, F-34, F-60, F-48 and F-49 wait on the owner
