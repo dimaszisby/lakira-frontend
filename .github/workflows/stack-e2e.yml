@@ -38,6 +38,11 @@ jobs:
       API_URL: http://localhost:8001/api/v1
       NEXT_PUBLIC_API_BASE_URL: http://localhost:8001/api/v1
       CYPRESS_BASE_URL: http://127.0.0.1:3000
+      # The app's own origin, for the requests its server makes to /api/proxy (src/lib/env.ts,
+      # resolveAppOrigin). Unset, a production build guesses https://localhost:3000, which this
+      # plain-http server does not answer, and every page that loads its data on the server, a
+      # metric's or a category's, renders 404. Inlined at build time, so it is set for the job.
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
     defaults:
       run:
         working-directory: lakira-frontend

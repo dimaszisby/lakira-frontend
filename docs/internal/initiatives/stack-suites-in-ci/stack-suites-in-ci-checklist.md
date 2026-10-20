@@ -38,6 +38,20 @@ and dispatched workflow ([D-01](decisions.md)); the analysis is
 
 - [x] Found: a high advisory in `follow-redirects` failed Security Scan on `dev` before this
       branch was cut → out of scope, fixed first in #126 (register row F-66).
+- [x] Found: the PR's first run (39511529204) failed 16 of 58 stack cases. Every failure was a
+      metric or category page answering 404, or a step that needed one; the CSP stack suite
+      passed. The job set no `NEXT_PUBLIC_APP_URL`, so `resolveAppOrigin` (`src/lib/env.ts`) gave
+      a production build `https://localhost:3000`. The server's own requests to `/api/proxy` went
+      there and failed against the plain-http server, and the detail layouts turn a failed fetch
+      into `notFound()`. Local runs pass because `.env.local` sets it → in scope, the job now sets
+      `NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000`.
+  - Reproduced against the local stack: a build with `https://localhost:3000` failed
+    `metrics-list-widths.cy.ts` 8 of 17 with the same 404s; the build with the fix passed it,
+    `metric-to-dashboard.cy.ts` and `chart-summary.cy.ts`, 27 of 27.
+- [x] Found: a production build with no app origin configured guesses `https://localhost:3000`
+      for its own server-side requests, which fails silently into a 404 on any host that does not
+      serve that → out of scope for this CI change. F-01's AC-3 already requires the production
+      `NEXT_PUBLIC_APP_URL` to be named; its analysis now says why it must be set at build time.
 - [x] Found: actionlint 1.7.12 does not know the `ubuntu-26.04` label that every workflow here
       uses and CI accepts → not a defect; the check was run with that one rule ignored.
 

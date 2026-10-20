@@ -125,7 +125,10 @@ repository to `lakira-frontend/` and lakira-backend `dev` to `lakira-backend/`, 
    up to 180 s for `/api/v1/health`;
 5. writes the backend commit, `/health`'s `release` and the frontend commit to the run summary;
 6. in this repository: `npm ci`, `build` and `start` with `API_URL` and `NEXT_PUBLIC_API_BASE_URL`
-   set to `http://localhost:8001/api/v1`, waiting up to 120 s for the app;
+   set to `http://localhost:8001/api/v1` and `NEXT_PUBLIC_APP_URL` to `http://127.0.0.1:3000`,
+   waiting up to 120 s for the app. Without `NEXT_PUBLIC_APP_URL`, the server's own requests to
+   `/api/proxy` go to `https://localhost:3000`, and every page that loads its data on the server
+   renders 404;
 7. `test:e2e:stack`, then `test:e2e:csp:stack`, each its own step; the second runs even when the
    first fails;
 8. stops the app, prints the backend's log on failure, uploads `stack-cypress-videos` and
