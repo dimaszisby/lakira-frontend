@@ -1,9 +1,14 @@
 "use client";
 
+import "@/styles/globals.css";
+
 import { useEffect } from "react";
 
+import { THEME_STORAGE_KEY } from "@/constants/app";
 import { reportClientError } from "@/lib/monitoring/report-client-error";
 import { Button } from "@/ui/Button";
+
+import { plusJakartaSans, quicksand } from "./fonts";
 
 /**
  * Last-resort error boundary. Replaces the root layout when a render throws
@@ -25,6 +30,22 @@ type GlobalErrorProps = {
   retry: () => void;
 };
 
+/**
+ * The theme next-themes would apply, read the way its pre-paint script reads it: the stored
+ * choice under `THEME_STORAGE_KEY`, with `system` (the default in `src/app/providers.tsx`)
+ * resolved from the OS. Keep it in step with that provider's config.
+ */
+const resolveStoredTheme = (): "light" | "dark" => {
+  let stored: string | null = null;
+  try {
+    stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+  } catch {
+    // Storage can be blocked; fall through to the OS setting.
+  }
+  if (stored === "light" || stored === "dark") return stored;
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+};
+
 const GlobalError = ({ error, retry }: GlobalErrorProps) => {
   useEffect(() => {
     // `digest` is the server-side correlation id; the message is omitted on the
@@ -32,8 +53,18 @@ const GlobalError = ({ error, retry }: GlobalErrorProps) => {
     reportClientError(error, "boundary");
   }, [error]);
 
+  // This page replaces the root layout, so next-themes never runs here and `data-theme` is unset
+  // (register row F-64). An effect rather than next-themes' inline script: that script needs the
+  // CSP nonce, which only the server layout can read (ADR-0026). The cost is one light paint
+  // before hydration for someone who chose dark.
+  useEffect(() => {
+    const theme = resolveStoredTheme();
+    document.documentElement.dataset.theme = theme;
+    document.documentElement.style.colorScheme = theme;
+  }, []);
+
   return (
-    <html lang="en">
+    <html lang="en" className={`${quicksand.variable} ${plusJakartaSans.variable}`}>
       <body className="min-h-dvh font-sans antialiased">
         <main className="flex min-h-dvh flex-col items-center justify-center gap-6">
           <h1 className="text-center">Something went wrong</h1>

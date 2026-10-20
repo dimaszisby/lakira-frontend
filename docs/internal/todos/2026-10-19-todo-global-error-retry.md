@@ -18,11 +18,12 @@ could not recover a server error at all.
       first render for each key, and a throwaway spec (both deleted):
   - with `reset`, the page did not recover in 3 of 3 runs;
   - with `retry`, it recovered in 3 of 3.
-- [ ] Found: the global error page renders in the browser's default serif and ignores the chosen
+- [x] Found: the global error page renders in the browser's default serif and ignores the chosen
       theme. It replaces the root layout, which is what sets the `next/font` variables on `<html>`
       and where `next-themes` applies `data-theme`; measured `--font-quicksand` empty, `<html>`
       with no class and no `data-theme`, body font `Times`. Next's docs say as much
-      (`error.md`, global-error "Good to know") → out of scope, register row F-64.
+      (`error.md`, global-error "Good to know") → out of scope, register row F-64. Fixed in
+      `2026-10-20-todo-global-error-theme-fonts.md`.
 - [x] Register: F-46 closed, F-64 filed; README names the next ready row.
 - [x] Gates
 

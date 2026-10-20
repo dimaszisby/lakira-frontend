@@ -1,13 +1,13 @@
 import "@/styles/globals.css";
 
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Quicksand } from "next/font/google";
 import { headers } from "next/headers";
 
 import { APP_DESCRIPTION, APP_NAME, TITLE_SEPARATOR } from "@/constants/app";
 import { NONCE_HEADER } from "@/lib/csp";
 
 import WebVitalsReporter from "./_components/WebVitalsReporter";
+import { plusJakartaSans, quicksand } from "./fonts";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
@@ -24,20 +24,6 @@ export const metadata: Metadata = {
     type: "website",
   },
 };
-
-const quicksand = Quicksand({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-quicksand",
-  display: "swap",
-});
-
-const plusJakartaSans = Plus_Jakarta_Sans({
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700", "800"],
-  variable: "--font-plus-jakarta",
-  display: "swap",
-});
 
 const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   // Set by src/proxy.ts for this request. Next stamps it on its own scripts
