@@ -115,17 +115,19 @@ and paste the failure. "Tests pass" is not a status.
 `/pre-push` runs these in CI's own order and is the canonical local sequence — use it rather than
 inventing an order here.
 
-**Every gate in this table runs in CI except `e2e (stack)` and `e2e (csp, stack)`.** `format` included as of 2026-09-20 —
-it is the last step of the `checks` job, so a formatting failure cannot mask a lint or type error
-in the same run. For those gates nothing depends on anyone remembering:
-`.claude/hooks/format-on-edit.sh` only reformats files an agent edits, which is why the repo
-reached 93 unformatted files before the gate existed.
+**Every gate in this table runs on every pull request except `e2e (stack)` and `e2e (csp, stack)`.**
+`format` included as of 2026-09-20 — it is the last step of the `checks` job, so a formatting
+failure cannot mask a lint or type error in the same run. For those gates nothing depends on anyone
+remembering: `.claude/hooks/format-on-edit.sh` only reformats files an agent edits, which is why
+the repo reached 93 unformatted files before the gate existed.
 
-`e2e (stack)` is the exception, and it **does** depend on remembering. It needs the backend and
-Mailpit, which CI does not have (kit `cypress-a11y-e2e`, D-01). CI still typechecks and lints its
-specs, so a renamed helper fails a PR, but whether the signed-in pages pass is only known when
-someone runs it. When its trigger applies, run it and report it by name, or report it as skipped
-and why.
+The two stack gates run in CI **nightly and on dispatch**, in their own workflow,
+`frontend-stack-e2e` (`.github/workflows/stack-e2e.yml`), against a backend built from
+lakira-backend `dev`. They do not run on a pull request, except one that changes that workflow
+(kit `stack-suites-in-ci`, D-01, which supersedes `cypress-a11y-e2e` D-01). So a pull request can
+still merge with a signed-in page broken, and the nightly run finds it the next morning. When
+their trigger applies, run them locally and report them by name, or report them as skipped and
+why. CI typechecks and lints their specs on every pull request either way.
 
 For anything touching routing, auth, or caching, check `docs/internal/incidents/` first — four logged postmortems cover exactly those areas, and their causes recur.
 

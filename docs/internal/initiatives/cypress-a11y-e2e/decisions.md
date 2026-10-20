@@ -2,7 +2,7 @@
 
 ## D-01 — CI runs the public specs only; backend-dependent specs run locally
 
-- **Status:** Accepted
+- **Status:** Superseded by [`stack-suites-in-ci` D-01](../stack-suites-in-ci/decisions.md) (2026-10-21)
 - **Date:** 2026-09-29
 
 **Context.** CI's `e2e` job starts the built app on `127.0.0.1:3000` and nothing else. Every signed-in

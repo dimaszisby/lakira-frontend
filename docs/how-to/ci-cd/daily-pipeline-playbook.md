@@ -6,7 +6,8 @@ What runs, when, and what to do when a job goes red.
 
 Which jobs run, in what order and on what: [`ci-pipeline/workflows.md`](../../reference/ci-pipeline/workflows.md).
 The short version: `checks → unit → integration → build → e2e` in series, with `api-contract`,
-`security` and `secret-scan` alongside, and `frontend-performance` nightly.
+`security` and `secret-scan` alongside, and `frontend-performance`, `dependency-audit` and
+`frontend-stack-e2e` nightly.
 
 ## Reproduce a failure locally
 
@@ -32,15 +33,16 @@ npm run test:e2e
 
 ## Common failures
 
-| Job                          | Symptom                         | Fix                                                                                                                                                                                                                           |
-| ---------------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `api-contract`               | "generated API types are stale" | `npm run api:types:generate`, commit the result.                                                                                                                                                                              |
-| `api-contract`               | "snapshot has drifted"          | `npm run api:spec:sync`, then regenerate types. Commit both.                                                                                                                                                                  |
-| `checks`                     | Passes locally, fails in CI     | Node version. CI runs the major in `.nvmrc` (24); run `nvm use`.                                                                                                                                                              |
-| `e2e`                        | Times out on first visit        | The app did not start. Check the `build` artifact uploaded and `npm run start` bound to `127.0.0.1:3000`.                                                                                                                     |
-| `security`                   | `npm audit` high finding        | A production dependency is affected, so every PR fails until it is fixed. Upgrade it (`npm audit fix`, no `--force`, then the full gates). If it cannot be upgraded, record the exception rather than lowering the threshold. |
-| `dependency-audit` (nightly) | `npm audit` high finding        | A development dependency is affected; PRs stay green. Fix it as its own task, the same way. The failure email goes to whoever last edited the workflow's cron line.                                                           |
-| `secret-scan`                | gitleaks hit                    | Rotate the credential first, then remove it from history. A revert does not un-leak it.                                                                                                                                       |
+| Job                            | Symptom                         | Fix                                                                                                                                                                                                                                                                                               |
+| ------------------------------ | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api-contract`                 | "generated API types are stale" | `npm run api:types:generate`, commit the result.                                                                                                                                                                                                                                                  |
+| `api-contract`                 | "snapshot has drifted"          | `npm run api:spec:sync`, then regenerate types. Commit both.                                                                                                                                                                                                                                      |
+| `checks`                       | Passes locally, fails in CI     | Node version. CI runs the major in `.nvmrc` (24); run `nvm use`.                                                                                                                                                                                                                                  |
+| `e2e`                          | Times out on first visit        | The app did not start. Check the `build` artifact uploaded and `npm run start` bound to `127.0.0.1:3000`.                                                                                                                                                                                         |
+| `security`                     | `npm audit` high finding        | A production dependency is affected, so every PR fails until it is fixed. Upgrade it (`npm audit fix`, no `--force`, then the full gates). If it cannot be upgraded, record the exception rather than lowering the threshold.                                                                     |
+| `dependency-audit` (nightly)   | `npm audit` high finding        | A development dependency is affected; PRs stay green. Fix it as its own task, the same way. The failure email goes to whoever last edited the workflow's cron line.                                                                                                                               |
+| `frontend-stack-e2e` (nightly) | A stack spec fails              | First read the run summary for the backend commit it tested: a change on backend `dev` since the last green run is the likeliest cause. Then reproduce with that backend locally ([run-stack-e2e.md](../testing/run-stack-e2e.md)). If the stack did not start, the job prints the backend's log. |
+| `secret-scan`                  | gitleaks hit                    | Rotate the credential first, then remove it from history. A revert does not un-leak it.                                                                                                                                                                                                           |
 
 ## Notes
 

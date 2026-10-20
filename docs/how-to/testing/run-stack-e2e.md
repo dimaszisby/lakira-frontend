@@ -4,10 +4,10 @@
 accessibility in both themes, the invite-and-switch journey, the password reset, signing out, the metrics
 list and a category's metric list at four widths in both list modes, and the journey from a new metric to its dashboard card
 and a logged value, through deleting that value and taking the metric off the dashboard and
-back, with a metric's own pages checked for accessibility. CI cannot run
-them, because it has no backend, so they run on your machine. Run them when a change touches a
-signed-in page, the app layout, or an auth or token flow, and before a release
-(`.claude/rules/workflow.md`, gate table).
+back, with a metric's own pages checked for accessibility. CI runs them every night, and no pull
+request waits for them, so run them on your machine when a change touches a signed-in page, the
+app layout, or an auth or token flow, and before a release (`.claude/rules/workflow.md`, gate
+table). To run them in CI instead, see [Run them in CI](#run-them-in-ci).
 
 ## 1. Start the backend and Mailpit
 
@@ -62,6 +62,19 @@ npm run test:e2e:stack
 The specs check the stack first and stop with one message naming anything that is not running, and
 how to start it. They create fresh users each run (`e2e-<role>-<number>@example.com`) and read every
 token from Mailpit; nothing needs to be seeded, and nothing is stored.
+
+## Run them in CI
+
+The `frontend-stack-e2e` workflow (`.github/workflows/stack-e2e.yml`) runs both stack suites every
+night at 04:00 UTC against a backend built from lakira-backend `dev`. To run it now:
+
+```bash
+gh workflow run frontend-stack-e2e
+```
+
+Add `--ref <branch>` to test a branch other than `dev`. The run's summary names the backend commit
+it tested, and a failed run uploads `stack-cypress-videos` and `stack-cypress-screenshots`. A pull
+request runs it only when it changes the workflow file itself.
 
 ## Point it elsewhere
 

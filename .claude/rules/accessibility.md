@@ -83,14 +83,15 @@ Know these so you do not mistake a passing lint run for a passing a11y check:
 - **`npm run check-accessibility` was removed on 2026-08-27.** It ran `npm install axe-core && echo` and asserted nothing. It was not replaced: every integration suite already carries `toHaveNoViolations`, so a dedicated script would be an exact alias for `npm run test:integration`, which gates CI. Run that.
 - **Real-browser checks exist since 2026-09-29**, contrast included: `cypress-axe` over every
   public page in both themes, in CI as its own step (`npm run test:e2e:a11y`), and over the
-  signed-in pages with `npm run test:e2e:stack`, locally only. The stack suite checks those pages
+  signed-in pages with `npm run test:e2e:stack`, locally and in the nightly `frontend-stack-e2e`
+  workflow, not on pull requests (kit `stack-suites-in-ci`). The stack suite checks those pages
   both empty (`app-pages.a11y.cy.ts`) and with a card and a row on them
   (`app-pages-with-data.a11y.cy.ts`, since 2026-10-17); the second found an unnamed chart canvas
   that every empty-state run had missed. See `.claude/rules/testing.md` § E2E. Two exclusions
   from `color-contrast`, both in `cypress/support/a11y.ts`: ADR-0017's buttons, and the header
   wordmark as a logotype. The
-  signed-in pages are therefore checked only when someone runs the stack suite; the gate table in
-  `.claude/rules/workflow.md` says when that is.
+  signed-in pages are therefore checked every night, and before merge only when someone runs the
+  stack suite; the gate table in `.claude/rules/workflow.md` says when that is.
 
 Automated coverage is now lint, `jest-axe` and Cypress with `cypress-axe`, and none is sufficient
 alone. Lint reads the source and catches structural mistakes — a handler on a `<div>`, an invalid
