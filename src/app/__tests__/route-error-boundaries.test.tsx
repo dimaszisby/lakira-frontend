@@ -5,14 +5,29 @@ import path from "path";
 import type { ComponentType } from "react";
 
 import { reportClientError } from "@/lib/monitoring/report-client-error";
+import { MODAL_ROUTE_ERROR_TITLE } from "@/src/app/(app)/_components/ModalRouteError";
 import DashboardError from "@/src/app/(app)/dashboard/error";
 import AppAreaError from "@/src/app/(app)/error";
+import CategoryDetailModalError from "@/src/app/(app)/metric-categories/[categoryId]/@modal/error";
+import CategoryMetricsModalError from "@/src/app/(app)/metric-categories/[categoryId]/metrics/@modal/error";
+import CategoriesModalError from "@/src/app/(app)/metric-categories/@modal/error";
+import MetricDetailModalError from "@/src/app/(app)/metrics/[metricId]/@modal/error";
 import MetricDetailError from "@/src/app/(app)/metrics/[metricId]/error";
+import MetricLogsModalError from "@/src/app/(app)/metrics/[metricId]/logs/@modal/error";
+import MetricSettingsModalError from "@/src/app/(app)/metrics/[metricId]/settings/@modal/error";
+import MetricsModalError from "@/src/app/(app)/metrics/@modal/error";
 import AuthAreaError from "@/src/app/(auth)/error";
 import GlobalError from "@/src/app/global-error";
 
 jest.mock("@/lib/monitoring/report-client-error", () => ({
   reportClientError: jest.fn(),
+}));
+
+const mockBack = jest.fn();
+const mockRefresh = jest.fn();
+// The `@modal` boundaries close back to the page under them with the router.
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({ back: mockBack, refresh: mockRefresh }),
 }));
 
 /** Every `error.tsx` under `src/app`, as a path from the repository root. */
@@ -69,6 +84,55 @@ const BOUNDARIES: readonly {
     title: "Unable to load metric",
     level: 2,
   },
+  {
+    name: "metrics list dialog",
+    file: "src/app/(app)/metrics/@modal/error.tsx",
+    Boundary: MetricsModalError,
+    title: MODAL_ROUTE_ERROR_TITLE,
+    level: 2,
+  },
+  {
+    name: "metric detail dialog",
+    file: "src/app/(app)/metrics/[metricId]/@modal/error.tsx",
+    Boundary: MetricDetailModalError,
+    title: MODAL_ROUTE_ERROR_TITLE,
+    level: 2,
+  },
+  {
+    name: "metric logs dialog",
+    file: "src/app/(app)/metrics/[metricId]/logs/@modal/error.tsx",
+    Boundary: MetricLogsModalError,
+    title: MODAL_ROUTE_ERROR_TITLE,
+    level: 2,
+  },
+  {
+    name: "metric settings dialog",
+    file: "src/app/(app)/metrics/[metricId]/settings/@modal/error.tsx",
+    Boundary: MetricSettingsModalError,
+    title: MODAL_ROUTE_ERROR_TITLE,
+    level: 2,
+  },
+  {
+    name: "categories list dialog",
+    file: "src/app/(app)/metric-categories/@modal/error.tsx",
+    Boundary: CategoriesModalError,
+    title: MODAL_ROUTE_ERROR_TITLE,
+    level: 2,
+  },
+  {
+    name: "category detail dialog",
+    file: "src/app/(app)/metric-categories/[categoryId]/@modal/error.tsx",
+    Boundary: CategoryDetailModalError,
+    title: MODAL_ROUTE_ERROR_TITLE,
+    level: 2,
+  },
+  {
+    name: "category metrics dialog",
+    file: "src/app/(app)/metric-categories/[categoryId]/metrics/@modal/error.tsx",
+    Boundary: CategoryMetricsModalError,
+    title: MODAL_ROUTE_ERROR_TITLE,
+    level: 2,
+  },
 ];
 
 const SECRET_MESSAGE = "connect ECONNREFUSED 10.0.0.7:5432 for jane.doe@example.com";
@@ -119,6 +183,20 @@ describe("route error boundaries", () => {
 
       expect(reportClientError).toHaveBeenCalledTimes(1);
       expect(reportClientError).toHaveBeenCalledWith(error, "boundary");
+    });
+  });
+
+  // The `@modal` boundaries render the panel in a dialog over the page (register row F-47).
+  describe("an intercepted route's error dialog", () => {
+    it("shows over the page, and closes back to it", async () => {
+      const user = userEvent.setup();
+      mockBack.mockClear();
+      render(<MetricsModalError error={new Error(SECRET_MESSAGE)} retry={jest.fn()} />);
+
+      expect(screen.getByRole("dialog", { name: MODAL_ROUTE_ERROR_TITLE })).toBeInTheDocument();
+      await user.click(screen.getByRole("button", { name: "Close modal" }));
+
+      expect(mockBack).toHaveBeenCalledTimes(1);
     });
   });
 

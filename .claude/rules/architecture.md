@@ -77,6 +77,7 @@ Each route group has an `error.tsx`, so a render error keeps the group's layout 
 - **Never render `error.message` in a boundary.** The panel shows fixed copy and the `digest`. Same rule as `.claude/rules/data-access.md` for API errors, and the same lint rule enforces it.
 - **Pass Next's `retry`, not `reset`.** `retry` fetches the segment again; `reset` only clears the error (Next 16.3; kit `route-error-boundaries`, D-01).
 - A new `error.tsx` must be added to the list in `src/app/__tests__/route-error-boundaries.test.tsx`, which fails otherwise.
+- **Every `@modal` slot has its own `error.tsx`**, re-exporting `src/app/(app)/_components/ModalRouteError.tsx`: the error shows in a dialog over the page, which stays. Without it the error reaches the group boundary and replaces the page under the dialog too (register row F-47). `src/app/__tests__/parallel-route-interceptors.test.ts` fails for a slot without one.
 
 ### Parallel `@modal` slots + intercepting routes
 

@@ -36,11 +36,13 @@ src/app/(app)/<segment>/
   layout.tsx                       ← MUST render {children} AND {modal}
   page.tsx
   @modal/default.tsx               ← returns null
+  @modal/error.tsx                 ← re-exports ModalRouteError
   @modal/(.)new/page.tsx           ← intercepts /<segment>/new
   new/page.tsx                     ← the real route, on hard refresh or direct link
   [id]/
     layout.tsx                     ← MUST also render {modal}
     @modal/default.tsx
+    @modal/error.tsx
     @modal/(.)edit/page.tsx
     edit/page.tsx
 ```
@@ -65,6 +67,14 @@ export default SegmentLayout;
 ```
 
 `@modal/default.tsx` returns `null`. Without it, navigating to a sibling route leaves the slot unresolved.
+
+`@modal/error.tsx` is the same two lines in every slot, so an error in an intercepted route shows in a dialog over the page instead of replacing it (register row F-47). `src/app/__tests__/parallel-route-interceptors.test.ts` fails without it.
+
+```tsx
+"use client";
+
+export { default } from "@/src/app/(app)/_components/ModalRouteError";
+```
 
 **Both the intercepted and the real route must exist.** The `(.)` version handles in-app navigation; the plain one handles hard refresh, direct links, and back/forward across a reload. They can share a component, but both files must be present.
 

@@ -96,4 +96,14 @@ describe("parallel route slots", () => {
       }
     },
   );
+
+  // An error in an intercepted route is caught by its slot's own boundary, which keeps the page
+  // under the dialog; without one it reaches `(app)/error.tsx` and replaces that page too
+  // (register row F-47).
+  it.each(slotDirs.map((dir) => [path.relative(APP_DIR, dir), dir]))(
+    "%s has its own error.tsx",
+    (_label, dir) => {
+      expect(existsSync(path.join(dir, "error.tsx"))).toBe(true);
+    },
+  );
 });
