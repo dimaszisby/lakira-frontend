@@ -33,6 +33,21 @@ const fill = async (
 };
 
 describe("ResetPasswordForm integration", () => {
+  it("titles the page with its one h1, with or without a token", () => {
+    const { unmount } = renderWithProviders(<ResetPasswordForm token={TOKEN} />);
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Choose a new password" }),
+    ).toBeInTheDocument();
+    unmount();
+
+    renderWithProviders(<ResetPasswordForm token="" />);
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(
+      screen.getByRole("heading", { level: 1, name: "This link is not valid" }),
+    ).toBeInTheDocument();
+  });
+
   beforeEach(() => {
     mockPush.mockReset();
   });
@@ -75,7 +90,9 @@ describe("ResetPasswordForm integration", () => {
 
     await fill(user);
 
-    expect(await screen.findByText(UPDATED_TITLE)).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { level: 1, name: UPDATED_TITLE }),
+    ).toBeInTheDocument();
     expect(body).toHaveBeenCalledWith({
       token: TOKEN,
       password: PASSWORD,

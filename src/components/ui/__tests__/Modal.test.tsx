@@ -37,6 +37,23 @@ describe("Modal", () => {
     expect(dialog).toHaveAccessibleDescription("This action cannot be undone");
   });
 
+  it("titles itself with an h2, or an h1 when it is the whole page", () => {
+    const { unmount } = render(
+      <Modal open onClose={() => {}} title="Over a page">
+        <p>Body</p>
+      </Modal>,
+    );
+    expect(screen.getByRole("heading", { level: 2, name: "Over a page" })).toBeInTheDocument();
+    unmount();
+
+    render(
+      <Modal open onClose={() => {}} title="The page" titleAs="h1">
+        <p>Body</p>
+      </Modal>,
+    );
+    expect(screen.getByRole("heading", { level: 1, name: "The page" })).toBeInTheDocument();
+  });
+
   it("uses aria-label when there is no title", async () => {
     render(
       <Modal open onClose={() => {}} aria-label="Quick edit">

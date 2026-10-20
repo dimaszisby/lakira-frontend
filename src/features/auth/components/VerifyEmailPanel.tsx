@@ -34,7 +34,7 @@ const VerifyEmailPanel = ({ token }: Props) => {
     return (
       <Card variant="primary" size="md" className="mx-auto w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle>This link is not valid</CardTitle>
+          <CardTitle as="h1">This link is not valid</CardTitle>
           <CardDescription>
             The verification link is missing its token. Sign in and request a new one.
           </CardDescription>
@@ -51,7 +51,7 @@ const VerifyEmailPanel = ({ token }: Props) => {
   return (
     <Card variant="primary" size="md" className="mx-auto w-full max-w-md">
       <CardHeader className="text-center">
-        <CardTitle>
+        <CardTitle as="h1">
           {isPending
             ? "Verifying your email…"
             : isSuccess

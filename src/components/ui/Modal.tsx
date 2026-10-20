@@ -11,10 +11,15 @@ import { cn } from "@/lib/cn";
 import type { CardSize, CardVariant } from "./Card";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./Card";
 
+/** The title's element: `h1` when the dialog is the whole page, `h2` over a page (ADR-0032). */
+export type ModalTitleLevel = "h1" | "h2";
+
 export type ModalProps = {
   open: boolean;
   onClose: () => void;
   title?: string;
+  /** Defaults to `h2`. Pass `h1` only when the dialog is the page, opened by its own route. */
+  titleAs?: ModalTitleLevel;
   description?: string;
   /** Accessible name when there is no visible title. */
   "aria-label"?: string;
@@ -66,6 +71,7 @@ export const Modal = ({
   open,
   onClose,
   title,
+  titleAs = "h2",
   description,
   "aria-label": ariaLabel,
   children,
@@ -101,7 +107,9 @@ export const Modal = ({
 
       {title || description ? (
         <CardHeader className={hideClose ? undefined : "dialog-header-with-dismiss"}>
-          {title ? <DialogHeading render={<CardTitle />}>{title}</DialogHeading> : null}
+          {title ? (
+            <DialogHeading render={<CardTitle as={titleAs} />}>{title}</DialogHeading>
+          ) : null}
           {description ? (
             <DialogDescription render={<CardDescription />}>{description}</DialogDescription>
           ) : null}

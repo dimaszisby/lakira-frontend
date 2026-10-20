@@ -20,15 +20,18 @@ import { Button } from "@/ui/Button";
 import { ColorField } from "@/ui/ColorField";
 import { ErrorMessage } from "@/ui/ErrorMessage";
 import { FormField } from "@/ui/FormField";
+import type { ModalTitleLevel } from "@/ui/Modal";
 import { Modal } from "@/ui/Modal";
 import { TextField } from "@/ui/TextField";
 
 interface Props {
   onClose: () => void;
   initialCategory: MetricCategoryVM | null;
+  /** The dialog title's element; see `Modal`. */
+  titleAs?: ModalTitleLevel;
 }
 
-const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
+const MetricCategoryForm = ({ onClose, initialCategory, titleAs }: Props) => {
   const isEditMode = !!initialCategory;
 
   const formTitle = isEditMode ? "Edit Category" : "Add Category";
@@ -129,7 +132,7 @@ const MetricCategoryForm = ({ onClose, initialCategory }: Props) => {
   const inputBg = "bg-surface2";
 
   return (
-    <Modal open onClose={handleCloseClick} title={formTitle}>
+    <Modal open onClose={handleCloseClick} title={formTitle} titleAs={titleAs}>
       <form
         noValidate
         className="mx-auto p-4 lg:p-6"

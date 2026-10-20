@@ -26,7 +26,8 @@ What is built on it today: Modal (`Dialog`), Select, DateTimePicker (`Popover` p
 
 - **Exactly one `<main>` per route** under `src/app/`.
 - Landmarks for the shell: `<header>`, `<nav>`, `<main>`, `<footer>`. `src/components/layout/` owns these.
-- Heading hierarchy descends without skipping. A page has one `<h1>`.
+- Heading hierarchy descends without skipping. A page has one `<h1>`. `cypress/e2e/public/auth-pages.a11y.cy.ts` and `cypress/e2e/stack/app-pages.a11y.cy.ts` check it on every page they visit (kit `page-headings`).
+- A route that is only a dialog, opened directly, titles the dialog with the page's `h1` (`Modal`'s `titleAs="h1"`); its intercept, over a page that has one, keeps the default `h2` ([ADR-0032](../../docs/explanation/decisions/adr-0032-a-dialog-that-is-the-page-titles-it-with-an-h1.md)).
 - Links navigate; buttons act. A `<div onClick>` is neither — it is invisible to keyboard and screen reader users.
 
 ## Every interactive element

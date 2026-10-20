@@ -18,6 +18,7 @@ import { useMetricCategoryReturnParams } from "./MetricCategoryReturnContext";
 const MetricCategoryHeaderSection = () => {
   const router = useRouter();
   const category = useMetricCategoryDetail();
+  const name = safeLabel(category?.name, "Not Set");
   const returnParams = useMetricCategoryReturnParams();
   const { categoryId } = useRouteParams<{ categoryId: string }>({ required: ["categoryId"] });
 
@@ -46,9 +47,12 @@ const MetricCategoryHeaderSection = () => {
         </Button>
       </div>
 
+      {/* The name is the page's h1, as on a metric's page (F-44). `data-label-text` keeps the
+          label's size and weight, and `font-sans` the body font, over the base h1 rule's. */}
       <DataLabel
         title="NAME"
-        value={safeLabel(category?.name, "Not Set")}
+        value={name}
+        renderValue={<h1 className="data-label-text font-sans">{name}</h1>}
         size="lg"
         className="mb-2"
       />

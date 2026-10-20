@@ -21,6 +21,15 @@ const typeEmailAndSend = async (user: ReturnType<typeof userEvent.setup>, email 
 };
 
 describe("ForgotPasswordForm integration", () => {
+  it("titles the page with its one h1", () => {
+    renderWithProviders(<ForgotPasswordForm />);
+
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(
+      screen.getByRole("heading", { level: 1, name: "Reset your password" }),
+    ).toBeInTheDocument();
+  });
+
   it("sends the address and says a link is on its way", async () => {
     const user = userEvent.setup();
     const body = jest.fn();
@@ -36,7 +45,7 @@ describe("ForgotPasswordForm integration", () => {
 
     await typeEmailAndSend(user);
 
-    expect(await screen.findByText(SENT_TITLE)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { level: 1, name: SENT_TITLE })).toBeInTheDocument();
     expect(body).toHaveBeenCalledWith({ email: EMAIL });
     expect(screen.getAllByRole("link", { name: "Back to login" })[0]).toHaveAttribute(
       "href",

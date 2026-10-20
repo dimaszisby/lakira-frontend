@@ -33,7 +33,7 @@ const AcceptInvitePanel = ({ token }: Props) => {
     return (
       <Card variant="primary" size="md" className="mx-auto w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle>This link is not valid</CardTitle>
+          <CardTitle as="h1">This link is not valid</CardTitle>
           <CardDescription>
             The invitation link is missing its token. Ask for a fresh invitation.
           </CardDescription>
@@ -50,7 +50,7 @@ const AcceptInvitePanel = ({ token }: Props) => {
   return (
     <Card variant="primary" size="md" className="mx-auto w-full max-w-md">
       <CardHeader className="text-center">
-        <CardTitle>
+        <CardTitle as="h1">
           {isPending
             ? "Accepting your invitation…"
             : isSuccess

@@ -179,7 +179,9 @@ const MetricCategoriesPageClient = ({ initialParams }: MetricCategoriesPageClien
   const pageTitle = (
     <CardHeader className="gap-0">
       <p className="text-sm font-medium text-ink-tertiary">Library</p>
-      <CardTitle className="text-h3">My Categories</CardTitle>
+      <CardTitle as="h1" className="text-h3">
+        My Categories
+      </CardTitle>
     </CardHeader>
   );
 

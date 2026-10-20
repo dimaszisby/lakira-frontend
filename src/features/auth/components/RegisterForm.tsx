@@ -86,7 +86,7 @@ const RegisterForm = () => {
   return (
     <Card variant="primary" size="md" className="mx-auto w-full max-w-md">
       <CardHeader className="text-center">
-        <CardTitle>Register</CardTitle>
+        <CardTitle as="h1">Register</CardTitle>
         <CardDescription>Create your {APP_NAME} Account</CardDescription>
       </CardHeader>
 

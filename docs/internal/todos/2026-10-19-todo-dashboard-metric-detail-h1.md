@@ -25,7 +25,8 @@ to file the other pages without an `h1` rather than widen this change.
 - [x] Seen to fail, each restored: the name as a `<span>` fails the composite case; the layout
       reverted fails the layout test; `headingLevel={2}` dropped fails the boundary table.
 - [x] Register: F-44 closed, F-63 filed; D-01 to D-04 marked `Accepted`, all four being merged.
-- [ ] Found: twelve pages have no `h1` → out of scope, register row F-63:
+- [x] Found: twelve pages have no `h1` → out of scope, register row F-63, closed in #123 (kit
+      `page-headings`):
   - `(auth)`: `forgot-password`, `invites/accept`, `login`, `register`, `reset-password`,
     `verify-email`, each titled by a `CardTitle`, which renders an `h2` unless given `as="h1"`;
   - `metric-categories`: the list, `new`, `[categoryId]`, `[categoryId]/edit` and

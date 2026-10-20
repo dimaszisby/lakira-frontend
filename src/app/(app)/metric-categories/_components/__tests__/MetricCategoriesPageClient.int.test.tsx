@@ -67,6 +67,9 @@ describe("MetricCategoriesPageClient integration", () => {
 
     expect(await screen.findByRole("heading", { name: /no categories yet/i })).toBeInTheDocument();
     expect(screen.getByText(/create a category to organize your metrics/i)).toBeInTheDocument();
+    // The page's one h1 (register row F-63).
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(screen.getByRole("heading", { level: 1, name: "My Categories" })).toBeInTheDocument();
   });
 
   it("shows loading then renders fetched categories list", async () => {

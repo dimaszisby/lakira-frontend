@@ -49,7 +49,7 @@ const ResetPasswordForm = ({ token }: Props) => {
     return (
       <Card variant="primary" size="md" className="mx-auto w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle>This link is not valid</CardTitle>
+          <CardTitle as="h1">This link is not valid</CardTitle>
           <CardDescription>
             The reset link is missing its token. Request a new one and use the most recent email.
           </CardDescription>
@@ -67,7 +67,7 @@ const ResetPasswordForm = ({ token }: Props) => {
     return (
       <Card variant="primary" size="md" className="mx-auto w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle>Password updated</CardTitle>
+          <CardTitle as="h1">Password updated</CardTitle>
           <CardDescription>Sign in with your new password.</CardDescription>
         </CardHeader>
         <CardContent className="flex justify-center">
@@ -82,7 +82,7 @@ const ResetPasswordForm = ({ token }: Props) => {
   return (
     <Card variant="primary" size="md" className="mx-auto w-full max-w-md">
       <CardHeader className="text-center">
-        <CardTitle>Choose a new password</CardTitle>
+        <CardTitle as="h1">Choose a new password</CardTitle>
         <CardDescription>Pick something you have not used here before.</CardDescription>
       </CardHeader>
 
