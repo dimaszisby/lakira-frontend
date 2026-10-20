@@ -24,14 +24,17 @@ const WIDTHS = [1000, 1280] as const;
 
 // What must be on the page before axe runs, so a pass cannot come from an empty state.
 //
-// Left out until their register rows close, so that this spec passes on what it can check:
-// - the categories list: the backend answers every repeat of its list query with a 500, so only
-//   the first visit renders a row (F-57). Its rows are checked empty by `app-pages.a11y.cy.ts`.
-// - the metrics table at 1280 px in the dark theme: the category chip's text is 4.11:1 on its
-//   tint, under the 4.5:1 of WCAG 1.4.3 (F-56).
+// Left out until its register row closes, so that this spec passes on what it can check: the
+// metrics table at 1280 px in the dark theme, where the category chip's text is 4.11:1 on its
+// tint, under the 4.5:1 of WCAG 1.4.3 (F-56).
+//
+// The categories list was left out too while the backend answered every repeat of its list query
+// with a 500 (F-57, fixed by backend #188). Its four visits here, each needing the row, now show
+// that a repeat renders.
 const PAGES: readonly { path: string; label: string; shows: string }[] = [
   { path: "/dashboard", label: "dashboard with a card", shows: METRIC_NAME },
   { path: "/metrics", label: "metrics list with a row", shows: METRIC_NAME },
+  { path: "/metric-categories", label: "categories list with a row", shows: CATEGORY_NAME },
 ];
 
 const isKnownFailure = (path: string, width: number, theme: string) =>
