@@ -21,6 +21,13 @@ const TEST_EMAIL = "john@example.com";
 const FIXTURE_TIMESTAMP = "2026-01-01T00:00:00.000Z";
 
 describe("RegisterForm integration", () => {
+  it("titles the page with its one h1", () => {
+    renderWithProviders(<RegisterForm />);
+
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(screen.getByRole("heading", { level: 1, name: "Register" })).toBeInTheDocument();
+  });
+
   beforeEach(() => {
     mockPush.mockReset();
   });

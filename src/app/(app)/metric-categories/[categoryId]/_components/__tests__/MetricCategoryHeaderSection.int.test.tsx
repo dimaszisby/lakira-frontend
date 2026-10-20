@@ -56,6 +56,13 @@ describe("MetricCategoryHeaderSection integration", () => {
     expect(screen.getByRole("button", { name: /edit category/i })).toBeInTheDocument();
   });
 
+  it("names the page by the category, in its one h1", () => {
+    renderHeader();
+
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(screen.getByRole("heading", { level: 1, name: "Wellness" })).toBeInTheDocument();
+  });
+
   it("navigates back to category list with serialized return params", async () => {
     const user = userEvent.setup();
 

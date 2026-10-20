@@ -22,6 +22,15 @@ const renderPanel = (token: string) =>
   renderWithProviders(<AcceptInvitePanel token={token} />, { reactStrictMode: true });
 
 describe("AcceptInvitePanel", () => {
+  it("titles the page with its one h1 when the link carries no token", () => {
+    renderPanel("");
+
+    expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(
+      screen.getByRole("heading", { level: 1, name: "This link is not valid" }),
+    ).toBeInTheDocument();
+  });
+
   it("shows success once the invite is accepted, spending the token exactly once", async () => {
     const bodies: unknown[] = [];
     server.use(
@@ -33,7 +42,9 @@ describe("AcceptInvitePanel", () => {
 
     renderPanel(TOKEN);
 
-    expect(await screen.findByText(SUCCESS_TITLE)).toBeInTheDocument();
+    expect(
+      await screen.findByRole("heading", { level: 1, name: SUCCESS_TITLE }),
+    ).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Go to login" })).toBeInTheDocument();
     expect(bodies).toEqual([{ token: TOKEN }]);
   });

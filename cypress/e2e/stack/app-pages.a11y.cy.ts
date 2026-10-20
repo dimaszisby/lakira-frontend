@@ -37,6 +37,8 @@ describe("Signed-in pages meet WCAG 2.1 A and AA", () => {
       it(`has no violations on ${label} in the ${theme} theme`, () => {
         signInSession(user);
         cy.visitInTheme(path, theme);
+        // A page has one h1 (accessibility.md § Structure; kit page-headings).
+        cy.get("h1").should("have.length", 1);
         cy.checkPageA11y(`${label} (${theme})`);
       });
     }

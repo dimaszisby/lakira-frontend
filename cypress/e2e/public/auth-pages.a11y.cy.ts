@@ -19,6 +19,8 @@ describe("Public pages meet WCAG 2.1 A and AA", () => {
     for (const { path, label, status } of PUBLIC_PAGES) {
       it(`has no violations on ${label} in the ${theme} theme`, () => {
         cy.visitInTheme(path, theme, { failOnStatusCode: status === undefined });
+        // A page has one h1 (accessibility.md § Structure; kit page-headings).
+        cy.get("h1").should("have.length", 1);
         cy.checkPageA11y(`${label} (${theme})`);
       });
     }

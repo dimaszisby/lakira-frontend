@@ -43,7 +43,7 @@ const ForgotPasswordForm = () => {
     return (
       <Card variant="primary" size="md" className="mx-auto w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle>Check your email</CardTitle>
+          <CardTitle as="h1">Check your email</CardTitle>
           <CardDescription>
             If an account exists for that address, a reset link is on its way. The link expires
             shortly, so use it soon.
@@ -61,7 +61,7 @@ const ForgotPasswordForm = () => {
   return (
     <Card variant="primary" size="md" className="mx-auto w-full max-w-md">
       <CardHeader className="text-center">
-        <CardTitle>Reset your password</CardTitle>
+        <CardTitle as="h1">Reset your password</CardTitle>
         <CardDescription>
           Enter the email address on your account and we will send you a reset link.
         </CardDescription>

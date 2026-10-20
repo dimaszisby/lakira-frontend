@@ -1,21 +1,9 @@
-import { notFound } from "next/navigation";
+import CategoryEditDialogRoute from "@/app/(app)/metric-categories/_components/CategoryEditDialogRoute";
 
-import MetricCategoryFormDialog from "@/app/(app)/metric-categories/_components/MetricCategoryFormDialog";
-import { getMetricCategoryById } from "@/features/metric-categories/api";
-import { toVM } from "@/features/metric-categories/mappers";
-import { getServerAuthHeaders } from "@/services/api/serverHeaders";
-
+// Opened directly, the dialog is the whole page, so its title is the page's h1 (ADR-0032).
 const MetricCategoryEditPage = async ({ params }: { params: Promise<{ categoryId: string }> }) => {
   const { categoryId } = await params;
-  const serverHeaders = await getServerAuthHeaders();
-  const category = await getMetricCategoryById(categoryId, { headers: serverHeaders }).catch(
-    () => null,
-  );
-  if (!category) {
-    notFound();
-  }
-
-  return <MetricCategoryFormDialog initialCategory={toVM(category)} />;
+  return <CategoryEditDialogRoute categoryId={categoryId} titleAs="h1" />;
 };
 
 export default MetricCategoryEditPage;

@@ -74,7 +74,7 @@ const LoginForm = () => {
   return (
     <Card variant="primary" size="md" className="mx-auto w-full max-w-md">
       <CardHeader className="text-center">
-        <CardTitle>Login</CardTitle>
+        <CardTitle as="h1">Login</CardTitle>
         <CardDescription>Login using your {APP_NAME} Account</CardDescription>
       </CardHeader>
 

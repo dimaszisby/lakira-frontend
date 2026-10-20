@@ -20,6 +20,7 @@ import { handleApiError } from "@/services/api/handleApiError";
 import { Button } from "@/ui/Button";
 import { ErrorMessage } from "@/ui/ErrorMessage";
 import { FormField } from "@/ui/FormField";
+import type { ModalTitleLevel } from "@/ui/Modal";
 import { Modal } from "@/ui/Modal";
 import { TextArea } from "@/ui/TextArea";
 import { TextField } from "@/ui/TextField";
@@ -27,9 +28,11 @@ import { TextField } from "@/ui/TextField";
 interface Props {
   onClose: () => void;
   initialMetric: MetricFormInitial | null;
+  /** The dialog title's element; see `Modal`. */
+  titleAs?: ModalTitleLevel;
 }
 
-export const MetricForm = ({ onClose, initialMetric }: Props) => {
+export const MetricForm = ({ onClose, initialMetric, titleAs }: Props) => {
   const isEditMode = !!initialMetric;
   const formTitle = isEditMode ? "Edit Metric" : "Add Metric";
 
@@ -176,7 +179,7 @@ export const MetricForm = ({ onClose, initialMetric }: Props) => {
   const inputBg = "bg-surface2";
 
   return (
-    <Modal title={formTitle} open onClose={handleCloseClick}>
+    <Modal title={formTitle} titleAs={titleAs} open onClose={handleCloseClick}>
       <form
         noValidate
         className="mx-auto p-4 lg:p-6"
