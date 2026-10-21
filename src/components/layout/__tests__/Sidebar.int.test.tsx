@@ -1,5 +1,4 @@
 import { screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import type { ComponentPropsWithoutRef, MouseEvent } from "react";
 
@@ -32,8 +31,6 @@ const renderSidebar = (props: Partial<SidebarProps> = {}) =>
     <Sidebar
       navItems={navItems}
       pathname="/dashboard"
-      isMobileOpen={false}
-      onClose={jest.fn()}
       onLogout={jest.fn()}
       isLoggingOut={false}
       {...props}
@@ -50,51 +47,15 @@ describe("Sidebar integration", () => {
     expect(metricLinks.some((link) => link.getAttribute("aria-current") === "page")).toBe(true);
   });
 
-  it("opens logout confirmation modal and closes it on cancel", async () => {
-    const user = userEvent.setup();
-    const onLogout = jest.fn();
+  // The confirmation and its cases moved to `SignOutControl.test.tsx` (kit `mobile-sign-out`).
+  // The drawer that held a second, off-screen copy of every control is gone (D-01, register F-49).
+  it("renders one sign-out control and no mobile drawer", () => {
+    renderSidebar();
 
-    renderSidebar({ onLogout });
-
-    const logoutButtons = screen.getAllByRole("button", { name: /logout/i });
-    await user.click(logoutButtons[0]);
-
-    expect(screen.getByRole("dialog", { name: /logout/i })).toBeInTheDocument();
-
-    await user.click(screen.getByRole("button", { name: /cancel logout/i }));
-    expect(screen.queryByRole("dialog", { name: /logout/i })).not.toBeInTheDocument();
-    expect(onLogout).not.toHaveBeenCalled();
-  });
-
-  // What signing out does is the caller's: `AppShell.int.test.tsx` asserts the
-  // endpoint and the redirect. The sidebar only asks, then hands over.
-  it("calls onLogout once when the confirmation is accepted", async () => {
-    const user = userEvent.setup();
-    const onLogout = jest.fn();
-
-    renderSidebar({ onLogout });
-
-    await user.click(screen.getAllByRole("button", { name: /logout/i })[0]);
-    expect(onLogout).not.toHaveBeenCalled();
-
-    await user.click(screen.getByRole("button", { name: /confirm logout/i }));
-    expect(onLogout).toHaveBeenCalledTimes(1);
-  });
-
-  it("disables the confirm button while sign-out is in flight", async () => {
-    const user = userEvent.setup();
-    const onLogout = jest.fn();
-
-    renderSidebar({ onLogout, isLoggingOut: true });
-
-    await user.click(screen.getAllByRole("button", { name: /logout/i })[0]);
-
-    const confirm = screen.getByRole("button", { name: /confirm logout/i });
-    expect(confirm).toBeDisabled();
-    expect(confirm).toHaveTextContent("Logging Out...");
-
-    await user.click(confirm);
-    expect(onLogout).not.toHaveBeenCalled();
+    expect(screen.getAllByRole("button", { name: "Sign out" })).toHaveLength(1);
+    expect(
+      screen.queryByRole("navigation", { name: /mobile sidebar navigation/i }),
+    ).not.toBeInTheDocument();
   });
 
   it("has no critical accessibility violations", async () => {

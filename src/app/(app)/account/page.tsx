@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 
+import SignOutControl from "@/components/layout/SignOutControl";
 import { APP_NAME } from "@/constants/app";
 import EmailVerificationNotice from "@/features/auth/components/EmailVerificationNotice";
 import { useAuthProfileQuery } from "@/features/auth/hooks/profile.query";
@@ -11,8 +12,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/
 import { ErrorMessage } from "@/ui/ErrorMessage";
 import { ThemeSwitcher } from "@/ui/ThemeSwitcher";
 
+import { useSignOut } from "../_components/useSignOut";
+
 const AccountPage = () => {
   const { data, isLoading, isFetching, isError, error, refetch } = useAuthProfileQuery();
+  const { signOut, isSigningOut } = useSignOut();
 
   const profileError = useMemo(
     () => (isError ? handleApiError(error).join(", ") : undefined),
@@ -49,6 +53,9 @@ const AccountPage = () => {
             >
               {isFetching ? "Refreshing…" : "Try again"}
             </Button>
+            {/* A failing profile can mean a failing session: signing out must still be possible
+                below `lg`, where this page is the only place to do it (kit `mobile-sign-out`). */}
+            <SignOutControl onSignOut={signOut} isSigningOut={isSigningOut} className="w-auto" />
           </CardContent>
         </Card>
       </section>
@@ -119,6 +126,18 @@ const AccountPage = () => {
         </CardHeader>
         <CardContent>
           <ThemeSwitcher />
+        </CardContent>
+      </Card>
+
+      {/* Below `lg` this is the only way to sign out; the bottom bar's Account tab leads here
+          (kit `mobile-sign-out`, D-01). On desktop the sidebar has the same control. */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Session</CardTitle>
+          <CardDescription>Sign out of {APP_NAME} on this device.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <SignOutControl onSignOut={signOut} isSigningOut={isSigningOut} className="w-auto" />
         </CardContent>
       </Card>
     </section>

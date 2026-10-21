@@ -64,6 +64,25 @@ describe("Layout integration", () => {
     ).toBeInTheDocument();
   });
 
+  // Below `lg` the bottom bar navigates and the account page signs out. The drawer this replaced
+  // was never opened, and its links and button stayed in the tab order off screen (kit
+  // `mobile-sign-out`, D-01; register F-48, F-49). Removed, not hidden, so there is one of each.
+  it("renders no mobile drawer and a single sign-out control", () => {
+    renderWithProviders(
+      <Layout onLogout={jest.fn()} isLoggingOut={false}>
+        <div>Main area</div>
+      </Layout>,
+    );
+
+    expect(
+      screen.queryByRole("complementary", { name: /mobile navigation/i }),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("navigation", { name: /mobile sidebar navigation/i }),
+    ).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Sign out" })).toHaveLength(1);
+  });
+
   it("has no critical accessibility violations", async () => {
     const { container } = renderWithProviders(
       <Layout onLogout={jest.fn()} isLoggingOut={false}>

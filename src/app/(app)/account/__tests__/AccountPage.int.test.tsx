@@ -1,4 +1,5 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { http, HttpResponse } from "msw";
 
@@ -6,7 +7,16 @@ import AccountPage from "@/app/(app)/account/page";
 import { server } from "@/src/test-utils/msw/server";
 import { renderWithProviders } from "@/src/test-utils/renderWithProviders";
 
+const mockPush = jest.fn();
+
+jest.mock("next/navigation", () => ({
+  useRouter: () => ({
+    push: mockPush,
+  }),
+}));
+
 const PROFILE_ENDPOINT = "/api/proxy/auth/profile";
+const LOGOUT_ENDPOINT = "/api/auth/logout";
 const TEST_EMAIL = "testuser001@email.com";
 
 const profile = {
@@ -27,6 +37,27 @@ const mockProfile = (status: number, body?: unknown) =>
         : HttpResponse.json(body, { status }),
   );
 
+/** Records each sign-out request; the endpoint is what `AppShell.int.test.tsx` explains. */
+const mockLogout = () => {
+  const logoutCall = jest.fn();
+  server.use(
+    http.post(LOGOUT_ENDPOINT, () => {
+      logoutCall();
+      return HttpResponse.json({ ok: true });
+    }),
+  );
+  return logoutCall;
+};
+
+const confirmSignOut = async () => {
+  const user = userEvent.setup();
+
+  await user.click(await screen.findByRole("button", { name: "Sign out" }));
+  // The confirm button shares the trigger's name (kit `mobile-sign-out`, D-02).
+  const dialog = await screen.findByRole("dialog", { name: "Sign out" });
+  await user.click(within(dialog).getByRole("button", { name: "Sign out" }));
+};
+
 /**
  * This page was wrapped in `withAuth` until 2026-09-22. The HOC gated the route
  * a third time — `src/proxy.ts` and `(app)/layout.tsx` already do — and fetched
@@ -34,6 +65,10 @@ const mockProfile = (status: number, body?: unknown) =>
  * here fills anyway. These tests pin what the page does now that it is alone.
  */
 describe("AccountPage integration", () => {
+  beforeEach(() => {
+    mockPush.mockReset();
+  });
+
   it("renders the profile the query returns", async () => {
     server.use(mockProfile(200, profile));
 
@@ -79,6 +114,34 @@ describe("AccountPage integration", () => {
 
     expect(await screen.findByText("This account has been suspended.")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument();
+  });
+
+  // Below `lg` this page is the only place to sign out; the bottom bar's Account tab leads here
+  // (kit `mobile-sign-out`, D-01; register F-48).
+  it("signs out from the Session card through the session route", async () => {
+    server.use(mockProfile(200, profile));
+    const logoutCall = mockLogout();
+
+    renderWithProviders(<AccountPage />);
+    expect(await screen.findByRole("heading", { name: "Session" })).toBeInTheDocument();
+    await confirmSignOut();
+
+    await waitFor(() => expect(logoutCall).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/login"));
+  });
+
+  // A profile that will not load can mean a session that will not either, and on a phone there
+  // is no sidebar to fall back on.
+  it("still offers sign-out when the profile cannot be loaded", async () => {
+    server.use(mockProfile(401));
+    const logoutCall = mockLogout();
+
+    renderWithProviders(<AccountPage />);
+    expect(await screen.findByText(/unable to load your profile/i)).toBeInTheDocument();
+    await confirmSignOut();
+
+    await waitFor(() => expect(logoutCall).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith("/login"));
   });
 
   it("has no critical accessibility violations", async () => {
