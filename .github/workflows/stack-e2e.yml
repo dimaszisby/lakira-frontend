@@ -157,9 +157,11 @@ jobs:
 
       # Runs whenever the suite above ran, pass or fail, so one red step does not hide the other;
       # not when the stack or the app never started, which would only add a second red step.
+      # Cypress empties cypress/videos and cypress/screenshots before each run, which deleted the
+      # first suite's evidence before the upload below; this run keeps them.
       - name: Run the stack specs with the Content Security Policy enforced
         if: ${{ !cancelled() && steps.stack.outcome != 'skipped' }}
-        run: npm run test:e2e:csp:stack
+        run: npm run test:e2e:csp:stack -- --config trashAssetsBeforeRuns=false
 
       - name: Stop app
         if: always()

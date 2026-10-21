@@ -54,6 +54,20 @@ and dispatched workflow ([D-01](decisions.md)); the analysis is
       `NEXT_PUBLIC_APP_URL` to be named; its analysis now says why it must be set at build time.
 - [x] Found: actionlint 1.7.12 does not know the `ubuntu-26.04` label that every workflow here
       uses and CI accepts → not a defect; the check was run with that one rule ignored.
+- [ ] Found: the second run (39514889446) passed 57 of 58 and the CSP stack suite 8 of 8. The
+      failure was "drops a deleted value from the dashboard reached with the back button": the card
+      read `n: 2`, not `n: 1`. The backend's log shows the DELETE and the log list's refetch, then no
+      request for 4.5 s, so the dashboard was never refetched. Not reproduced locally: five plain
+      runs, a 6x CPU throttle and a delayed metric chart all pass. Ruled out:
+  - the backend's dashboard cache: a log write awaits its `vizdash:` invalidation before answering;
+  - a `<Link>` prefetch overwriting the query: the dashboard's prefetch carries no figures;
+  - the delete's serial `await`s: the metric chart query is not active on the logs tab, so the
+    dashboard is marked stale right after the list refetch. A `Promise.all` change was written,
+    tested at unit level and parked, not shipped, because it does not explain this failure.
+  - → in scope, still open. The run could not show more: the CSP stack run emptied
+    `cypress/videos` and `cypress/screenshots` before the upload, so the failing spec's video was
+    lost. It now runs with `--config trashAssetsBeforeRuns=false`; locally a file left by an
+    earlier run survived it. The next red run carries the video.
 
 ## Acceptance
 

@@ -130,7 +130,8 @@ repository to `lakira-frontend/` and lakira-backend `dev` to `lakira-backend/`, 
    `/api/proxy` go to `https://localhost:3000`, and every page that loads its data on the server
    renders 404;
 7. `test:e2e:stack`, then `test:e2e:csp:stack`, each its own step; the second runs even when the
-   first fails;
+   first fails, with `--config trashAssetsBeforeRuns=false` so it keeps the first's videos and
+   screenshots;
 8. stops the app, prints the backend's log on failure, uploads `stack-cypress-videos` and
    `stack-cypress-screenshots` (always), and takes the stack down.
 
