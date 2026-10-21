@@ -1,7 +1,7 @@
 # CI in parallel
 
-**Status:** Done 2026-10-21, pending merge and the first measured run. Debt register row F-68;
-D-01 promoted to ADR-0036.
+**Status:** Done 2026-10-21 (#134): 12m14s to 5m37s on a pull request, 5m16s on `dev`. Debt
+register row F-68; D-01 promoted to ADR-0036.
 **Slug:** `ci-in-parallel` · **Branch:** `ci/ci-in-parallel`
 
 - [Checklist](ci-in-parallel-checklist.md) — work items, acceptance, gates

@@ -42,7 +42,8 @@ Every job starts at once except `e2e`, which needs the `.next` artifact `build` 
 named "CI passed", needs all eight, runs `if: always()`, and fails unless each one succeeded: a
 failed, skipped or cancelled job fails it, and its log lists every job's result. It is the check
 to require when branch protection is set up (register F-24). Until 2026-10-21 the jobs from
-`checks` to `e2e` were a `needs` chain, about 12 to 14 minutes for 2 to 3 minutes of work
+`checks` to `e2e` were a `needs` chain, about 12 to 14 minutes for 2 to 3 minutes of work; the
+first runs after it took 5m37s on a pull request and 5m16s on `dev`
 ([ADR-0036](../../explanation/decisions/adr-0036-ci-runs-its-jobs-in-parallel-behind-a-gate.md)).
 
 Only `e2e` downloads the Cypress binary, from a cache keyed on `package-lock.json`. Every other
