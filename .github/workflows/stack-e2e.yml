@@ -1,0 +1,201 @@
+name: frontend-stack-e2e
+
+# Runs the specs that sign in, cypress/e2e/stack and cypress/e2e/csp-stack, against the real
+# backend built from lakira-backend `dev`. Nightly and on dispatch rather than on every pull
+# request, so a change on backend `dev` cannot turn unrelated frontend work red (kit
+# stack-suites-in-ci, D-01, which supersedes cypress-a11y-e2e D-01).
+#
+# The pull_request trigger covers this file only: a workflow can be neither dispatched nor
+# scheduled until it is on the default branch, so a change to it is proved on its own PR.
+#
+# GitHub sends a failed scheduled run to the user who last modified the cron line below, and
+# disables schedules in a public repo after 60 days without activity.
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - dev
+    paths:
+      - .github/workflows/stack-e2e.yml
+
+concurrency:
+  group: frontend-stack-e2e-${{ github.ref }}
+  # A manual run on dev shares this group with the nightly one; never cancel a run mid-suite.
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  stack-e2e:
+    name: Stack E2E (signed in, real backend)
+    runs-on: ubuntu-26.04
+    timeout-minutes: 45
+    env:
+      # The URLs the stack helpers default to; they refuse any non-local host.
+      API_URL: http://localhost:8001/api/v1
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8001/api/v1
+      CYPRESS_BASE_URL: http://127.0.0.1:3000
+      # The app's own origin, for the requests its server makes to /api/proxy (src/lib/env.ts,
+      # resolveAppOrigin). Unset, a production build guesses https://localhost:3000, which this
+      # plain-http server does not answer, and every page that loads its data on the server, a
+      # metric's or a category's, renders 404. Inlined at build time, so it is set for the job.
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+    defaults:
+      run:
+        working-directory: lakira-frontend
+    steps:
+      # Side by side, as on a developer's machine, so ../lakira-backend in the docs holds here.
+      - name: Checkout the frontend
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: lakira-frontend
+
+      - name: Checkout the backend (dev)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: dimaszisby/lakira-backend
+          ref: dev
+          path: lakira-backend
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: lakira-frontend/.nvmrc
+          cache: npm
+          cache-dependency-path: |
+            lakira-frontend/package-lock.json
+            lakira-backend/package-lock.json
+
+      # The backend's own example, with two changes. The secret is made here and never printed
+      # or stored. Rate limiting is off because a run registers more users than the 10 per hour
+      # per IP that registration allows (docs/how-to/testing/run-stack-e2e.md).
+      - name: Write the backend's .env from its .env.example
+        working-directory: lakira-backend
+        run: |
+          cp .env.example .env
+          for key in JWT_SECRET DISABLE_RATE_LIMITING; do
+            grep -q "^${key}=" .env || { echo "::error::.env.example has no ${key}= line"; exit 1; }
+          done
+          sed -i "s/^JWT_SECRET=.*/JWT_SECRET=$(openssl rand -hex 32)/" .env
+          sed -i "s/^DISABLE_RATE_LIMITING=.*/DISABLE_RATE_LIMITING=true/" .env
+
+      - name: Start the backing services
+        working-directory: lakira-backend
+        run: docker compose up -d --wait db redis rabbitmq mailpit
+
+      # The image runs `npm run dev`, which does not migrate. This is how the backend's own
+      # fork-smoke.yml prepares the same database.
+      - name: Migrate the backend's database
+        working-directory: lakira-backend
+        run: |
+          npm ci
+          npm run migrate:development
+
+      - name: Build and start the backend
+        working-directory: lakira-backend
+        run: |
+          APP_RELEASE="$(git rev-parse HEAD)" docker compose up -d --build app
+          for i in {1..90}; do
+            if curl -fsS "$API_URL/health" >/dev/null; then
+              echo "Backend is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Backend failed to start in time"
+          docker compose logs --tail 300 app || true
+          exit 1
+
+      # A red run has to say which backend it was red against.
+      - name: Name the commits under test
+        run: |
+          backend="$(git -C ../lakira-backend rev-parse HEAD)"
+          release="$(curl -fsS "$API_URL/health" | node -e 'let s="";process.stdin.on("data",(d)=>(s+=d)).on("end",()=>console.log(JSON.parse(s).release))')"
+          echo "Backend dev: ${backend}; /health release: ${release}; frontend: ${GITHUB_SHA}"
+          {
+            echo "### Commits under test"
+            echo ""
+            echo "| Repository | Commit |"
+            echo "| --- | --- |"
+            echo "| lakira-backend \`dev\` | \`${backend}\` |"
+            echo "| backend \`/health\` release | \`${release}\` |"
+            echo "| lakira-frontend | \`${GITHUB_SHA}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build app
+        run: npm run build
+
+      - name: Start Next.js app
+        run: |
+          npm run start -- --hostname 127.0.0.1 --port 3000 > /tmp/next-start.log 2>&1 &
+          echo $! > /tmp/next-start.pid
+
+      - name: Wait for app readiness
+        run: |
+          for i in {1..60}; do
+            if curl -fsS "$CYPRESS_BASE_URL" >/dev/null; then
+              echo "App is ready"
+              exit 0
+            fi
+            sleep 2
+          done
+
+          echo "App failed to start in time"
+          tail -n 200 /tmp/next-start.log || true
+          exit 1
+
+      - name: Run the stack specs (signed in, both themes)
+        id: stack
+        run: npm run test:e2e:stack
+
+      # Runs whenever the suite above ran, pass or fail, so one red step does not hide the other;
+      # not when the stack or the app never started, which would only add a second red step.
+      # Cypress empties cypress/videos and cypress/screenshots before each run, which deleted the
+      # first suite's evidence before the upload below; this run keeps them.
+      - name: Run the stack specs with the Content Security Policy enforced
+        if: ${{ !cancelled() && steps.stack.outcome != 'skipped' }}
+        run: npm run test:e2e:csp:stack -- --config trashAssetsBeforeRuns=false
+
+      - name: Stop app
+        if: always()
+        run: |
+          if [ -f /tmp/next-start.pid ]; then
+            kill "$(cat /tmp/next-start.pid)" || true
+            rm -f /tmp/next-start.pid
+          fi
+
+      - name: Service logs
+        if: failure()
+        working-directory: lakira-backend
+        run: |
+          docker compose ps || true
+          docker compose logs --tail 300 app || true
+          tail -n 200 /tmp/next-start.log || true
+
+      - name: Upload Cypress videos
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: stack-cypress-videos
+          path: lakira-frontend/cypress/videos
+          if-no-files-found: warn
+
+      - name: Upload Cypress screenshots
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: stack-cypress-screenshots
+          path: lakira-frontend/cypress/screenshots
+          if-no-files-found: warn
+
+      - name: Stop the backend
+        if: always()
+        working-directory: lakira-backend
+        run: docker compose down -v || true

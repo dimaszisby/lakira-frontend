@@ -2,7 +2,8 @@
 
 What each GitHub Actions workflow runs, in what order, and on what. Checked against
 `.github/workflows/test.yml` and `.github/workflows/performance.yml` on 2026-09-26, and
-`.github/workflows/dependency-audit.yml` on 2026-10-02.
+`.github/workflows/dependency-audit.yml` on 2026-10-02, and `.github/workflows/stack-e2e.yml` on
+2026-10-21.
 
 This page is the one description of the pipeline. What to do when a job goes red is in the
 [daily pipeline playbook](../../how-to/ci-cd/daily-pipeline-playbook.md); the npm scripts are in
@@ -57,8 +58,8 @@ Details that decide whether a job fails:
   `/login` keyboard check. "Run accessibility checks on the public pages" takes axe over every
   public page in both themes, contrast included, so an accessibility failure is named as one; it
   prints the rule, the element and axe's reason in the job log. Then `cypress/e2e/csp/` runs with
-  the Content Security Policy enforced. The job has no backend, so `cypress/e2e/stack/` never runs
-  here (kit `cypress-a11y-e2e`, D-01).
+  the Content Security Policy enforced. The job has no backend, so `cypress/e2e/stack/` and
+  `cypress/e2e/csp-stack/` do not run here; they run nightly in `frontend-stack-e2e`, below.
 - `checks` covers the Cypress specs anyway: `typecheck` includes `cypress/tsconfig.json`, and
   `lint` covers `cypress/`.
 - `e2e` sets `CYPRESS_BASE_URL=http://127.0.0.1:3000`. `cypress-screenshots` warns "No files were
@@ -102,6 +103,40 @@ code runs. Pull requests audit production dependencies only; this is where an ad
 development tooling surfaces ([ADR-0023](../../explanation/decisions/adr-0023-pull-requests-block-on-production-advisories-only.md)).
 A failed scheduled run is sent to whoever last edited the cron line, and GitHub disables the
 schedule after 60 days without repository activity.
+
+## `frontend-stack-e2e` (`stack-e2e.yml`)
+
+**Triggers:** `schedule` at `0 4 * * *` (04:00 UTC daily), `workflow_dispatch`
+(`gh workflow run frontend-stack-e2e`), and a `pull_request` to `dev` that changes
+`.github/workflows/stack-e2e.yml` itself. That last trigger exists because a workflow can be
+neither dispatched nor scheduled before it is on the default branch.
+**Concurrency:** group `frontend-stack-e2e-<ref>`, `cancel-in-progress: false`.
+**Permissions:** `contents: read`.
+**Not a PR gate.** No other pull request runs it (kit `stack-suites-in-ci`, D-01).
+
+One job, `stack-e2e` (Stack E2E, signed in, real backend), 45 min timeout. It checks out this
+repository to `lakira-frontend/` and lakira-backend `dev` to `lakira-backend/`, side by side, then:
+
+1. writes the backend's `.env` from its `.env.example`, with `JWT_SECRET` generated for the run and
+   `DISABLE_RATE_LIMITING=true`;
+2. `docker compose up -d --wait db redis rabbitmq mailpit` from the backend's own Compose file;
+3. in the backend: `npm ci`, `migrate:development`;
+4. builds and starts the backend's `app` service with `APP_RELEASE` set to its commit, and waits
+   up to 180 s for `/api/v1/health`;
+5. writes the backend commit, `/health`'s `release` and the frontend commit to the run summary;
+6. in this repository: `npm ci`, `build` and `start` with `API_URL` and `NEXT_PUBLIC_API_BASE_URL`
+   set to `http://localhost:8001/api/v1` and `NEXT_PUBLIC_APP_URL` to `http://127.0.0.1:3000`,
+   waiting up to 120 s for the app. Without `NEXT_PUBLIC_APP_URL`, the server's own requests to
+   `/api/proxy` go to `https://localhost:3000`, and every page that loads its data on the server
+   renders 404;
+7. `test:e2e:stack`, then `test:e2e:csp:stack`, each its own step; the second runs even when the
+   first fails, with `--config trashAssetsBeforeRuns=false` so it keeps the first's videos and
+   screenshots;
+8. stops the app, prints the backend's log on failure, uploads `stack-cypress-videos` and
+   `stack-cypress-screenshots` (always), and takes the stack down.
+
+It reads no secret: lakira-backend is public, and every user the specs need is created during the
+run. The stack helpers still refuse any non-local URL (`cypress/support/stack.ts`).
 
 ## Changing a workflow
 

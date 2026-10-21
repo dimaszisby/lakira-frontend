@@ -79,11 +79,17 @@ Cypress, in four folders. The first pair differ in what they may touch (kit `cyp
 | Folder | Needs | Runs with | In CI |
 |---|---|---|---|
 | `cypress/e2e/public/` | the app only | `npm run test:e2e` | yes, the `e2e` job, as two steps |
-| `cypress/e2e/stack/` | the app, the backend and Mailpit | `npm run test:e2e:stack` | **no** |
+| `cypress/e2e/stack/` | the app, the backend and Mailpit | `npm run test:e2e:stack` | nightly and on dispatch, `frontend-stack-e2e`; not on pull requests |
 | `cypress/e2e/csp/` | the app only | `npm run test:e2e:csp` | yes, the `e2e` job |
-| `cypress/e2e/csp-stack/` | the app, the backend and Mailpit | `npm run test:e2e:csp:stack` | **no** |
+| `cypress/e2e/csp-stack/` | the app, the backend and Mailpit | `npm run test:e2e:csp:stack` | nightly and on dispatch, `frontend-stack-e2e`; not on pull requests |
 
-**The folder is the contract.** A spec in `public/` must not call the backend, because CI runs none.
+The stack pair run in `.github/workflows/stack-e2e.yml`, which builds lakira-backend `dev` from
+source and names the backend commit in its summary (kit `stack-suites-in-ci`, D-01). A pull request
+is not gated by them, so run them locally when the gate table in `.claude/rules/workflow.md` says
+to.
+
+**The folder is the contract.** A spec in `public/` must not call the backend, because the `e2e`
+job runs none.
 Anything that signs in, or reads an emailed token, goes in `stack/`. How to run it:
 `docs/how-to/testing/run-stack-e2e.md`.
 

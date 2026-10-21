@@ -54,7 +54,9 @@ is the same shape: one configuration file, one gated job, and the environment ta
   request of a fork. _Why:_ category 8, "Deploy job"; a deploy job is a credential boundary.
 - **AC-3** — `docs/reference/environments.md` names the production values of `API_URL`,
   `NEXT_PUBLIC_API_BASE_URL` and `NEXT_PUBLIC_APP_URL`, and the two "not final" lines are gone.
-  _Why:_ F-02 and F-11 are answered by the same decision.
+  _Why:_ F-02 and F-11 are answered by the same decision. And the deploy must set
+  `NEXT_PUBLIC_APP_URL` at build time: without it a production build sends its server-side
+  requests to `https://localhost:3000`, and every page that loads its data on the server renders 404. That is what the first CI run of the stack suites hit (kit `stack-suites-in-ci`).
 - **AC-4** — `README.md` § Deployment describes what is committed, not what is assumed.
   _Why:_ the audit cites that paragraph as its evidence.
 - **AC-5** — The Content Security Policy's `connect-src` holds the production API origin on a

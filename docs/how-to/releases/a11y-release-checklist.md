@@ -17,8 +17,9 @@ Before running this checklist:
 - [ ] All tests are green:
   - [ ] Unit + integration tests
   - [ ] E2E public suite, `npm run test:e2e` (CI runs it)
-  - [ ] E2E stack suite, `npm run test:e2e:stack`, against the local backend and Mailpit. CI cannot
-        run it, so this step is the only place the signed-in pages are checked before a release
+  - [ ] E2E stack suite, `npm run test:e2e:stack`, against the local backend and Mailpit, or a
+        green run of the `frontend-stack-e2e` workflow on the commit being released. CI runs it
+        nightly, not on pull requests, so check that the latest run covers what is being released
         ([how to run it](../testing/run-stack-e2e.md))
 - [ ] Any new UI is considered stable (no major redesign expected before release).
 - [ ] No **known critical accessibility regressions** are currently open without a plan.
