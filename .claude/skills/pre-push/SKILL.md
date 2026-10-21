@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Pre-Push Validation
 
-Run the gates CI runs, in CI's order, locally. Stop at the first failure — the chain is serial in CI too, so a later gate's result would be meaningless.
+Run the gates CI runs, locally, in this order. Stop at the first failure: a later gate run on a tree that already fails one tells you little. CI runs its jobs side by side since 2026-10-21 (ADR-0036), so a red run can name several at once.
 
 ## Sequence
 

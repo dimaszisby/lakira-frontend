@@ -1,6 +1,6 @@
 # Frontend debt register
 
-**As of:** 2026-10-21, frontend `dev` at `d1fca20`, with F-06, F-08, F-09, F-10, F-14 to F-21, F-27 to F-29, F-31 to F-37, F-40, F-42 to F-50, F-51, F-52, F-53, F-54, F-55, F-57, F-61, F-62, F-63, F-64, F-66 and F-67 closed, and F-41 to its deferred folder split. Ranked by [D-01](decisions.md).
+**As of:** 2026-10-21, frontend `dev` at `7d54f25`, with F-06, F-08, F-09, F-10, F-14 to F-21, F-27 to F-29, F-31 to F-37, F-40, F-42 to F-50, F-51, F-52, F-53, F-54, F-55, F-57, F-61, F-62, F-63, F-64, F-66 and F-67 closed, and F-41 to its deferred folder split. Ranked by [D-01](decisions.md).
 
 **"What's next" is the first row below whose state is `ready`.** A row above it that is waiting on
 someone is reported with it, as a gap. How rows are added and closed:
@@ -67,13 +67,13 @@ Listed, not analysed ([D-03](decisions.md)). Between the repos:
 
 Security, the proxy and the repository:
 
-| ID   | Item                                                                                                                  | Sev | State                                              | Source                                                    |
-| ---- | --------------------------------------------------------------------------------------------------------------------- | --- | -------------------------------------------------- | --------------------------------------------------------- |
-| F-22 | `console.warn` and `console.log` are not scrubbed; nothing in CI shows that Next still prints through `console.error` | —   | accepted in ADR-0029; one probe for the next audit | `2026-10-10-todo-reaudit-findings.md` (N7, left as found) |
-| F-23 | `next.config.ts` reads `NEXT_PUBLIC_API_BASE_URL` raw, outside the validated environment                              | —   | kept on purpose                                    | `2026-08-24-todo-saas-readiness.md` phase 3               |
-| F-24 | `dev` and `main` have no server-side branch protection                                                                | —   | owner (an action, not code)                        | `2026-08-17-todo-claude-code-setup.md`                    |
-| F-25 | `main` shares no history with `dev`                                                                                   | —   | owner (O-08)                                       | `2026-09-24-todo-main-has-unrelated-history.md`           |
-| F-26 | Security follow-ups of 2025-11-26, never triaged: moving protected fetching into Server Components                    | —   | owner                                              | `todo-security-20251126.md`, next cycle, item 2           |
+| ID   | Item                                                                                                                         | Sev | State                                              | Source                                                    |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------- | --- | -------------------------------------------------- | --------------------------------------------------------- |
+| F-22 | `console.warn` and `console.log` are not scrubbed; nothing in CI shows that Next still prints through `console.error`        | —   | accepted in ADR-0029; one probe for the next audit | `2026-10-10-todo-reaudit-findings.md` (N7, left as found) |
+| F-23 | `next.config.ts` reads `NEXT_PUBLIC_API_BASE_URL` raw, outside the validated environment                                     | —   | kept on purpose                                    | `2026-08-24-todo-saas-readiness.md` phase 3               |
+| F-24 | `dev` and `main` have no server-side branch protection; the check to require is "CI passed", `frontend-ci`'s gate (ADR-0036) | —   | owner (an action, not code)                        | `2026-08-17-todo-claude-code-setup.md`                    |
+| F-25 | `main` shares no history with `dev`                                                                                          | —   | owner (O-08)                                       | `2026-09-24-todo-main-has-unrelated-history.md`           |
+| F-26 | Security follow-ups of 2025-11-26, never triaged: moving protected fetching into Server Components                           | —   | owner                                              | `todo-security-20251126.md`, next cycle, item 2           |
 
 Errors and forms:
 
@@ -97,9 +97,10 @@ Performance:
 
 Tests, docs and this register:
 
-| ID   | Item                                                                                                                      | Sev | State    | Source                                                                                                                 |
-| ---- | ------------------------------------------------------------------------------------------------------------------------- | --- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
-| F-41 | A unit and integration folder split (`__tests__/unit`, `__tests__/integration`), to evaluate only if readability degrades | P3  | deferred | `2026-02-18-tests-structure-overhaul.md`; its coverage item done in #113, `2026-10-19-todo-form-integration-suites.md` |
+| ID   | Item                                                                                                                                                         | Sev | State                                    | Source                                                                                                                 |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --- | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| F-41 | A unit and integration folder split (`__tests__/unit`, `__tests__/integration`), to evaluate only if readability degrades                                    | P3  | deferred                                 | `2026-02-18-tests-structure-overhaul.md`; its coverage item done in #113, `2026-10-19-todo-form-integration-suites.md` |
+| F-68 | `frontend-ci` runs five jobs as a chain, 12 to 14 min for 2 to 3 min of work; each pays its own `npm ci`, which seems to include the Cypress binary download | —   | ready; in progress, kit `ci-in-parallel` | `2026-10-21-todo-ci-wall-clock-time.md`; Notion "Handoff", FE CI Handoff                                               |
 
 ## Waiting on the owner, not code
 

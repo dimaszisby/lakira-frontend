@@ -43,6 +43,7 @@ npm run test:e2e
 | `dependency-audit` (nightly)   | `npm audit` high finding        | A development dependency is affected; PRs stay green. Fix it as its own task, the same way. The failure email goes to whoever last edited the workflow's cron line.                                                                                                                               |
 | `frontend-stack-e2e` (nightly) | A stack spec fails              | First read the run summary for the backend commit it tested: a change on backend `dev` since the last green run is the likeliest cause. Then reproduce with that backend locally ([run-stack-e2e.md](../testing/run-stack-e2e.md)). If the stack did not start, the job prints the backend's log. |
 | `secret-scan`                  | gitleaks hit                    | Rotate the credential first, then remove it from history. A revert does not un-leak it.                                                                                                                                                                                                           |
+| `ci` (CI passed)               | Red while the other jobs ran    | Not a failure of its own: its log lists each job's result. Open the job that is not `success`. A `skipped` `e2e` means `build` failed; a `cancelled` one means a newer push replaced the run.                                                                                                     |
 
 ## Notes
 
