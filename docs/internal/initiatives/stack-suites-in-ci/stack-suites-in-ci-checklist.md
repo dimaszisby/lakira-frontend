@@ -54,7 +54,7 @@ and dispatched workflow ([D-01](decisions.md)); the analysis is
       `NEXT_PUBLIC_APP_URL` to be named; its analysis now says why it must be set at build time.
 - [x] Found: actionlint 1.7.12 does not know the `ubuntu-26.04` label that every workflow here
       uses and CI accepts → not a defect; the check was run with that one rule ignored.
-- [ ] Found: the second run (39514889446) passed 57 of 58 and the CSP stack suite 8 of 8. The
+- [x] Found: the second run (39514889446) passed 57 of 58 and the CSP stack suite 8 of 8. The
       failure was "drops a deleted value from the dashboard reached with the back button": the card
       read `n: 2`, not `n: 1`. The backend's log shows the DELETE and the log list's refetch, then no
       request for 4.5 s, so the dashboard was never refetched. Not reproduced locally: five plain
@@ -68,6 +68,10 @@ and dispatched workflow ([D-01](decisions.md)); the analysis is
     `cypress/videos` and `cypress/screenshots` before the upload, so the failing spec's video was
     lost. It now runs with `--config trashAssetsBeforeRuns=false`; locally a file left by an
     earlier run survived it. The next red run carries the video.
+  - The third run (39547119660) failed the same case and kept its video: the DELETE, the list
+    refetch and the back navigation, then no request. The cause was not found; the dashboard was
+    made independent of it instead, revalidating on every visit (#128, register row F-67). The
+    next run (39564076596, on `13b59ec`, `dev` merged in) passed 58 of 58 and 8 of 8.
 
 ## Acceptance
 
@@ -83,10 +87,11 @@ and dispatched workflow ([D-01](decisions.md)); the analysis is
 
 How each is checked:
 
-- [ ] AC-1 — machine: this PR's own `frontend-stack-e2e` run, triggered by its path filter; both
+- [x] AC-1 — machine: this PR's own `frontend-stack-e2e` run, triggered by its path filter; both
       steps green, with the same case counts as the last local runs (58 and 8), so neither suite
-      passed by running nothing.
-- [ ] AC-2 — machine: the same run's summary lists the backend commit and `/health`'s `release`.
+      passed by running nothing. Run 39564076596: 58 of 58 and 8 of 8, each in its named step.
+- [x] AC-2 — machine: the same run's summary lists the backend commit and `/health`'s `release`.
+      Both read `58180423c252dc3d19ff13bdf18c6b2cf4ecd5c7`.
 - [x] AC-3 — by construction: nothing under `cypress/` changes; `LOCAL_HOSTS` in
       `cypress/support/stack.ts` is untouched, and the workflow uses only `localhost` and
       `127.0.0.1`.
@@ -106,4 +111,4 @@ How each is checked:
 - [x] build
 - [ ] e2e, e2e (csp) — skipped: no app code changed
 - [x] actionlint on every workflow, with the runner-label rule ignored
-- [ ] e2e (stack), e2e (csp, stack) in CI — the PR's own run (AC-1)
+- [x] e2e (stack), e2e (csp, stack) in CI — the PR's own run (AC-1)

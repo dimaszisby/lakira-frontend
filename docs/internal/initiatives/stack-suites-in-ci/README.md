@@ -1,6 +1,7 @@
 # Stack suites in CI
 
-**Status:** In review. Debt register row F-06, owner question O-02, answered 2026-10-21.
+**Status:** Done 2026-10-21 (#127). Debt register row F-06, owner question O-02. All five
+acceptance criteria met; D-01 accepted. The dashboard failure the first runs found is F-67 (#128).
 **Slug:** `stack-suites-in-ci` · **Branch:** `ci/stack-suites-in-ci`
 
 - [Checklist](stack-suites-in-ci-checklist.md) — work items, acceptance, gates

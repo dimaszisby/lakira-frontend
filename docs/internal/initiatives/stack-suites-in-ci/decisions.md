@@ -2,7 +2,7 @@
 
 ## D-01 — The stack suites run in CI nightly and on dispatch, not on every pull request
 
-- **Status:** Proposed
+- **Status:** Accepted (merged in #127, 2026-10-21)
 - **Date:** 2026-10-21
 
 Supersedes [`cypress-a11y-e2e` D-01](../cypress-a11y-e2e/decisions.md), which kept every spec that
