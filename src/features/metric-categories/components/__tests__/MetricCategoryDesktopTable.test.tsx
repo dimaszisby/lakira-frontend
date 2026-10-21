@@ -67,6 +67,21 @@ describe("MetricCategoryDesktopTable", () => {
     expect(onRowClick).toHaveBeenCalledWith(categories[0]);
   });
 
+  it("names each row after its category so no two rows share a name", () => {
+    render(
+      <MetricCategoryDesktopTableBase
+        categories={categories}
+        sortBy="createdAt"
+        sortOrder="DESC"
+        onSort={() => {}}
+        onRowClick={() => {}}
+      />,
+    );
+
+    expect(screen.getByRole("row", { name: "Open category Wellness" })).toBeInTheDocument();
+    expect(screen.getByRole("row", { name: "Open category Hydration" })).toBeInTheDocument();
+  });
+
   it("shows fallback values and empty message", () => {
     const { rerender } = render(
       <MetricCategoryDesktopTableBase

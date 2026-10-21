@@ -24,6 +24,7 @@ export const MetricDesktopTableBase = ({
       onSort={onSort}
       rowKey={(cat) => cat.id}
       onRowClick={onRowClick}
+      rowLabel={(metric) => `Open metric ${metric.name}`}
       onRowHover={onRowHover}
       className={cn("hidden sm:block", className)}
       aria-label="Metrics table"

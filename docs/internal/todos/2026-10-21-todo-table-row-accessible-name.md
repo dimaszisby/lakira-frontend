@@ -39,9 +39,18 @@ because a duplicate name is not an axe rule.
 
 ## Items
 
-- [ ] Choose the naming, and record it as a decision entry if it changes `Table`'s props
-- [ ] `Table.tsx` and the three desktop tables
-- [ ] `src/app/(app)/metrics/[metricId]/logs/_components/__tests__/MetricLogsClient.int.test.tsx`:
+- [x] Choose the naming, and record it as a decision entry if it changes `Table`'s props
+- [x] `Table.tsx` and the three desktop tables
+- [x] `src/app/(app)/metrics/[metricId]/logs/_components/__tests__/MetricLogsClient.int.test.tsx`:
       its queries rely on the current label (its comment says so), so it changes with the fix
-- [ ] A case that fails while two rows share a name
-- [ ] A keyboard pass in a real browser, both themes
+- [x] A case that fails while two rows share a name
+- [x] A keyboard pass in a real browser, both themes
+
+## Status
+
+Done 2026-10-22 in kit `table-row-accessible-name`, PR #137. The owner chose a caller-supplied
+label (option B): `Table` requires `rowLabel` wherever `onRowClick` is passed, and the three
+tables name rows "Open metric ...", "Open category ..." and "Open log from <the cell's
+timestamp>" ([ADR-0037](../../explanation/decisions/adr-0037-a-clickable-row-is-named-by-its-caller.md)).
+A keyboard pass in Electron, both themes, tabbed through two rows of each table: each was focused
+with a visible ring and named apart, and Enter or Space opened it.

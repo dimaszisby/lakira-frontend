@@ -121,9 +121,10 @@ describe("MetricLogsClient integration", () => {
      * `LogDesktopTable` never reads `onEdit`, unlike the mobile card. So a
      * missing `onRowClick` does not degrade desktop editing, it removes it.
      *
-     * Both queries below rely on `Table` setting `aria-label="View row details"`
-     * and `tabIndex={0}` only when `onRowClick` is supplied, which is what makes
-     * them fail against the unfixed client rather than silently pass.
+     * Both queries below rely on `Table` naming a row from `rowLabel` ("Open log
+     * from ...") and setting `tabIndex={0}` only when `onRowClick` is supplied,
+     * which is what makes them fail against the unfixed client rather than
+     * silently pass.
      */
     const singleLog = () =>
       mockMetricLogsCursor(
@@ -145,7 +146,7 @@ describe("MetricLogsClient integration", () => {
       // jsdom applies no CSS, so the mobile list renders alongside the desktop
       // table. Scope to the table to avoid matching the card.
       const table = await screen.findByRole("table", { name: /metric logs table/i });
-      return within(table).getByRole("row", { name: /view row details/i });
+      return within(table).getByRole("row", { name: /open log from/i });
     };
 
     it("navigates to the log when its row is clicked", async () => {
