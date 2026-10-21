@@ -1,6 +1,6 @@
 # Frontend debt register
 
-**As of:** 2026-10-21, frontend `dev` at `a54dde5`, with F-06, F-08, F-09, F-10, F-14 to F-21, F-27 to F-29, F-31 to F-37, F-40, F-42 to F-50, F-51, F-52, F-53, F-54, F-55, F-57, F-61, F-62, F-63, F-64, F-66, F-67 and F-68 closed, and F-41 to its deferred folder split. Ranked by [D-01](decisions.md).
+**As of:** 2026-10-21, frontend `dev` at `72dad3d`, with F-06, F-08, F-09, F-10, F-14 to F-21, F-27 to F-29, F-31 to F-37, F-40, F-42 to F-50, F-51, F-52, F-53, F-54, F-55, F-57, F-61, F-62, F-63, F-64, F-66, F-67 and F-68 closed, and F-41 to its deferred folder split. Ranked by [D-01](decisions.md).
 
 **"What's next" is the first row below whose state is `ready`.** A row above it that is waiting on
 someone is reported with it, as a gap. How rows are added and closed:
@@ -87,6 +87,7 @@ Interface, accessibility and end-to-end checks:
 | ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | ------------ | -------------------------------------------------------- |
 | F-56 | The category chip's text is 4.11:1 on its tint in the dark desktop metrics table, under WCAG 1.4.3's 4.5:1; since #133 (ADR-0035) that table shows from 640 px, so tablets meet it too | —   | owner (O-12) | `2026-10-17-todo-axe-pages-with-data.md`                 |
 | F-60 | The log list shows newest created first, so a value backfilled into the past is listed at the top; the backend now orders logs by `loggedAt` (#125)                                    | —   | owner (O-13) | `2026-10-18-todo-metric-logs-order-after-backend-125.md` |
+| F-72 | Every clickable row in the three desktop tables is named "View row details", so rows cannot be told apart by name                                                                      | —   | ready        | `2026-10-21-todo-table-row-accessible-name.md`           |
 
 Performance:
 
@@ -97,9 +98,12 @@ Performance:
 
 Tests, docs and this register:
 
-| ID   | Item                                                                                                                      | Sev | State    | Source                                                                                                                 |
-| ---- | ------------------------------------------------------------------------------------------------------------------------- | --- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
-| F-41 | A unit and integration folder split (`__tests__/unit`, `__tests__/integration`), to evaluate only if readability degrades | P3  | deferred | `2026-02-18-tests-structure-overhaul.md`; its coverage item done in #113, `2026-10-19-todo-form-integration-suites.md` |
+| ID   | Item                                                                                                                              | Sev | State    | Source                                                                                                                 |
+| ---- | --------------------------------------------------------------------------------------------------------------------------------- | --- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| F-41 | A unit and integration folder split (`__tests__/unit`, `__tests__/integration`), to evaluate only if readability degrades         | P3  | deferred | `2026-02-18-tests-structure-overhaul.md`; its coverage item done in #113, `2026-10-19-todo-form-integration-suites.md` |
+| F-69 | The build and E2E each run `npm ci` on the critical path; building inside the E2E job would save one install, about 1 min         | —   | ready    | `2026-10-21-todo-ci-install-on-the-critical-path.md`                                                                   |
+| F-71 | E2E's Cypress binary cache measured no gain: it hit and the install still took 1m45s                                              | —   | ready    | `2026-10-21-todo-ci-install-on-the-critical-path.md`                                                                   |
+| F-70 | Caching `node_modules` to skip `npm ci`: about 1 min a job, at the cost of stale-dependency failures; considered, not recommended | P3  | deferred | `2026-10-21-todo-ci-install-on-the-critical-path.md`                                                                   |
 
 ## Waiting on the owner, not code
 
