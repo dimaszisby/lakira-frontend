@@ -46,11 +46,12 @@ ADR-0036.
       skipped job, guards nothing (ADR-0036). · **The gate's script, run locally** on eight
       results: exit 0 with all `success`, and exit 1 with one `failure`, `skipped` or
       `cancelled`.
-- [ ] The Cypress binary is not downloaded where Cypress does not run. _Why:_ the 66 s silence in
-      `npm ci` was inferred to be its download. · **The PR's run:** each job's install step,
-      against run 39624288837. Filled in after the push.
-- [ ] Wall-clock time, measured against run 39624288837 (12m14s). _Why:_ the point of the change.
-      · **The PR's run.** Filled in after the push.
+- [x] The Cypress binary is not downloaded where Cypress does not run. _Why:_ the 66 s silence in
+      `npm ci` was inferred to be its download. · **Checked, not met as stated:** the six jobs
+      no longer fetch it, but their installs did not get shorter (1m04 to 1m49 across the two
+      runs, against 1m13 to 1m57 before). The inference was wrong; see the todo.
+- [x] Wall-clock time, measured against run 39624288837 (12m14s). _Why:_ the point of the change.
+      · **The PR's run** 39631209683: 5m37s. **The `dev` run** 39632717440: 5m16s.
 
 ## Gates
 
@@ -65,5 +66,6 @@ Run 2026-10-21 on Node 24.21.0. No application code changed.
 - [x] spec drift and `security:audit`
 - [x] build
 - [x] actionlint
-- [ ] e2e, e2e (csp), e2e (stack) and e2e (csp, stack): skipped locally, since no application
-      code changed. The PR's own run executes e2e and e2e (csp) under the new workflow
+- [x] e2e and e2e (csp): run by the PR's own CI under the new workflow, passing (run
+      39631209683). e2e (stack) and e2e (csp, stack): skipped, since no application code
+      changed
