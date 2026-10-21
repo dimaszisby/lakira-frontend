@@ -36,9 +36,11 @@ account, which has no metrics to miss, and jsdom applies no CSS.
       tables have no `variant`, so CSS alone picks desktop or mobile and the two agree -> out of
       scope. It becomes this defect the day either gains a variant. Done 2026-10-17:
       `2026-10-17-todo-mobile-lists-breakpoint-class.md`.
-- [ ] Found: the list switches variant at 1024 px in JavaScript and at 640 px in CSS. With this
+- [x] Found: the list switches variant at 1024 px in JavaScript and at 640 px in CSS. With this
       fix a 640 to 1023 px viewport gets cards on `/metrics` and the table in a category's
-      paginated list -> out of scope; which one tablets should get is a design decision.
+      paginated list -> out of scope; which one tablets should get is a design decision. Done
+      2026-10-21: the owner chose the table from 640 px (O-07), kit `list-variant-breakpoint`,
+      ADR-0035.
 - [x] Found: a category's metric list in infinite mode is the same component and the same defect,
       and is not browser-checked here: reaching it needs a category with metrics -> out of
       scope for the spec; covered by the unit test. Done 2026-10-17, in the same spec:

@@ -57,6 +57,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0032](./adr-0032-a-dialog-that-is-the-page-titles-it-with-an-h1.md)            | A dialog that is the whole page titles it with an `h1`                       | Accepted       | 2026-10-20 | `D-01` (page-headings)              |
 | [ADR-0033](./adr-0033-sign-out-lives-on-the-account-page-below-lg.md)               | Below `lg`, signing out lives on the account page; the mobile drawer is gone | Accepted       | 2026-10-21 | `D-01` (mobile-sign-out)            |
 | [ADR-0034](./adr-0034-the-proxy-forwards-only-the-error-keys-the-frontend-reads.md) | The proxy forwards only the error keys the frontend reads                    | Accepted       | 2026-10-21 | `D-01` (proxy-error-body-allowlist) |
+| [ADR-0035](./adr-0035-a-list-picks-table-or-cards-in-css-at-sm.md)                  | A list picks table or cards in CSS, at `sm`                                  | Accepted       | 2026-10-21 | `D-01` (list-variant-breakpoint)    |
 
 ## Where the other decisions went
 

@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { http, HttpResponse } from "msw";
@@ -9,6 +9,8 @@ import { DEFAULT_METRIC_LIST_PARAMS } from "@/features/metrics/listSearchParams"
 import { server } from "@/src/test-utils/msw/server";
 import { renderWithProviders } from "@/src/test-utils/renderWithProviders";
 
+const CARD_LIST = "Metrics mobile list";
+const TABLE = "Metrics table";
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
 const mockPrefetch = jest.fn();
@@ -46,6 +48,20 @@ function mockMetricsListResponse(items: Array<Record<string, unknown>>, totalCou
     }),
   );
 }
+
+const LISTED_METRIC = {
+  id: "33333333-3333-4333-8333-333333333333",
+  name: "Resting Heart Rate",
+  defaultUnit: "bpm",
+  description: null,
+  isPublic: false,
+  originalMetricId: null,
+  category: null,
+  logCount: 0,
+  goalType: "incremental",
+  createdAt: TIMESTAMP,
+  updatedAt: TIMESTAMP,
+};
 
 describe("MetricsPageClient integration", () => {
   beforeEach(() => {
@@ -86,7 +102,10 @@ describe("MetricsPageClient integration", () => {
     renderWithProviders(<MetricsPageClient initialParams={initialParams} />);
 
     expect(screen.getByRole("status", { name: /loading content/i })).toBeInTheDocument();
-    expect(await screen.findByText("Body Weight")).toBeInTheDocument();
+    // Shown in both variants, which both render in paginated mode (ADR-0035).
+    expect(
+      within(await screen.findByRole("table", { name: TABLE })).getByText("Body Weight"),
+    ).toBeInTheDocument();
 
     await waitFor(() => {
       expect(mockPrefetch).toHaveBeenCalledWith(`/metrics/${metricId}`);
@@ -125,9 +144,12 @@ describe("MetricsPageClient integration", () => {
       );
 
       renderWithProviders(<MetricsPageClient initialParams={initialParams} />);
-      expect(await screen.findByText("Sleep")).toBeInTheDocument();
+      // Both variants render in paginated mode and CSS shows one; jsdom applies no CSS, so the
+      // card list, which carries the swipe actions, is chosen explicitly (ADR-0035).
+      const cards = within(await screen.findByRole("region", { name: CARD_LIST }));
+      expect(cards.getByText("Sleep")).toBeInTheDocument();
 
-      await user.click(screen.getByRole("button", { name: /more actions/i }));
+      await user.click(cards.getByRole("button", { name: /more actions/i }));
       await user.click(screen.getByRole("button", { name: /^delete$/i }));
 
       expect(await screen.findByRole("alert")).toHaveTextContent(refusal);
@@ -157,6 +179,31 @@ describe("MetricsPageClient integration", () => {
     await user.click(screen.getByRole("button", { name: /create metric/i }));
 
     expect(mockPush).toHaveBeenCalledWith("/metrics/new");
+  });
+
+  // Register row F-34, owner question O-07: a paginated list shows the table from 640 px, as every
+  // other list does. It used to pick its variant in JavaScript at 1024 px, so a tablet got cards
+  // here and the table in a category's list. Both variants now render, and CSS shows one.
+  it("renders both list variants in paginated mode and lets CSS pick at sm", async () => {
+    server.use(mockMetricsListResponse([LISTED_METRIC], 1));
+
+    renderWithProviders(<MetricsPageClient initialParams={initialParams} />);
+
+    expect(await screen.findByRole("table", { name: TABLE })).toBeInTheDocument();
+    expect(screen.getByRole("region", { name: CARD_LIST })).toHaveClass("sm:hidden");
+    // The chips sort the cards, so they show exactly when the cards do.
+    expect(screen.getByRole("group", { name: "Sort options" })).toHaveClass("sm:hidden");
+  });
+
+  it("keeps infinite mode on cards at every width, with its chips", async () => {
+    server.use(mockMetricsListResponse([LISTED_METRIC], 1));
+
+    renderWithProviders(<MetricsPageClient initialParams={{ ...initialParams, mode: "scroll" }} />);
+
+    const list = await screen.findByRole("region", { name: CARD_LIST });
+    expect(list).not.toHaveClass("sm:hidden");
+    expect(screen.queryByRole("table", { name: TABLE })).not.toBeInTheDocument();
+    expect(screen.getByRole("group", { name: "Sort options" })).not.toHaveClass("sm:hidden");
   });
 
   it("has no critical accessibility violations in empty-state view", async () => {
