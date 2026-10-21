@@ -36,6 +36,7 @@ What is built on it today: Modal (`Dialog`), Select, DateTimePicker (`Popover` p
 - Reachable and operable by keyboard, in a sensible tab order.
 - Has a visible focus indicator: a `--focus-ring-width` outline in `--ring` with `--focus-ring-offset`. For Ariakit composite items, style `[data-focus-visible]` too. Do not remove outlines without replacing them.
 - Has an accessible name: visible text, `aria-label` or `aria-labelledby`. When there is visible text, the accessible name must contain it (WCAG 2.5.3); do not override a visible label with a different `aria-label`.
+- **A clickable table row is named by its caller.** `Table` requires `rowLabel` wherever `onRowClick` is passed, worded as the mobile card is ("Open metric …"), so no two rows share a name ([ADR-0037](../../docs/explanation/decisions/adr-0037-a-clickable-row-is-named-by-its-caller.md)). axe does not flag duplicate names; a table's unit suite checks that two rows' names differ.
 - Has a pointer target of at least 24×24 CSS px (WCAG 2.2 AA; `--target-min`). Icon buttons inside fields use `--target-icon-button`. A smaller visual, such as a slider thumb, gets its hit area from a pseudo-element.
 - Uses `disabled` or `aria-disabled` for its disabled state, matching the `button.recipe.css` selector `:disabled, [aria-disabled="true"]`.
 - Never depends on dragging alone (WCAG 2.5.7). A swipe or drag action needs a single-pointer and keyboard alternative, like SwipeableCard's "More actions" button.

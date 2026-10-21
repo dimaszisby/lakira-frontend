@@ -59,6 +59,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0034](./adr-0034-the-proxy-forwards-only-the-error-keys-the-frontend-reads.md) | The proxy forwards only the error keys the frontend reads                    | Accepted       | 2026-10-21 | `D-01` (proxy-error-body-allowlist) |
 | [ADR-0035](./adr-0035-a-list-picks-table-or-cards-in-css-at-sm.md)                  | A list picks table or cards in CSS, at `sm`                                  | Accepted       | 2026-10-21 | `D-01` (list-variant-breakpoint)    |
 | [ADR-0036](./adr-0036-ci-runs-its-jobs-in-parallel-behind-a-gate.md)                | CI runs its jobs in parallel, behind a gate                                  | Accepted       | 2026-10-21 | `D-01` (ci-in-parallel)             |
+| [ADR-0037](./adr-0037-a-clickable-row-is-named-by-its-caller.md)                    | A clickable table row is named by its caller                                 | Accepted       | 2026-10-22 | `D-01` (table-row-accessible-name)  |
 
 ## Where the other decisions went
 

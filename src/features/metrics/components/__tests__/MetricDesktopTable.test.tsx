@@ -74,6 +74,21 @@ describe("MetricDesktopTable", () => {
     expect(onRowClick).toHaveBeenCalledWith(metrics[0]);
   });
 
+  it("names each row after its metric so no two rows share a name", () => {
+    render(
+      <MetricDesktopTableBase
+        metrics={metrics}
+        sortBy="createdAt"
+        sortOrder="DESC"
+        onSort={() => {}}
+        onRowClick={() => {}}
+      />,
+    );
+
+    expect(screen.getByRole("row", { name: "Open metric Sleep Quality" })).toBeInTheDocument();
+    expect(screen.getByRole("row", { name: "Open metric Hydration" })).toBeInTheDocument();
+  });
+
   it("shows empty message when metrics are empty", () => {
     render(
       <MetricDesktopTableBase metrics={[]} sortBy="createdAt" sortOrder={null} onSort={() => {}} />,

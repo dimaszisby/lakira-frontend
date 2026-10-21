@@ -26,6 +26,8 @@ const rows: Row[] = [
   { id: "r2", name: "Beta", count: 4 },
 ];
 
+const rowLabel = (row: Row) => `Open ${row.name}`;
+
 const firstRow = () => document.querySelector<HTMLTableRowElement>('tr[data-rowid="r1"]');
 
 describe("Table", () => {
@@ -58,7 +60,13 @@ describe("Table", () => {
     const onRowClick = jest.fn();
 
     render(
-      <Table<Row> data={rows} columns={columns} rowKey={(row) => row.id} onRowClick={onRowClick} />,
+      <Table<Row>
+        data={rows}
+        columns={columns}
+        rowKey={(row) => row.id}
+        onRowClick={onRowClick}
+        rowLabel={rowLabel}
+      />,
     );
 
     const row = firstRow();
@@ -78,7 +86,13 @@ describe("Table", () => {
     const onRowClick = jest.fn();
 
     render(
-      <Table<Row> data={rows} columns={columns} rowKey={(row) => row.id} onRowClick={onRowClick} />,
+      <Table<Row>
+        data={rows}
+        columns={columns}
+        rowKey={(row) => row.id}
+        onRowClick={onRowClick}
+        rowLabel={rowLabel}
+      />,
     );
 
     await user.click(screen.getByRole("button", { name: "2" }));
@@ -97,6 +111,7 @@ describe("Table", () => {
         columns={columns}
         rowKey={(row) => row.id}
         onRowClick={() => {}}
+        rowLabel={rowLabel}
         onRowHover={onRowHover}
       />,
     );
@@ -111,6 +126,57 @@ describe("Table", () => {
     onRowHover.mockClear();
     fireEvent.focus(screen.getByRole("button", { name: "2" }));
     expect(onRowHover).not.toHaveBeenCalled();
+  });
+
+  it("names each clickable row from rowLabel when onRowClick is passed", () => {
+    render(
+      <Table<Row>
+        data={rows}
+        columns={columns}
+        rowKey={(row) => row.id}
+        onRowClick={() => {}}
+        rowLabel={rowLabel}
+      />,
+    );
+
+    expect(screen.getByRole("row", { name: "Open Alpha" })).toHaveAttribute("tabindex", "0");
+    expect(screen.getByRole("row", { name: "Open Beta" })).toHaveAttribute("tabindex", "0");
+  });
+
+  it("gives no two clickable rows the same name when their items differ", () => {
+    render(
+      <Table<Row>
+        data={rows}
+        columns={columns}
+        rowKey={(row) => row.id}
+        onRowClick={() => {}}
+        rowLabel={rowLabel}
+      />,
+    );
+
+    // axe has no rule for duplicate names, so this is the check that catches one.
+    const names = Array.from(document.querySelectorAll("tbody tr")).map((row) =>
+      row.getAttribute("aria-label"),
+    );
+    expect(names).toHaveLength(rows.length);
+    expect(new Set(names).size).toBe(rows.length);
+  });
+
+  it("leaves a row unnamed and out of the tab order when onRowClick is absent", () => {
+    render(<Table<Row> data={rows} columns={columns} rowKey={(row) => row.id} />);
+
+    const row = firstRow();
+    expect(row).not.toHaveAttribute("aria-label");
+    expect(row).toHaveAttribute("tabindex", "-1");
+  });
+
+  it("rejects onRowClick without rowLabel at compile time", () => {
+    const element = (
+      // @ts-expect-error -- a clickable row must be named by its caller (ADR-0037)
+      <Table<Row> data={rows} columns={columns} rowKey={(row) => row.id} onRowClick={() => {}} />
+    );
+
+    expect(element).toBeDefined();
   });
 
   it("renders the empty message when there is no data", () => {

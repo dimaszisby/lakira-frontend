@@ -63,6 +63,23 @@ describe("LogDesktopTable", () => {
     expect(onRowClick).toHaveBeenCalledWith(logs[0]);
   });
 
+  it("names each row after its log so no two rows share a name", () => {
+    render(
+      <LogDesktopTableBase
+        logs={logs}
+        sortBy="loggedAt"
+        sortOrder="DESC"
+        onSort={() => {}}
+        onRowClick={() => {}}
+      />,
+    );
+
+    expect(
+      screen.getByRole("row", { name: `Open log from ${new Date(ISO_1).toLocaleString()}` }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("row", { name: "Open log from N/A" })).toBeInTheDocument();
+  });
+
   it("shows empty message when logs are empty", () => {
     render(<LogDesktopTableBase logs={[]} sortBy="loggedAt" sortOrder={null} onSort={() => {}} />);
 

@@ -27,7 +27,19 @@ export type TableColumn<T> = {
   renderCell?: (row: T, value: T[keyof T]) => ReactNode;
 };
 
-export type TableProps<T> = {
+/**
+ * A clickable row is focusable, so it needs a name that says which item it opens. The caller
+ * supplies it, and `rowLabel` is required wherever `onRowClick` is passed (ADR-0037).
+ */
+type RowClickProps<T> =
+  | {
+      onRowClick: ((item: T) => void) | undefined;
+      /** The row's accessible name: the action and the item, e.g. "Open metric Running". */
+      rowLabel: (item: T) => string;
+    }
+  | { onRowClick?: never; rowLabel?: never };
+
+export type TableProps<T> = RowClickProps<T> & {
   data: T[];
   columns: TableColumn<T>[];
   rowKey: (item: T) => string;
@@ -36,7 +48,6 @@ export type TableProps<T> = {
   onSort?: (column: keyof T) => void;
   /** Custom row renderer; replaces the default row and its click/hover handling. */
   renderRow?: (item: T) => ReactNode;
-  onRowClick?: (item: T) => void;
   onRowHover?: (item: T) => void;
   emptyMessage?: string;
   className?: string;
@@ -77,6 +88,7 @@ export const Table = <T,>({
   onSort,
   renderRow,
   onRowClick,
+  rowLabel,
   onRowHover,
   emptyMessage = "No data available",
   className,
@@ -144,7 +156,7 @@ export const Table = <T,>({
                 data-rowid={key}
                 data-interactive={onRowClick ? "" : undefined}
                 tabIndex={onRowClick ? 0 : -1}
-                aria-label={onRowClick ? "View row details" : undefined}
+                aria-label={onRowClick ? rowLabel?.(item) : undefined}
                 className="data-table-row"
                 onMouseEnter={() => onRowHover?.(item)}
                 onFocus={(event: FocusEvent<HTMLTableRowElement>) => {

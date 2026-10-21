@@ -48,6 +48,8 @@ export const LogDesktopTableBase = ({
       onSort={onSort}
       rowKey={(cat) => cat.id}
       onRowClick={onRowClick}
+      // The cell's own text, so the name contains what the row shows (WCAG 2.5.3).
+      rowLabel={(log) => `Open log from ${formatTimestamp(log.loggedAt)}`}
       className={cn("hidden sm:block", className)}
       aria-label="Metric logs table"
       emptyMessage="No logs available"

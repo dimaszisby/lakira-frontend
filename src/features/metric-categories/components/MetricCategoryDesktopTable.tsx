@@ -94,6 +94,7 @@ export const MetricCategoryDesktopTableBase = ({
       onSort={onSort}
       rowKey={(cat) => cat.id}
       onRowClick={onRowClick}
+      rowLabel={(category) => `Open category ${category.name}`}
       className={cn("hidden sm:block", className)}
       aria-label="Metric categories table"
       emptyMessage="No categories available"
