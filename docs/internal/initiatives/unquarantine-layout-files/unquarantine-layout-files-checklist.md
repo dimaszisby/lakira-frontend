@@ -52,13 +52,14 @@ sweep owes one, because the two files needed different answers.
 - [x] Found: `docs/explanation/architecture/app-router-and-modal-routing.md` said `(app)` renders
       "the sidebar and header" and `(auth)` "a bare centred card"; the header is in `(auth)`
       (review) → in scope, one sentence corrected
-- [ ] Found: nothing sets the mobile drawer open (`Layout.tsx` only ever calls
+- [x] Found: nothing sets the mobile drawer open (`Layout.tsx` only ever calls
       `setMobileSidebarOpen(false)`), so below 1024 px there is no visible way to sign out. Seen
       in a browser at 1000 px: the one displayed "Logout" button sits at x -263 to -25. Not a
-      regression; `dev` is the same → out of scope, register row F-48, question O-11
-- [ ] Found: that off-screen button has `tabIndex` 0 and no `inert` or `aria-hidden` ancestor, so
+      regression; `dev` is the same → out of scope, register row F-48, question O-11. Done
+      2026-10-21, kit `mobile-sign-out`: sign-out on the account page, the drawer removed
+- [x] Found: that off-screen button has `tabIndex` 0 and no `inert` or `aria-hidden` ancestor, so
       the closed drawer's controls are in the tab order. Same browser run → out of scope,
-      register row F-49
+      register row F-49. Done 2026-10-21 with F-48, kit `mobile-sign-out`
 - [x] Found: no Cypress spec signs out, public or stack → out of scope, register row F-50. Done
       2026-10-18, `cypress/e2e/stack/sign-out.cy.ts`:
       `docs/internal/todos/2026-10-18-todo-sign-out-toast-and-spec.md`

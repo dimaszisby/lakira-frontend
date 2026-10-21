@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
-import { useState } from "react";
 
 import BottomNavigationBar from "./BottomNavigationBar";
 import Sidebar from "./Sidebar";
@@ -16,7 +15,6 @@ interface LayoutProps {
 
 const Layout = ({ children, onLogout, isLoggingOut }: LayoutProps) => {
   const pathname = usePathname() ?? "/";
-  const [isMobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
     <div className="flex min-h-screen w-full bg-bg text-ink">
@@ -27,8 +25,6 @@ const Layout = ({ children, onLogout, isLoggingOut }: LayoutProps) => {
       <Sidebar
         navItems={navItems}
         pathname={pathname}
-        isMobileOpen={isMobileSidebarOpen}
-        onClose={() => setMobileSidebarOpen(false)}
         onLogout={onLogout}
         isLoggingOut={isLoggingOut}
       />
@@ -47,11 +43,7 @@ const Layout = ({ children, onLogout, isLoggingOut }: LayoutProps) => {
         </main>
       </div>
 
-      <BottomNavigationBar
-        navItems={navItems}
-        pathname={pathname}
-        onLinkClick={() => setMobileSidebarOpen(false)}
-      />
+      <BottomNavigationBar navItems={navItems} pathname={pathname} />
     </div>
   );
 };

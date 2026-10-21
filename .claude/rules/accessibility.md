@@ -28,6 +28,7 @@ What is built on it today: Modal (`Dialog`), Select, DateTimePicker (`Popover` p
 - Landmarks for the shell: `<header>`, `<nav>`, `<main>`, `<footer>`. `src/components/layout/` owns these.
 - Heading hierarchy descends without skipping. A page has one `<h1>`. `cypress/e2e/public/auth-pages.a11y.cy.ts` and `cypress/e2e/stack/app-pages.a11y.cy.ts` check it on every page they visit (kit `page-headings`).
 - A route that is only a dialog, opened directly, titles the dialog with the page's `h1` (`Modal`'s `titleAs="h1"`); its intercept, over a page that has one, keeps the default `h2` ([ADR-0032](../../docs/explanation/decisions/adr-0032-a-dialog-that-is-the-page-titles-it-with-an-h1.md)).
+- Below `lg` the bottom bar is the only navigation and the account page is where a user signs out; there is no drawer ([ADR-0033](../../docs/explanation/decisions/adr-0033-sign-out-lives-on-the-account-page-below-lg.md)). A control some widths do not need is removed at those widths with `hidden` / `lg:*`, never moved off screen, which leaves it in the tab order.
 - Links navigate; buttons act. A `<div onClick>` is neither — it is invisible to keyboard and screen reader users.
 
 ## Every interactive element

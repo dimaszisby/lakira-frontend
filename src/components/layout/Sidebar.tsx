@@ -1,160 +1,40 @@
 "use client";
 
-import { SignOut, X } from "@phosphor-icons/react";
-import type { ReactNode } from "react";
-import { useCallback, useState } from "react";
-
 import { APP_NAME } from "@/constants/app";
-import { cn } from "@/lib/cn";
-import { Button } from "@/ui/Button";
 import { Card } from "@/ui/Card";
-import { Modal } from "@/ui/Modal";
 
 import SideBarNavigationItems from "./SideBarNavigationItems";
+import SignOutControl from "./SignOutControl";
 import type { SidebarProps } from "./type";
 
-interface SidebarContentProps {
-  includeCloseButton?: boolean;
-  onClose?: () => void;
-  children: ReactNode;
-}
-
-const SidebarContentWrapper = ({ includeCloseButton, onClose, children }: SidebarContentProps) => (
-  <div className="flex h-full flex-col">
-    <div className="flex items-center justify-between pb-8">
-      <div className="flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary text-sm font-bold text-on-brand">
-          L
+/**
+ * The desktop sidebar, from `lg` up. Below it, the bottom bar navigates and the account page signs
+ * out; the mobile drawer that used to live here was never opened and kept its controls in the tab
+ * order while off screen (kit `mobile-sign-out`, D-01).
+ */
+const Sidebar = ({ navItems, pathname, onLinkClick, onLogout, isLoggingOut }: SidebarProps) => (
+  <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
+    <Card radius="none" className="flex h-full flex-col border-r border-surface2 px-4 py-6">
+      <div className="flex h-full flex-col">
+        <div className="flex items-center gap-2 pb-8">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand-primary text-sm font-bold text-on-brand">
+            L
+          </div>
+          <p className="text-lg font-semibold text-ink">{APP_NAME}</p>
         </div>
-        <p className="text-lg font-semibold text-ink">{APP_NAME}</p>
-      </div>
-      {includeCloseButton ? (
-        <button
-          type="button"
-          onClick={onClose}
-          className="p-2 text-ink-secondary transition hover:text-ink"
-          aria-label="Close navigation"
-        >
-          <X size={20} />
-        </button>
-      ) : null}
-    </div>
-    {children}
-  </div>
-);
-
-const Sidebar = ({
-  navItems,
-  pathname,
-  onLinkClick,
-  isMobileOpen,
-  onClose,
-  onLogout,
-  isLoggingOut,
-}: SidebarProps) => {
-  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
-
-  const handleNavigationSelection = useCallback(() => {
-    if (isMobileOpen) {
-      onClose();
-    }
-    onLinkClick?.();
-  }, [isMobileOpen, onClose, onLinkClick]);
-
-  const logoutButton = (
-    <div className="mt-auto border-t border-surface2 pt-4">
-      <button
-        type="button"
-        onClick={() => setLogoutModalOpen(true)}
-        className="flex w-full items-center rounded-xl px-4 py-2.5 text-sm font-medium text-ink transition hover:bg-status-error-bg hover:text-status-error"
-        aria-label="Logout"
-      >
-        <SignOut size={18} className="mr-3 shrink-0" />
-        Sign Out
-      </button>
-    </div>
-  );
-
-  return (
-    <>
-      <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col">
-        <Card radius="none" className="flex h-full flex-col border-r border-surface2 px-4 py-6">
-          <SidebarContentWrapper>
-            <SideBarNavigationItems
-              navItems={navItems}
-              pathname={pathname}
-              onLinkClick={handleNavigationSelection}
-              className="flex-1"
-              ariaLabel="Primary sidebar navigation"
-            />
-            {logoutButton}
-          </SidebarContentWrapper>
-        </Card>
-      </aside>
-
-      <div className="lg:hidden" aria-live="polite">
-        <div
-          className={cn(
-            "chrome-scrim fixed inset-0 z-40 transition-opacity duration-200",
-            isMobileOpen ? "opacity-100" : "pointer-events-none opacity-0",
-          )}
-          aria-hidden="true"
-          onClick={onClose}
+        <SideBarNavigationItems
+          navItems={navItems}
+          pathname={pathname}
+          onLinkClick={onLinkClick}
+          className="flex-1"
+          ariaLabel="Primary sidebar navigation"
         />
-
-        <aside
-          className={cn(
-            "fixed inset-y-0 left-0 z-50 w-72 max-w-sm",
-            "transform transition-transform duration-200 ease-out",
-            isMobileOpen ? "translate-x-0" : "-translate-x-full",
-          )}
-          aria-label="Mobile navigation"
-        >
-          <Card radius="none" className="flex h-full flex-col border-r border-surface2 px-4 py-6">
-            <SidebarContentWrapper includeCloseButton onClose={onClose}>
-              <SideBarNavigationItems
-                navItems={navItems}
-                pathname={pathname}
-                onLinkClick={handleNavigationSelection}
-                className="flex-1"
-                ariaLabel="Mobile sidebar navigation"
-              />
-              {logoutButton}
-            </SidebarContentWrapper>
-          </Card>
-        </aside>
-      </div>
-
-      <Modal
-        title="Logout"
-        description="Are you sure you want to log out?"
-        open={logoutModalOpen}
-        onClose={() => setLogoutModalOpen(false)}
-        className="mx-auto w-full max-w-md"
-      >
-        <div className="flex justify-center gap-4">
-          <Button
-            variant="ghost"
-            onClick={() => setLogoutModalOpen(false)}
-            className="w-full"
-            aria-label="Cancel logout"
-          >
-            Cancel
-          </Button>
-
-          <Button
-            variant="destructive"
-            onClick={onLogout}
-            disabled={isLoggingOut}
-            className="w-full"
-            aria-label="Confirm logout"
-          >
-            {isLoggingOut ? "Logging Out..." : "Log Out"}
-          </Button>
+        <div className="mt-auto border-t border-surface2 pt-4">
+          <SignOutControl onSignOut={onLogout} isSigningOut={isLoggingOut} />
         </div>
-      </Modal>
-    </>
-  );
-};
+      </div>
+    </Card>
+  </aside>
+);
 
 export default Sidebar;

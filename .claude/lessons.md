@@ -200,3 +200,20 @@ in-progress status is not evidence: wait and re-read before proposing a cancel o
 
 **Why**: "stuck for a day" was an inference from two numbers, one of them misread. Cancelling a
 run that had already passed would have thrown away the result that verified the merge.
+
+## [2026-10-21] "PR merged. What's next?" was taken as a go
+
+**Mistake**: When the owner wrote "PR merged. What's next?", I verified the merge, picked the next
+item from the register, and started implementing it. A plan for that item had been approved
+earlier, and I read that approval as permission to start. The owner corrected it: the question
+asks for a recommendation, not for work.
+
+**Rule**: "What's next" (with or without a merge) means verify the merge, answer from the
+register, queue the work, and **wait**. Never start implementing on the strength of an earlier
+approval. The owner says when to start, usually "Enter plan mode" or an explicit go. If
+half-finished work for the item is already in the tree, ask whether to keep it or discard it
+before touching anything.
+
+**Why**: an approval is given for a plan at a moment, and the owner may have reordered, paused
+or rethought the work since. Work started unasked leaves an uncommitted tree that the owner then
+has to decide about, which is what happened with F-48 on `fix/mobile-sign-out`.

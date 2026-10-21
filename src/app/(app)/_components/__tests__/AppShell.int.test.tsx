@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "jest-axe";
 import { http, HttpResponse } from "msw";
@@ -49,8 +49,10 @@ const renderShell = () =>
 const confirmSignOut = async () => {
   const user = userEvent.setup();
 
-  await user.click(screen.getAllByRole("button", { name: /logout/i })[0]);
-  await user.click(screen.getByRole("button", { name: /confirm logout/i }));
+  await user.click(screen.getByRole("button", { name: "Sign out" }));
+  // The confirm button shares the trigger's name (kit `mobile-sign-out`, D-02).
+  const dialog = await screen.findByRole("dialog", { name: "Sign out" });
+  await user.click(within(dialog).getByRole("button", { name: "Sign out" }));
 };
 
 describe("AppShell integration", () => {
@@ -99,7 +101,11 @@ describe("AppShell integration", () => {
     await confirmSignOut();
 
     await waitFor(() =>
-      expect(screen.getByRole("button", { name: /confirm logout/i })).toBeEnabled(),
+      expect(
+        within(screen.getByRole("dialog", { name: "Sign out" })).getByRole("button", {
+          name: "Sign out",
+        }),
+      ).toBeEnabled(),
     );
     expect(mockPush).not.toHaveBeenCalled();
   });

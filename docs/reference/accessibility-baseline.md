@@ -240,8 +240,9 @@ Disabled state must use actual `disabled` attribute or `aria-disabled`, not just
   - and announced via attributes (`aria-current="page"` where logical).
 
 The components, all in `src/components/layout/`: `Sidebar.tsx` renders
-`SideBarNavigationItems.tsx` for the desktop and the mobile drawer, each with its own `aria-label`,
-and `BottomNavigationBar.tsx` is the bar below the `lg` breakpoint. There is no helper hook: each
+`SideBarNavigationItems.tsx` for the desktop sidebar, from the `lg` breakpoint up, and
+`BottomNavigationBar.tsx` is the only navigation below it. There is no mobile drawer
+([ADR-0033](../explanation/decisions/adr-0033-sign-out-lives-on-the-account-page-below-lg.md)). There is no helper hook: each
 compares the current pathname with the item's link and sets `aria-current="page"` on the match.
 
 ### 7.2 Tables & Data Grids

@@ -82,12 +82,9 @@ describe("Signed-in pages under the enforced Content Security Policy", () => {
     cy.viewport(1280, 800);
     signIn(user);
     cy.visitInTheme(DASHBOARD, "light");
-    cy.get("aside")
-      .not('[aria-label="Mobile navigation"]')
-      .first()
-      .find('button[aria-label="Logout"]')
-      .click();
-    cy.get('button[aria-label="Confirm logout"]').click();
+    cy.get("aside").contains("button", "Sign out").click();
+    // The confirm button shares the trigger's name (kit `mobile-sign-out`, D-02).
+    cy.get('[role="dialog"]').contains("button", "Sign out").click();
 
     cy.location("pathname").should("eq", "/login");
     cy.contains('[role="status"]', "Logged out successfully").should(VISIBLE);
