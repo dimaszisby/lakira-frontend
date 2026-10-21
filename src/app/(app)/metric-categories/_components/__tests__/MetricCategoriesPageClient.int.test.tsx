@@ -21,6 +21,8 @@ jest.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
+const CREATED_AT = "2026-02-22T10:00:00.000Z";
+
 const initialParams: MetricCategoryListSearchParams = {
   ...DEFAULT_CATEGORY_LIST_PARAMS,
   mode: "pages",
@@ -82,8 +84,8 @@ describe("MetricCategoriesPageClient integration", () => {
             color: "#E897A3",
             icon: "🔥",
             metricCount: 4,
-            createdAt: "2026-02-22T10:00:00.000Z",
-            updatedAt: "2026-02-22T10:00:00.000Z",
+            createdAt: CREATED_AT,
+            updatedAt: CREATED_AT,
           },
         ],
         1,
@@ -98,6 +100,37 @@ describe("MetricCategoriesPageClient integration", () => {
       expect(screen.getAllByText("Wellness").length).toBeGreaterThan(0);
     });
   });
+
+  // Register row F-34, owner question O-07. The categories list switches table and cards in CSS
+  // at sm in both modes; its chips were shown in JavaScript below 1024 px, so a tablet got the
+  // chips beside the table. They now hide with the cards.
+  it.each(["pages", "scroll"] as const)(
+    "shows its sort chips only with the card list, in %s mode",
+    async (mode) => {
+      server.use(
+        mockCategoryListResponse(
+          [
+            {
+              id: "cat-2",
+              name: "Sleep",
+              color: "#E897A3",
+              icon: "🔥",
+              metricCount: 1,
+              createdAt: CREATED_AT,
+              updatedAt: CREATED_AT,
+            },
+          ],
+          1,
+        ),
+      );
+
+      renderWithProviders(
+        <MetricCategoriesPageClient initialParams={{ ...initialParams, mode }} />,
+      );
+
+      expect(await screen.findByRole("group", { name: "Sort options" })).toHaveClass("sm:hidden");
+    },
+  );
 
   it("navigates to create-category modal when create button is clicked", async () => {
     const user = userEvent.setup();

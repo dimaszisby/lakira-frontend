@@ -84,6 +84,7 @@ These are enforced by review:
 - **Never write an arbitrary font size.** Use the named scale: `text-h3`, `text-body1`, `text-caption`. In recipe CSS, read it with `theme("fontSize.caption")` rather than repeating the value.
 - **New values must match the current look.** Add a token that reproduces an existing value instead of silently restyling. The brand identity is fixed input: palette values, brand mapping, Button colour tokens, fonts and type scale.
 - **Theme switching** is `data-theme` on `<html>` (`darkMode: ["class", '[data-theme="dark"]']`, driven by `next-themes`, whose inline script applies it before paint). A bare `.dark` class does nothing.
+- **A list picks its table or its cards in CSS, at `sm`.** Render both, with `hidden sm:block` on the table and `sm:hidden` on the cards and their sort chips; never choose the variant with `useMediaQuery`. `lg` is the shell's breakpoint, not a list's ([ADR-0035](../../docs/explanation/decisions/adr-0035-a-list-picks-table-or-cards-in-css-at-sm.md)).
 - **Merge classes with `cn()`** from `src/lib/cn.ts`. Never concatenate class strings. `cn` knows the named type scale, so `cn("text-caption", "text-ink-secondary")` keeps both classes.
 
 ## Adding a component's styles

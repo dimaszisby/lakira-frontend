@@ -231,16 +231,17 @@ const MetricCategoriesPageClient = ({ initialParams }: MetricCategoriesPageClien
     </div>
   );
 
-  const renderMobileSortControls = () =>
-    !isDesktopViewport ? (
-      <SortChipGroup
-        sortBy={sortField as keyof MetricCategoryVM}
-        sortOrder={sortDir}
-        onSort={(key) => onColumnSort(String(key))}
-        columns={mobileColumns}
-        className="w-full"
-      />
-    ) : null;
+  // The list shows the table or the cards by CSS at `sm`; the chips sort the cards, so they hide
+  // with them (ADR-0035). They were shown below 1024 px, beside the table on a tablet.
+  const renderMobileSortControls = () => (
+    <SortChipGroup
+      sortBy={sortField as keyof MetricCategoryVM}
+      sortOrder={sortDir}
+      onSort={(key) => onColumnSort(String(key))}
+      columns={mobileColumns}
+      className="w-full sm:hidden"
+    />
+  );
 
   const paginatedSection = (
     <section className="flex flex-col gap-4">

@@ -198,8 +198,6 @@ const MetricsPageClient = ({ initialParams }: MetricsPageClientProps) => {
       : infinite.items.length === 0
     : false;
 
-  const paginatedTableVariant: "desktop" | "mobile" = isDesktopViewport ? "desktop" : "mobile";
-
   const header = (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -256,15 +254,15 @@ const MetricsPageClient = ({ initialParams }: MetricsPageClientProps) => {
 
   const paginatedSection = (
     <div className="flex flex-col gap-4">
-      {paginatedTableVariant === "mobile" ? (
-        <SortChipGroup
-          sortBy={sortField as keyof MetricPreviewVM}
-          sortOrder={sortDir}
-          onSort={(key) => onColumnSort(String(key))}
-          columns={mobileColumns}
-          className="w-full"
-        />
-      ) : null}
+      {/* Table or cards is CSS's call, at `sm`, as on every list; the chips sort the cards, so
+          they hide with them (ADR-0035). */}
+      <SortChipGroup
+        sortBy={sortField as keyof MetricPreviewVM}
+        sortOrder={sortDir}
+        onSort={(key) => onColumnSort(String(key))}
+        columns={mobileColumns}
+        className="w-full sm:hidden"
+      />
 
       <MetricTable
         metrics={pages.items}
@@ -274,7 +272,6 @@ const MetricsPageClient = ({ initialParams }: MetricsPageClientProps) => {
         onEdit={handleEditMetric}
         onDelete={handleDeleteClick}
         onRowClick={handleRowClick}
-        variant={paginatedTableVariant}
       />
 
       <Pagination

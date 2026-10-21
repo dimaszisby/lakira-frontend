@@ -40,7 +40,10 @@ describe("The log form's time picker between two minute steps", () => {
       cy.get(SUBMIT).click();
     });
     cy.get(DIALOG).should("not.exist");
-    cy.contains("button", METRIC_NAME).click();
+    // The table from 640 px, the cards below it; both render (ADR-0035), so the visible one.
+    cy.get(`button[aria-label="Open metric ${METRIC_NAME}"], tr:contains("${METRIC_NAME}")`)
+      .filter(":visible")
+      .click();
     cy.location("pathname")
       .should("match", /^\/metrics\/[^/]+$/)
       .then((pathname) => {

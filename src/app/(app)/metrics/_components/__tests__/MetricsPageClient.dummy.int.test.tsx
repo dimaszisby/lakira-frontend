@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { http, HttpResponse } from "msw";
 
@@ -24,6 +24,7 @@ jest.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(),
 }));
 
+const CARD_LIST = "Metrics mobile list";
 const TIMESTAMP = "2026-02-18T08:00:00.000Z";
 
 const initialParams: MetricListSearchParams = { ...DEFAULT_METRIC_LIST_PARAMS, mode: "pages" };
@@ -78,12 +79,15 @@ describe("MetricsPageClient with dummy actions on", () => {
       );
 
       renderWithProviders(<MetricsPageClient initialParams={initialParams} />);
-      expect(await screen.findByText("Sleep")).toBeInTheDocument();
+      // Both variants render in paginated mode and CSS shows one; jsdom applies no CSS, so the
+      // card list, which carries the swipe actions, is chosen explicitly (ADR-0035).
+      const cards = within(await screen.findByRole("region", { name: CARD_LIST }));
+      expect(cards.getByText("Sleep")).toBeInTheDocument();
 
       await user.click(screen.getByRole("button", { name: /add dummy/i }));
       expect(await screen.findByRole("alert")).toHaveTextContent(/dummy data is disabled/i);
 
-      await user.click(screen.getByRole("button", { name: /more actions/i }));
+      await user.click(cards.getByRole("button", { name: /more actions/i }));
       await user.click(screen.getByRole("button", { name: /^delete$/i }));
       await waitFor(() => {
         expect(screen.getByRole("alert")).toHaveTextContent("This metric still has logs");

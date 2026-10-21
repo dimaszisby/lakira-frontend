@@ -55,8 +55,12 @@ const logValue = (value: string) => {
   cy.contains(value).should(VISIBLE);
 };
 
+// The list shows the table from 640 px and the cards below it, and renders both (ADR-0035), so this
+// clicks whichever is visible: the card's button, or the table row.
 const openMetricFromList = () => {
-  cy.contains("button", METRIC_NAME).click();
+  cy.get(`button[aria-label="Open metric ${METRIC_NAME}"], tr:contains("${METRIC_NAME}")`)
+    .filter(":visible")
+    .click();
   cy.location("pathname").should("match", /^\/metrics\/[^/]+$/);
 };
 
