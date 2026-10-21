@@ -44,6 +44,8 @@ Non-negotiables:
 
 **It forwards only under the API base.** `buildUpstreamUrl` (`src/lib/auth-paths.ts`) builds the upstream URL and is the only thing that may. A route segment is one opaque path component: an empty one, `.`, `..`, or one containing a slash or a backslash is refused with 400 before the session check, and the rest are percent-encoded. Next decodes segments before the handler sees them, so until 2026-10-05 `/api/proxy/..%2f..%2fhealth` reached the backend's `/health` with the caller's token attached. Never join segments into a URL by hand.
 
+**It forwards an error body only as the keys the frontend reads.** On a status of 400 or above the body is rebuilt from an allowlist in `src/lib/proxy-error-body.ts` (`status`, `message`, `error`, `code`, `errors[{ field, message }]`, `issues[{ message }]`), so a `stack` the backend fails to gate, or a key it adds, stops at the proxy. A body that is not a JSON object, or is over 64 KiB, is dropped ([ADR-0034](../../docs/explanation/decisions/adr-0034-the-proxy-forwards-only-the-error-keys-the-frontend-reads.md)). For the UI to read a new key, add it there and to `src/lib/__tests__/proxy-error-body.test.ts`, which fails if the filter drops something `normalizeApiError` reads.
+
 **Adding a backend resource requires no change here.** It is protected from the moment it exists. Only add to `PUBLIC_API_PATHS` when the contract genuinely marks an operation unauthenticated, and cover it in `src/lib/__tests__/auth-paths.test.ts`.
 
 Until 2026-08-27 this was inverted — an allowlist of protected segments, so every unlisted resource proxied unauthenticated. `analytics/*` and `admin/_ping` were both exposed that way.

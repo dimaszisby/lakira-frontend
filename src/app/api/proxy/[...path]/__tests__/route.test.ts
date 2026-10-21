@@ -6,6 +6,7 @@ import { NextRequest } from "next/server";
 
 import { REFRESH_COOKIE_NAME, SESSION_COOKIE_NAME } from "@/constants/app";
 import { refreshAccessToken } from "@/lib/auth-refresh";
+import { MAX_ERROR_BODY_BYTES } from "@/lib/proxy-error-body";
 
 import { GET, POST } from "../route";
 
@@ -353,6 +354,149 @@ describe("a backend 5xx", () => {
   });
 });
 
+/** A backend response with a real body, as the error-body filter reads it. */
+const upstreamBody = (status: number, text: string, contentType = "application/json") =>
+  new Response(text, { status, headers: { "content-type": contentType } });
+
+/** The structured lines the logger wrote to stdout while `run` ran. */
+const loggedLines = async (run: () => Promise<unknown>) => {
+  const stdout = jest.spyOn(process.stdout, "write").mockImplementation(() => true);
+  try {
+    await run();
+    return stdout.mock.calls.map(([line]) => JSON.parse(String(line)) as Record<string, unknown>);
+  } finally {
+    stdout.mockRestore();
+  }
+};
+
+// ADR-0034: an error body reaches the browser only as the keys `normalizeApiError` reads. The
+// filter's own cases are in `src/lib/__tests__/proxy-error-body.test.ts`; these show the proxy
+// applies it, and to what.
+describe("an upstream error body", () => {
+  const SESSION = { [SESSION_COOKIE_NAME]: "valid" };
+
+  it("reaches the browser as the allowlisted keys only, as JSON", async () => {
+    global.fetch = jest.fn().mockResolvedValue(
+      upstreamBody(
+        400,
+        JSON.stringify({
+          status: "fail",
+          message: "Validation failed",
+          errors: [{ field: "body.name", message: "Required", received: "undefined" }],
+          query: "SELECT 1",
+        }),
+      ),
+    ) as typeof fetch;
+
+    const response = await GET(request("metrics", SESSION), context("metrics"));
+
+    expect(response.status).toBe(400);
+    expect(response.headers.get("content-type")).toBe("application/json");
+    await expect(response.json()).resolves.toEqual({
+      status: "fail",
+      message: "Validation failed",
+      errors: [{ field: "body.name", message: "Required" }],
+    });
+  });
+
+  it("drops a 5xx's stack and keeps its request id header", async () => {
+    const failed = upstreamBody(
+      500,
+      JSON.stringify({ status: "error", message: "Something went wrong!", stack: "Error: at db" }),
+    );
+    failed.headers.set(REQUEST_ID_HEADER, "req-500");
+    global.fetch = jest.fn().mockResolvedValue(failed) as typeof fetch;
+
+    const response = await GET(request("metrics", SESSION), context("metrics"));
+
+    expect(response.status).toBe(500);
+    expect(response.headers.get(REQUEST_ID_HEADER)).toBe("req-500");
+    await expect(response.json()).resolves.toEqual({
+      status: "error",
+      message: "Something went wrong!",
+    });
+  });
+
+  it("drops a body that is not JSON, says so in the log, and never logs the body", async () => {
+    const html = "<html><body>502 Bad Gateway at 10.0.0.12</body></html>";
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(upstreamBody(502, html, "text/html")) as typeof fetch;
+
+    let response: Response | undefined;
+    const lines = await loggedLines(async () => {
+      response = await GET(request("metrics", SESSION), context("metrics"));
+    });
+
+    expect(response?.status).toBe(502);
+    expect(response?.headers.get("content-type")).toBeNull();
+    await expect(response?.text()).resolves.toBe("");
+    expect(lines).toContainEqual(
+      expect.objectContaining({
+        level: "info",
+        msg: "proxy.error_body_dropped",
+        path: "metrics",
+        status: 502,
+        reason: "not_json",
+      }),
+    );
+    expect(JSON.stringify(lines)).not.toContain("10.0.0.12");
+  });
+
+  it("drops a body larger than the cap without reading all of it", async () => {
+    const huge = JSON.stringify({ message: "x".repeat(MAX_ERROR_BODY_BYTES) });
+    global.fetch = jest.fn().mockResolvedValue(upstreamBody(400, huge)) as typeof fetch;
+
+    let response: Response | undefined;
+    const lines = await loggedLines(async () => {
+      response = await GET(request("metrics", SESSION), context("metrics"));
+    });
+
+    expect(response?.status).toBe(400);
+    await expect(response?.text()).resolves.toBe("");
+    expect(lines).toContainEqual(
+      expect.objectContaining({ msg: "proxy.error_body_dropped", reason: "too_large" }),
+    );
+  });
+
+  it("passes an empty error body through quietly", async () => {
+    global.fetch = jest.fn().mockResolvedValue(upstreamBody(404, "")) as typeof fetch;
+
+    let response: Response | undefined;
+    const lines = await loggedLines(async () => {
+      response = await GET(request("metrics", SESSION), context("metrics"));
+    });
+
+    expect(response?.status).toBe(404);
+    await expect(response?.text()).resolves.toBe("");
+    expect(lines).toEqual([]);
+  });
+
+  it("leaves a success body exactly as the backend sent it", async () => {
+    const body = JSON.stringify({ status: "success", data: { id: "m-1" }, extra: true });
+    global.fetch = jest.fn().mockResolvedValue(upstreamBody(200, body)) as typeof fetch;
+
+    const response = await GET(request("metrics", SESSION), context("metrics"));
+
+    await expect(response.text()).resolves.toBe(body);
+  });
+
+  it("still answers a session refresh could not rescue in its own words", async () => {
+    global.fetch = jest
+      .fn()
+      .mockResolvedValue(
+        upstreamBody(401, JSON.stringify({ status: "fail", message: "Unauthorized" })),
+      ) as typeof fetch;
+
+    const response = await GET(request("metrics", SESSION), context("metrics"));
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual(
+      expect.objectContaining({ code: "SESSION_EXPIRED" }),
+    );
+  });
+});
+
 describe("a path that tries to leave the API base", () => {
   /**
    * Next decodes each segment before the handler sees it, so `..%2f..%2fhealth`
@@ -586,8 +730,8 @@ describe("a response that issues an access token", () => {
     expect(setCookies(response)[SESSION_COOKIE_NAME]).toContain("Max-Age=0");
   });
 
-  // AC-7.
-  it("forwards an error on a token-issuing path untouched, and sets no session", async () => {
+  // AC-7. Filtered like any error body since ADR-0034; this envelope has nothing to drop.
+  it("forwards an error on a token-issuing path filtered, and sets no session", async () => {
     const stream = new Response(JSON.stringify({ status: "fail", message: "Invalid" })).body;
     const failed = upstream(401);
     (failed as unknown as { body: unknown }).body = stream;

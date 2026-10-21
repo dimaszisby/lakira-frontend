@@ -1,5 +1,6 @@
 import { createFixedWindow } from "@/lib/fixed-window";
 import { logger } from "@/lib/logger";
+import { discard, readCapped } from "@/lib/read-capped";
 
 /**
  * The front door for a route that accepts reports from the browser.
@@ -37,45 +38,6 @@ const WINDOW_MS = 60_000;
 
 /** The message written once after a window in which requests were dropped. */
 export const TELEMETRY_SUPPRESSED_MSG = "telemetry.suppressed";
-
-const discard = async (request: Request): Promise<void> => {
-  try {
-    await request.body?.cancel();
-  } catch {
-    // The body was already consumed or the client went away; nothing to release.
-  }
-};
-
-/** The body as text, or `null` when it is larger than `maxBytes`. */
-const readCapped = async (request: Request, maxBytes: number): Promise<string | null> => {
-  // A declared length is a cheap first refusal. It is the client's claim, so the
-  // streamed count below is what actually enforces the cap.
-  if (Number(request.headers.get("content-length")) > maxBytes) {
-    await discard(request);
-    return null;
-  }
-  if (!request.body) return "";
-
-  const reader = request.body.getReader();
-  const decoder = new TextDecoder();
-  let text = "";
-  let bytes = 0;
-
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-
-    bytes += value.byteLength;
-    if (bytes > maxBytes) {
-      // A failed cancel must not turn "too large" into "malformed".
-      await reader.cancel().catch(() => undefined);
-      return null;
-    }
-    text += decoder.decode(value, { stream: true });
-  }
-
-  return text + decoder.decode();
-};
 
 export const createTelemetryIntake = ({
   event,

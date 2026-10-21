@@ -40,7 +40,8 @@ Prefer `API_URL`: it is server-only, so it never ships to the browser. See
 3. Forwards all headers except `connection`, `content-length`, `host` and `x-request-id`. The
    backend takes an incoming request id as its own, so a browser may not send one; the backend
    mints it, and the id on the response still reaches the browser.
-4. Streams the request and response bodies (`duplex: "half"`), so uploads are not buffered.
+4. Streams the request and response bodies (`duplex: "half"`), so uploads are not buffered. An
+   error response's body is the exception: see step 8.
 5. Uses `redirect: "manual"` — upstream redirects are passed through, not followed.
 6. On a `401`, redeems the refresh cookie once and retries. If that fails, clears both session
    cookies so the next navigation reaches the login form rather than looping on a dead token.
@@ -48,6 +49,12 @@ Prefer `API_URL`: it is server-only, so it never ships to the browser. See
    it scoped to this origin's `/api`. Login runs as `POST /api/proxy/auth/login`, so this is the
    only point that cookie passes through — dropping it wholesale, as the proxy used to, is what
    ended every session when its 15-minute access token expired.
+8. On a status of `400` or above, reads the body, up to 64 KiB, and rebuilds it from the keys
+   `normalizeApiError` reads: `status`, `message`, `error`, `code`, `errors[{ field, message }]`
+   and `issues[{ message }]`. Everything else, `stack` included, is dropped. A body that is not a
+   JSON object, or is larger, is replaced with an empty one and logged as
+   `proxy.error_body_dropped` (`src/lib/proxy-error-body.ts`;
+   [ADR-0034](../explanation/decisions/adr-0034-the-proxy-forwards-only-the-error-keys-the-frontend-reads.md)).
 
 **Auth enforcement denies by default.** A request with no token gets a `401` without reaching the
 backend, unless its full path is one of the public auth entry points in `PUBLIC_API_PATHS`

@@ -58,8 +58,18 @@ was a denylist by omission.
 Arguments against: it is a change to a shared request path for no observed defect, and a filter that
 silently drops a field the frontend later needs is its own failure mode.
 
-- [ ] Decide. If yes, it needs its own branch and review — not a ride-along.
-- [ ] If yes, cover it in `src/app/api/proxy/[...path]/__tests__/route.test.ts` alongside the
+- [x] Decide. If yes, it needs its own branch and review — not a ride-along.
+- [x] If yes, cover it in `src/app/api/proxy/[...path]/__tests__/route.test.ts` alongside the
       existing header-stripping assertions.
 
 See `docs/internal/initiatives/api-error-messages/decisions.md` § D-03.
+
+## Status
+
+Done 2026-10-21 on `fix/proxy-error-body-allowlist` (#131), kit `proxy-error-body-allowlist`.
+The owner answered O-06 with an allowlist. A 4xx or 5xx body reaches the browser rebuilt from the
+keys `normalizeApiError` reads; `stack` and any other key are dropped, and a body that is not a
+JSON object or is over 64 KiB is dropped and logged as `proxy.error_body_dropped`
+([ADR-0034](../../explanation/decisions/adr-0034-the-proxy-forwards-only-the-error-keys-the-frontend-reads.md)).
+Covered in `route.test.ts` as asked, and in `src/lib/__tests__/proxy-error-body.test.ts`, which
+also checks the filter keeps everything the UI reads.

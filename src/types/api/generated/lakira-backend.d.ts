@@ -1201,12 +1201,19 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get aggregated statistics for metric logs */
+        /**
+         * Get aggregated statistics for metric logs
+         * @description Average, minimum and maximum of the caller's logs, for one metric or all of them. With startDate and/or endDate, only logs with startDate <= loggedAt < endDate are counted. No log in scope answers zeros.
+         */
         get: {
             parameters: {
                 query?: {
                     /** @description Optional metric identifier to scope the request */
                     metricId?: components["schemas"]["Uuid"];
+                    /** @description Count logs whose loggedAt is at or after this instant. An ISO 8601 datetime with an offset. */
+                    startDate?: string;
+                    /** @description Count logs whose loggedAt is before this instant (exclusive). An ISO 8601 datetime with an offset; must be after startDate when both are given. */
+                    endDate?: string;
                 };
                 header?: never;
                 path?: never;
