@@ -4,7 +4,7 @@
 F-10, F-14 to F-21, F-27 to F-29, F-31 to F-37, F-40, F-42 to F-50, F-51, F-52, F-53, F-54, F-55, F-57, F-61, F-62, F-63, F-64, F-66, F-67). Every row in tiers 1 to 4
 waits on the owner, the backend or a package's maintainers. In tier 5, F-58, F-59
 and F-24 to F-26 wait on the backend or the owner, F-65 on the owner (O-14), F-30 on the owner and the backend, F-22 and F-23 are settled, and F-56 and F-60 wait on the owner
-(O-12, O-13); F-41 is deferred (its coverage item was done in #113); no row is ready.
+(O-12, O-13); F-41 is deferred (its coverage item was done in #113); F-68 is ready and in progress (kit `ci-in-parallel`).
 **Slug:** `frontend-debt-register` · **Branch:** `docs/frontend-debt-register`
 
 The same scheme as lakira-backend's register (lakira-backend #159), so the two can be read side by

@@ -14,11 +14,20 @@ concurrency:
   group: frontend-ci-${{ github.ref }}
   cancel-in-progress: true
 
+# The jobs run side by side, except E2E, which needs the build it serves. "CI passed" at the end
+# is the one check that says the whole run passed (kit ci-in-parallel, ADR-0036). They used to be
+# a chain, checks then unit, integration, build and e2e, which took 12 to 14 minutes for 2 to 3
+# minutes of work: each job installs its dependencies afresh.
 jobs:
   checks:
     name: Static checks
     runs-on: ubuntu-26.04
     timeout-minutes: 15
+    # Cypress's postinstall downloads its binary unless told not to, and nothing in this job runs
+    # Cypress. Typecheck needs only the npm package's bundled types. E2E, which runs Cypress,
+    # caches the binary instead (kit ci-in-parallel).
+    env:
+      CYPRESS_INSTALL_BINARY: "0"
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -50,8 +59,10 @@ jobs:
   unit:
     name: Unit tests
     runs-on: ubuntu-26.04
-    needs: checks
     timeout-minutes: 20
+    # Runs no Cypress, so `npm ci` skips its binary download (see Static checks).
+    env:
+      CYPRESS_INSTALL_BINARY: "0"
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -85,8 +96,10 @@ jobs:
   integration:
     name: Integration tests
     runs-on: ubuntu-26.04
-    needs: unit
     timeout-minutes: 20
+    # Runs no Cypress, so `npm ci` skips its binary download (see Static checks).
+    env:
+      CYPRESS_INSTALL_BINARY: "0"
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -106,8 +119,10 @@ jobs:
   build:
     name: Build
     runs-on: ubuntu-26.04
-    needs: integration
     timeout-minutes: 20
+    # Runs no Cypress, so `npm ci` skips its binary download (see Static checks).
+    env:
+      CYPRESS_INSTALL_BINARY: "0"
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -135,6 +150,7 @@ jobs:
   e2e:
     name: E2E tests
     runs-on: ubuntu-26.04
+    # Its one input: the .next artifact the build uploads.
     needs: build
     timeout-minutes: 30
     env:
@@ -148,6 +164,14 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: npm
+
+      # `cache: npm` above keeps ~/.npm only. The Cypress binary lives in ~/.cache/Cypress, and
+      # without this its postinstall downloads it on every run. The lockfile pins the version.
+      - name: Cache the Cypress binary
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Install dependencies
         run: npm ci
@@ -220,6 +244,9 @@ jobs:
     name: API Contract Drift
     runs-on: ubuntu-26.04
     timeout-minutes: 10
+    # Runs no Cypress, so `npm ci` skips its binary download (see Static checks).
+    env:
+      CYPRESS_INSTALL_BINARY: "0"
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -245,6 +272,9 @@ jobs:
     name: Security Scan
     runs-on: ubuntu-26.04
     timeout-minutes: 20
+    # Runs no Cypress, so `npm ci` skips its binary download (see Static checks).
+    env:
+      CYPRESS_INSTALL_BINARY: "0"
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -295,3 +325,21 @@ jobs:
 
       - name: Scan full history
         run: '"$RUNNER_TEMP/gitleaks" git . --redact --verbose --no-banner'
+
+  # The one check that says the whole run passed: every job above, each a success. It is the name
+  # to require when branch protection is set up (register F-24). `if: always()` is what makes it
+  # trustworthy: without it a failed job leaves this one skipped, and GitHub counts a skipped
+  # required check as passing. A skipped or cancelled job fails it too (ADR-0036).
+  ci:
+    name: CI passed
+    runs-on: ubuntu-26.04
+    needs: [checks, unit, integration, build, e2e, api-contract, security, secret-scan]
+    if: always()
+    timeout-minutes: 5
+    steps:
+      - name: Every job passed
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          echo "$RESULTS" | jq -r 'to_entries[] | "\(.key): \(.value.result)"'
+          echo "$RESULTS" | jq -e 'all(.[]; .result == "success")' > /dev/null

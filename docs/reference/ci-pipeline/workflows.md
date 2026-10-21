@@ -29,14 +29,25 @@ The pinning and install-script rules are in `.claude/rules/security.md`.
 the run still going on it.
 
 ```
-checks → unit → integration → build → e2e
-api-contract   (independent)
-security       (independent)
-secret-scan    (independent)
+checks ──────┐
+unit ────────┤
+integration ─┤
+build → e2e ─┼─→ ci ("CI passed")
+api-contract ┤
+security ────┤
+secret-scan ─┘
 ```
 
-Each job in the chain `needs` the one before it, so the first failure stops the rest. The three
-independent jobs start immediately and do not gate the chain.
+Every job starts at once except `e2e`, which needs the `.next` artifact `build` uploads. `ci`,
+named "CI passed", needs all eight, runs `if: always()`, and fails unless each one succeeded: a
+failed, skipped or cancelled job fails it, and its log lists every job's result. It is the check
+to require when branch protection is set up (register F-24). Until 2026-10-21 the jobs from
+`checks` to `e2e` were a `needs` chain, about 12 to 14 minutes for 2 to 3 minutes of work
+([ADR-0036](../../explanation/decisions/adr-0036-ci-runs-its-jobs-in-parallel-behind-a-gate.md)).
+
+Only `e2e` downloads the Cypress binary, from a cache keyed on `package-lock.json`. Every other
+job sets `CYPRESS_INSTALL_BINARY=0`, so `npm ci` skips the download; typecheck needs only the
+package's bundled types.
 
 | Job            | Name               | Timeout | Runs, in order                                                                                                                                                                    | Uploads                                          |
 | -------------- | ------------------ | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
@@ -48,6 +59,7 @@ independent jobs start immediately and do not gate the chain.
 | `api-contract` | API Contract Drift | 10 min  | `api:spec:check`, `api:types:check`                                                                                                                                               | none                                             |
 | `security`     | Security Scan      | 20 min  | `security:scan`: `lint`, `lint:css`, then `npm audit --omit=dev --audit-level=high` (production dependencies only)                                                                | none                                             |
 | `secret-scan`  | Secret Scan        | 10 min  | full-history checkout, gitleaks `8.30.1` binary verified against a hard-coded SHA-256, `gitleaks git . --redact`                                                                  | none                                             |
+| `ci`           | CI passed          | 5 min   | `needs` all eight jobs, `if: always()`; prints each result, fails unless all are `success`                                                                                        | none                                             |
 
 Details that decide whether a job fails:
 
