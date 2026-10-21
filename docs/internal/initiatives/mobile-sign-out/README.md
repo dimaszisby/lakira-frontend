@@ -1,6 +1,6 @@
 # Mobile sign-out
 
-**Status:** Done 2026-10-21, pending merge. Debt register rows F-48 and F-49, owner question O-11;
+**Status:** Done 2026-10-21 (#130). Debt register rows F-48 and F-49, owner question O-11;
 D-01 promoted to ADR-0033.
 **Slug:** `mobile-sign-out` · **Branch:** `fix/mobile-sign-out`
 

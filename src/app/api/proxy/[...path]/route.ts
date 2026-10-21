@@ -19,6 +19,8 @@ import {
 } from "@/lib/auth-refresh";
 import { getApiBaseUrl } from "@/lib/env";
 import { logger } from "@/lib/logger";
+import { filterErrorBody, MAX_ERROR_BODY_BYTES } from "@/lib/proxy-error-body";
+import { readCapped } from "@/lib/read-capped";
 
 /** The header `lakira-backend` sets on every response and tags its own errors with. */
 const REQUEST_ID_HEADER = "x-request-id";
@@ -238,6 +240,41 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
     logger.info("proxy.session.issued", { path: loggedPath });
   }
 
+  // A 401 that refresh could not rescue means the session is finished, and is
+  // answered below in the proxy's own words. Decided here so its body is not read.
+  const isSessionEnded =
+    response.status === 401 && !refreshed && token !== null && !isPublicApiPath(rawSegments);
+
+  // An error body reaches the browser only as the keys the frontend reads, so a
+  // field the backend adds, or a `stack` it fails to gate, stops here (ADR-0034).
+  if (response.status >= 400 && !isSessionEnded) {
+    let raw: string | null;
+    try {
+      raw = await readCapped(response, MAX_ERROR_BODY_BYTES);
+    } catch {
+      // The backend went away mid-body; there is nothing whole to filter.
+      raw = null;
+    }
+    const filtered = raw ? filterErrorBody(raw) : null;
+
+    if (filtered) {
+      body = filtered;
+      responseHeaders.set("content-type", "application/json");
+    } else {
+      body = null;
+      responseHeaders.delete("content-type");
+      // An empty body is ordinary. Anything else dropped is worth a line: it is
+      // what the user's message fell back from. The body itself is never logged.
+      if (raw !== "") {
+        logger.info("proxy.error_body_dropped", {
+          path: loggedPath,
+          status: response.status,
+          reason: raw === null ? "too_large" : "not_json",
+        });
+      }
+    }
+  }
+
   const proxied = new NextResponse(body, {
     status: response.status,
     headers: responseHeaders,
@@ -272,7 +309,7 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
   // the cookies in place is what trapped users: the token was dead, every call
   // 401'd, and `/login` bounced back to the dashboard because a cookie existed.
   // Clearing here means the next navigation reaches the login form.
-  if (response.status === 401 && !refreshed && token && !isPublicApiPath(rawSegments)) {
+  if (isSessionEnded) {
     logger.info("proxy.session.cleared", { path: loggedPath });
 
     // Replace the upstream body, not just the cookies. Having just ended the

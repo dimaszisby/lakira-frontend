@@ -35,6 +35,8 @@ This used to be an allowlist of *protected* segments, which was a denylist by om
 
 `src/app/api/auth/*` handles logout, session and revival directly rather than through the proxy. That is correct, not a bypass: the proxy exists so the **browser** never reaches the backend, and these are already server routes — routing them through the proxy would make the server call itself. Login is the exception and goes through the proxy like any other call; the route that duplicated it was deleted on 2026-09-12 having never been reachable.
 
+**An error body reaches the browser filtered.** On a status of 400 or above the proxy keeps only the keys `normalizeApiError` reads and drops the rest, `stack` included ([ADR-0034](../../docs/explanation/decisions/adr-0034-the-proxy-forwards-only-the-error-keys-the-frontend-reads.md)). A new envelope key needs adding to `src/lib/proxy-error-body.ts` before any component can see it.
+
 **A backend the proxy cannot reach is answered with a 502** and `{ error: "The server could not be reached." }`, logged as `proxy.upstream_unreachable`. If a token refresh succeeded before the retry failed, that 502 still carries the rotated cookies; dropping them would get the session revoked as replay on the next refresh.
 
 The proxy also **captures `lakira_refresh` out of the backend's `Set-Cookie` and re-issues it against `/api` on this origin**, and clears both cookies on a 401 that refresh could not rescue. It strips the header otherwise: the backend scopes its cookie to `Path=/api/v1/auth/refresh`, which this origin does not serve.
