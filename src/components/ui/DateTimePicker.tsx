@@ -72,11 +72,17 @@ const clampDateTime = (value: Date, min?: Date, max?: Date) => {
   return value;
 };
 
-const closestStep = (value: number, steps: number[]) =>
-  steps.reduce(
-    (best, step) => (Math.abs(value - step) < Math.abs(value - best) ? step : best),
-    steps[0] ?? 0,
-  );
+/**
+ * The minutes the list offers: every step, plus the value's own minute when it falls between
+ * them, in order. The list used to show the nearest step instead, "00" for 9:02, so it disagreed
+ * with the trigger, and choosing that step re-picked the selected option, which fires no change
+ * event: the time stayed 9:02 (register row F-31). A value is usually off-step: the log form
+ * starts at the current time.
+ */
+const minuteOptionsFor = (minute: number, step: number) => {
+  const steps = Array.from({ length: Math.ceil(60 / step) }, (_, index) => index * step);
+  return steps.includes(minute) ? steps : [...steps, minute].sort((a, b) => a - b);
+};
 
 /** Six full weeks starting on the Sunday on or before the first of the month. */
 const buildMonthCells = (year: number, month: number, min?: Date, max?: Date): DayCell[] => {
@@ -196,9 +202,9 @@ export const DateTimePicker = ({
   const minutes = value?.getMinutes() ?? 0;
   const isPM = hours >= 12;
   const hour12 = ((hours + 11) % 12) + 1;
-  const minuteChoices = Array.from(
-    { length: Math.ceil(60 / Math.max(1, Math.min(60, Math.floor(minuteStep)))) },
-    (_, index) => index * Math.max(1, Math.min(60, Math.floor(minuteStep))),
+  const minuteChoices = minuteOptionsFor(
+    minutes,
+    Math.max(1, Math.min(60, Math.floor(minuteStep))),
   );
 
   const setTime = (hour: number, pm: boolean, minute: number) => {
@@ -341,7 +347,7 @@ export const DateTimePicker = ({
             </span>
             <select
               aria-label="Select minute"
-              value={closestStep(minutes, minuteChoices)}
+              value={minutes}
               onChange={(event) => setTime(hour12, isPM, Number(event.target.value))}
               className="calendar-time-select"
             >

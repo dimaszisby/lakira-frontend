@@ -89,10 +89,12 @@ range of its latest logs. The spec's metric is always new, so it is always on th
       per metric (`CreateMetricLog.ts`, 409). The dialog then shows "Request failed with status
       code 409", not the backend's "A log entry already exists for this timestamp for this
       metric" -> out of scope. The spec logs its second value at another minute.
-- [ ] Found: in the log form's time picker, choosing minute 0 changed nothing when the current
+- [x] Found: in the log form's time picker, choosing minute 0 changed nothing when the current
       minute was 02; the field stayed at 9:02 PM. Seen once, in Cypress. Inference: the minute
       list steps by five, so at minute 02 no option matches, the list shows its first option, 0,
-      and choosing it is not a change -> out of scope, not reproduced by hand.
+      and choosing it is not a change -> out of scope, not reproduced by hand. Reproduced
+      and fixed 2026-10-21, register row F-31: the list showed the nearest step, not the first
+      option. `2026-10-21-todo-time-picker-off-step-minute.md`.
 
 ## Status
 
