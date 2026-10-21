@@ -42,6 +42,10 @@ export function useDashboardVisualizations(
     enabled,
     staleTime,
     gcTime,
+    // Every visit revalidates, fresh or not. A back navigation restores the page with whatever
+    // this query holds, and in CI a deleted value was still counted with nothing refetching it
+    // (register row F-67). The cached figures show at once; the request is usually a 304.
+    refetchOnMount: "always",
     placeholderData: keepPreviousData,
     retry: (count, err) => !isAbortError(err) && count < 2,
   });

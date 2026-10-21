@@ -165,7 +165,8 @@ describe("From a new metric to the dashboard", () => {
     cy.contains("li", LOGGED_VALUE).should(VISIBLE);
 
     // Deleting has no dialog, so nothing refreshes the router: going back restores the dashboard
-    // from the router's cache, and only the invalidation marks its query stale.
+    // from the router's cache, with the query's cached figures. The dashboard revalidates on every
+    // visit, which is what corrects them; the invalidation alone did not in CI (register row F-67).
     cy.go(-3);
     cy.location("pathname").should("eq", DASHBOARD);
     cardCount(METRIC_NAME).should(HAVE_TEXT, "n: 1");
