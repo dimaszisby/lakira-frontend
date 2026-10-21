@@ -17,6 +17,11 @@ const dayButton = (key: string) => {
 
 const lastDate = (mock: jest.Mock) => mock.mock.calls.at(-1)?.[0] as Date;
 
+const minuteOptions = () =>
+  Array.from(
+    screen.getByRole("combobox", { name: /select minute/i }).querySelectorAll("option"),
+  ).map((option) => option.value);
+
 describe("DateTimePicker", () => {
   it("selects a date in date mode, normalizes to midnight, and closes", async () => {
     const user = userEvent.setup();
@@ -101,7 +106,7 @@ describe("DateTimePicker", () => {
     });
   });
 
-  it("offers minutes in steps of minuteStep", async () => {
+  it("offers minutes in steps of minuteStep, and the value's own minute when it is between steps", async () => {
     const user = userEvent.setup();
 
     render(
@@ -115,11 +120,52 @@ describe("DateTimePicker", () => {
 
     await user.click(screen.getByRole("button", { name: CHOOSE_DATE_AND_TIME }));
 
-    const minuteSelect = screen.getByRole("combobox", { name: /select minute/i });
-    const values = Array.from(minuteSelect.querySelectorAll("option")).map(
-      (option) => option.value,
+    expect(minuteOptions()).toEqual(["0", "12", "15", "30", "45"]);
+  });
+
+  it("offers only the steps when the value's minute is one of them", async () => {
+    const user = userEvent.setup();
+
+    render(
+      <DateTimePicker
+        mode="datetime"
+        value={new Date(2026, 1, 16, 9, 15)}
+        onChange={() => {}}
+        minuteStep={15}
+      />,
     );
-    expect(values).toEqual(["0", "15", "30", "45"]);
+
+    await user.click(screen.getByRole("button", { name: CHOOSE_DATE_AND_TIME }));
+
+    expect(minuteOptions()).toEqual(["0", "15", "30", "45"]);
+  });
+
+  // Register row F-31. The list used to show the nearest step, "00" at 9:02, while the value
+  // was 02; choosing "00" then picked the option already selected, and a browser fires no change
+  // for that. jsdom fires one regardless, so the no-event half is shown by
+  // `cypress/e2e/stack/log-time-picker.cy.ts`; this shows the list tells the truth.
+  it("shows the value's real minute between steps, and choosing the nearest step changes it", async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+
+    render(
+      <DateTimePicker
+        mode="datetime"
+        value={new Date(2026, 1, 16, 21, 2)}
+        onChange={onChange}
+        minuteStep={5}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: CHOOSE_DATE_AND_TIME }));
+    const minuteSelect = screen.getByRole("combobox", { name: /select minute/i });
+    expect(minuteSelect).toHaveValue("2");
+    expect(minuteSelect).toHaveDisplayValue("02");
+
+    await user.selectOptions(minuteSelect, "0");
+
+    const picked = lastDate(onChange);
+    expect([picked.getHours(), picked.getMinutes()]).toEqual([21, 0]);
   });
 
   it("clamps time changes to the min boundary", async () => {

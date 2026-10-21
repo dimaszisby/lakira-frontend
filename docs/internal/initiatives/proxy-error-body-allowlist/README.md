@@ -1,6 +1,6 @@
 # Proxy error-body allowlist
 
-**Status:** Done 2026-10-21, pending merge. Debt register row F-20, owner question O-06; D-01
+**Status:** Done 2026-10-21 (#131). Debt register row F-20, owner question O-06; D-01
 promoted to ADR-0034.
 **Slug:** `proxy-error-body-allowlist` · **Branch:** `fix/proxy-error-body-allowlist`
 
