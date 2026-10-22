@@ -47,7 +47,7 @@ function mockMetricLogsCursor(items: Array<Record<string, unknown>>, totalCount:
       data: {
         items,
         nextCursor: null,
-        sort: "-createdAt",
+        sort: "-loggedAt",
         limit: 50,
         q: "",
         totalCount,
@@ -113,6 +113,47 @@ describe("MetricLogsClient integration", () => {
     await waitFor(() => {
       expect(screen.getAllByText("120").length).toBeGreaterThan(0);
     });
+  });
+
+  it("requests and marks newest logged first when the URL names no sort", async () => {
+    // Register row F-60: `createdAt` is no column, so the old default marked none as sorted.
+    const sorts: Array<string | null> = [];
+    server.use(
+      http.get("/api/proxy/metric-logs", ({ request }) => {
+        sorts.push(new URL(request.url).searchParams.get("sort"));
+        return HttpResponse.json({
+          status: "success",
+          message: "ok",
+          data: {
+            items: [
+              {
+                id: "log-1",
+                metricId,
+                logValue: 120,
+                loggedAt: fixedTimestamp,
+                type: "manual",
+                createdAt: fixedTimestamp,
+                updatedAt: fixedTimestamp,
+              },
+            ],
+            nextCursor: null,
+            sort: "-loggedAt",
+            limit: 50,
+            q: "",
+            totalCount: 1,
+          },
+        });
+      }),
+    );
+
+    const { container } = renderMetricLogsClient();
+
+    expect(await screen.findByRole("columnheader", { name: /logged at/i })).toHaveAttribute(
+      "aria-sort",
+      "descending",
+    );
+    expect(sorts).toEqual(["-loggedAt"]);
+    expect(await axe(container)).toHaveNoViolations();
   });
 
   describe("opening a log from the desktop table", () => {

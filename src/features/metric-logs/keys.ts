@@ -1,4 +1,5 @@
 import type { MetricLogFilter, MetricLogSortParam, MetricsLogsListParams } from "./sort";
+import { DEFAULT_METRIC_LOG_SORT } from "./sort";
 
 // helpers to keep keys stable
 const normalizeList = (p: MetricsLogsListParams) => ({
@@ -21,7 +22,7 @@ const normalizeCursor = (p: {
   after?: string; // for infinite hook pageParam
 }) => ({
   limit: p.limit ?? 20,
-  sort: p.sort ?? "-createdAt",
+  sort: p.sort ?? DEFAULT_METRIC_LOG_SORT,
   q: p.q?.trim() || undefined,
   filter: {
     name: p.filter?.name?.trim() || undefined,

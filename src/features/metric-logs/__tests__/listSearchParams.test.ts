@@ -18,6 +18,16 @@ describe("metric log list search params", () => {
       expect(parseMetricLogSearchParams(null)).toEqual(DEFAULT_METRIC_LOG_LIST_PARAMS);
     });
 
+    // Register row F-60, owner question O-13: a value backfilled into the past is listed where
+    // its date puts it, as the backend orders logs (#125).
+    it("sorts newest logged first when the URL names no sort", () => {
+      expect(parseMetricLogSearchParams(null).sort).toBe("-loggedAt");
+    });
+
+    it("keeps an explicit created-at sort from the URL", () => {
+      expect(parseMetricLogSearchParams({ sort: "-createdAt" }).sort).toBe("-createdAt");
+    });
+
     it("reads URLSearchParams", () => {
       const params = new URLSearchParams({ page: "2", limit: "10", q: "morning" });
 

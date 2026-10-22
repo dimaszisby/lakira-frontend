@@ -39,7 +39,7 @@ export type MetricLogCursorPageResponse = CursorPage<
 export const metricLogSort = createCursorSort({
   keys: METRIC_LOG_SORT_KEYS,
   defaultDesc: ["createdAt", "updatedAt", "logValue", "loggedAt"] as const,
-  defaultSort: "-createdAt" as const,
+  defaultSort: "-loggedAt" as const,
 });
 
 export const {
