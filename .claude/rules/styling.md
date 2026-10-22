@@ -27,7 +27,7 @@ palette → semantic → scales → typography → component tokens → componen
    - Stored as **bare HSL bodies** (`348 69% 86%`, no `hsl()` wrapper), so Tailwind can apply `<alpha-value>`.
    - The **only** file allowed to hold colour values.
 2. **`tokens/semantic.css`**: UI meaning, theme-switched.
-   - Surfaces: `--bg`, `--surface`, `--surface-2`.
+   - Surfaces: `--bg`, `--surface`, `--surface-2`, and `--tint-base`, the base a user colour is tinted over (ADR-0040).
    - Text: `--text`, `--text-emphasis` (equal to `--text`), `--text-secondary`, `--text-tertiary`, `--text-inverted`, `--text-error`, `--text-info`, `--text-placeholder`.
    - Borders and focus: `--border`, `--border-control`, `--ring`.
    - Interaction: `--input-bg`, `--overlay`, `--interactive-hover`, `--interactive-selected-bg`, `--interactive-selected-fg`, `--on-brand-fg`.
@@ -77,6 +77,8 @@ These are mechanically enforced:
   An exception needs a disable comment with a reason, like SwipeableCard's framer-motion `x`.
 
 - **Dynamic values reach CSS as custom properties.** When a value is genuinely data — a user's category colour, a computed chart height — pass it as a custom property and let a recipe read it: `style={categoryColorStyle(color)}` with `.category-color-bg`, or `chartHeightStyle(px)` with `.chart-box`. Mind the units: React appends `px` to a bare number for `style={{ height }}`, but a custom property is an opaque string and needs `${n}px` written out.
+
+- **A user colour is tinted in its recipe, opaque, over `--tint-base`.** `.category-color-bg` mixes 20 % of the colour into it with `color-mix`, and the text is the theme's ink, so it meets 4.5:1 for any colour in both themes. A translucent overlay depends on the surface beneath, and failed at 4.11:1 in the dark metrics table ([ADR-0040](../../docs/explanation/decisions/adr-0040-a-category-chip-is-an-opaque-tint-on-a-fixed-base.md)); `src/styles/__tests__/category-chip-contrast.test.ts` checks the guarantee from the tokens.
 
 These are enforced by review:
 

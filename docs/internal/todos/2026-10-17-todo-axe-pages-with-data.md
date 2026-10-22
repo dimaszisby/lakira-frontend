@@ -22,7 +22,8 @@ suite ran axe on a dashboard with cards or a metrics list with rows:
       table in the dark theme (`#f2f2f2` on `#757575`, WCAG 1.4.3 asks 4.5:1), with the default
       colour `#D9D9D9`. `CategoryChip.tsx` tints the user's colour to 20 % in JS and picks the text
       colour without knowing the theme or the surface beneath. Register row F-56, owner question
-      O-12. That combination is left out of the spec until it closes.
+      O-12. That combination is left out of the spec until it closes. Decided 2026-10-23: an
+      opaque tint on a fixed base (#143, ADR-0040); the spec checks it again.
 - [x] Found, out of scope: the backend answers every repeat of the category list query with a 500
       (`TypeError: Cannot read properties of undefined (reading 'toISOString')` at
       `MetricCategoryMapper.ts:51`). Register row F-57; raised on the Notion page, Part 1. The
