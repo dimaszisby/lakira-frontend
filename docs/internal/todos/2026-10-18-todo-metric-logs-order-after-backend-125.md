@@ -28,7 +28,8 @@ the backend on `dev` through `gh api`.
 - [x] Found, out of scope: the log list shows newest _created_ first. A value backfilled into the
       past is listed at the top rather than where its date puts it. The backend now treats
       `loggedAt` as a log's order (#125, its ADR-0052). Whether the list should default to
-      `-loggedAt` is a product choice: register row F-60, owner question O-13.
+      `-loggedAt` is a product choice: register row F-60, owner question O-13. Decided 2026-10-22:
+      `-loggedAt` (#142, kit `log-list-default-order`).
 
 ## Status
 
