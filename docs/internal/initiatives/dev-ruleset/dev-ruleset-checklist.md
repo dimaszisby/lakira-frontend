@@ -42,10 +42,14 @@ Register row F-24. `dev` had no branch protection, so "CI passed" guarded nothin
       `gh api repos/dimaszisby/lakira-frontend/rulesets/25639339`, and
       `gh api repos/dimaszisby/lakira-frontend/rules/branches/dev` lists the four rules from
       ruleset 25639339, with "CI passed" as the required check
-- [ ] This PR's merge state is `BLOCKED` while "CI passed" is pending and `CLEAN` once it is
+- [x] This PR's merge state is `BLOCKED` while "CI passed" is pending and `CLEAN` once it is
       green. _Why:_ the read-back shows the rule exists; this shows it binds. ·
-      **`gh pr checks --required`** on this PR lists exactly "CI passed", and
-      **`gh pr view --json mergeStateStatus`** during and after its run
+      **Checked, met in part.** `gh pr checks 140 --required` lists exactly "CI passed", which
+      passed on run 39784707988. GitHub's rule-suite log for the merge push to `dev` (`d4cdcf8`
+      to `89d21dc`, rule suite 4664732616) shows all four rules of "dev (integration gate)"
+      evaluated, `active`, each `pass`. The merge state was not read while the run was pending,
+      because #140 merged first, so `BLOCKED` was not observed: only that the ruleset applied to
+      this PR and to its merge.
 - [x] `main` is unchanged. _Why:_ the owner's choice; O-08 stays open. ·
       `gh api repos/dimaszisby/lakira-frontend/rules/branches/main` returns no rules
 - [x] No doc outside historical records still says `dev` has no server-side protection. _Why:_ a

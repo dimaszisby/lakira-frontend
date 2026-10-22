@@ -1,7 +1,8 @@
 # dev ruleset
 
-**Status:** Done 2026-10-22, pending this PR's own run as the live check. Debt register row F-24
-for `dev`; `main` follows F-25. D-01 promoted to ADR-0039.
+**Status:** Done 2026-10-22 (#140): "CI passed" is required on `dev`, and the merge of #140 was
+the first push the ruleset evaluated. Debt register row F-24 for `dev`; `main` follows F-25.
+D-01 promoted to ADR-0039.
 **Slug:** `dev-ruleset` · **Branch:** `chore/dev-ruleset`
 
 - [Checklist](dev-ruleset-checklist.md) — work items, acceptance, gates
