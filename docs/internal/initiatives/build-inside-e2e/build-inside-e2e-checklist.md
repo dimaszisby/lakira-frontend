@@ -48,11 +48,15 @@ ADR-0038).
       `test:e2e:a11y`, `test:e2e:csp`): 2, 16 and 7 tests, as before.
 - [x] E2E has no Cypress cache step. _Why:_ F-71; it measured no gain. · By inspection of the
       diff. Its Cypress runs on the PR's run: below.
-- [ ] "CI passed" needs exactly the seven remaining jobs and is green on the PR's run. _Why:_ the
-      gate is what branch protection will require (F-24). · **The PR's run**, read with
-      `gh run view`.
-- [ ] The PR's measured wall clock is recorded against the four runs in the todo (5m09s to
-      6m52s), whatever it shows. _Why:_ the gain was an estimate. · **The PR's run**.
+- [x] "CI passed" needs exactly the seven remaining jobs and is green on the PR's run. _Why:_ the
+      gate is what branch protection will require (F-24). · **The PR's run** 39725445945 and
+      **the `dev` run** 39735862596, read with `gh run view`: seven jobs and "CI passed", all
+      `success`, and no Build job.
+- [x] The PR's measured wall clock is recorded against the four runs in the todo (5m09s to
+      6m52s), whatever it shows. _Why:_ the gain was an estimate. · **The PR's run** 39725445945:
+      3m01s. **The `dev` run** 39735862596: 3m05s. About 2 to 4 minutes saved, against the 1
+      minute estimated. E2E's install took 1m12s in both and its build 19s and 17s. E2E is no
+      longer the slowest job: Static checks took 2m49s and 2m55s, E2E 2m32s and 2m28s.
 
 ## Gates
 
