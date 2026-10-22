@@ -75,7 +75,7 @@ If `dev` has uncommitted local changes that the pull would conflict with, stop a
 
 Every subagent prompt for implementation work must say `branch off dev`.
 
-`.claude/hooks/guard-branch.sh` blocks edits while `main` is checked out and warns while `dev` is. Neither branch has server-side protection, so that hook is the only enforcement — treat it as a real boundary, not a formality.
+`.claude/hooks/guard-branch.sh` blocks edits while `main` is checked out and warns while `dev` is. Since 2026-10-22 `dev` also has a server-side ruleset: no direct push, no force push, and a pull request merges only once "CI passed" is green (ADR-0039). `main` has no server-side rule until register row F-25 is fixed, so there the hook is the only enforcement — treat it as a real boundary, not a formality.
 
 ## Commit and PR ownership
 

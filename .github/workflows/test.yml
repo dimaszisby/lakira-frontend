@@ -286,10 +286,11 @@ jobs:
       - name: Scan full history
         run: '"$RUNNER_TEMP/gitleaks" git . --redact --verbose --no-banner'
 
-  # The one check that says the whole run passed: every job above, each a success. It is the name
-  # to require when branch protection is set up (register F-24). `if: always()` is what makes it
-  # trustworthy: without it a failed job leaves this one skipped, and GitHub counts a skipped
-  # required check as passing. A skipped or cancelled job fails it too (ADR-0036).
+  # The one check that says the whole run passed: every job above, each a success. The `dev`
+  # ruleset requires it by name, so a rename must change `.github/rulesets/dev.json` (ADR-0039).
+  # `if: always()` is what makes it trustworthy: without it a failed job leaves this one skipped,
+  # and GitHub counts a skipped required check as passing. A skipped or cancelled job fails it too
+  # (ADR-0036).
   ci:
     name: CI passed
     runs-on: ubuntu-26.04

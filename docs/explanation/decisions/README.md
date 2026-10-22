@@ -61,6 +61,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0036](./adr-0036-ci-runs-its-jobs-in-parallel-behind-a-gate.md)                | CI runs its jobs in parallel, behind a gate                                  | Accepted       | 2026-10-21 | `D-01` (ci-in-parallel)             |
 | [ADR-0037](./adr-0037-a-clickable-row-is-named-by-its-caller.md)                    | A clickable table row is named by its caller                                 | Accepted       | 2026-10-22 | `D-01` (table-row-accessible-name)  |
 | [ADR-0038](./adr-0038-e2e-builds-the-app-itself.md)                                 | E2E builds the app itself; supersedes ADR-0036 in part                       | Accepted       | 2026-10-22 | `D-01` (build-inside-e2e)           |
+| [ADR-0039](./adr-0039-dev-is-protected-by-a-ruleset.md)                             | `dev` is protected by a ruleset that requires "CI passed"                    | Accepted       | 2026-10-22 | `D-01` (dev-ruleset)                |
 
 ## Where the other decisions went
 
