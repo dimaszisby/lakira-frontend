@@ -45,7 +45,8 @@ Until 2026-10-21 the jobs from `checks` to `e2e` were a `needs` chain, about 12 
 2 to 3 minutes of work; the first runs after it took 5m37s on a pull request and 5m16s on `dev`
 ([ADR-0036](../../explanation/decisions/adr-0036-ci-runs-its-jobs-in-parallel-behind-a-gate.md)).
 A separate `build` job, which `e2e` waited on for its `.next` artifact, was folded into `e2e` on
-2026-10-22, so the slowest job pays one `npm ci` instead of two
+2026-10-22, so the critical path pays one `npm ci` instead of two; the first runs after it took
+3m01s on a pull request and 3m05s on `dev`
 ([ADR-0038](../../explanation/decisions/adr-0038-e2e-builds-the-app-itself.md)).
 
 Only `e2e` downloads the Cypress binary, during its `npm ci`; there is no cache for it, because

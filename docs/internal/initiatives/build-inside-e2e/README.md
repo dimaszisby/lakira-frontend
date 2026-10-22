@@ -1,7 +1,7 @@
 # Build inside E2E
 
-**Status:** Done 2026-10-22, pending merge and the PR run's measurement. Debt register rows F-69
-and F-71; D-01 promoted to ADR-0038.
+**Status:** Done 2026-10-22 (#138): 5m09s to 6m52s down to 3m01s on a pull request, 3m05s on
+`dev`. Debt register rows F-69 and F-71; D-01 promoted to ADR-0038.
 **Slug:** `build-inside-e2e` · **Branch:** `ci/build-inside-e2e`
 
 - [Checklist](build-inside-e2e-checklist.md) — work items, acceptance, gates

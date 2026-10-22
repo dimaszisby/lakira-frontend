@@ -68,3 +68,7 @@ F-69 and F-71 done 2026-10-22 in kit `build-inside-e2e`, PR #138
 app itself, the Build job and its `next-build` artifact are gone, the gate needs seven jobs, and
 E2E has no Cypress cache. `CYPRESS_INSTALL_BINARY=0` stays on the other jobs, unmeasured either
 way. The measured runs are in the kit's checklist. F-70 stays deferred.
+
+Measured after the merge: 3m01s on the pull request (run 39725445945) and 3m05s on `dev` (run
+39735862596), against 5m09s to 6m52s before. The estimate above was about 1 minute; the gain was
+about 2 to 4.
