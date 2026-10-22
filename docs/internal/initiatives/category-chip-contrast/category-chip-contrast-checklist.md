@@ -35,7 +35,7 @@ opaque tint on a fixed base ([D-01](decisions.md), promoted to ADR-0040).
 
 ## Discovered
 
-- [x] Found: two `next` advisories published 2026-10-22, one critical, patched in 16.4.1;
+- [x] Found: three `next` advisories published 2026-10-22, two critical, patched in 16.4.1;
       `security:audit` fails → out of scope, filed as
       `docs/internal/todos/2026-10-23-todo-next-16-4-1-advisories.md`, register row F-74
 
@@ -66,5 +66,6 @@ Run 2026-10-23 on Node 24.21.0.
 - [x] e2e (stack), 71 of 71, and e2e (csp, stack), 8 of 8, against `next start` of this build,
       with `E2E_ALLOW_STALE_BACKEND=1`: the local backend image is `00fb2d2`, four commits behind
       backend `dev` (#207 to #210)
-- [ ] `security:audit`: **fails**, on the two `next` advisories (F-74), not on this change
+- [x] `security:audit`: failed on three `next` advisories, not on this change; cleared on `dev`
+      by #144 (F-74), which CI's run on the merge with `dev` audits
 - [ ] e2e and e2e (csp): skipped, the chip is on no public page
