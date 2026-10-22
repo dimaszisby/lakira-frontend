@@ -135,7 +135,7 @@ All kept agents use `memory: project` with the `MEMORY.md`-index + `**How to app
 
 ### Phase 7 — Follow-ups (not this session)
 
-- [ ] Enable server-side branch protection on `dev` and `main` (user action — `gh api`)
+- [x] Enable server-side branch protection on `dev` and `main` (user action — `gh api`) — `dev` done 2026-10-22 with a ruleset (#140, ADR-0039); `main` follows register row F-25. Ticked 2026-10-22.
 - [x] Raise coverage thresholds from the placeholder 3/2/3/3 % — done 2026-08-27: `jest.config.ts` sets 29/29/26/29, inherited by `jest.unit.config.ts`. Ticked 2026-09-24.
 - [x] ~~Populate `src/test-utils/msw/handlers.ts` — currently empty while `onUnhandledRequest: "error"`~~ — won't do: the empty array is by design, each suite declares its own requests. See `CLAUDE.md` § Known state. Closed 2026-09-24.
 - [x] Enable `jsx-a11y` recommended ruleset — **done 2026-09-23**, as errors. Found no existing defects; two reasoned disables and `no-redundant-roles` off with its rationale recorded in `.claude/rules/accessibility.md`.

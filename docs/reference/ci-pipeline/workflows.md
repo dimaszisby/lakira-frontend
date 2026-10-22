@@ -40,7 +40,7 @@ secret-scan ─┘
 
 Every job starts at once. `ci`, named "CI passed", needs all seven, runs `if: always()`, and
 fails unless each one succeeded: a failed, skipped or cancelled job fails it, and its log lists
-every job's result. It is the check to require when branch protection is set up (register F-24).
+every job's result. It is the one check the `dev` ruleset requires (see Branch rules below).
 Until 2026-10-21 the jobs from `checks` to `e2e` were a `needs` chain, about 12 to 14 minutes for
 2 to 3 minutes of work; the first runs after it took 5m37s on a pull request and 5m16s on `dev`
 ([ADR-0036](../../explanation/decisions/adr-0036-ci-runs-its-jobs-in-parallel-behind-a-gate.md)).
@@ -153,8 +153,30 @@ repository to `lakira-frontend/` and lakira-backend `dev` to `lakira-backend/`, 
 It reads no secret: lakira-backend is public, and every user the specs need is created during the
 run. The stack helpers still refuse any non-local URL (`cypress/support/stack.ts`).
 
+## Branch rules
+
+`dev` has one repository ruleset, "dev (integration gate)", id 25639339, active with no bypass
+([ADR-0039](../../explanation/decisions/adr-0039-dev-is-protected-by-a-ruleset.md)). It blocks
+deleting `dev` and force-pushing to it, requires a pull request to merge (no approval needed; merge,
+squash and rebase allowed), and requires "CI passed" from GitHub Actions. The branch need not be up
+to date first. `main` has no rules until register row F-25 is fixed.
+
+The ruleset as applied is `.github/rulesets/dev.json`. To compare it with what GitHub enforces:
+
+```bash
+gh api repos/dimaszisby/lakira-frontend/rulesets/25639339
+gh api repos/dimaszisby/lakira-frontend/rules/branches/dev
+```
+
+To change it, edit the file and apply it in the same pull request with
+`gh api --method PUT repos/dimaszisby/lakira-frontend/rulesets/25639339 --input .github/rulesets/dev.json`.
+To roll it back, `gh api --method DELETE repos/dimaszisby/lakira-frontend/rulesets/25639339`, or
+switch it off under Settings > Rules.
+
 ## Changing a workflow
 
 - Update this page in the same change.
+- Renaming the `ci` job's name, "CI passed", blocks every merge into `dev` until the ruleset
+  names the new one (Branch rules above).
 - Pin any new action by commit SHA, never by tag, and any new job's runner to the same `ubuntu-26.04` as the others.
 - A job that needs a secret is a change of stance, since no job has one today; say so in the PR.
