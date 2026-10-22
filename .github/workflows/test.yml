@@ -14,10 +14,11 @@ concurrency:
   group: frontend-ci-${{ github.ref }}
   cancel-in-progress: true
 
-# The jobs run side by side, except E2E, which needs the build it serves. "CI passed" at the end
-# is the one check that says the whole run passed (kit ci-in-parallel, ADR-0036). They used to be
-# a chain, checks then unit, integration, build and e2e, which took 12 to 14 minutes for 2 to 3
-# minutes of work: each job installs its dependencies afresh.
+# The jobs run side by side. "CI passed" at the end is the one check that says the whole run
+# passed (kit ci-in-parallel, ADR-0036). They used to be a chain, checks then unit, integration,
+# build and e2e, which took 12 to 14 minutes for 2 to 3 minutes of work: each job installs its
+# dependencies afresh. E2E builds the app itself rather than waiting on a build job, so the
+# slowest job pays one install, not two (kit build-inside-e2e, ADR-0038).
 jobs:
   checks:
     name: Static checks
@@ -25,7 +26,7 @@ jobs:
     timeout-minutes: 15
     # Cypress's postinstall downloads its binary unless told not to, and nothing in this job runs
     # Cypress. Typecheck needs only the npm package's bundled types. E2E, which runs Cypress,
-    # caches the binary instead (kit ci-in-parallel).
+    # downloads it (kit ci-in-parallel; its cache measured no gain, kit build-inside-e2e).
     env:
       CYPRESS_INSTALL_BINARY: "0"
     steps:
@@ -116,42 +117,10 @@ jobs:
       - name: Run integration tests
         run: npm run test:integration
 
-  build:
-    name: Build
-    runs-on: ubuntu-26.04
-    timeout-minutes: 20
-    # Runs no Cypress, so `npm ci` skips its binary download (see Static checks).
-    env:
-      CYPRESS_INSTALL_BINARY: "0"
-    steps:
-      - name: Checkout
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - name: Setup Node.js
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Build app
-        run: npm run build
-
-      - name: Upload Next build artifact
-        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        with:
-          name: next-build
-          path: .next
-          if-no-files-found: error
-          include-hidden-files: true
-
   e2e:
     name: E2E tests
     runs-on: ubuntu-26.04
-    # Its one input: the .next artifact the build uploads.
-    needs: build
+    # Builds the app itself, so it needs no other job and pays one `npm ci` (ADR-0038).
     timeout-minutes: 30
     env:
       CYPRESS_BASE_URL: http://127.0.0.1:3000
@@ -165,22 +134,13 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
-      # `cache: npm` above keeps ~/.npm only. The Cypress binary lives in ~/.cache/Cypress, and
-      # without this its postinstall downloads it on every run. The lockfile pins the version.
-      - name: Cache the Cypress binary
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.cache/Cypress
-          key: cypress-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-
+      # Cypress's postinstall downloads its binary here. A cache of ~/.cache/Cypress hit and the
+      # install still took 1m45s, so there is none (kit build-inside-e2e).
       - name: Install dependencies
         run: npm ci
 
-      - name: Download Next build artifact
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: next-build
-          path: .next
+      - name: Build app
+        run: npm run build
 
       - name: Start Next.js app
         run: |
@@ -333,7 +293,7 @@ jobs:
   ci:
     name: CI passed
     runs-on: ubuntu-26.04
-    needs: [checks, unit, integration, build, e2e, api-contract, security, secret-scan]
+    needs: [checks, unit, integration, e2e, api-contract, security, secret-scan]
     if: always()
     timeout-minutes: 5
     steps:

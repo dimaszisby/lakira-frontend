@@ -24,7 +24,7 @@ Four runs after #134:
 
 ## Items
 
-- [ ] **F-69: run the build inside the E2E job.**
+- [x] **F-69: run the build inside the E2E job.**
   - **Gain:** one `npm ci` on the critical path instead of two, and no `.next` upload and download.
     Estimated about 1 minute, not measured.
   - **Cost:**
@@ -36,7 +36,7 @@ Four runs after #134:
   a line in ADR-0036's successor or a superseding entry, since it changes the job graph that ADR
   records.
 
-- [ ] **F-71: remove the Cypress binary cache step from E2E.**
+- [x] **F-71: remove the Cypress binary cache step from E2E.**
   - **Why:** it hit in both of the last two runs, and E2E's install still took 1m45s. Skipping
     the binary in the other jobs did not shorten their installs either (kit `ci-in-parallel`,
     checklist AC-3). The binary is not where the time goes, so the step adds a cache entry and a
@@ -60,3 +60,11 @@ Four runs after #134:
 The Security Scan job runs `security:scan`, which is `lint` and `lint:css` again, then the audit.
 That repeats part of Static checks. It runs alongside the other jobs, off the critical path, so it
 costs no wait. Change it only if the job is touched for another reason.
+
+## Status
+
+F-69 and F-71 done 2026-10-22 in kit `build-inside-e2e`, PR #138
+([ADR-0038](../../explanation/decisions/adr-0038-e2e-builds-the-app-itself.md)). E2E builds the
+app itself, the Build job and its `next-build` artifact are gone, the gate needs seven jobs, and
+E2E has no Cypress cache. `CYPRESS_INSTALL_BINARY=0` stays on the other jobs, unmeasured either
+way. The measured runs are in the kit's checklist. F-70 stays deferred.

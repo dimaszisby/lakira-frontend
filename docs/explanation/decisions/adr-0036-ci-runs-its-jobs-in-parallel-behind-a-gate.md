@@ -4,7 +4,9 @@
 - **Date:** 2026-10-21
 - **Origin:** kit `ci-in-parallel`, D-01 — [`decisions.md`](../../internal/initiatives/ci-in-parallel/decisions.md); debt register row F-68
 - **Related:** lakira-backend ADR-0081, "CI runs each test suite once, in parallel, behind a gate
-  that keeps the required check" (backend #204)
+  that keeps the required check" (backend #204). Superseded in part by
+  [ADR-0038](./adr-0038-e2e-builds-the-app-itself.md): E2E no longer needs a Build job, and the
+  gate needs seven jobs. The rest of this record stands
 
 ---
 
