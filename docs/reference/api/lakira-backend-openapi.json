@@ -1194,10 +1194,19 @@
                       "$ref": "#/components/schemas/Member"
                     },
                     "type": "array"
+                  },
+                  "nextCursor": {
+                    "description": "Pass as `after` for the next page; null on the last page. A page can hold fewer rows than `limit` and still be followed by another.",
+                    "example": null,
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   }
                 },
                 "required": [
-                  "members"
+                  "members",
+                  "nextCursor"
                 ],
                 "type": "object"
               }
@@ -2522,6 +2531,14 @@
             "properties": {
               "data": {
                 "properties": {
+                  "nextCursor": {
+                    "description": "Pass as `after` for the next page; null on the last page. A page can hold fewer rows than `limit` and still be followed by another.",
+                    "example": null,
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
                   "organizations": {
                     "items": {
                       "$ref": "#/components/schemas/UserOrganization"
@@ -2530,7 +2547,8 @@
                   }
                 },
                 "required": [
-                  "organizations"
+                  "organizations",
+                  "nextCursor"
                 ],
                 "type": "object"
               }
@@ -6088,7 +6106,29 @@
     },
     "/organizations": {
       "get": {
-        "description": "Returns the organizations the authenticated user holds an active membership in, oldest membership first, with the caller's role in each. `isCurrent` marks the organization the access token is scoped to; pass any listed `organizationId` to `POST /auth/switch-org`. Scoped to the caller: it takes no parameters and never lists another user's organizations.",
+        "description": "Returns the organizations the authenticated user holds an active membership in, oldest membership first, with the caller's role in each. `isCurrent` marks the organization the access token is scoped to; pass any listed `organizationId` to `POST /auth/switch-org`. Scoped to the caller: it never lists another user's organizations. Paged by cursor, 100 per page unless `limit` says fewer; follow `nextCursor` until it is null.",
+        "parameters": [
+          {
+            "description": "Rows per page, 1 to 100; 100 when omitted",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Opaque cursor returned from the previous page",
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "content": {
@@ -6099,6 +6139,9 @@
               }
             },
             "description": "The caller's organizations"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
           },
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
@@ -6196,7 +6239,7 @@
     },
     "/organizations/{id}/members": {
       "get": {
-        "description": "Returns all active memberships for the organization with user details. Any member of the organization can call this endpoint.",
+        "description": "Returns the organization's memberships, of every status, with user details, oldest first. Any member of the organization can call this endpoint. Paged by cursor, 100 per page unless `limit` says fewer; follow `nextCursor` until it is null.",
         "parameters": [
           {
             "in": "path",
@@ -6206,6 +6249,26 @@
               "description": "Organization ID",
               "example": "123e4567-e89b-42d3-a456-426614174000",
               "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "description": "Rows per page, 1 to 100; 100 when omitted",
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "maximum": 100,
+              "minimum": 1,
+              "type": "integer"
+            }
+          },
+          {
+            "description": "Opaque cursor returned from the previous page",
+            "in": "query",
+            "name": "after",
+            "required": false,
+            "schema": {
               "type": "string"
             }
           }
@@ -6220,6 +6283,9 @@
               }
             },
             "description": "List of organization members"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
           },
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"

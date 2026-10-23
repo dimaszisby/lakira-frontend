@@ -2123,11 +2123,16 @@ export interface paths {
         };
         /**
          * List the caller's organizations
-         * @description Returns the organizations the authenticated user holds an active membership in, oldest membership first, with the caller's role in each. `isCurrent` marks the organization the access token is scoped to; pass any listed `organizationId` to `POST /auth/switch-org`. Scoped to the caller: it takes no parameters and never lists another user's organizations.
+         * @description Returns the organizations the authenticated user holds an active membership in, oldest membership first, with the caller's role in each. `isCurrent` marks the organization the access token is scoped to; pass any listed `organizationId` to `POST /auth/switch-org`. Scoped to the caller: it never lists another user's organizations. Paged by cursor, 100 per page unless `limit` says fewer; follow `nextCursor` until it is null.
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Rows per page, 1 to 100; 100 when omitted */
+                    limit?: number;
+                    /** @description Opaque cursor returned from the previous page */
+                    after?: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
@@ -2143,6 +2148,7 @@ export interface paths {
                         "application/json": components["schemas"]["UserOrganizationListResponse"];
                     };
                 };
+                400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
@@ -2218,11 +2224,16 @@ export interface paths {
         };
         /**
          * List organization members
-         * @description Returns all active memberships for the organization with user details. Any member of the organization can call this endpoint.
+         * @description Returns the organization's memberships, of every status, with user details, oldest first. Any member of the organization can call this endpoint. Paged by cursor, 100 per page unless `limit` says fewer; follow `nextCursor` until it is null.
          */
         get: {
             parameters: {
-                query?: never;
+                query?: {
+                    /** @description Rows per page, 1 to 100; 100 when omitted */
+                    limit?: number;
+                    /** @description Opaque cursor returned from the previous page */
+                    after?: string;
+                };
                 header?: never;
                 path: {
                     id: string;
@@ -2240,6 +2251,7 @@ export interface paths {
                         "application/json": components["schemas"]["MemberListResponse"];
                     };
                 };
+                400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 403: components["responses"]["ForbiddenError"];
                 429: components["responses"]["TooManyRequestsError"];
@@ -2684,6 +2696,11 @@ export interface components {
         MemberListResponse: components["schemas"]["SuccessResponse"] & {
             data?: {
                 members: components["schemas"]["Member"][];
+                /**
+                 * @description Pass as `after` for the next page; null on the last page. A page can hold fewer rows than `limit` and still be followed by another.
+                 * @example null
+                 */
+                nextCursor: string | null;
             };
         };
         Metric: {
@@ -3259,6 +3276,11 @@ export interface components {
         };
         UserOrganizationListResponse: components["schemas"]["SuccessResponse"] & {
             data?: {
+                /**
+                 * @description Pass as `after` for the next page; null on the last page. A page can hold fewer rows than `limit` and still be followed by another.
+                 * @example null
+                 */
+                nextCursor: string | null;
                 organizations: components["schemas"]["UserOrganization"][];
             };
         };
