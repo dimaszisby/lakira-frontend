@@ -7,10 +7,9 @@ in the [debt register](frontend-debt-register/register.md), not in this list.
 
 ## Active
 
-| Kit                                                        | What                                                                                      | PR                |
-| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------- |
-| [docs-diet](docs-diet/README.md)                           | The register's closed rows in their own file, lessons promoted into the rules, this index | #149              |
-| [frontend-debt-register](frontend-debt-register/README.md) | Every open item, ranked; "what's next" is answered from it                                | #89, kept current |
+| Kit                                                        | What                                                       | PR                |
+| ---------------------------------------------------------- | ---------------------------------------------------------- | ----------------- |
+| [frontend-debt-register](frontend-debt-register/README.md) | Every open item, ranked; "what's next" is answered from it | #89, kept current |
 
 ## Done
 
@@ -25,6 +24,7 @@ in the [debt register](frontend-debt-register/register.md), not in this list.
 | [cypress-a11y-e2e](cypress-a11y-e2e/README.md)                     | Cypress accessibility and auth-flow E2E            | #60, 2026-09-29  |
 | [dependency-audit-split](dependency-audit-split/README.md)         | Dependency audit split                             | #64, 2026-10-03  |
 | [dev-ruleset](dev-ruleset/README.md)                               | `dev` protected by a ruleset                       | #140, 2026-10-22 |
+| [docs-diet](docs-diet/README.md)                                   | Register split, lessons into rules, this index     | #149, 2026-10-23 |
 | [drop-withauth](drop-withauth/README.md)                           | `withAuth` and the dead auth shims removed         | #41, 2026-09-22  |
 | [form-shows-latest-error](form-shows-latest-error/README.md)       | A form shows its latest error                      | #102, 2026-10-16 |
 | [list-variant-breakpoint](list-variant-breakpoint/README.md)       | A list picks table or cards in CSS                 | #133, 2026-10-21 |
