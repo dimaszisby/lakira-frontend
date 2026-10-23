@@ -1,0 +1,35 @@
+name: Bug
+description: Something does not work as it should
+labels: ["type:bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        A security problem goes to private vulnerability reporting instead, as `SECURITY.md`
+        says. Do not paste tokens, cookies or personal data.
+  - type: textarea
+    id: actual
+    attributes:
+      label: What happened
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Sign in and open /dashboard
+        2. ...
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Browser and version, the commit or deployment, and the backend it talked to.

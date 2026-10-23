@@ -75,6 +75,7 @@ Security, the proxy and the repository:
 | F-23 | `next.config.ts` reads `NEXT_PUBLIC_API_BASE_URL` raw, outside the validated environment                              | —   | kept on purpose                                    | `2026-08-24-todo-saas-readiness.md` phase 3               |
 | F-26 | Security follow-ups of 2025-11-26, never triaged: moving protected fetching into Server Components                    | —   | owner                                              | `todo-security-20251126.md`, next cycle, item 2           |
 | F-75 | Releases are not versioned: no tags, changelog or GitHub releases on `main`                                           | —   | owner                                              | kit `main-release-branch` D-01, out of scope              |
+| F-77 | Open work is still Markdown in git; tracker steps 3, 4 and 6 remain                                                   | —   | ready                                              | ADR-0042; kit `tracker-as-code`                           |
 
 Errors and forms:
 

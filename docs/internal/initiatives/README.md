@@ -47,6 +47,7 @@ in the [debt register](frontend-debt-register/register.md), not in this list.
 | [table-row-accessible-name](table-row-accessible-name/README.md)   | Table row accessible name                          | #137, 2026-10-22 |
 | [telemetry-log-hardening](telemetry-log-hardening/README.md)       | Bounded telemetry intake and a scrubbed log stream | #75, 2026-10-07  |
 | [theme-switching](theme-switching/README.md)                       | Theme switching                                    | #35, 2026-09-20  |
+| [tracker-as-code](tracker-as-code/README.md)                       | Labels, issue forms and a PR template as code      | #153, 2026-10-24 |
 | [unquarantine-layout-files](unquarantine-layout-files/README.md)   | Layout files brought inside the layer rule         | #91, 2026-10-13  |
 
 ## Earlier programmes

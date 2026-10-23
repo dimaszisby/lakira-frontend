@@ -42,7 +42,8 @@
     "security:lint": "npm run lint && npm run lint:css",
     "security:audit": "npm audit --omit=dev --audit-level=high",
     "security:audit:full": "npm audit --audit-level=high",
-    "security:scan": "npm run security:lint && npm run security:audit"
+    "security:scan": "npm run security:lint && npm run security:audit",
+    "labels:sync": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/github/sync-labels.ts"
   },
   "dependencies": {
     "@ariakit/react": "^0.4.18",
