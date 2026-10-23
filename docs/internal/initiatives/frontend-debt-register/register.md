@@ -1,6 +1,6 @@
 # Frontend debt register
 
-**As of:** 2026-10-23, frontend `dev` at `11b6758`, with F-06, F-08, F-09, F-10, F-14 to F-21, F-24, F-25, F-27 to F-29, F-31 to F-37, F-40, F-42 to F-50, F-51, F-52, F-53, F-54, F-55, F-56, F-57, F-60, F-61, F-62, F-63, F-64, F-66, F-67, F-68, F-69, F-71, F-72 and F-74 closed, and F-41 to its deferred folder split. Ranked by [D-01](decisions.md).
+**As of:** 2026-10-23, frontend `dev` at `04c2f5a`, with F-06, F-08, F-09, F-10, F-14 to F-21, F-24, F-25, F-27 to F-29, F-31 to F-37, F-40, F-42 to F-50, F-51, F-52, F-53, F-54, F-55, F-56, F-57, F-60, F-61, F-62, F-63, F-64, F-66, F-67, F-68, F-69, F-71, F-72, F-74 and F-76 closed, and F-41 to its deferred folder split. Ranked by [D-01](decisions.md).
 
 **"What's next" is the first row below whose state is `ready`.** A row above it that is waiting on
 someone is reported with it, as a gap. How rows are added and closed:
@@ -66,7 +66,6 @@ Listed, not analysed ([D-03](decisions.md)). Between the repos:
 | F-58 | The metrics list reports `logCount: 0` for a metric that has logs                                                                                                                                              | —   | BE                     | `2026-10-17-todo-axe-pages-with-data.md`                                               |
 | F-59 | The frontend has no smoke steps of its own: the backend's sequence (B-15) runs against the backend, and the same round trip through `/api/proxy` is not written                                                | P3  | owner, BE (after F-11) | lakira-backend #171; `release-checklist.md`                                            |
 | F-73 | A new key in the backend's error envelope reaches the browser only once the frontend adds it to the proxy's allowlist (ADR-0034); the backend is asked to say when it adds one                                 | P3  | BE                     | N1 "A new error-envelope key reaches the browser only once the frontend lists it"      |
-| F-76 | The members list and the organization switcher read only the first page, 100 rows, and never follow `nextCursor`                                                                                               | P3  | ready                  | N2 "The organization lists page by cursor, 100 rows per page"; lakira-backend #218     |
 
 Security, the proxy and the repository:
 
