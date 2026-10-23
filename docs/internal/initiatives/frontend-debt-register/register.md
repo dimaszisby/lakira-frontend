@@ -1,6 +1,6 @@
 # Frontend debt register
 
-**As of:** 2026-10-23, frontend `dev` at `e2cea04`, with F-06, F-08, F-09, F-10, F-14 to F-21, F-24, F-27 to F-29, F-31 to F-37, F-40, F-42 to F-50, F-51, F-52, F-53, F-54, F-55, F-56, F-57, F-60, F-61, F-62, F-63, F-64, F-66, F-67, F-68, F-69, F-71, F-72 and F-74 closed, and F-41 to its deferred folder split. Ranked by [D-01](decisions.md).
+**As of:** 2026-10-23, frontend `dev` at `2702db7`, with F-06, F-08, F-09, F-10, F-14 to F-21, F-24, F-27 to F-29, F-31 to F-37, F-40, F-42 to F-50, F-51, F-52, F-53, F-54, F-55, F-56, F-57, F-60, F-61, F-62, F-63, F-64, F-66, F-67, F-68, F-69, F-71, F-72 and F-74 closed, and F-41 to its deferred folder split. Ranked by [D-01](decisions.md).
 
 **"What's next" is the first row below whose state is `ready`.** A row above it that is waiting on
 someone is reported with it, as a gap. How rows are added and closed:
@@ -59,12 +59,12 @@ The P1 first, then smaller first.
 
 Listed, not analysed ([D-03](decisions.md)). Between the repos:
 
-| ID   | Item                                                                                                                                                                           | Sev | State                  | Source                                                                            |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --- | ---------------------- | --------------------------------------------------------------------------------- |
-| F-65 | An invite whose email never arrived blocks re-inviting that address for 7 days once the backend's queue is on (B-71); the backend needs the remedy chosen                      | P3  | owner (O-14)           | N2 "The invite email is queued"                                                   |
-| F-58 | The metrics list reports `logCount: 0` for a metric that has logs                                                                                                              | —   | BE                     | `2026-10-17-todo-axe-pages-with-data.md`                                          |
-| F-59 | The frontend has no smoke steps of its own: the backend's sequence (B-15) runs against the backend, and the same round trip through `/api/proxy` is not written                | P3  | owner, BE (after F-11) | lakira-backend #171; `release-checklist.md`                                       |
-| F-73 | A new key in the backend's error envelope reaches the browser only once the frontend adds it to the proxy's allowlist (ADR-0034); the backend is asked to say when it adds one | P3  | BE                     | N1 "A new error-envelope key reaches the browser only once the frontend lists it" |
+| ID   | Item                                                                                                                                                                                                           | Sev | State                  | Source                                                                                 |
+| ---- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --- | ---------------------- | -------------------------------------------------------------------------------------- |
+| F-65 | An invite whose email never arrived blocks re-inviting that address for 7 days once the backend's queue is on; the owner chose that re-inviting replaces a pending invite (B-71), then the form's copy changes | P3  | BE (B-71)              | N2 "The invite email is queued"; `2026-10-23-todo-reinvite-replaces-pending-invite.md` |
+| F-58 | The metrics list reports `logCount: 0` for a metric that has logs                                                                                                                                              | —   | BE                     | `2026-10-17-todo-axe-pages-with-data.md`                                               |
+| F-59 | The frontend has no smoke steps of its own: the backend's sequence (B-15) runs against the backend, and the same round trip through `/api/proxy` is not written                                                | P3  | owner, BE (after F-11) | lakira-backend #171; `release-checklist.md`                                            |
+| F-73 | A new key in the backend's error envelope reaches the browser only once the frontend adds it to the proxy's allowlist (ADR-0034); the backend is asked to say when it adds one                                 | P3  | BE                     | N1 "A new error-envelope key reaches the browser only once the frontend lists it"      |
 
 Security, the proxy and the repository:
 
@@ -102,15 +102,14 @@ Tests, docs and this register:
 
 ## Waiting on the owner, not code
 
-| ID   | Question                                                                                                                                                                                    | Rows                         | Source                                                   |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- | -------------------------------------------------------- |
-| O-01 | Where is the frontend hosted, per environment, and does that host set `X-Forwarded-For`?                                                                                                    | F-01, F-02, F-03, F-11, F-12 | A10 § 9; N2; the backend's O-04                          |
-| O-03 | Which code of conduct text, and which contact address?                                                                                                                                      | F-07                         | A10 § 3.1 category 13                                    |
-| O-05 | Should two entries picked for the same minute be allowed? That would be a backend change                                                                                                    | F-30                         | A10 § 9, item 2; settled for the common case by #88      |
-| O-08 | How does `main` become a release branch: a reset, or a one-time merge?                                                                                                                      | F-25                         | `2026-09-24-todo-main-has-unrelated-history.md`          |
-| O-09 | Is one cold-load frame worth a second script?                                                                                                                                               | F-39                         | `2026-09-24-todo-cold-load-paint-before-theme-script.md` |
-| O-10 | Is a subscription or plan surface in scope for the template? The backend defers its equivalent                                                                                              | F-13                         | `iteration-plan.md` § P2-only items                      |
-| O-14 | An invite whose email never arrived: should re-inviting replace the pending invite, or should the backend add a resend endpoint? And should "Invitation sent." say the email is on its way? | F-65                         | N2 "The invite email is queued"; backend B-71            |
+| ID   | Question                                                                                       | Rows                         | Source                                                   |
+| ---- | ---------------------------------------------------------------------------------------------- | ---------------------------- | -------------------------------------------------------- |
+| O-01 | Where is the frontend hosted, per environment, and does that host set `X-Forwarded-For`?       | F-01, F-02, F-03, F-11, F-12 | A10 § 9; N2; the backend's O-04                          |
+| O-03 | Which code of conduct text, and which contact address?                                         | F-07                         | A10 § 3.1 category 13                                    |
+| O-05 | Should two entries picked for the same minute be allowed? That would be a backend change       | F-30                         | A10 § 9, item 2; settled for the common case by #88      |
+| O-08 | How does `main` become a release branch: a reset, or a one-time merge?                         | F-25                         | `2026-09-24-todo-main-has-unrelated-history.md`          |
+| O-09 | Is one cold-load frame worth a second script?                                                  | F-39                         | `2026-09-24-todo-cold-load-paint-before-theme-script.md` |
+| O-10 | Is a subscription or plan surface in scope for the template? The backend defers its equivalent | F-13                         | `iteration-plan.md` § P2-only items                      |
 
 ## Settled just before this register, noted so they are not re-raised
 
