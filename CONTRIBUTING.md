@@ -11,14 +11,17 @@ feat/<name>  →  dev  →  main
 - **feature branches**: branch off `dev`, target `dev` in your PR. The prefix is a Conventional
   Commit type — `feat/`, `fix/`, `docs/`, `chore/`, `refactor/` — matching the commit type and the
   PR title. Branches merged before 2026-09-20 use `feature/` and keep their names.
-- **dev → main**: promoted after the full pipeline is green.
+- **dev → main**: a pull request from `dev`, merged with a merge commit once "CI passed" is
+  green. Fixes reach `main` the same way, through `dev`. Steps:
+  [`docs/how-to/releases/promote-dev-to-main.md`](docs/how-to/releases/promote-dev-to-main.md).
 
 This repo has **no `staging` branch** — the backend has one, the frontend does not. Do not
 reference one.
 
-Neither `dev` nor `main` has server-side protection today. `.claude/hooks/guard-branch.sh`
-blocks edits while `main` is checked out and warns on `dev`; treat it as a real boundary, not
-a formality.
+Both branches are protected by repository rulesets, kept as code in `.github/rulesets/`: no
+direct push, no force push, no deletion, and a pull request merges only once "CI passed" is green.
+Into `main`, only a merge commit is allowed (ADR-0039, ADR-0041). A fork does not inherit
+rulesets; apply both files as `docs/reference/ci-pipeline/workflows.md` § Branch rules shows.
 
 ## Commit Conventions
 

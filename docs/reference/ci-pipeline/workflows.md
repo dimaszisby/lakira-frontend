@@ -40,7 +40,7 @@ secret-scan ─┘
 
 Every job starts at once. `ci`, named "CI passed", needs all seven, runs `if: always()`, and
 fails unless each one succeeded: a failed, skipped or cancelled job fails it, and its log lists
-every job's result. It is the one check the `dev` ruleset requires (see Branch rules below).
+every job's result. It is the one check the `dev` and `main` rulesets require (see Branch rules below).
 Until 2026-10-21 the jobs from `checks` to `e2e` were a `needs` chain, about 12 to 14 minutes for
 2 to 3 minutes of work; the first runs after it took 5m37s on a pull request and 5m16s on `dev`
 ([ADR-0036](../../explanation/decisions/adr-0036-ci-runs-its-jobs-in-parallel-behind-a-gate.md)).
@@ -159,24 +159,44 @@ run. The stack helpers still refuse any non-local URL (`cypress/support/stack.ts
 ([ADR-0039](../../explanation/decisions/adr-0039-dev-is-protected-by-a-ruleset.md)). It blocks
 deleting `dev` and force-pushing to it, requires a pull request to merge (no approval needed; merge,
 squash and rebase allowed), and requires "CI passed" from GitHub Actions. The branch need not be up
-to date first. `main` has no rules until register row F-25 is fixed.
+to date first.
 
-The ruleset as applied is `.github/rulesets/dev.json`. To compare it with what GitHub enforces:
+`main` has one repository ruleset, "main (release gate)", id 25702940, active with no bypass
+([ADR-0041](../../explanation/decisions/adr-0041-main-is-reset-onto-dev-and-protected-by-a-release-gate.md)).
+It has the same four rules as `dev`'s, except that a pull request merges only as a merge commit,
+so a promotion keeps `dev`'s commits as they are. Promotion is in
+[`promote-dev-to-main.md`](../../how-to/releases/promote-dev-to-main.md).
+
+The rulesets as applied are `.github/rulesets/dev.json` and `.github/rulesets/main.json`. To
+compare them with what GitHub enforces:
 
 ```bash
 gh api repos/dimaszisby/lakira-frontend/rulesets/25639339
+gh api repos/dimaszisby/lakira-frontend/rulesets/25702940
 gh api repos/dimaszisby/lakira-frontend/rules/branches/dev
+gh api repos/dimaszisby/lakira-frontend/rules/branches/main
 ```
 
-To change it, edit the file and apply it in the same pull request with
+To change one, edit its file and apply it in the same pull request, for example
 `gh api --method PUT repos/dimaszisby/lakira-frontend/rulesets/25639339 --input .github/rulesets/dev.json`.
-To roll it back, `gh api --method DELETE repos/dimaszisby/lakira-frontend/rulesets/25639339`, or
+To roll one back, `gh api --method DELETE repos/dimaszisby/lakira-frontend/rulesets/<id>`, or
 switch it off under Settings > Rules.
+
+**In a fork.** Forking copies neither ruleset. Once the fork's `main` shares history with its
+`dev`, apply both, replacing `<owner>/<repo>`:
+
+```bash
+gh api --method POST repos/<owner>/<repo>/rulesets --input .github/rulesets/dev.json
+gh api --method POST repos/<owner>/<repo>/rulesets --input .github/rulesets/main.json
+```
+
+Each call prints the new ruleset's id. "CI passed" is matched with GitHub Actions' app id, 15368,
+which is the same in every repository.
 
 ## Changing a workflow
 
 - Update this page in the same change.
-- Renaming the `ci` job's name, "CI passed", blocks every merge into `dev` until the ruleset
-  names the new one (Branch rules above).
+- Renaming the `ci` job's name, "CI passed", blocks every merge into `dev` and `main` until both
+  rulesets name the new one (Branch rules above).
 - Pin any new action by commit SHA, never by tag, and any new job's runner to the same `ubuntu-26.04` as the others.
 - A job that needs a secret is a change of stance, since no job has one today; say so in the PR.

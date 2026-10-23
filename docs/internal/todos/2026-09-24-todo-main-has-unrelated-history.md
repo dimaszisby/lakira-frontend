@@ -59,11 +59,26 @@ sweep.
 ## Checklist
 
 - [x] Confirm `dev` carries `LICENSE` — it does (checked 2026-09-24).
-- [ ] Choose reset or one-time merge; record the reason here.
+- [x] Choose reset or one-time merge; record the reason here. **Reset, 2026-10-23** (owner,
+      register O-08). The one-time merge would conflict on `LICENSE` (this commit's MIT against
+      `dev`'s ISC, chosen in `b157e14`) and keep a root holding a licence the project chose
+      against. `de0db41` is kept as the tag `archive/main-initial-commit`. Kit
+      `main-release-branch`, ADR-0041.
 - [x] Decide whether `dev` becomes the default branch. **Done 2026-09-24** with
       `gh repo edit --default-branch dev`. Non-destructive and reversible; it rewrites no history.
       It fixed the scheduled-workflow problem at once: GitHub registered `frontend-performance`
       immediately, the six docs describing a nightly run became true, and `gh pr create` without
       `--base` now targets `dev`. The first run found a measurement problem, not a performance one
       — see `2026-09-24-todo-perf-measurement-reliability.md`.
-- [ ] Do the same for `lakira-backend`, or file it there.
+- [x] Do the same for `lakira-backend`, or file it there. Filed 2026-10-23 as a Part 1 record on
+      the Notion page "FE and BE messages", "`main` shares no history with `dev`; the frontend
+      reset its own". The backend's `main` is also a lone "Initial commit", and its
+      "main (release gate)" requires signed commits, which would block a promotion carrying
+      unsigned ones.
+
+## Status
+
+Done 2026-10-23 (#146). `main` was reset to `dev`'s `c7ba8b7` after tagging `de0db41`, and its
+push run of `frontend-ci` passed. The ruleset "main (release gate)", id 25702940, is active: no
+deletion or force push, a pull request merged with a merge commit only, and "CI passed" required.
+Register F-25 closed; O-08 removed. Versioning releases is register row F-75.
