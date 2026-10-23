@@ -237,6 +237,8 @@ export interface paths {
                     };
                 };
                 400: components["responses"]["BadRequestError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 /** @description Rate limit exceeded for password reset requests */
                 429: {
                     headers: {
@@ -292,6 +294,8 @@ export interface paths {
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 409: components["responses"]["ConflictError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -403,6 +407,8 @@ export interface paths {
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 409: components["responses"]["ConflictError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -495,6 +501,8 @@ export interface paths {
                 };
                 400: components["responses"]["BadRequestError"];
                 409: components["responses"]["ConflictError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 /** @description Too many registration attempts from this IP (RATE_LIMIT_REGISTER_IP_MAX per hour) */
                 429: {
                     headers: {
@@ -602,6 +610,8 @@ export interface paths {
                     };
                 };
                 400: components["responses"]["BadRequestError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 /** @description Rate limit exceeded for password reset requests */
                 429: {
                     headers: {
@@ -660,6 +670,8 @@ export interface paths {
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 403: components["responses"]["ForbiddenError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -706,6 +718,8 @@ export interface paths {
                     };
                 };
                 400: components["responses"]["BadRequestError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 /** @description Rate limit exceeded for email verification requests */
                 429: {
                     headers: {
@@ -719,6 +733,57 @@ export interface paths {
                 500: components["responses"]["InternalServerError"];
             };
         };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Liveness probe
+         * @description Answers 200 while the process serves requests. It checks no dependency.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description The process is up */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            /** @example production */
+                            environment: string;
+                            /**
+                             * @description `APP_RELEASE`, else the platform's commit, else `unknown`
+                             * @example d985155
+                             */
+                            release: string;
+                            /** @enum {string} */
+                            status: "ok";
+                            /** Format: date-time */
+                            timestamp: string;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -762,6 +827,8 @@ export interface paths {
                 };
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -850,6 +917,8 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 403: components["responses"]["ForbiddenError"];
                 404: components["responses"]["NotFoundError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -934,6 +1003,8 @@ export interface paths {
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 409: components["responses"]["ConflictError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -983,6 +1054,8 @@ export interface paths {
                 };
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1064,6 +1137,8 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
                 409: components["responses"]["ConflictError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1184,6 +1259,8 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
                 409: components["responses"]["ConflictError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1322,6 +1399,8 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
                 409: components["responses"]["ConflictError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1406,6 +1485,8 @@ export interface paths {
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 403: components["responses"]["ForbiddenError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1496,6 +1577,8 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
                 409: components["responses"]["ConflictError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1576,6 +1659,8 @@ export interface paths {
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1714,6 +1799,8 @@ export interface paths {
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1800,6 +1887,8 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
                 409: components["responses"]["ConflictError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1849,6 +1938,8 @@ export interface paths {
                 };
                 400: components["responses"]["BadRequestError"];
                 401: components["responses"]["UnauthorizedError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1933,6 +2024,8 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 404: components["responses"]["NotFoundError"];
                 409: components["responses"]["ConflictError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -2104,6 +2197,8 @@ export interface paths {
                 401: components["responses"]["UnauthorizedError"];
                 403: components["responses"]["ForbiddenError"];
                 409: components["responses"]["ConflictError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
                 429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -2149,6 +2244,73 @@ export interface paths {
                 403: components["responses"]["ForbiddenError"];
                 429: components["responses"]["TooManyRequestsError"];
                 500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ready": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Readiness probe
+         * @description Checks Postgres and Redis, each within 2 s. A result is held for 2 s, so it can lag by that much. Not the error envelope: a 503 is a probe document.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Every dependency answered */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            checks: {
+                                /** @enum {string} */
+                                db: "ok" | "fail";
+                                /** @enum {string} */
+                                redis: "ok" | "fail";
+                            };
+                            /** @enum {string} */
+                            status: "ok";
+                        };
+                    };
+                };
+                500: components["responses"]["InternalServerError"];
+                /** @description A dependency failed or timed out; `checks` names which */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            checks: {
+                                /** @enum {string} */
+                                db: "ok" | "fail";
+                                /** @enum {string} */
+                                redis: "ok" | "fail";
+                            };
+                            /** @enum {string} */
+                            status: "degraded";
+                        };
+                    };
+                };
             };
         };
         put?: never;
@@ -2327,20 +2489,64 @@ export interface components {
         };
         DashboardVisualizationResponse: {
             items: {
+                /** @description The range `series` covers: `requestedRange`, or the fallback range when the requested one holds no log. */
+                actualRange: {
+                    /** @enum {string} */
+                    bucket: "1h" | "1d" | "1w" | "1m" | "1y";
+                    /** Format: date-time */
+                    endISO: string;
+                    /** Format: date-time */
+                    startISO: string;
+                };
                 /** @example #663399 */
                 category_color: string | null;
                 /** @example 😴 */
                 category_icon: string | null;
                 /** @example Wellness */
                 category_name: string | null;
+                fallbackRangeUsed: boolean;
+                /**
+                 * @description `last_activity_window` when `fallbackRangeUsed`: a window ending with the bucket of the newest log. Null otherwise.
+                 * @enum {string|null}
+                 */
+                fallbackStrategy: "last_activity_window" | null;
+                /**
+                 * Format: date-time
+                 * @description The oldest log's stored instant (ADR-0062).
+                 * @example 2025-01-02T08:30:00.000Z
+                 */
+                firstLogAt: string | null;
+                /**
+                 * Format: date-time
+                 * @description The newest log's stored instant (ADR-0062).
+                 * @example 2025-06-10T12:00:00.000Z
+                 */
+                lastLogAt: string | null;
+                /**
+                 * Format: date-time
+                 * @description The bucket of the newest log. The start of a bucket in the requested `tz`, written as if it were UTC: midnight of 2025-06-10 in Asia/Jakarta is `2025-06-10T00:00:00.000Z` (ADR-0062).
+                 * @example 2025-06-10T00:00:00.000Z
+                 */
+                latestBucketStart: string | null;
+                /** @example 7.5 */
+                latestValue: number | null;
                 metricId: components["schemas"]["Uuid"];
                 /** @example Sleep */
                 name: string;
                 /** @example 1 */
                 priority: number | null;
+                requestedRange: {
+                    /** @enum {string} */
+                    bucket: "1h" | "1d" | "1w" | "1m" | "1y";
+                    /** Format: date-time */
+                    endISO: string;
+                    /** Format: date-time */
+                    startISO: string;
+                };
                 series: {
                     /**
                      * Format: date-time
+                     * @description The start of a bucket in the requested `tz`, written as if it were UTC: midnight of 2025-06-10 in Asia/Jakarta is `2025-06-10T00:00:00.000Z` (ADR-0062).
                      * @example 2023-01-01T00:00:00Z
                      */
                     bucketStartISO: string;
@@ -2357,6 +2563,8 @@ export interface components {
                     /** @example 5 */
                     min: number | null;
                 };
+                /** @example 42 */
+                totalLogs: number;
                 /** @example hours */
                 unit: string;
             }[];
@@ -2365,14 +2573,28 @@ export interface components {
                 bucket: string;
                 /** @example 5 */
                 count: number;
+                /**
+                 * @description Items whose series uses the fallback range.
+                 * @example 1
+                 */
+                fallbackMetrics: number;
                 range: {
                     /** Format: date-time */
                     endISO: string;
                     /** Format: date-time */
                     startISO: string;
                 };
+                /**
+                 * @description Metrics shown on the dashboard, before `limit`.
+                 * @example 8
+                 */
+                totalMetrics: number;
                 /** @example Asia/Jakarta */
                 tz: string;
+            };
+            sync: {
+                /** @description A hash of the request and the metrics' settings. Not the response's `ETag`, which is a digest of the body. */
+                etagSeed: string;
             };
         };
         ForgotPasswordRequest: {
@@ -2764,8 +2986,11 @@ export interface components {
         RateLimitError: {
             /** @example Too many requests, please try again later. */
             message: string;
-            /** @example fail */
-            status: string;
+            /**
+             * @example fail
+             * @enum {string}
+             */
+            status: "fail";
         };
         RefreshResponse: components["schemas"]["SuccessResponse"] & {
             data?: {
@@ -3054,6 +3279,11 @@ export interface components {
             meta: {
                 /** @example 1d */
                 bucket: string;
+                /**
+                 * @example none
+                 * @enum {string}
+                 */
+                fill: "none" | "zero" | "nan";
                 metricId: components["schemas"]["Uuid"];
                 range: {
                     /** Format: date-time */
@@ -3066,9 +3296,11 @@ export interface components {
                 /** @example steps */
                 unit: string;
             };
+            metricId: components["schemas"]["Uuid"];
             series: {
                 /**
                  * Format: date-time
+                 * @description The start of a bucket in the requested `tz`, written as if it were UTC: midnight of 2025-06-10 in Asia/Jakarta is `2025-06-10T00:00:00.000Z` (ADR-0062).
                  * @example 2023-01-01T00:00:00Z
                  */
                 bucketStartISO: string;
@@ -3103,8 +3335,11 @@ export interface components {
                     }[];
                     /** @example Validation failed */
                     message: string;
-                    /** @example fail */
-                    status: string;
+                    /**
+                     * @example fail
+                     * @enum {string}
+                     */
+                    status: "fail";
                 };
             };
         };
@@ -3117,8 +3352,11 @@ export interface components {
                 "application/json": {
                     /** @example Resource already exists */
                     message: string;
-                    /** @example fail */
-                    status: string;
+                    /**
+                     * @example fail
+                     * @enum {string}
+                     */
+                    status: "fail";
                 };
             };
         };
@@ -3131,8 +3369,11 @@ export interface components {
                 "application/json": {
                     /** @example Forbidden */
                     message: string;
-                    /** @example fail */
-                    status: string;
+                    /**
+                     * @example fail
+                     * @enum {string}
+                     */
+                    status: "fail";
                 };
             };
         };
@@ -3145,8 +3386,11 @@ export interface components {
                 "application/json": {
                     /** @example Internal Server Error */
                     message: string;
-                    /** @example error */
-                    status: string;
+                    /**
+                     * @example error
+                     * @enum {string}
+                     */
+                    status: "error";
                 };
             };
         };
@@ -3159,8 +3403,28 @@ export interface components {
                 "application/json": {
                     /** @example Resource not found */
                     message: string;
-                    /** @example fail */
-                    status: string;
+                    /**
+                     * @example fail
+                     * @enum {string}
+                     */
+                    status: "fail";
+                };
+            };
+        };
+        /** @description The request body is larger than the server accepts (`REQUEST_BODY_LIMIT`, 1mb by default). */
+        PayloadTooLargeError: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": {
+                    /** @example request entity too large */
+                    message: string;
+                    /**
+                     * @example fail
+                     * @enum {string}
+                     */
+                    status: "fail";
                 };
             };
         };
@@ -3174,8 +3438,11 @@ export interface components {
                 "application/json": {
                     /** @example Too many requests, please try again later. */
                     message: string;
-                    /** @example fail */
-                    status: string;
+                    /**
+                     * @example fail
+                     * @enum {string}
+                     */
+                    status: "fail";
                 };
             };
         };
@@ -3188,8 +3455,28 @@ export interface components {
                 "application/json": {
                     /** @example Unauthorized */
                     message: string;
-                    /** @example fail */
-                    status: string;
+                    /**
+                     * @example fail
+                     * @enum {string}
+                     */
+                    status: "fail";
+                };
+            };
+        };
+        /** @description The request body's charset or `Content-Encoding` is not supported. A JSON body's charset must be a UTF one (UTF-8 when none is given), and its encoding `identity`, `gzip` or `deflate`. */
+        UnsupportedMediaTypeError: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": {
+                    /** @example unsupported charset "LATIN1" */
+                    message: string;
+                    /**
+                     * @example fail
+                     * @enum {string}
+                     */
+                    status: "fail";
                 };
             };
         };

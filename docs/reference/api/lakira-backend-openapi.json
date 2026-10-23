@@ -75,6 +75,9 @@
                   "type": "string"
                 },
                 "status": {
+                  "enum": [
+                    "fail"
+                  ],
                   "example": "fail",
                   "type": "string"
                 }
@@ -99,6 +102,9 @@
                   "type": "string"
                 },
                 "status": {
+                  "enum": [
+                    "fail"
+                  ],
                   "example": "fail",
                   "type": "string"
                 }
@@ -123,6 +129,9 @@
                   "type": "string"
                 },
                 "status": {
+                  "enum": [
+                    "fail"
+                  ],
                   "example": "fail",
                   "type": "string"
                 }
@@ -147,6 +156,9 @@
                   "type": "string"
                 },
                 "status": {
+                  "enum": [
+                    "error"
+                  ],
                   "example": "error",
                   "type": "string"
                 }
@@ -171,6 +183,9 @@
                   "type": "string"
                 },
                 "status": {
+                  "enum": [
+                    "fail"
+                  ],
                   "example": "fail",
                   "type": "string"
                 }
@@ -185,6 +200,33 @@
         },
         "description": "Resource not found"
       },
+      "PayloadTooLargeError": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "message": {
+                  "example": "request entity too large",
+                  "type": "string"
+                },
+                "status": {
+                  "enum": [
+                    "fail"
+                  ],
+                  "example": "fail",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "status",
+                "message"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        "description": "The request body is larger than the server accepts (`REQUEST_BODY_LIMIT`, 1mb by default)."
+      },
       "TooManyRequestsError": {
         "content": {
           "application/json": {
@@ -195,6 +237,9 @@
                   "type": "string"
                 },
                 "status": {
+                  "enum": [
+                    "fail"
+                  ],
                   "example": "fail",
                   "type": "string"
                 }
@@ -224,6 +269,9 @@
                   "type": "string"
                 },
                 "status": {
+                  "enum": [
+                    "fail"
+                  ],
                   "example": "fail",
                   "type": "string"
                 }
@@ -237,6 +285,33 @@
           }
         },
         "description": "Authentication required or invalid token"
+      },
+      "UnsupportedMediaTypeError": {
+        "content": {
+          "application/json": {
+            "schema": {
+              "properties": {
+                "message": {
+                  "example": "unsupported charset \"LATIN1\"",
+                  "type": "string"
+                },
+                "status": {
+                  "enum": [
+                    "fail"
+                  ],
+                  "example": "fail",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "status",
+                "message"
+              ],
+              "type": "object"
+            }
+          }
+        },
+        "description": "The request body's charset or `Content-Encoding` is not supported. A JSON body's charset must be a UTF one (UTF-8 when none is given), and its encoding `identity`, `gzip` or `deflate`."
       }
     },
     "schemas": {
@@ -629,6 +704,35 @@
           "items": {
             "items": {
               "properties": {
+                "actualRange": {
+                  "description": "The range `series` covers: `requestedRange`, or the fallback range when the requested one holds no log.",
+                  "properties": {
+                    "bucket": {
+                      "enum": [
+                        "1h",
+                        "1d",
+                        "1w",
+                        "1m",
+                        "1y"
+                      ],
+                      "type": "string"
+                    },
+                    "endISO": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "startISO": {
+                      "format": "date-time",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "startISO",
+                    "endISO",
+                    "bucket"
+                  ],
+                  "type": "object"
+                },
                 "category_color": {
                   "example": "#663399",
                   "type": [
@@ -650,6 +754,54 @@
                     "null"
                   ]
                 },
+                "fallbackRangeUsed": {
+                  "type": "boolean"
+                },
+                "fallbackStrategy": {
+                  "description": "`last_activity_window` when `fallbackRangeUsed`: a window ending with the bucket of the newest log. Null otherwise.",
+                  "enum": [
+                    "last_activity_window",
+                    null
+                  ],
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "firstLogAt": {
+                  "description": "The oldest log's stored instant (ADR-0062).",
+                  "example": "2025-01-02T08:30:00.000Z",
+                  "format": "date-time",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "lastLogAt": {
+                  "description": "The newest log's stored instant (ADR-0062).",
+                  "example": "2025-06-10T12:00:00.000Z",
+                  "format": "date-time",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "latestBucketStart": {
+                  "description": "The bucket of the newest log. The start of a bucket in the requested `tz`, written as if it were UTC: midnight of 2025-06-10 in Asia/Jakarta is `2025-06-10T00:00:00.000Z` (ADR-0062).",
+                  "example": "2025-06-10T00:00:00.000Z",
+                  "format": "date-time",
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "latestValue": {
+                  "example": 7.5,
+                  "type": [
+                    "number",
+                    "null"
+                  ]
+                },
                 "metricId": {
                   "$ref": "#/components/schemas/Uuid"
                 },
@@ -664,10 +816,39 @@
                     "null"
                   ]
                 },
+                "requestedRange": {
+                  "properties": {
+                    "bucket": {
+                      "enum": [
+                        "1h",
+                        "1d",
+                        "1w",
+                        "1m",
+                        "1y"
+                      ],
+                      "type": "string"
+                    },
+                    "endISO": {
+                      "format": "date-time",
+                      "type": "string"
+                    },
+                    "startISO": {
+                      "format": "date-time",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "startISO",
+                    "endISO",
+                    "bucket"
+                  ],
+                  "type": "object"
+                },
                 "series": {
                   "items": {
                     "properties": {
                       "bucketStartISO": {
+                        "description": "The start of a bucket in the requested `tz`, written as if it were UTC: midnight of 2025-06-10 in Asia/Jakarta is `2025-06-10T00:00:00.000Z` (ADR-0062).",
                         "example": "2023-01-01T00:00:00Z",
                         "format": "date-time",
                         "type": "string"
@@ -724,6 +905,10 @@
                   ],
                   "type": "object"
                 },
+                "totalLogs": {
+                  "example": 42,
+                  "type": "integer"
+                },
                 "unit": {
                   "example": "hours",
                   "type": "string"
@@ -738,7 +923,16 @@
                 "category_color",
                 "priority",
                 "series",
-                "stats"
+                "stats",
+                "lastLogAt",
+                "firstLogAt",
+                "totalLogs",
+                "latestValue",
+                "latestBucketStart",
+                "requestedRange",
+                "actualRange",
+                "fallbackRangeUsed",
+                "fallbackStrategy"
               ],
               "type": "object"
             },
@@ -753,6 +947,11 @@
               "count": {
                 "example": 5,
                 "type": "number"
+              },
+              "fallbackMetrics": {
+                "description": "Items whose series uses the fallback range.",
+                "example": 1,
+                "type": "integer"
               },
               "range": {
                 "properties": {
@@ -771,6 +970,11 @@
                 ],
                 "type": "object"
               },
+              "totalMetrics": {
+                "description": "Metrics shown on the dashboard, before `limit`.",
+                "example": 8,
+                "type": "integer"
+              },
               "tz": {
                 "example": "Asia/Jakarta",
                 "type": "string"
@@ -780,14 +984,29 @@
               "bucket",
               "tz",
               "range",
-              "count"
+              "count",
+              "totalMetrics",
+              "fallbackMetrics"
+            ],
+            "type": "object"
+          },
+          "sync": {
+            "properties": {
+              "etagSeed": {
+                "description": "A hash of the request and the metrics' settings. Not the response's `ETag`, which is a digest of the body.",
+                "type": "string"
+              }
+            },
+            "required": [
+              "etagSeed"
             ],
             "type": "object"
           }
         },
         "required": [
           "items",
-          "meta"
+          "meta",
+          "sync"
         ],
         "type": "object"
       },
@@ -1654,6 +1873,9 @@
             "type": "string"
           },
           "status": {
+            "enum": [
+              "fail"
+            ],
             "example": "fail",
             "type": "string"
           }
@@ -2360,6 +2582,15 @@
                 "example": "1d",
                 "type": "string"
               },
+              "fill": {
+                "enum": [
+                  "none",
+                  "zero",
+                  "nan"
+                ],
+                "example": "none",
+                "type": "string"
+              },
               "metricId": {
                 "$ref": "#/components/schemas/Uuid"
               },
@@ -2394,14 +2625,19 @@
               "unit",
               "bucket",
               "tz",
-              "range"
+              "range",
+              "fill"
             ],
             "type": "object"
+          },
+          "metricId": {
+            "$ref": "#/components/schemas/Uuid"
           },
           "series": {
             "items": {
               "properties": {
                 "bucketStartISO": {
+                  "description": "The start of a bucket in the requested `tz`, written as if it were UTC: midnight of 2025-06-10 in Asia/Jakarta is `2025-06-10T00:00:00.000Z` (ADR-0062).",
                   "example": "2023-01-01T00:00:00Z",
                   "format": "date-time",
                   "type": "string"
@@ -2460,6 +2696,7 @@
           }
         },
         "required": [
+          "metricId",
           "series",
           "stats",
           "meta"
@@ -2894,6 +3131,12 @@
           "400": {
             "$ref": "#/components/responses/BadRequestError"
           },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
+          },
           "429": {
             "content": {
               "application/json": {
@@ -2955,6 +3198,12 @@
           },
           "409": {
             "$ref": "#/components/responses/ConflictError"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
@@ -3071,6 +3320,12 @@
           "409": {
             "$ref": "#/components/responses/ConflictError"
           },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
+          },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
           },
@@ -3172,6 +3427,12 @@
           },
           "409": {
             "$ref": "#/components/responses/ConflictError"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
           },
           "429": {
             "content": {
@@ -3275,6 +3536,12 @@
           "400": {
             "$ref": "#/components/responses/BadRequestError"
           },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
+          },
           "429": {
             "content": {
               "application/json": {
@@ -3338,6 +3605,12 @@
           "403": {
             "$ref": "#/components/responses/ForbiddenError"
           },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
+          },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
           },
@@ -3383,6 +3656,12 @@
           "400": {
             "$ref": "#/components/responses/BadRequestError"
           },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
+          },
           "429": {
             "content": {
               "application/json": {
@@ -3405,6 +3684,54 @@
         "summary": "Verify email address with a token",
         "tags": [
           "Auth"
+        ]
+      }
+    },
+    "/health": {
+      "get": {
+        "description": "Answers 200 while the process serves requests. It checks no dependency.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "environment": {
+                      "example": "production",
+                      "type": "string"
+                    },
+                    "release": {
+                      "description": "`APP_RELEASE`, else the platform's commit, else `unknown`",
+                      "example": "d985155",
+                      "type": "string"
+                    },
+                    "status": {
+                      "enum": [
+                        "ok"
+                      ],
+                      "type": "string"
+                    },
+                    "timestamp": {
+                      "format": "date-time",
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "environment",
+                    "release",
+                    "timestamp"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "The process is up"
+          }
+        },
+        "summary": "Liveness probe",
+        "tags": [
+          "Health"
         ]
       }
     },
@@ -3437,6 +3764,12 @@
           },
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
@@ -3555,6 +3888,12 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFoundError"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
@@ -3744,6 +4083,12 @@
           "409": {
             "$ref": "#/components/responses/ConflictError"
           },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
+          },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
           },
@@ -3805,6 +4150,12 @@
           },
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
@@ -3997,6 +4348,12 @@
           "409": {
             "$ref": "#/components/responses/ConflictError"
           },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
+          },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
           },
@@ -4188,6 +4545,12 @@
           },
           "409": {
             "$ref": "#/components/responses/ConflictError"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
@@ -4490,6 +4853,12 @@
           "409": {
             "$ref": "#/components/responses/ConflictError"
           },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
+          },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
           },
@@ -4564,6 +4933,12 @@
           },
           "403": {
             "$ref": "#/components/responses/ForbiddenError"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
@@ -4754,6 +5129,12 @@
           "409": {
             "$ref": "#/components/responses/ConflictError"
           },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
+          },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
           },
@@ -4939,6 +5320,12 @@
           "404": {
             "$ref": "#/components/responses/NotFoundError"
           },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
+          },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
           },
@@ -5101,6 +5488,12 @@
           },
           "404": {
             "$ref": "#/components/responses/NotFoundError"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
@@ -5296,6 +5689,12 @@
           "409": {
             "$ref": "#/components/responses/ConflictError"
           },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
+          },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
           },
@@ -5357,6 +5756,12 @@
           },
           "401": {
             "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
           },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
@@ -5594,6 +5999,12 @@
           "409": {
             "$ref": "#/components/responses/ConflictError"
           },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
+          },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
           },
@@ -5759,6 +6170,12 @@
           "409": {
             "$ref": "#/components/responses/ConflictError"
           },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
+          },
           "429": {
             "$ref": "#/components/responses/TooManyRequestsError"
           },
@@ -5827,6 +6244,110 @@
           "Organizations"
         ]
       }
+    },
+    "/ready": {
+      "get": {
+        "description": "Checks Postgres and Redis, each within 2 s. A result is held for 2 s, so it can lag by that much. Not the error envelope: a 503 is a probe document.",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "checks": {
+                      "properties": {
+                        "db": {
+                          "enum": [
+                            "ok",
+                            "fail"
+                          ],
+                          "type": "string"
+                        },
+                        "redis": {
+                          "enum": [
+                            "ok",
+                            "fail"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "db",
+                        "redis"
+                      ],
+                      "type": "object"
+                    },
+                    "status": {
+                      "enum": [
+                        "ok"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "checks"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Every dependency answered"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          },
+          "503": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "checks": {
+                      "properties": {
+                        "db": {
+                          "enum": [
+                            "ok",
+                            "fail"
+                          ],
+                          "type": "string"
+                        },
+                        "redis": {
+                          "enum": [
+                            "ok",
+                            "fail"
+                          ],
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "db",
+                        "redis"
+                      ],
+                      "type": "object"
+                    },
+                    "status": {
+                      "enum": [
+                        "degraded"
+                      ],
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "status",
+                    "checks"
+                  ],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A dependency failed or timed out; `checks` names which"
+          }
+        },
+        "summary": "Readiness probe",
+        "tags": [
+          "Health"
+        ]
+      }
     }
   },
   "servers": [
@@ -5863,6 +6384,10 @@
     {
       "description": "Visualization and dashboard analytics endpoints",
       "name": "Analytics"
+    },
+    {
+      "description": "Liveness and readiness probes for the platform. They run ahead of the rate limiter and the HTTPS check, take no credentials, and are not fuzzed by the contract gate (openapi-contract-polish D-01).",
+      "name": "Health"
     },
     {
       "description": "Organization admin/owner surface. Excluded from the default contract-test tag set — these routes require an elevated role the seeded fixtures do not hold.",

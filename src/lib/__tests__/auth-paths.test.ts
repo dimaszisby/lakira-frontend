@@ -327,9 +327,28 @@ describe("PUBLIC_API_PATHS matches the contract", () => {
     expect(secured.length).toBeGreaterThan(0);
   });
 
-  it("lists exactly the paths the contract leaves unsecured", () => {
-    const unsecuredPaths = [...new Set(operationsBySecurity().unsecured.map(pathOf))].sort();
-    expect([...PUBLIC_API_PATHS].sort()).toEqual(unsecuredPaths);
+  /**
+   * Unsecured in the contract, and still not forwarded without a session. The
+   * backend's liveness and readiness probes (backend #215) are for the platform,
+   * not sign-in steps: nothing in the browser calls them, and `ready` checks
+   * Postgres and Redis on each request. Decided 2026-10-23. Any other unsecured
+   * path still fails below until it joins `PUBLIC_API_PATHS` or this list, with
+   * its reason.
+   */
+  const UNSECURED_NOT_PROXIED = new Set(["health", "ready"]);
+
+  const unsecuredPaths = () => [...new Set(operationsBySecurity().unsecured.map(pathOf))].sort();
+
+  it("lists exactly the paths the contract leaves unsecured, apart from the probes", () => {
+    const expected = unsecuredPaths().filter((path) => !UNSECURED_NOT_PROXIED.has(path));
+    expect([...PUBLIC_API_PATHS].sort()).toEqual(expected);
+  });
+
+  it("excludes only paths the contract still leaves unsecured", () => {
+    // A probe the backend secures, renames or removes leaves a stale exclusion.
+    expect([...UNSECURED_NOT_PROXIED].filter((path) => !unsecuredPaths().includes(path))).toEqual(
+      [],
+    );
   });
 
   it("lists no path that also has a secured method", () => {
