@@ -32,6 +32,7 @@ in the [debt register](frontend-debt-register/register.md), not in this list.
 | [main-release-branch](main-release-branch/README.md)               | `main` reset onto `dev` and protected              | #146, 2026-10-23 |
 | [metric-detail-contrast](metric-detail-contrast/README.md)         | Contrast on the metric detail page                 | #78, 2026-10-08  |
 | [mobile-sign-out](mobile-sign-out/README.md)                       | Sign-out on mobile                                 | #130, 2026-10-21 |
+| [org-lists-follow-cursor](org-lists-follow-cursor/README.md)       | Org lists fetch every page of their cursor         | #151, 2026-10-24 |
 | [org-switcher](org-switcher/README.md)                             | Organization switcher                              | #56, 2026-09-29  |
 | [page-headings](page-headings/README.md)                           | An `h1` on every page                              | #123, 2026-10-20 |
 | [profile-load-errors](profile-load-errors/README.md)               | Profile load errors                                | #100, 2026-10-16 |

@@ -69,6 +69,33 @@ describe("OrganizationSwitcher", () => {
       expect(within(items[1]).getByText(/Member/)).toBeInTheDocument();
     });
 
+    it("lists organizations from every page when the list runs past one page", async () => {
+      // At most 100 rows a page since lakira-backend #218 (register row F-76).
+      const afters: (string | null)[] = [];
+      server.use(
+        http.get(ORGANIZATIONS_URL, ({ request }) => {
+          const after = new URL(request.url).searchParams.get("after");
+          afters.push(after);
+          const [organizations, nextCursor] =
+            after === "page-2" ? [[beta], null] : [[acme], "page-2"];
+          return HttpResponse.json({
+            status: "success",
+            message: "Success",
+            data: { organizations, nextCursor },
+          });
+        }),
+      );
+
+      const { container } = renderWithProviders(<OrganizationSwitcher />);
+
+      const list = await screen.findByRole("list");
+      await waitFor(() => expect(within(list).getAllByRole("listitem")).toHaveLength(2));
+      expect(within(list).getByText("Acme")).toBeInTheDocument();
+      expect(within(list).getByText("Beta")).toBeInTheDocument();
+      expect(afters).toEqual([null, "page-2"]);
+      expect(await axe(container)).toHaveNoViolations();
+    });
+
     it("marks the current organization in text and offers it no switch (AC-2)", async () => {
       useOrganizations([acme, beta]);
 

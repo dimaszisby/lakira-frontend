@@ -29,6 +29,12 @@ export type MembersResponse = {
 };
 
 /**
+ * One page of `GET /organizations/{id}/members`, 100 rows at most. `listMembers`
+ * follows `nextCursor` and returns every page as one `MembersResponse`.
+ */
+export type MembersPage = MembersResponse & { nextCursor?: string | null };
+
+/**
  * One of the organizations the signed-in user belongs to, from
  * `GET /organizations`.
  *
@@ -41,3 +47,6 @@ export type UserOrganization = components["schemas"]["UserOrganization"];
 export type UserOrganizationsResponse = {
   organizations: UserOrganization[];
 };
+
+/** One page of `GET /organizations`; `listMyOrganizations` follows it to the last. */
+export type UserOrganizationsPage = UserOrganizationsResponse & { nextCursor?: string | null };
