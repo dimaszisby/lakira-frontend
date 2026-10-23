@@ -89,6 +89,19 @@ End every completed task with a ready-to-use PR message:
 - Body covering what changed and why, and how it was verified.
 - Links to the kit README and every ADR the work promoted.
 
+**Handing over.** The commands are run verbatim, in a shell whose state you cannot see:
+
+- **Never name a path that `git mv` or `git rm` already staged.** Both remove it from the working
+  tree, so a later `git add` fails with `pathspec ... did not match` and stops the commit. Run
+  `git add --dry-run` on each path before handing over (2026-09-15).
+- **One path per `git add` line**, or a directory when all of it belongs to the task. A long line
+  wraps on paste and the cut-off path runs as a command, silently; a dry run proves the command, not
+  the paste (2026-09-24, #50).
+- **No `cd` in a handover.** It outlives the command, and the next block runs in the wrong repo.
+  Point the tool at the other repo instead (`git -C`, `docker compose -f`), and make the first line
+  prove where it runs, such as a check of the branch. `!` means "run here" only at the Claude Code
+  prompt; in plain zsh, `! cmd` inverts the exit status, so a failure reads as success (2026-09-29).
+
 Note that this repo's commit history is only partly conventional — the older half is free-form (`update …`, `add …`), and there is no commitlint or husky. Write conventional messages anyway; that is the direction the recent history moved in.
 
 ## Gates are named, not asserted
@@ -129,6 +142,12 @@ still merge with a signed-in page broken, and the nightly run finds it the next 
 their trigger applies, run them locally and report them by name, or report them as skipped and
 why. CI typechecks and lints their specs on every pull request either way.
 
+**Two gates depend on state outside this repo:** `npm run security:audit` (new advisories) and
+`npm run api:spec:check` (the backend's live spec). `api:types:check` compares local files only.
+Rerun both immediately before every handover, whatever the change, since an earlier result is
+stale. When both are red, fix them in one PR as separate commits: split, each PR fails the other's
+gate (2026-10-01, #63).
+
 For anything touching routing, auth, or caching, check `docs/internal/incidents/` first — four logged postmortems cover exactly those areas, and their causes recur.
 
 The bar: would a staff engineer approve this as-is?
@@ -166,6 +185,16 @@ item from the todo folder, the dated audit and the Notion page shared with lakir
 by a rule fixed in that kit's D-01. Do not rank from memory of the conversation. The backend keeps
 the same register (lakira-backend #159); a row that exists on both sides names the other's id.
 
+- **Answer, then wait.** "What's next", with or without a merge, asks for a recommendation, not
+  for work. Never start on the strength of an earlier approval; the owner says when, usually "Enter
+  plan mode". If half-finished work for the item is in the tree, ask whether to keep it before
+  touching anything (2026-10-21).
+- **A merge is verified when the `dev` push run for its merge commit has finished,** not when the
+  PR's run was green. If it is still running, say so and check it before the next task. A red
+  `api-contract` on `dev` alone means "sync the contract", not "the merge broke something"
+  (2026-09-27, #52). Before calling a run stuck, compare `date -u` with its `createdAt` and
+  `updatedAt` (all UTC); during a GitHub Actions incident an in-progress status is not evidence
+  (2026-10-01).
 - **Recommend the first row whose state is `ready`**, and cite it by id (`F-08`). Read its
   analysis file if it has one before proposing a kit size.
 - **Report any row above it that is waiting on someone** as a gap, with who it waits on. A blocked
@@ -178,16 +207,17 @@ the same register (lakira-backend #159); a row that exists on both sides names t
 - **A new todo, audit finding or Notion record gets a register row in the same PR that files it**,
   placed by D-01. A todo with no row is invisible to this rule. That includes a "Found, out of
   scope" line left in a todo's Status section.
-- **A fix PR moves its row to the register's Closed section** with the PR number, in the same PR.
+- **A fix PR moves its row to `register-closed.md`**, appended with the PR number, in the same PR.
   A row a dated audit must confirm says so until the run does.
 - **Re-rank only by the rule.** If the rule gives the wrong answer, change D-01 with a new
   decision entry, not the order of one row.
 
 `src/__tests__/register-todos.test.ts` fails the unit gate when a todo with an unticked box
-(`- [ ]`) is not named in a row above the register's `## Closed` heading (register D-04, row F-43,
-2026-10-19). It cannot see a finding written as prose instead of a box, or a row left open after
-its todo was fully ticked, so a "what's next" answer still starts by reading the `docs/internal/todos/`
-files newer than the register's "As of" date for those two cases.
+(`- [ ]`) is not named in a row of `register.md`, which holds open rows only (register D-04 and
+D-05, row F-43), or when a row id is in both `register.md` and `register-closed.md`. It cannot see
+a finding written as prose instead of a box, or a row left open after its todo was fully ticked,
+so a "what's next" answer still starts by reading the `docs/internal/todos/` files newer than the
+register's "As of" date for those two cases.
 
 ## Core principles
 

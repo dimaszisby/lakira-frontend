@@ -10,6 +10,7 @@ side. Rows here are `F-NN`; the backend's are `B-NN`.
 
 - [Register](register.md) — every open item, ranked. **"What's next" is answered from here**
   (`.claude/rules/workflow.md` § What's next)
+- [Closed rows](register-closed.md) — every closed row, with the PR that closed it
 - [Plan](frontend-debt-register-plan.md) — goals, acceptance criteria, phases
 - [Checklist](frontend-debt-register-checklist.md) — work items, acceptance, gates
 - [Decisions](decisions.md) — `D-NN` entries: the ranking rule, the grouping, what is not analysed

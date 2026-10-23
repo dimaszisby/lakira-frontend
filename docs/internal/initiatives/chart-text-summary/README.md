@@ -1,6 +1,7 @@
 # Chart text summary
 
 **Status:** Done on the branch; closes register row F-32.
+Merged in #103 (`c480907`, 2026-10-17).
 **Slug:** `chart-text-summary` · **Branch:** `fix/chart-text-summary`
 
 Small sweep: no plan, acceptance criteria live in the checklist. Found by the accessibility

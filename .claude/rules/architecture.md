@@ -102,6 +102,11 @@ Use `/new-route` to scaffold these — it holds the invariant so you do not have
 - Server-side fetches for protected routes go through `/api/proxy/[...path]` and must forward the `lakira_token` cookie via `getServerAuthHeaders()`. An SSR prefetch without it silently 401s.
 - Closing an edit modal with `router.back()` restores the cached RSC tree. Pair it with `router.refresh()` or the parent route shows stale data.
 - Client-only hooks (`useRouter`, `useState`, …) cannot live in a file that is still a server component. Split out a client child.
+- **A file loaded by convention runs only if its name and directory match the version's
+  convention**: the proxy, instrumentation, route handlers, config. `middleware.ts` at the repo root
+  never ran once Next 16 renamed it to `proxy` under `src/`, and the layout's own redirect hid it.
+  Check `node_modules/next/dist/docs/`, and prove a gate runs before trusting it; the matcher test
+  now reads `src/proxy.ts` by path (2026-09-12).
 
 ## Path aliases
 

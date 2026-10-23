@@ -128,3 +128,26 @@ and the check would make deleting one fail CI.
 **Consequences.** A finding written as prose, not as a box, is invisible to the check, as is a row
 left open after its todo was fully ticked. The "what's next" answer still lists todos newer than
 the register's "As of" date by hand, for those cases only.
+
+## D-05 — Closed rows move to their own file
+
+- **Status:** Accepted
+- **Date:** 2026-10-23
+
+**Context.** Kit `docs-diet`, D-01. On `dev` at `168291f` the register was 51,086 bytes, and its
+`## Closed` section, 53 rows, was 36,644 of them (72%). Every "what's next" reads `register.md` in
+full, so it read 53 finished rows to find the open ones. D-04's check bounded the open rows by the
+`## Closed` heading.
+**Decision.** The Closed table moves, verbatim, to [`register-closed.md`](register-closed.md). A
+fix PR moves its row there, appended at the bottom, in the same PR. `register.md` holds open rows,
+the owner questions and the notes above them, and points to the closed file. This supersedes D-04's
+"above the `## Closed` heading": every row of `register.md` is open, and
+`src/__tests__/register-todos.test.ts` checks each open todo against it. The test also fails when
+one row id is in both files, which catches a row copied instead of moved.
+**Options considered.** Shortening each closed row to one line plus its PR: rejected, it rewrites
+53 records and the register would still be read in one piece. Deleting closed rows, since each PR
+holds the detail: rejected, the notes record what each fix found, and only some of that is in the
+PR body.
+**Consequences.** `register.md` dropped to about 14 KB. A closing PR now edits two files instead of
+one. The "As of" line still lists closed ids, so it can say which rows a given `dev` has closed
+without opening the second file.

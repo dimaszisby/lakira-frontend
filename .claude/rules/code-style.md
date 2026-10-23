@@ -72,3 +72,11 @@ For what classes to reach for, see `.claude/rules/styling.md`.
 - `import-x/no-extraneous-dependencies` — runtime code in `src/` (not tests, not `test-utils`) may not import a devDependency. CI's PR audit skips devDependencies (ADR-0023), so such an import would ship a package nothing audits. Move it to `dependencies`. Type-only imports are fine.
 
 **Warnings fail lint.** `npm run lint` is `eslint . --max-warnings=0` as of 2026-09-24, so a warning fails CI's `checks` job exactly as an error does. The distinction between `warn` and `error` in `eslint.config.mjs` is now only how the editor displays it. Fix the warning; if a rule is wrong for a whole class of file, scope an override with its reason next to it, as the context-file exemption above does. Never raise `--max-warnings` to make a build pass.
+
+## Editing hazards
+
+**Never write an escape sequence for a control character through an editing tool.** `"\u0000"`
+was stored as a literal NUL byte: the suite stayed green, git marked the file binary, and the commit
+message that described it was refused. Use a plain-ASCII value or build the string in code. When one
+seems unavoidable, scan the staged files, the untracked files and the commit draft, since
+`git diff --name-only` misses the last two (2026-09-23).

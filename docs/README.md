@@ -64,6 +64,8 @@ from a clean clone.
 
 [`internal/`](./internal/) holds this project's working material: initiative kits, audit runs,
 incidents, todos, and archive. It sits _beside_ the four quadrants rather than inside them.
+[`internal/initiatives/README.md`](./internal/initiatives/README.md) lists every kit, active or
+done, with the PR that merged it.
 
 The reason is that Diátaxis classifies documentation **of a system**. It says nothing about the
 plans, checklists, trackers, and audit runs a real project accumulates — which here is 58 of 120

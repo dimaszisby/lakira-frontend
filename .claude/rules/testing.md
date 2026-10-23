@@ -154,3 +154,11 @@ The genuinely untested areas, in rough priority order: `src/services/**` (the wh
 - A test that needs `waitFor` around an assertion that should be synchronous is usually hiding a bug in the component.
 - Boundary lint rules are off in test files; that is a convenience, not a licence to import across layers in source.
 - Fix a flaky test or delete it. Do not retry it.
+- **A regression test must be seen to fail.** Restore the unfixed file from `HEAD` and run it. If
+  it cannot be made to fail, say so in the test and the PR, and prove the fix another way: jsdom
+  orders effects differently from a browser, and four `withAuth` tests passed against the broken
+  component (2026-09-15).
+- **A value standing in for a credential is plain and low-entropy** (`"switched-session-token"`),
+  unless the code under test parses it; then build the shape at runtime from parts. The secret scan
+  reads full history and cannot tell a fixture from a leak: a JWT-shaped string failed it. Amend the
+  commit that added one; this repo has no `.gitleaksignore` (2026-09-28).

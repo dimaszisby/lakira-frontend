@@ -1,6 +1,7 @@
 # Unquarantine layout files
 
 **Status:** Done on the branch; closes register row F-09, pending a dated audit run.
+Merged in #91 (`590e935`, 2026-10-13).
 **Slug:** `unquarantine-layout-files` · **Branch:** `refactor/unquarantine-layout-files`
 
 Small sweep: no plan, acceptance criteria live in the checklist. The work was sized and analysed

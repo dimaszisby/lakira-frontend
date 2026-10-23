@@ -27,7 +27,10 @@ first is this page's rule, since a ruleset cannot name a pull request's head bra
    The body lists the pull requests merged into `dev` since the last promotion:
    `git log --first-parent --oneline origin/main..origin/dev`.
 
-2. Wait for "CI passed" on the pull request.
+2. Wait for "CI passed" on the pull request. It is matched by commit, so `dev`'s own push run on
+   the same commit can satisfy it before the pull request's run finishes. That is safe for a
+   promotion, since the merge has the same files as `dev`, but let the pull request's run finish
+   too: `gh pr checks <number> --watch`.
 3. Merge with **Create a merge commit**, the only method the ruleset offers:
 
    ```bash

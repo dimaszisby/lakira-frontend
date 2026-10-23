@@ -2,6 +2,7 @@
 
 **Status:** Done 2026-10-21, pending merge. Debt register row F-34, owner question O-07; D-01
 promoted to ADR-0035.
+Merged in #133 (`7d54f25`, 2026-10-21).
 **Slug:** `list-variant-breakpoint` · **Branch:** `fix/list-variant-breakpoint`
 
 - [Checklist](list-variant-breakpoint-checklist.md) — work items, acceptance, gates
