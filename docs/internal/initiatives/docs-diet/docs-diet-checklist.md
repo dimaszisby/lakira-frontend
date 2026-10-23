@@ -56,6 +56,11 @@ Each lesson is condensed into its rule file with its date, then removed from
       programmes, state as their own files say
 - [x] Found: a `grep` for NUL bytes counted every line, because the shell cannot pass a NUL in an
       argument → the scan was redone in Python; no changed file has control bytes
+- [x] Found: two live files pointed at a lesson by "see `.claude/lessons.md`":
+      `.claude/rules/architecture.md` and a comment in `src/styles/__tests__/colour-classes.test.ts`
+      → in scope, repointed. `lessons.md` now names `9c081c3`, the last commit holding every entry,
+      so dated citations in records (ADR-0023, the audits, finished kits) still resolve
+- [x] Found: the API sync PR opened first and took #148 → in scope, this kit's PR is #149
 
 ## Acceptance
 
@@ -65,8 +70,8 @@ Each lesson is condensed into its rule file with its date, then removed from
       script; `register-todos` passes with 3 cases
 - [x] `.claude/lessons.md` holds no lesson, and each one can be found in its rule file. _Why:_ the
       log loads every session, and a lesson that has proven true belongs in the rules
-      (`workflow.md` § Self-improvement loop). · The table above; `lessons.md` is 578 bytes
-- [x] The always-loaded set is smaller. _Why:_ it is read every session. · 32,253 bytes, down from
+      (`workflow.md` § Self-improvement loop). · The table above; `lessons.md` is 640 bytes
+- [x] The always-loaded set is smaller. _Why:_ it is read every session. · 32,315 bytes, down from
       45,795
 - [x] The index lists all 38 folders, and no kit status says "on the branch", "pending merge",
       "Implementation complete" or "In review" without its merge PR, apart from this kit's own
@@ -84,8 +89,10 @@ Run 2026-10-23 on Node 24.21.0.
 - [x] unit tests, 1133, including the rewritten `register-todos` (3 cases) and `commands-doc`
 - [x] build
 - [x] `security:audit`, 0 vulnerabilities; `api:types:check` in sync
-- [ ] spec drift: `api:spec:check` red on 2026-10-23. Backend #215 (`7acd1f9`, 08:18Z) added
-      `GET /health` and `GET /ready`, 413 and 415 on 22 operations, and narrowed
-      `RateLimitError.status` to `"fail"`. Not caused by this branch
+- [x] spec drift, via `dev`: `api:spec:check` went red on 2026-10-23 from backend #215 and then
+      #217, not from this branch. #148 synced the snapshot on `dev` (`ddfe4fc`, whose run passed).
+      This branch changes no contract file, and its merge with `dev` is conflict-free and carries
+      `dev`'s contract files unchanged (`git merge-tree`), so the PR's run checks the synced
+      snapshot. Locally the branch still holds the older copy and fails the check on its own
 - [ ] css lint, integration, e2e, e2e (csp), e2e (stack) and e2e (csp, stack): skipped, since no
       application code, style or contract changed

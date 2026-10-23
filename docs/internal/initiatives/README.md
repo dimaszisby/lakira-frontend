@@ -9,7 +9,7 @@ in the [debt register](frontend-debt-register/register.md), not in this list.
 
 | Kit                                                        | What                                                                                      | PR                |
 | ---------------------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------- |
-| [docs-diet](docs-diet/README.md)                           | The register's closed rows in their own file, lessons promoted into the rules, this index | #148              |
+| [docs-diet](docs-diet/README.md)                           | The register's closed rows in their own file, lessons promoted into the rules, this index | #149              |
 | [frontend-debt-register](frontend-debt-register/README.md) | Every open item, ranked; "what's next" is answered from it                                | #89, kept current |
 
 ## Done

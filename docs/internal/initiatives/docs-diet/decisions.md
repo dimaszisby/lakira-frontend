@@ -42,7 +42,7 @@ was 16,856 bytes of 15 lessons, several already restated in the rules.
 
 - `register.md` is 14,504 bytes, down from 51,086. A closing PR edits two files.
 - The always-loaded set (`CLAUDE.md`, `workflow.md`, `code-style.md`, `commands.md`,
-  `lessons.md`) is 32,253 bytes, down from 45,795. `workflow.md` grew by 2,271 bytes with the
+  `lessons.md`) is 32,315 bytes, down from 45,795. `workflow.md` grew by 2,271 bytes with the
   promoted handover, gate and "what's next" lessons. Three lessons now live in path-scoped rules
   (`testing.md`, `styling.md`, `architecture.md`), which load only when matching files are
   touched.
