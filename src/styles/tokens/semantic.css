@@ -7,6 +7,10 @@
     --bg: var(--gray-200);
     --surface: var(--gray-50);
     --surface-2: var(--gray-100);
+
+    /* A user colour's tint is mixed into this, opaque, so the theme's ink meets 4.5:1 on it for any
+       colour: 8.7:1 at worst (ADR-0040) */
+    --tint-base: var(--gray-white);
     --text: var(--gray-900);
 
     /* Equal to --text: h5/h6 and .text-button already render this way */
@@ -53,6 +57,7 @@
     --bg: var(--gray-900);
     --surface: var(--gray-800);
     --surface-2: var(--gray-700);
+    --tint-base: var(--gray-900); /* 6.54:1 at worst; gray-800 is 4.54:1, gray-700 3.7:1 */
     --text: var(--gray-100);
     --text-secondary: var(--gray-300);
 

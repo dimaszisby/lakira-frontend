@@ -24,10 +24,9 @@ const WIDTHS = [1000, 1280] as const;
 
 // What must be on the page before axe runs, so a pass cannot come from an empty state.
 //
-// Left out until its register row closes, so that this spec passes on what it can check: the
-// metrics table in the dark theme, where the category chip's text is 4.11:1 on its tint, under the
-// 4.5:1 of WCAG 1.4.3 (F-56). At 1280 px only until 2026-10-21; the table now shows from 640 px
-// (ADR-0035), so 1000 px meets the same chip.
+// Every combination runs. The metrics table in the dark theme was left out while the category
+// chip's text was 4.11:1 on its tint (F-56); the chip is an opaque tint on a fixed base since
+// ADR-0040.
 //
 // The categories list was left out too while the backend answered every repeat of its list query
 // with a 500 (F-57, fixed by backend #188). Its four visits here, each needing the row, now show
@@ -37,12 +36,6 @@ const PAGES: readonly { path: string; label: string; shows: string }[] = [
   { path: "/metrics", label: "metrics list with a row", shows: METRIC_NAME },
   { path: "/metric-categories", label: "categories list with a row", shows: CATEGORY_NAME },
 ];
-
-// Wherever the metrics table shows: Tailwind's `sm`.
-const TABLE_FROM = 640;
-
-const isKnownFailure = (path: string, width: number, theme: string) =>
-  path === "/metrics" && width >= TABLE_FROM && theme === "dark";
 
 type Created = { data: { id: string } };
 
@@ -92,7 +85,6 @@ describe("Signed-in pages with data meet WCAG 2.1 A and AA", () => {
   for (const width of WIDTHS) {
     for (const theme of THEMES) {
       for (const { path, label, shows } of PAGES) {
-        if (isKnownFailure(path, width, theme)) continue;
         it(`has no violations on the ${label} at ${width} px in the ${theme} theme`, () => {
           cy.viewport(width, HEIGHT);
           cy.visitInTheme(path, theme);

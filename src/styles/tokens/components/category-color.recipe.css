@@ -1,8 +1,12 @@
 /* The colour is user data — a category's chosen swatch — so it cannot be a
  * token. It arrives as the `--category-color` custom property, which is the one
- * thing an inline style is allowed to set; the styling itself stays here. */
+ * thing an inline style is allowed to set; the styling itself stays here.
+ *
+ * The tint is opaque: 20 % of the colour mixed into `--tint-base`, not laid over
+ * whatever surface the chip sits on, so the theme's ink meets 4.5:1 on it for
+ * any colour in both themes (ADR-0040). */
 @layer components {
   .category-color-bg {
-    background-color: var(--category-color, transparent);
+    background-color: color-mix(in srgb, var(--category-color) 20%, hsl(var(--tint-base)));
   }
 }

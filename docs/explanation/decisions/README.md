@@ -62,6 +62,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0037](./adr-0037-a-clickable-row-is-named-by-its-caller.md)                    | A clickable table row is named by its caller                                 | Accepted       | 2026-10-22 | `D-01` (table-row-accessible-name)  |
 | [ADR-0038](./adr-0038-e2e-builds-the-app-itself.md)                                 | E2E builds the app itself; supersedes ADR-0036 in part                       | Accepted       | 2026-10-22 | `D-01` (build-inside-e2e)           |
 | [ADR-0039](./adr-0039-dev-is-protected-by-a-ruleset.md)                             | `dev` is protected by a ruleset that requires "CI passed"                    | Accepted       | 2026-10-22 | `D-01` (dev-ruleset)                |
+| [ADR-0040](./adr-0040-a-category-chip-is-an-opaque-tint-on-a-fixed-base.md)         | A category chip is an opaque tint on a fixed base                            | Accepted       | 2026-10-23 | `D-01` (category-chip-contrast)     |
 
 ## Where the other decisions went
 
