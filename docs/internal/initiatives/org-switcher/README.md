@@ -2,6 +2,7 @@
 
 **Status:** Done. All eleven acceptance criteria met; AC-5 and AC-11 checked live on 2026-09-29
 against a local backend with Mailpit. e2e stays skipped: no Cypress coverage of this flow.
+Merged in #56 (`5c67da3`, 2026-09-29).
 **Slug:** `org-switcher` · **Branch:** `feat/org-switcher`
 
 - [Plan](org-switcher-plan.md) — goals, acceptance criteria, phases

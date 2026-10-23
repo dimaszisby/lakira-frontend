@@ -61,10 +61,15 @@ Register row F-25, owner question O-08. `main` was one commit with no history in
       GitHub Actions. _Why:_ ADR-0039 left `main` to this row; merge commits keep `dev`'s commits
       in `main` as they are. · Read back with
       `gh api repos/dimaszisby/lakira-frontend/rulesets/25702940`, equal to the file
-- [ ] The first `dev` → `main` promotion merges under the ruleset, offering only a merge commit,
+- [x] The first `dev` → `main` promotion merges under the ruleset, offering only a merge commit,
       and `git merge-base --is-ancestor origin/dev origin/main` holds afterwards. _Why:_ the
-      read-back shows the rule exists; a promotion shows it binds. · **Not yet checked**: the
-      owner's action after #146 merges
+      read-back shows the rule exists; a promotion shows it binds. · **Checked 2026-10-23, after
+      #146, recorded in kit `docs-diet`:** #147 merged at 07:28Z as `66d4b65`, whose parents are
+      `c7ba8b7` and `168291f`. `gh pr merge 147 --squash` was refused first ("Squash merges are not
+      allowed on this repository"). Afterwards `dev` was an ancestor of `main`, the two trees were
+      equal, and the push run on `main`, 39917967762, passed. The required "CI passed" was already
+      met by `dev`'s push run on the same commit (39915336780) when the pull-request run
+      (39916416565) started; both passed
 - [x] No live doc still says `main` is unprotected or that F-25 is open. _Why:_ a stale "the hook
       is the only enforcement" misleads the next reader. · `grep` for "F-25", "O-08",
       "server-side protection" and "only enforcement"; what is left is in dated todos, finished

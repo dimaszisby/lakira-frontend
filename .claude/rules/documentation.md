@@ -94,6 +94,12 @@ directly in the checklist's `## Acceptance` section. The never-restate rule belo
 plan exists to be restated from. A small sweep also has no Definition of Ready: its checklist is the
 thing approved.
 
+**Write acceptance criteria the PR itself can meet.** A criterion that only a later event can
+satisfy, such as the first promotion after a merge, leaves the kit open and costs a close-out PR.
+State such a check as a step in the how-to or the handover instead, and record its evidence on
+the PR or run that performs it. Added 2026-10-23 from `main-release-branch`, whose last box
+waited on promotion #147.
+
 Within a full kit, **acceptance criteria and open questions are unconditional**. Rollback, security,
 observability and accessibility fire on their triggers. Everything else is shape, not ceremony.
 
