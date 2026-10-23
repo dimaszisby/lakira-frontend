@@ -2489,20 +2489,64 @@ export interface components {
         };
         DashboardVisualizationResponse: {
             items: {
+                /** @description The range `series` covers: `requestedRange`, or the fallback range when the requested one holds no log. */
+                actualRange: {
+                    /** @enum {string} */
+                    bucket: "1h" | "1d" | "1w" | "1m" | "1y";
+                    /** Format: date-time */
+                    endISO: string;
+                    /** Format: date-time */
+                    startISO: string;
+                };
                 /** @example #663399 */
                 category_color: string | null;
                 /** @example 😴 */
                 category_icon: string | null;
                 /** @example Wellness */
                 category_name: string | null;
+                fallbackRangeUsed: boolean;
+                /**
+                 * @description `last_activity_window` when `fallbackRangeUsed`: a window ending with the bucket of the newest log. Null otherwise.
+                 * @enum {string|null}
+                 */
+                fallbackStrategy: "last_activity_window" | null;
+                /**
+                 * Format: date-time
+                 * @description The oldest log's stored instant (ADR-0062).
+                 * @example 2025-01-02T08:30:00.000Z
+                 */
+                firstLogAt: string | null;
+                /**
+                 * Format: date-time
+                 * @description The newest log's stored instant (ADR-0062).
+                 * @example 2025-06-10T12:00:00.000Z
+                 */
+                lastLogAt: string | null;
+                /**
+                 * Format: date-time
+                 * @description The bucket of the newest log. The start of a bucket in the requested `tz`, written as if it were UTC: midnight of 2025-06-10 in Asia/Jakarta is `2025-06-10T00:00:00.000Z` (ADR-0062).
+                 * @example 2025-06-10T00:00:00.000Z
+                 */
+                latestBucketStart: string | null;
+                /** @example 7.5 */
+                latestValue: number | null;
                 metricId: components["schemas"]["Uuid"];
                 /** @example Sleep */
                 name: string;
                 /** @example 1 */
                 priority: number | null;
+                requestedRange: {
+                    /** @enum {string} */
+                    bucket: "1h" | "1d" | "1w" | "1m" | "1y";
+                    /** Format: date-time */
+                    endISO: string;
+                    /** Format: date-time */
+                    startISO: string;
+                };
                 series: {
                     /**
                      * Format: date-time
+                     * @description The start of a bucket in the requested `tz`, written as if it were UTC: midnight of 2025-06-10 in Asia/Jakarta is `2025-06-10T00:00:00.000Z` (ADR-0062).
                      * @example 2023-01-01T00:00:00Z
                      */
                     bucketStartISO: string;
@@ -2519,6 +2563,8 @@ export interface components {
                     /** @example 5 */
                     min: number | null;
                 };
+                /** @example 42 */
+                totalLogs: number;
                 /** @example hours */
                 unit: string;
             }[];
@@ -2527,14 +2573,28 @@ export interface components {
                 bucket: string;
                 /** @example 5 */
                 count: number;
+                /**
+                 * @description Items whose series uses the fallback range.
+                 * @example 1
+                 */
+                fallbackMetrics: number;
                 range: {
                     /** Format: date-time */
                     endISO: string;
                     /** Format: date-time */
                     startISO: string;
                 };
+                /**
+                 * @description Metrics shown on the dashboard, before `limit`.
+                 * @example 8
+                 */
+                totalMetrics: number;
                 /** @example Asia/Jakarta */
                 tz: string;
+            };
+            sync: {
+                /** @description A hash of the request and the metrics' settings. Not the response's `ETag`, which is a digest of the body. */
+                etagSeed: string;
             };
         };
         ForgotPasswordRequest: {
@@ -3219,6 +3279,11 @@ export interface components {
             meta: {
                 /** @example 1d */
                 bucket: string;
+                /**
+                 * @example none
+                 * @enum {string}
+                 */
+                fill: "none" | "zero" | "nan";
                 metricId: components["schemas"]["Uuid"];
                 range: {
                     /** Format: date-time */
@@ -3231,9 +3296,11 @@ export interface components {
                 /** @example steps */
                 unit: string;
             };
+            metricId: components["schemas"]["Uuid"];
             series: {
                 /**
                  * Format: date-time
+                 * @description The start of a bucket in the requested `tz`, written as if it were UTC: midnight of 2025-06-10 in Asia/Jakarta is `2025-06-10T00:00:00.000Z` (ADR-0062).
                  * @example 2023-01-01T00:00:00Z
                  */
                 bucketStartISO: string;
