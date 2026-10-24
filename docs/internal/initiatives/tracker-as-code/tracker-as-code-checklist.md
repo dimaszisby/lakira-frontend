@@ -61,9 +61,9 @@ defaults, and a sync run by hand ([D-01](decisions.md),
 - [x] format
 - [x] unit tests
 - [x] spec drift
-- [ ] `security:audit`: fails on `zod` 3.25.76, GHSA-mrhx-c7xc-m3w5, widened to every release
-      before 4.6.6 at 18:26Z on 2026-10-23. Not this branch's change; the owner chose to fix it
-      on `dev` first, and this branch is rerun on top of that fix before its PR opens
+- [x] `security:audit`: 0 vulnerabilities on 2026-10-24, after `dev` was merged in. It had failed
+      on `zod` 3.25.76 (GHSA-mrhx-c7xc-m3w5), which the owner chose to fix on `dev` first, in
+      #152; this branch waited for it
 - [x] build
 - [ ] css lint, integration, e2e, e2e (csp), e2e (stack) and e2e (csp, stack): skipped, no
       application code, style or flow changed
