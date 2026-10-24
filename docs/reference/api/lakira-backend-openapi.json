@@ -648,9 +648,6 @@
                   },
                   {
                     "type": "null"
-                  },
-                  {
-                    "type": "null"
                   }
                 ]
               },
@@ -1760,9 +1757,6 @@
               },
               {
                 "type": "null"
-              },
-              {
-                "type": "null"
               }
             ],
             "example": "cumulative"
@@ -2197,12 +2191,6 @@
                 ]
               },
               "displayOptions": {
-                "default": {
-                  "chartType": "line",
-                  "color": "#E897A3",
-                  "priority": 1,
-                  "showOnDashboard": true
-                },
                 "properties": {
                   "chartType": {
                     "default": "line",
@@ -2291,12 +2279,6 @@
                 ]
               },
               "displayOptions": {
-                "default": {
-                  "chartType": "line",
-                  "color": "#E897A3",
-                  "priority": 1,
-                  "showOnDashboard": true
-                },
                 "properties": {
                   "chartType": {
                     "default": "line",
@@ -2335,9 +2317,6 @@
                       "incremental"
                     ],
                     "type": "string"
-                  },
-                  {
-                    "type": "null"
                   },
                   {
                     "type": "null"
@@ -2880,6 +2859,7 @@
             }
           },
           {
+            "description": "The `ETag` of a response stored earlier. When it still matches, the answer is a 304 with no body.",
             "in": "header",
             "name": "If-None-Match",
             "required": false,
@@ -3043,6 +3023,7 @@
             }
           },
           {
+            "description": "The `ETag` of a response stored earlier. When it still matches, the answer is a 304 with no body.",
             "in": "header",
             "name": "If-None-Match",
             "required": false,
@@ -3367,6 +3348,7 @@
         "description": "Reads the `lakira_refresh` HttpOnly cookie. Rotates the refresh token (revokes old, issues new) and returns a fresh access token. If the presented token was already revoked, the entire token family is invalidated (reuse detection).",
         "parameters": [
           {
+            "description": "Opaque refresh token set by login",
             "in": "cookie",
             "name": "lakira_refresh",
             "required": true,
@@ -4900,6 +4882,7 @@
         "description": "Accepts a generation job and returns immediately with a `jobId`. When `RABBITMQ_ENABLED=true` the inserts are processed asynchronously by the worker; otherwise the logs are inserted synchronously before the response is returned. Only available when `ENABLE_DUMMY_ENDPOINTS=true`.",
         "parameters": [
           {
+            "description": "ID of the metric to generate logs for",
             "in": "path",
             "name": "metricId",
             "required": true,
@@ -6169,6 +6152,7 @@
         "description": "Sends an invitation email with a single-use token. Only owners and admins can invite. Rejects if a pending invite already exists for the email.",
         "parameters": [
           {
+            "description": "Organization ID",
             "in": "path",
             "name": "id",
             "required": true,
@@ -6242,6 +6226,7 @@
         "description": "Returns the organization's memberships, of every status, with user details, oldest first. Any member of the organization can call this endpoint. Paged by cursor, 100 per page unless `limit` says fewer; follow `nextCursor` until it is null.",
         "parameters": [
           {
+            "description": "Organization ID",
             "in": "path",
             "name": "id",
             "required": true,
