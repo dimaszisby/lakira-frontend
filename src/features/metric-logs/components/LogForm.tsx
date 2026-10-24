@@ -10,7 +10,7 @@ import {
   useDeleteMetricLog,
   useUpdateMetricLog,
 } from "@/features/metric-logs/hooks";
-import type { LogFormInputs } from "@/features/metric-logs/types";
+import type { LogFormFields, LogFormInputs } from "@/features/metric-logs/types";
 import { logFormSchema } from "@/features/metric-logs/types";
 import type { MetricLogVM } from "@/features/metric-logs/view-models";
 import { cn } from "@/lib/cn";
@@ -55,7 +55,7 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
     reset,
     formState: { errors, isSubmitting, isValid },
     control,
-  } = useForm<LogFormInputs>({
+  } = useForm<LogFormFields, unknown, LogFormInputs>({
     resolver: zodResolver(logFormSchema),
     mode: "onChange",
     defaultValues: defaults,

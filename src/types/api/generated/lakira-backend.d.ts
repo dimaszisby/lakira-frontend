@@ -86,6 +86,7 @@ export interface paths {
                     limit?: number;
                 };
                 header?: {
+                    /** @description The `ETag` of a response stored earlier. When it still matches, the answer is a 304 with no body. */
                     "If-None-Match"?: string;
                 };
                 path?: never;
@@ -154,6 +155,7 @@ export interface paths {
                     last?: string;
                 };
                 header?: {
+                    /** @description The `ETag` of a response stored earlier. When it still matches, the answer is a 304 with no body. */
                     "If-None-Match"?: string;
                 };
                 path: {
@@ -439,6 +441,7 @@ export interface paths {
                 header?: never;
                 path?: never;
                 cookie: {
+                    /** @description Opaque refresh token set by login */
                     lakira_refresh: string;
                 };
             };
@@ -1461,6 +1464,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
+                    /** @description ID of the metric to generate logs for */
                     metricId: string;
                 };
                 cookie?: never;
@@ -2180,6 +2184,7 @@ export interface paths {
                 query?: never;
                 header?: never;
                 path: {
+                    /** @description Organization ID */
                     id: string;
                 };
                 cookie?: never;
@@ -2236,6 +2241,7 @@ export interface paths {
                 };
                 header?: never;
                 path: {
+                    /** @description Organization ID */
                     id: string;
                 };
                 cookie?: never;
@@ -3136,15 +3142,7 @@ export interface components {
              * @example 2023-01-01T00:00:00Z
              */
             deadlineDate?: string | null;
-            /**
-             * @default {
-             *       "chartType": "line",
-             *       "color": "#E897A3",
-             *       "priority": 1,
-             *       "showOnDashboard": true
-             *     }
-             */
-            displayOptions: {
+            displayOptions?: {
                 /** @default line */
                 chartType: string;
                 /** @default #E897A3 */
@@ -3175,15 +3173,7 @@ export interface components {
              * @example 2023-01-01T00:00:00Z
              */
             deadlineDate?: string | null;
-            /**
-             * @default {
-             *       "chartType": "line",
-             *       "color": "#E897A3",
-             *       "priority": 1,
-             *       "showOnDashboard": true
-             *     }
-             */
-            displayOptions: {
+            displayOptions?: {
                 /** @default line */
                 chartType: string;
                 /** @default #E897A3 */

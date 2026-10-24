@@ -49,6 +49,7 @@ in the [debt register](frontend-debt-register/register.md), not in this list.
 | [theme-switching](theme-switching/README.md)                       | Theme switching                                    | #35, 2026-09-20  |
 | [tracker-as-code](tracker-as-code/README.md)                       | Labels, issue forms and a PR template as code      | #153, 2026-10-24 |
 | [unquarantine-layout-files](unquarantine-layout-files/README.md)   | Layout files brought inside the layer rule         | #91, 2026-10-13  |
+| [zod-4-upgrade](zod-4-upgrade/README.md)                           | zod 4 and resolvers 5, clearing a zod advisory     | #152, 2026-10-24 |
 
 ## Earlier programmes
 

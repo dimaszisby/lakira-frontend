@@ -7,6 +7,8 @@ import type { ServerSortBy, SortOrder } from "./sort";
 // ===== Form =====
 export const metricFormSchema = createMetricSchema.shape.body;
 export type MetricFormInputs = z.infer<typeof metricFormSchema>;
+/** What the form holds before validation: zod 4 types a defaulted field as optional on input. */
+export type MetricFormFields = z.input<typeof metricFormSchema>;
 
 // ===== API Includes and Params =====
 
