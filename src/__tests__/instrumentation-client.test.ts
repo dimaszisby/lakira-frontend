@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import { reportClientError } from "@/lib/monitoring/report-client-error";
 
 jest.mock("@/lib/monitoring/report-client-error", () => ({ reportClientError: jest.fn() }));
@@ -15,6 +17,14 @@ describe("instrumentation-client", () => {
 
   beforeEach(() => {
     mockReport.mockClear();
+  });
+
+  it("turns off zod's eval-based fast path before any schema is built", () => {
+    // zod 4 probes `new Function` to compile object parsers, and the Content
+    // Security Policy reports that as a `script-src` eval violation on every
+    // page (kit `zod-4-upgrade`, D-03). `npm run test:e2e:csp` is the proof in
+    // a browser; this pins the switch.
+    expect(z.config().jitless).toBe(true);
   });
 
   it("reports an uncaught error", () => {

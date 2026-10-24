@@ -10,7 +10,7 @@ import { useRegisterUserMutation } from "@/features/auth/hooks/register.mutation
 import { authRoutes } from "@/lib/routes";
 import { handleApiError } from "@/services/api/handleApiError";
 import { createUserSchema } from "@/types/api/zod-user.schema";
-import type { CreateUserRequestDTO } from "@/types/dtos/user.dto";
+import type { CreateUserFormFields, CreateUserRequestDTO } from "@/types/dtos/user.dto";
 import { Button } from "@/ui/Button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/ui/Card";
 import { ErrorMessage } from "@/ui/ErrorMessage";
@@ -37,7 +37,7 @@ const RegisterForm = () => {
     handleSubmit,
     formState: { errors, isValid, isSubmitting },
     control,
-  } = useForm<CreateUserRequestDTO>({
+  } = useForm<CreateUserFormFields, unknown, CreateUserRequestDTO>({
     resolver: zodResolver(createUserSchema.shape.body),
     mode: "onChange",
   });

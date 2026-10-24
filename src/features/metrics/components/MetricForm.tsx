@@ -7,7 +7,7 @@ import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDebounce } from "react-use";
 
 import CategorySelect from "@/features/metric-categories/components/CategorySelect";
-import type { MetricFormInitial, MetricFormInputs } from "@/features/metrics";
+import type { MetricFormFields, MetricFormInitial, MetricFormInputs } from "@/features/metrics";
 import { metricFormSchema } from "@/features/metrics";
 import {
   useCreateMetric,
@@ -58,7 +58,7 @@ export const MetricForm = ({ onClose, initialMetric, titleAs }: Props) => {
     setError,
     clearErrors,
     control,
-  } = useForm<MetricFormInputs>({
+  } = useForm<MetricFormFields, unknown, MetricFormInputs>({
     resolver: zodResolver(metricFormSchema),
     mode: "onChange",
     defaultValues: defaults,

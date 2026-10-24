@@ -11,7 +11,10 @@ import {
   useDeleteMetricCategory,
   useUpdateMetricCategory,
 } from "@/features/metric-categories/hooks";
-import type { MetricCategoryFormInput } from "@/features/metric-categories/types";
+import type {
+  MetricCategoryFormFields,
+  MetricCategoryFormInput,
+} from "@/features/metric-categories/types";
 import { metricCategoryFormSchema } from "@/features/metric-categories/types";
 import type { MetricCategoryVM } from "@/features/metric-categories/view-models";
 import { cn } from "@/lib/cn";
@@ -53,7 +56,7 @@ const MetricCategoryForm = ({ onClose, initialCategory, titleAs }: Props) => {
     reset,
     formState: { errors, isSubmitting, isValid },
     control,
-  } = useForm<MetricCategoryFormInput>({
+  } = useForm<MetricCategoryFormFields, unknown, MetricCategoryFormInput>({
     resolver: zodResolver(metricCategoryFormSchema),
     mode: "onChange",
     defaultValues: defaults,

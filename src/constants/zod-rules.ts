@@ -125,10 +125,16 @@ export const zDisplayOptions = z
 /**
  * * * Metric Log
  */
+// zod 4 has no `required_error`: an `error` function that answers only for a
+// missing value does the same, and returns undefined to keep zod's own message
+// for every other case (kit `zod-4-upgrade`).
+const whenMissing = (message: string) => (issue: { input: unknown }) =>
+  issue.input === undefined ? message : undefined;
+
 export const zPositiveFloat = z
-  .number({ required_error: ZodMessages.metricLog.logValueRequired })
+  .number({ error: whenMissing(ZodMessages.metricLog.logValueRequired) })
   .positive({ message: ZodMessages.metricLog.logValueNonNegative });
 
 export const zLogType = z.enum(["manual", "automatic"], {
-  required_error: ZodMessages.metricLog.logTypeInvalid,
+  error: whenMissing(ZodMessages.metricLog.logTypeInvalid),
 });

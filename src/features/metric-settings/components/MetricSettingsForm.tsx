@@ -6,7 +6,10 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 
 import { CATEGORY_DEFAULTS } from "@/features/metric-categories/constants";
-import type { MetricSettingsFormInputs } from "@/features/metric-settings/form";
+import type {
+  MetricSettingsFormFields,
+  MetricSettingsFormInputs,
+} from "@/features/metric-settings/form";
 import { metricSettingsFormSchema } from "@/features/metric-settings/form";
 import { useCreateMetricSettings, useUpdateMetricSettings } from "@/features/metric-settings/hooks";
 import type { MetricSettingsExtendedVM } from "@/features/metric-settings/view-models";
@@ -74,7 +77,7 @@ export const MetricSettingsForm = ({ onClose, metricId, initialSettings }: Props
     setValue,
     formState: { errors, isSubmitting, isValid },
     control,
-  } = useForm<MetricSettingsFormInputs>({
+  } = useForm<MetricSettingsFormFields, unknown, MetricSettingsFormInputs>({
     resolver: zodResolver(metricSettingsFormSchema),
     mode: "onChange",
     defaultValues: defaults,

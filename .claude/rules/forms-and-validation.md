@@ -57,4 +57,11 @@ Never hand-write a type that parallels a schema — they will drift.
 - Submit handlers are async and must satisfy `no-misused-promises` — pass `form.handleSubmit(onSubmit)` directly rather than wrapping it in an inline async arrow.
 - Never render a string as HTML. `react/no-danger` is a lint error and no sanitiser is installed; see `.claude/rules/security.md` § Injection for what an exception takes.
 
-Zod is pinned at v3 (`3.25.x`). Do not use v4 syntax.
+Zod is v4 (`4.6.x`) since 2026-10-24, imported from `"zod"`; the legacy `zod/v3` path is not used ([ADR-0043](../../docs/explanation/decisions/adr-0043-the-frontend-moves-to-zod-4.md)). Four v4 differences bite here:
+
+- **A defaulted field is optional on input and required on output**, so a form whose schema has `.default()` is typed with both: `useForm<z.input<typeof schema>, unknown, z.infer<typeof schema>>`. Each such form's `types.ts` exports a `<Name>FormFields` input type beside its output type.
+- **`required_error` and `invalid_type_error` are gone.** Pass `error`, a string or a function of the issue; `whenMissing` in `src/constants/zod-rules.ts` answers only for a missing value.
+- **zod 4 reaches for eval** to compile object parsers, which the Content Security Policy blocks and reports. `src/instrumentation-client.ts` sets `z.config({ jitless: true })` before any schema is built; do not move that call later, and do not widen the policy (kit `zod-4-upgrade`, D-03).
+- **zod's own messages changed wording** ("Too small: expected number to be >=0"). A field whose error is shown carries a `ZodMessages` entry rather than zod's text.
+
+lakira-backend is still on zod 3, so the two sides' rule files no longer share zod syntax.

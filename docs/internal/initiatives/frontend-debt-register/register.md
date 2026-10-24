@@ -1,6 +1,6 @@
 # Frontend debt register
 
-**As of:** 2026-10-23, frontend `dev` at `04c2f5a`, with F-06, F-08, F-09, F-10, F-14 to F-21, F-24, F-25, F-27 to F-29, F-31 to F-37, F-40, F-42 to F-50, F-51, F-52, F-53, F-54, F-55, F-56, F-57, F-60, F-61, F-62, F-63, F-64, F-66, F-67, F-68, F-69, F-71, F-72, F-74 and F-76 closed, and F-41 to its deferred folder split. Ranked by [D-01](decisions.md).
+**As of:** 2026-10-23, frontend `dev` at `04c2f5a`, with F-06, F-08, F-09, F-10, F-14 to F-21, F-24, F-25, F-27 to F-29, F-31 to F-37, F-40, F-42 to F-50, F-51, F-52, F-53, F-54, F-55, F-56, F-57, F-60, F-61, F-62, F-63, F-64, F-66, F-67, F-68, F-69, F-71, F-72, F-74, F-76 and F-78 closed, and F-41 to its deferred folder split. Ranked by [D-01](decisions.md).
 
 **"What's next" is the first row below whose state is `ready`.** A row above it that is waiting on
 someone is reported with it, as a gap. How rows are added and closed:
