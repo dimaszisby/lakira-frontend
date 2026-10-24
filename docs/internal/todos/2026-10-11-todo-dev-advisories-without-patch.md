@@ -44,3 +44,5 @@ own selectors.
       tick it here
 
 ## Status
+
+**Issue:** #164 (F-05). The open boxes below are tracked there since 2026-10-25; this file is the dated record.

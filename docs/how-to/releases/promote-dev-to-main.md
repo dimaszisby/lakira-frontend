@@ -58,4 +58,4 @@ through `dev` is what keeps each promotion's diff exactly what `dev` gained.
   bypass. In an emergency, switch the ruleset off under Settings > Rules, a visible act, and back
   on afterwards.
 
-Versioning a release (tags, a changelog, GitHub releases) is not decided yet: register row F-75.
+Versioning a release (tags, a changelog, GitHub releases) is not decided yet: issue #174.

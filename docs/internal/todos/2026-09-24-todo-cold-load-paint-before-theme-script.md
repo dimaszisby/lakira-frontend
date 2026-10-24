@@ -33,3 +33,7 @@ when the cache is cold.
 ## Checklist
 
 - [ ] Decide whether one cold-load frame is worth a second script.
+
+## Status
+
+**Issues:** #177 (F-39), decided in #158 (O-09). The open boxes below are tracked there since 2026-10-25; this file is the dated record.

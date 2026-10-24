@@ -4,9 +4,23 @@
 them.
 **Owner:** whoever changes `.github/labels.json` or `.github/ISSUE_TEMPLATE/`.
 
-The tracker is defined in the repository ([ADR-0042](../explanation/decisions/adr-0042-open-work-moves-to-github-issues.md)).
-Until the debt register's open rows move to issues (register row F-77), "what's next" is still
-answered from [the register](../internal/initiatives/frontend-debt-register/register.md).
+The tracker is defined in the repository ([ADR-0042](../explanation/decisions/adr-0042-open-work-moves-to-github-issues.md)),
+and every task starts from an issue ([ADR-0044](../explanation/decisions/adr-0044-every-task-starts-from-an-issue.md)).
+The debt register's open rows became issues #155 to #179 on 2026-10-25; the
+[frozen register](../internal/initiatives/frontend-debt-register/register.md) maps each `F-NN` and
+`O-NN` to its issue. Gaps kept on purpose are in [`known-gaps.md`](known-gaps.md), not in issues.
+
+## What's next
+
+The first open issue labelled `state:ready`, by the lowest `tier:`, then the lowest `sev:` (none
+sorts after P3), then the lower number (kit `open-work-to-issues`, D-02):
+
+```bash
+gh issue list --state open --label state:ready --json number,title,labels
+```
+
+A higher-ranked issue that waits on someone is a gap worth naming; `type:decision` issues are the
+owner's open questions. A pull request that finishes an issue says `Closes #N`.
 
 ## Labels
 

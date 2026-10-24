@@ -50,6 +50,8 @@ Those are CI's `checks` and `unit` jobs. Run them before proposing a change is c
 
 Plan mode for anything non-trivial — 3+ steps or an architectural decision.
 
+**Task ids are issue numbers.** Every task starts from a GitHub issue: the branch is `<type>/<N>-<slug>`, commits carry `refs: #N`, and the PR says `Closes #N`. A kit is written only for work of two days or more (ADR-0044).
+
 ## Agents and skills
 
 Agents: `code-reviewer`, `test-writer`, `doc-writer`, `ci-debugger`.
@@ -72,8 +74,8 @@ Worth knowing about:
 - [`docs/internal/incidents/`](docs/internal/incidents/) — four postmortems covering routing, caching, prefetch, and `searchParams`. Check these before touching those areas; the causes recur.
 - [`docs/explanation/testing-strategy.md`](docs/explanation/testing-strategy.md) — the full pyramid.
 - [`docs/reference/components/README.md`](docs/reference/components/README.md) — UI standards, read in the order that README gives.
-- [`docs/internal/todos/`](docs/internal/todos/) — active backlogs.
-- [`docs/internal/initiatives/frontend-debt-register/register.md`](docs/internal/initiatives/frontend-debt-register/register.md) — every open item, ranked. **"What's next" is answered from here** (`.claude/rules/workflow.md` § What's next).
+- [`docs/internal/todos/`](docs/internal/todos/) — dated records of findings; open work is in [GitHub Issues](https://github.com/dimaszisby/lakira-frontend/issues) since 2026-10-25 (ADR-0044).
+- [GitHub Issues](https://github.com/dimaszisby/lakira-frontend/issues) — every open item, ranked by labels. **"What's next" is answered from here** (`.claude/rules/workflow.md` § What's next). The debt register, [`register.md`](docs/internal/initiatives/frontend-debt-register/register.md), is frozen as a record since 2026-10-25 and maps each old `F-NN` to its issue.
 - [`docs/explanation/decisions/`](docs/explanation/decisions/) — the ADR registry, one decision per file. Check **Status** before trusting one.
 - [`docs/reference/commands.md`](docs/reference/commands.md) — canonical npm scripts. Do not keep a second copy elsewhere.
 

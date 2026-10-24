@@ -378,6 +378,8 @@ The boxes were left unticked; ticked 2026-09-29.
 
 ## Status
 
+**Issues:** #160 (F-01); F-23 is in [`known-gaps.md`](../../reference/known-gaps.md). The open boxes below are tracked there since 2026-10-25; this file is the dated record.
+
 _Phase 0 complete 2026-08-24. Appended per `.claude/rules/workflow.md` as later phases land._
 
 _2026-10-04: third dated run,

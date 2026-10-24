@@ -1,15 +1,15 @@
 # Initiatives
 
-One folder per piece of work, named by its slug, which is also its branch and its `refs:` footer
-(`.claude/rules/workflow.md` § The kit slug is the traceability spine). A finished kit is a
-record: it stays here as written, and the ADRs it promoted link back to it. What is still open is
-in the [debt register](frontend-debt-register/register.md), not in this list.
+One folder per piece of work of two days or more, named by its slug, which is also the slug in its
+branch; its README names its issue (`.claude/rules/workflow.md` § The issue number is the
+traceability spine). Kits before 2026-10-25 used the slug as the `refs:` footer too, and smaller
+work had kits as well. A finished kit is a record: it stays here as written, and the ADRs it
+promoted link back to it. What is still open is in
+[GitHub Issues](https://github.com/dimaszisby/lakira-frontend/issues), not in this list.
 
 ## Active
 
-| Kit                                                        | What                                                       | PR                |
-| ---------------------------------------------------------- | ---------------------------------------------------------- | ----------------- |
-| [frontend-debt-register](frontend-debt-register/README.md) | Every open item, ranked; "what's next" is answered from it | #89, kept current |
+None. Open work is in issues.
 
 ## Done
 
@@ -27,11 +27,13 @@ in the [debt register](frontend-debt-register/register.md), not in this list.
 | [docs-diet](docs-diet/README.md)                                   | Register split, lessons into rules, this index     | #149, 2026-10-23 |
 | [drop-withauth](drop-withauth/README.md)                           | `withAuth` and the dead auth shims removed         | #41, 2026-09-22  |
 | [form-shows-latest-error](form-shows-latest-error/README.md)       | A form shows its latest error                      | #102, 2026-10-16 |
+| [frontend-debt-register](frontend-debt-register/README.md)         | Ranked register, frozen when work moved to issues  | #89; frozen #180 |
 | [list-variant-breakpoint](list-variant-breakpoint/README.md)       | A list picks table or cards in CSS                 | #133, 2026-10-21 |
 | [log-list-default-order](log-list-default-order/README.md)         | Log lists open newest logged first                 | #142, 2026-10-23 |
 | [main-release-branch](main-release-branch/README.md)               | `main` reset onto `dev` and protected              | #146, 2026-10-23 |
 | [metric-detail-contrast](metric-detail-contrast/README.md)         | Contrast on the metric detail page                 | #78, 2026-10-08  |
 | [mobile-sign-out](mobile-sign-out/README.md)                       | Sign-out on mobile                                 | #130, 2026-10-21 |
+| [open-work-to-issues](open-work-to-issues/README.md)               | Open work moved to GitHub Issues; rules rewritten  | #180, 2026-10-25 |
 | [org-lists-follow-cursor](org-lists-follow-cursor/README.md)       | Org lists fetch every page of their cursor         | #151, 2026-10-24 |
 | [org-switcher](org-switcher/README.md)                             | Organization switcher                              | #56, 2026-09-29  |
 | [page-headings](page-headings/README.md)                           | An `h1` on every page                              | #123, 2026-10-20 |

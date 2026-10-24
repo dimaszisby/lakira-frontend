@@ -319,7 +319,7 @@ Security-related checks are included in:
 - E2E tests for auth and protected routes.
 - Release-time checklists:
   - `docs/how-to/releases/release-checklist.md`
-  - `docs/internal/todos/*` for time-boxed security tasks.
+  - GitHub issues for time-boxed security tasks (ADR-0044).
 
 ---
 

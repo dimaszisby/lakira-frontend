@@ -66,6 +66,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0041](./adr-0041-main-is-reset-onto-dev-and-protected-by-a-release-gate.md)    | `main` is reset onto `dev` and protected by a release gate                   | Accepted       | 2026-10-23 | `D-01` (main-release-branch)        |
 | [ADR-0042](./adr-0042-open-work-moves-to-github-issues.md)                          | Open work moves to GitHub Issues, with the tracker kept as code              | Accepted       | 2026-10-24 | `D-01` (tracker-as-code)            |
 | [ADR-0043](./adr-0043-the-frontend-moves-to-zod-4.md)                               | The frontend moves to zod 4                                                  | Accepted       | 2026-10-24 | `D-01` (zod-4-upgrade)              |
+| [ADR-0044](./adr-0044-every-task-starts-from-an-issue.md)                           | Every task starts from an issue; a kit only for two days or more             | Accepted       | 2026-10-25 | `D-01` (open-work-to-issues)        |
 
 ## Where the other decisions went
 
