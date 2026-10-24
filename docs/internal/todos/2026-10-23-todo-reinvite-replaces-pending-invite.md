@@ -41,3 +41,7 @@ builds B-71. The copy change is not an interface change. No frontend ADR.
 - [ ] An integration case: inviting an address twice shows the success note both times, with MSW
       answering 201 to each
 - [ ] Register: F-65 to Closed; the Part 2 record acknowledged with the frontend PR
+
+## Status
+
+**Issue:** #169 (F-65). The open boxes below are tracked there since 2026-10-25; this file is the dated record.

@@ -31,3 +31,7 @@ charts, the metric lists — has never been measured.
 - [ ] Add the session mechanism to `scripts/perf/run-lighthouse.mjs`; the redirect check then proves
       the session worked.
 - [ ] Add `/dashboard` and `/metrics` back to `performance-thresholds.json`.
+
+## Status
+
+**Issue:** #176 (F-38). The open boxes below are tracked there since 2026-10-25; this file is the dated record.

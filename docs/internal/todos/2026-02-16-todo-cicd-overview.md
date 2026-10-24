@@ -124,3 +124,7 @@ What each open item waits on: `docs/internal/initiatives/frontend-debt-register/
 - `docs/internal/initiatives/tests-overhaul/5-performance-and-web-vitals-tests/lighthouse-plan.md`
 - `docs/internal/initiatives/tests-overhaul/5-performance-and-web-vitals-tests/web-vitals-plan.md`
 - `docs/internal/initiatives/tests-overhaul/5-performance-and-web-vitals-tests/bundle-size-checklist.md`
+
+## Status
+
+**Issues:** #161 (F-02), #166 (F-11). The open boxes below are tracked there since 2026-10-25; this file is the dated record.

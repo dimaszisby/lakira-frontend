@@ -1,5 +1,46 @@
 # Frontend debt register
 
+**Frozen:** 2026-10-25. Open work moved to GitHub Issues that day
+([ADR-0044](../../../explanation/decisions/adr-0044-every-task-starts-from-an-issue.md), kit
+[`open-work-to-issues`](../open-work-to-issues/README.md)). This file is a record: nothing is added
+to it, and "what's next" is answered from the issues (`.claude/rules/workflow.md` § What's next).
+Where each row went is the table below; the rows themselves stay as they read on the day.
+
+## Where each row went
+
+| Row  | Now             |
+| ---- | --------------- |
+| F-01 | #160            |
+| F-02 | #161            |
+| F-03 | #162            |
+| F-04 | #163            |
+| F-05 | #164            |
+| F-07 | #165            |
+| F-11 | #166            |
+| F-12 | #167            |
+| F-13 | #168            |
+| F-65 | #169            |
+| F-58 | #170            |
+| F-59 | #171            |
+| F-73 | #172            |
+| F-22 | `known-gaps.md` |
+| F-23 | `known-gaps.md` |
+| F-26 | #173            |
+| F-75 | #174            |
+| F-77 | closed in #180  |
+| F-30 | #175            |
+| F-38 | #176            |
+| F-39 | #177            |
+| F-41 | #178            |
+| F-70 | #179            |
+| O-01 | #155            |
+| O-03 | #156            |
+| O-05 | #157            |
+| O-09 | #158            |
+| O-10 | #159            |
+
+## The register as it stood on 2026-10-24
+
 **As of:** 2026-10-24, frontend `dev` at `0802598`, with F-06, F-08, F-09, F-10, F-14 to F-21, F-24, F-25, F-27 to F-29, F-31 to F-37, F-40, F-42 to F-50, F-51, F-52, F-53, F-54, F-55, F-56, F-57, F-60, F-61, F-62, F-63, F-64, F-66, F-67, F-68, F-69, F-71, F-72, F-74, F-76, F-78 and F-79 closed, and F-41 to its deferred folder split. Ranked by [D-01](decisions.md).
 
 **"What's next" is the first row below whose state is `ready`.** A row above it that is waiting on
@@ -75,7 +116,6 @@ Security, the proxy and the repository:
 | F-23 | `next.config.ts` reads `NEXT_PUBLIC_API_BASE_URL` raw, outside the validated environment                              | —   | kept on purpose                                    | `2026-08-24-todo-saas-readiness.md` phase 3               |
 | F-26 | Security follow-ups of 2025-11-26, never triaged: moving protected fetching into Server Components                    | —   | owner                                              | `todo-security-20251126.md`, next cycle, item 2           |
 | F-75 | Releases are not versioned: no tags, changelog or GitHub releases on `main`                                           | —   | owner                                              | kit `main-release-branch` D-01, out of scope              |
-| F-77 | Open work is still Markdown in git; tracker steps 3, 4 and 6 remain                                                   | —   | ready                                              | ADR-0042; kit `tracker-as-code`                           |
 
 Errors and forms:
 

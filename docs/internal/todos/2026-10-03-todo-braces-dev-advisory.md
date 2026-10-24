@@ -38,6 +38,8 @@ Decided 2026-10-03: record it and leave the nightly red. No exception list, and 
 
 ## Status
 
+**Issue:** #163 (F-04). The open boxes below are tracked there since 2026-10-25; this file is the dated record.
+
 Still open on 2026-10-11: no patched `braces` exists. After `chore/dev-advisories-n14` updated
 `handlebars`, this is the only advisory at or above the nightly gate's level; `npm audit` reports 0
 critical, 47 high (all from `braces`) and 7 moderate. The two moderate advisories that no update

@@ -49,6 +49,7 @@ from a clean clone.
 | [`performance-budget.md`](./reference/performance-budget.md)         | Web Vitals, bundle, and Lighthouse budgets                      |
 | [`ci-pipeline/`](./reference/ci-pipeline/)                           | What each CI workflow runs; the backend→frontend CI/CD contract |
 | [`issue-tracker.md`](./reference/issue-tracker.md)                   | GitHub labels and issue forms, and syncing them to a fork       |
+| [`known-gaps.md`](./reference/known-gaps.md)                         | Gaps a fork inherits knowingly, with the reason each stays      |
 
 ## Explanation — understanding-oriented
 
@@ -92,7 +93,8 @@ Pick by the reader's purpose, not by the artifact's shape:
 | explains a decision or a concept                  | `explanation/`                              |
 | records an architectural decision                 | `explanation/decisions/` (one ADR per file) |
 | tracks a piece of work — plan, checklist, tracker | `internal/initiatives/<topic>/`             |
-| is a dated one-off note                           | `internal/todos/` or `internal/dev-log/`    |
+| is work to do, however small                      | a GitHub issue, not a file (ADR-0044)       |
+| is a dated one-off note                           | `internal/dev-log/`                         |
 | is an audit run                                   | `internal/audits/<program>/`                |
 | is a postmortem                                   | `internal/incidents/`                       |
 
