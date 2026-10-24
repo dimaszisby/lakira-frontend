@@ -48,6 +48,7 @@ in the [debt register](frontend-debt-register/register.md), not in this list.
 | [telemetry-log-hardening](telemetry-log-hardening/README.md)       | Bounded telemetry intake and a scrubbed log stream | #75, 2026-10-07  |
 | [theme-switching](theme-switching/README.md)                       | Theme switching                                    | #35, 2026-09-20  |
 | [unquarantine-layout-files](unquarantine-layout-files/README.md)   | Layout files brought inside the layer rule         | #91, 2026-10-13  |
+| [zod-4-upgrade](zod-4-upgrade/README.md)                           | zod 4 and resolvers 5, clearing a zod advisory     | #152, 2026-10-24 |
 
 ## Earlier programmes
 

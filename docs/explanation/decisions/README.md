@@ -64,6 +64,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0039](./adr-0039-dev-is-protected-by-a-ruleset.md)                             | `dev` is protected by a ruleset that requires "CI passed"                    | Accepted       | 2026-10-22 | `D-01` (dev-ruleset)                |
 | [ADR-0040](./adr-0040-a-category-chip-is-an-opaque-tint-on-a-fixed-base.md)         | A category chip is an opaque tint on a fixed base                            | Accepted       | 2026-10-23 | `D-01` (category-chip-contrast)     |
 | [ADR-0041](./adr-0041-main-is-reset-onto-dev-and-protected-by-a-release-gate.md)    | `main` is reset onto `dev` and protected by a release gate                   | Accepted       | 2026-10-23 | `D-01` (main-release-branch)        |
+| [ADR-0043](./adr-0043-the-frontend-moves-to-zod-4.md)                               | The frontend moves to zod 4                                                  | Accepted       | 2026-10-24 | `D-01` (zod-4-upgrade)              |
 
 ## Where the other decisions went
 

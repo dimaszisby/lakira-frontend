@@ -29,6 +29,7 @@ export const ZodMessages = {
   metricLog: {
     logValueRequired: "Log value is required",
     logValueNonNegative: "Log value must be a positive number",
+    logValueNegative: "Log value cannot be negative",
     logTypeInvalid: "Invalid log type",
   },
 };

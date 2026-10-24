@@ -92,6 +92,9 @@ export interface AuthResponseDTO {
  */
 export type CreateUserRequestDTO = z.infer<typeof createUserSchema.shape.body>;
 
+/** The register form before validation: zod 4 types a defaulted field as optional on input. */
+export type CreateUserFormFields = z.input<typeof createUserSchema.shape.body>;
+
 /**
  * @typedef UpdateUserRequestDTO
  * @description Represents the expected structure of the request body when updating an existing user.
