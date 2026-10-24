@@ -48,6 +48,7 @@ from a clean clone.
 | [`accessibility-baseline.md`](./reference/accessibility-baseline.md) | WCAG 2.1 AA criteria this app holds itself to                   |
 | [`performance-budget.md`](./reference/performance-budget.md)         | Web Vitals, bundle, and Lighthouse budgets                      |
 | [`ci-pipeline/`](./reference/ci-pipeline/)                           | What each CI workflow runs; the backend→frontend CI/CD contract |
+| [`issue-tracker.md`](./reference/issue-tracker.md)                   | GitHub labels and issue forms, and syncing them to a fork       |
 
 ## Explanation — understanding-oriented
 

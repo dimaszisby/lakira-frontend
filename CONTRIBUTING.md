@@ -107,7 +107,8 @@ known gaps a forker inherits.
 
 This project is maintained by a single developer. External pull requests are welcome but
 response time is best-effort. Open an issue first for significant changes to discuss approach
-before writing code.
+before writing code; the forms and labels are described in
+[`docs/reference/issue-tracker.md`](docs/reference/issue-tracker.md).
 
 ## Security
 

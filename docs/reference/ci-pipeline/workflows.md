@@ -191,7 +191,8 @@ gh api --method POST repos/<owner>/<repo>/rulesets --input .github/rulesets/main
 ```
 
 Each call prints the new ruleset's id. "CI passed" is matched with GitHub Actions' app id, 15368,
-which is the same in every repository.
+which is the same in every repository. Labels are not copied either: run
+`npm run labels:sync -- --apply` once ([`issue-tracker.md`](../issue-tracker.md)).
 
 ## Changing a workflow
 
