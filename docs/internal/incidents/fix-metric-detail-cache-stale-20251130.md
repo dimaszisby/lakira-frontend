@@ -1,5 +1,14 @@
 ## Fix: metric-detail-cache-stale-on-modal-close-20251130
 
+> **Note, 2026-10-25.** Found and fixed while running `npm run dev`. No production deployment
+> exists, so "users" below means the developer's own flow, not live traffic. The file name dates it
+> 2025-11-30; git first recorded it on 2026-07-27 (`6e3dcce`), and the two dates were not reconciled.
+> Follow-ups: the modal rule is now in `.claude/rules/architecture.md` (Next 16 gotchas). A test named
+> "navigates back and refreshes on close" is in
+> `src/features/metrics/components/__tests__/MetricFormDialog.test.tsx`, though nothing shows it was
+> written for this incident. Tests for the memoized comparison: not found. The text below is the
+> original.
+
 ### Overview
 
 - Editing a metric or log via intercepting modal (e.g., /metrics/[id]/edit or /metrics/[id]/logs/[logId]) closed the overlay without revalidating the parent /metrics/[id] layout.

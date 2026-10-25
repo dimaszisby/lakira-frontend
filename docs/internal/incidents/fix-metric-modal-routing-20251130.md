@@ -1,5 +1,15 @@
 # Fix: Metric Modal Routing & Data Fetch Regression (2025-11-30)
 
+> **Note, 2026-10-25.** Found and fixed while running `npm run dev`. No production deployment
+> exists, so "end users" and "production builds" below describe the developer's own flow, not live
+> traffic. The date in the title is when it was fixed; git first recorded the file on 2026-07-27
+> (`6e3dcce`), and the two dates were not reconciled. Follow-ups: the `{modal}` layout rule is in
+> `.claude/rules/architecture.md` and the `/new-route` skill scaffolds it.
+> `src/app/__tests__/parallel-route-interceptors.test.ts` covers a later defect in the same area
+> (two interceptors in one slot, fixed in `0b31637` on 2026-09-15), not this one. Contract tests for
+> API clients with required query parameters, and integration tests for modal routing: not found.
+> The text below is the original.
+
 ## Overview
 
 The metric detail experience introduced intercepting routes for edit flows (metrics, categories, logs). Three regressions surfaced:

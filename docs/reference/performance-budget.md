@@ -40,9 +40,13 @@ For **key routes**:
 
 - `/` (landing, if present)
 - `/login`
-- `/app/dashboard`
-- `/app/metrics`
-- `/app/metrics/[id]`
+- `/dashboard`
+- `/metrics`
+- `/metrics/[metricId]`
+
+The nightly Lighthouse run audits only `/`, `/login` and `/register`
+(`scripts/perf/performance-thresholds.json`). The signed-in routes are checked by hand, per the
+[Performance Release Checklist](../how-to/releases/performance-release-checklist.md).
 
 **LCP (Largest Contentful Paint)**
 
@@ -168,7 +172,10 @@ These are enforced via:
 
 ## 7. Field Web Vitals Budgets
 
-From real-user telemetry (see [Web Vitals Plan](../internal/initiatives/tests-overhaul/5-performance-and-web-vitals-tests/web-vitals-plan.md)):
+Targets for real-user telemetry (see [Web Vitals Plan](../internal/initiatives/tests-overhaul/5-performance-and-web-vitals-tests/web-vitals-plan.md)).
+The app collects each vital and writes it to the server log (`WebVitalsReporter` posts to
+`/api/observability/web-vitals`), but nothing aggregates them, so these budgets are not yet
+compared with field data. That work is [#167](https://github.com/dimaszisby/lakira-frontend/issues/167).
 
 - For core routes:
   - **p75 LCP**:

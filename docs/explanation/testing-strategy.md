@@ -226,7 +226,7 @@ Ensure that the app stays within agreed **performance budgets** and provides goo
 
 **What we test**
 
-- Lighthouse scores for key pages (e.g. `/`, `/app/dashboard`):
+- Lighthouse scores for key pages (e.g. `/`, `/dashboard`):
   - Performance
   - Best Practices
   - Accessibility (supplements other tests)

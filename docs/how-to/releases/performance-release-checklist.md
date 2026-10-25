@@ -18,6 +18,9 @@ Before running through this checklist:
 - [ ] The release build is **ready** (same config as production).
 - [ ] The app is deployed to a **staging/test environment** similar to production.
   - <!-- SPECIAL NOTE: Add URL here, e.g. `https://lakira-staging.example.com`. -->
+  - No deployed environment exists yet ([#160](https://github.com/dimaszisby/lakira-frontend/issues/160)).
+    Until one does, run this checklist against a local production build
+    (`npm run build && npm run start`) and read "staging" below as that build.
 - [ ] CI has already passed:
   - [ ] Static checks
   - [ ] Unit + integration tests
@@ -37,7 +40,7 @@ At minimum:
 
 - [ ] Landing / marketing page (if any) → `/`
 - [ ] Auth page → `/login` (or equivalent)
-- [ ] Dashboard → `/app/dashboard`
+- [ ] Dashboard → `/dashboard`
 - [ ] At least one **data-heavy page**:
   - e.g. metrics library, metric detail with chart + logs
 
