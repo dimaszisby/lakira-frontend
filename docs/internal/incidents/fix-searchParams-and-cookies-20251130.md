@@ -1,5 +1,15 @@
 # Dashboard Access Failures – searchParams & Cookie Propagation
 
+> **Note, 2026-10-25.** Found and fixed while running `npm run dev`. No production deployment
+> exists, so "Users", "Severity" and "Frequency" below describe the developer's own flow, not live
+> traffic. The file name dates it 2025-11-30; git first recorded it on 2026-07-27 (`6e3dcce`), and
+> the two dates were not reconciled. Follow-ups: the async `searchParams` rule is in
+> `.claude/rules/architecture.md`, and `getServerAuthHeaders` in
+> `src/services/api/serverHeaders.ts` is the shared cookie helper. The proxy logs
+> `proxy.unauthenticated` for a request with no session (`src/app/api/proxy/[...path]/route.ts`),
+> but no metric or alert is built on it. A lint rule for `searchParams`: not found. The text below
+> is the original.
+
 - **Date detected:** 2025-11-30
 - **Reporter:** dimaspramudya
 - **Owner:** Codex assist
