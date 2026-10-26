@@ -43,7 +43,9 @@
     "security:audit": "npm audit --omit=dev --audit-level=high",
     "security:audit:full": "npm audit --audit-level=high",
     "security:scan": "npm run security:lint && npm run security:audit",
-    "labels:sync": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/github/sync-labels.ts"
+    "labels:sync": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/github/sync-labels.ts",
+    "release:prepare": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/github/release.ts prepare",
+    "release:notes": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/github/release.ts notes"
   },
   "dependencies": {
     "@ariakit/react": "^0.4.18",
