@@ -1,6 +1,7 @@
 # Drop withAuth
 
 **Status:** Implementation complete, all nine gates green.
+Merged in #41 (`71f44a6`, 2026-09-22).
 **Slug:** `drop-withauth` · **Branch:** `refactor/drop-withauth-and-dead-auth-shims`
 
 A small sweep, so there is no plan — the [checklist](drop-withauth-checklist.md) carries the

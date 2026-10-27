@@ -1,0 +1,72 @@
+name: release
+
+# Tags each promotion that carries a new version (ADR-0045). The version is bumped on dev, in an
+# ordinary pull request made with `npm run release:prepare`; main changes only by promotion
+# (ADR-0041), so a push to main is a promotion. When package.json's version has no tag yet, this
+# tags the pushed commit v<version> and creates a GitHub release whose notes are that version's
+# CHANGELOG.md section. When the tag exists, the promotion carried no new version and nothing runs.
+#
+# The only job in the repository that can write: its token creates the tag and the release. It
+# runs `gh`, which the runner ships, and no third-party action, so no action code holds the token.
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: release
+  # Two promotions in quick succession must each finish, or one version could go untagged.
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Tag and release
+    runs-on: ubuntu-26.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # Node 24 runs release.ts by stripping its types. It imports only Node built-ins, so no
+      # `npm ci`.
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+
+      - name: Read the version
+        id: version
+        run: echo "version=$(node -p 'require("./package.json").version')" >> "$GITHUB_OUTPUT"
+
+      - name: Check for an existing tag
+        id: tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: v${{ steps.version.outputs.version }}
+        run: |
+          count=$(gh api "repos/${GITHUB_REPOSITORY}/git/matching-refs/tags/${TAG}" \
+            --jq "map(select(.ref == \"refs/tags/${TAG}\")) | length")
+          if [ "$count" -gt 0 ]; then
+            echo "::notice::${TAG} already exists; this promotion carries no new version."
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create the tag and the release
+        if: steps.tag.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          npm run --silent release:notes -- "$VERSION" > "$RUNNER_TEMP/notes.md"
+          gh release create "v${VERSION}" --target "$GITHUB_SHA" --title "v${VERSION}" \
+            --notes-file "$RUNNER_TEMP/notes.md"
+          echo "Released v${VERSION} at ${GITHUB_SHA}." >> "$GITHUB_STEP_SUMMARY"

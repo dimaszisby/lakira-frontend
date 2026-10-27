@@ -29,6 +29,8 @@ backend's `TRUST_PROXY`. It changes a security boundary, so it needs sizing and 
 
 ## Status
 
+**Issue:** #162 (F-03). The open boxes below are tracked there since 2026-10-25; this file is the dated record.
+
 **2026-10-14, register row F-19.** Not started. The two open items wait on where the frontend is
 hosted, which is the owner's question O-01 in
 `docs/internal/initiatives/frontend-debt-register/register.md`; the work itself is row F-03,

@@ -41,6 +41,8 @@ branch when picked up.
 
 ## Status
 
+**Issues:** #175 (F-30), decided in #157 (O-05); F-22 is in [`known-gaps.md`](../../reference/known-gaps.md). The open boxes below are tracked there since 2026-10-25; this file is the dated record.
+
 **N12: done 2026-10-10 on `fix/forms-show-server-error`.** Node 24.21.0, production build, local
 backend on `a6ab1dc`. N14, N7, N13, N16, the two accessibility items and N15 are done too; see the
 later entries in this section. Nothing in the checklist is open.

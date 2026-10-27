@@ -27,7 +27,8 @@ Ask what the reader is doing, then place it. Never place by artifact name.
 | explains a concept, a trade-off, or why something is | `docs/explanation/`                              |
 | records an architectural decision                    | `docs/explanation/decisions/adr-NNNN-<slug>.md`  |
 | tracks a piece of work — plan, checklist, tracker    | `docs/internal/initiatives/<topic>/`             |
-| is a dated one-off note or session TODO              | `docs/internal/todos/`, `docs/internal/dev-log/` |
+| is work to do, however small                         | a GitHub issue, not a file (ADR-0044)            |
+| is a dated one-off note                              | `docs/internal/dev-log/`                         |
 | is an audit run                                      | `docs/internal/audits/<program>/`                |
 | is a postmortem                                      | `docs/internal/incidents/`                       |
 
@@ -51,12 +52,12 @@ the work:
 | --------------------- | --------------------------------------------------------------------------------------------- |
 | Multi-week initiative | `README.md`, `<topic>-plan.md`, `<topic>-checklist.md`, `decisions.md`, plus tracker/incidents |
 | 2–5 days              | `README.md`, `<topic>-plan.md`, `<topic>-checklist.md`, `decisions.md`                        |
-| Small sweep           | `README.md`, `<topic>-checklist.md`, one `decisions.md` entry                                 |
-| Single commit         | One `decisions.md` entry with the SHA                                                         |
-| Ephemeral             | One `docs/internal/todos/YYYY-MM-DD-todo-<slug>.md`. No kit.                                  |
+| Under two days        | No kit. The issue body is the plan, and the pull request that closes it is the record         |
 
-An ephemeral todo is tracked in git but user-controlled and deletable without a follow-up PR.
-Promote it to a kit if it grows into an initiative.
+Every task starts from an issue, and only work of two days or more gets a kit (ADR-0044). If work
+without a kit grows past two days, write the kit then, with the issue in its README. Before
+2026-10-25 a small sweep, a single commit and an ephemeral todo each had their own row; those kits
+and todos stay as written.
 
 **A document in one of the four shipped quadrants is a single file.** Do not scaffold a kit around it.
 
@@ -71,8 +72,8 @@ Do not invent a `specs/` folder or a parallel ticket file. The kit already is bo
 | decision log  | `decisions.md`        |
 | entry point   | `README.md`           |
 
-The kit directory slug is the task's identity — it is also the branch name and the `refs:` footer on
-every commit. See `.claude/rules/workflow.md` § the kit slug is the traceability spine.
+The issue number is the task's identity; the kit directory slug names the kit, and is the slug in
+the branch name. See `.claude/rules/workflow.md` § The issue number is the traceability spine.
 
 ## What goes in each kit file
 
@@ -85,14 +86,18 @@ Sizing gates all of this. Which documents a kit owes follows the sizing table ab
 | --------------------- | ---- | --------- | --------- | ------ | --------------------------- |
 | Multi-week initiative | yes  | yes       | yes       | yes    | the plan                    |
 | 2–5 days              | yes  | yes       | yes       | yes    | the plan                    |
-| Small sweep           | no   | yes       | yes       | yes    | **the checklist**           |
-| Single commit         | no   | no        | one entry | no     | — no spec is owed           |
-| Ephemeral             | no   | no        | no        | no     | — no spec is owed           |
+| Under two days        | no   | no        | no        | no     | **the issue body**          |
 
-**A small sweep has no plan**, so it has no AC IDs to reference — it states its acceptance criteria
-directly in the checklist's `## Acceptance` section. The never-restate rule below binds only when a
-plan exists to be restated from. A small sweep also has no Definition of Ready: its checklist is the
-thing approved.
+**Work under two days has no kit**, so its acceptance criteria are the issue's, written in the Task
+form's "Acceptance criteria" field, and its Definition of Ready is that field and the plan the owner
+approved. A decision such work settles goes in the pull request body, or in an ADR when it alters an
+interface, a data shape, a dependency or a security boundary.
+
+**Write acceptance criteria the PR itself can meet.** A criterion that only a later event can
+satisfy, such as the first promotion after a merge, leaves the kit open and costs a close-out PR.
+State such a check as a step in the how-to or the handover instead, and record its evidence on
+the PR or run that performs it. Added 2026-10-23 from `main-release-branch`, whose last box
+waited on promotion #147.
 
 Within a full kit, **acceptance criteria and open questions are unconditional**. Rollback, security,
 observability and accessibility fire on their triggers. Everything else is shape, not ceremony.
@@ -212,7 +217,7 @@ Items name the artifact, not the intent. "`FormField`, `InputChrome`, `TextField
 Work found mid-implementation. Two outcomes only, and naming it forces the choice:
 
 - [ ] Found: <thing> → in scope, added to Phase N
-- [ ] Found: <thing> → out of scope, filed as `docs/internal/todos/YYYY-MM-DD-todo-<slug>.md`
+- [ ] Found: <thing> → out of scope, filed as issue #N
 
 If a discovery changes a component's public props, a data contract, a dependency, or an
 auth/routing boundary, stop and re-size per `.claude/rules/workflow.md`.
@@ -322,7 +327,8 @@ makes a plan approvable — stated here once, never copied into a plan:
 
 `grep -r 'NEEDS CLARIFICATION' docs/internal/initiatives/<slug>/` is the mechanical half.
 
-A small sweep has no plan and so no Definition of Ready — its checklist is the thing approved.
+Work under two days has no kit and so no Definition of Ready here — the issue's acceptance criteria
+and the approved plan stand in for it.
 
 ## Decisions and ADRs
 

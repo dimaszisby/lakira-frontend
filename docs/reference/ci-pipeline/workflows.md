@@ -2,8 +2,8 @@
 
 What each GitHub Actions workflow runs, in what order, and on what. Checked against
 `.github/workflows/test.yml` and `.github/workflows/performance.yml` on 2026-09-26, and
-`.github/workflows/dependency-audit.yml` on 2026-10-02, and `.github/workflows/stack-e2e.yml` on
-2026-10-21.
+`.github/workflows/dependency-audit.yml` on 2026-10-02, `.github/workflows/stack-e2e.yml` on
+2026-10-21, and `.github/workflows/release.yml` on 2026-10-27.
 
 This page is the one description of the pipeline. What to do when a job goes red is in the
 [daily pipeline playbook](../../how-to/ci-cd/daily-pipeline-playbook.md); the npm scripts are in
@@ -153,6 +153,26 @@ repository to `lakira-frontend/` and lakira-backend `dev` to `lakira-backend/`, 
 It reads no secret: lakira-backend is public, and every user the specs need is created during the
 run. The stack helpers still refuse any non-local URL (`cypress/support/stack.ts`).
 
+## `release` (`release.yml`)
+
+**Triggers:** `push` to `main`, which is always a promotion
+([ADR-0045](../../explanation/decisions/adr-0045-releases-are-versioned-on-dev-and-tagged-on-main.md)).
+**Concurrency:** group `release`, `cancel-in-progress: false`, so a second promotion cannot cancel
+the first one's tag.
+**Permissions:** `contents: read` for the workflow; `contents: write` for its one job, the only
+job in the repository that can write. The repository's default workflow token is `read`
+(`gh api repos/dimaszisby/lakira-frontend/actions/permissions/workflow`, checked 2026-10-27).
+**Not a PR gate.** It runs on no pull request.
+
+One job, `release` (Tag and release), 5 min timeout: checkout without persisted credentials,
+setup-node from `.nvmrc`, then reads `package.json`'s version. If tag `v<version>` exists, it
+prints a notice and stops: the promotion carried no new version. Otherwise it runs
+`release:notes` for that version and `gh release create v<version> --target <pushed commit>`,
+which makes the tag and the release together. There is no `npm ci`: the script imports only Node
+built-ins, and `gh` ships on the runner, so no package or third-party action runs with the token.
+The version is bumped on `dev` beforehand with `release:prepare`
+([`promote-dev-to-main.md`](../../how-to/releases/promote-dev-to-main.md)).
+
 ## Branch rules
 
 `dev` has one repository ruleset, "dev (integration gate)", id 25639339, active with no bypass
@@ -191,7 +211,8 @@ gh api --method POST repos/<owner>/<repo>/rulesets --input .github/rulesets/main
 ```
 
 Each call prints the new ruleset's id. "CI passed" is matched with GitHub Actions' app id, 15368,
-which is the same in every repository.
+which is the same in every repository. Labels are not copied either: run
+`npm run labels:sync -- --apply` once ([`issue-tracker.md`](../issue-tracker.md)).
 
 ## Changing a workflow
 

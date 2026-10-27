@@ -12,6 +12,9 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 - **`Origin` points at where the decision was made.** ADR-0001…0014 come from the kit under
   [`../../internal/initiatives/components-overhaul/`](../../internal/initiatives/components-overhaul/),
   whose `decisions.md` remains the full working log. Later records link their own origin.
+- **Dates are decision dates, not file dates.** ADR-0001…0014 carry the dates the kit settled them
+  (February and March 2026); the files themselves entered git on 2026-08-22 (`b74ab2c`, the move to
+  this structure). Use `git log --follow` on a file for when it was written down.
 - **The `Origin` column is deliberately mixed.** Kit-local decisions were numbered `ADR-NNN` inside
   their own kit until 2026-09-20, which is what the existing values record; from that date a kit
   numbers them `D-NN`, so new rows read `D-03`. The old values were correct when written and are
@@ -58,12 +61,16 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0033](./adr-0033-sign-out-lives-on-the-account-page-below-lg.md)               | Below `lg`, signing out lives on the account page; the mobile drawer is gone | Accepted       | 2026-10-21 | `D-01` (mobile-sign-out)            |
 | [ADR-0034](./adr-0034-the-proxy-forwards-only-the-error-keys-the-frontend-reads.md) | The proxy forwards only the error keys the frontend reads                    | Accepted       | 2026-10-21 | `D-01` (proxy-error-body-allowlist) |
 | [ADR-0035](./adr-0035-a-list-picks-table-or-cards-in-css-at-sm.md)                  | A list picks table or cards in CSS, at `sm`                                  | Accepted       | 2026-10-21 | `D-01` (list-variant-breakpoint)    |
-| [ADR-0036](./adr-0036-ci-runs-its-jobs-in-parallel-behind-a-gate.md)                | CI runs its jobs in parallel, behind a gate                                  | Accepted       | 2026-10-21 | `D-01` (ci-in-parallel)             |
+| [ADR-0036](./adr-0036-ci-runs-its-jobs-in-parallel-behind-a-gate.md)                | CI runs its jobs in parallel, behind a gate; superseded in part by ADR-0038  | Accepted       | 2026-10-21 | `D-01` (ci-in-parallel)             |
 | [ADR-0037](./adr-0037-a-clickable-row-is-named-by-its-caller.md)                    | A clickable table row is named by its caller                                 | Accepted       | 2026-10-22 | `D-01` (table-row-accessible-name)  |
 | [ADR-0038](./adr-0038-e2e-builds-the-app-itself.md)                                 | E2E builds the app itself; supersedes ADR-0036 in part                       | Accepted       | 2026-10-22 | `D-01` (build-inside-e2e)           |
 | [ADR-0039](./adr-0039-dev-is-protected-by-a-ruleset.md)                             | `dev` is protected by a ruleset that requires "CI passed"                    | Accepted       | 2026-10-22 | `D-01` (dev-ruleset)                |
 | [ADR-0040](./adr-0040-a-category-chip-is-an-opaque-tint-on-a-fixed-base.md)         | A category chip is an opaque tint on a fixed base                            | Accepted       | 2026-10-23 | `D-01` (category-chip-contrast)     |
 | [ADR-0041](./adr-0041-main-is-reset-onto-dev-and-protected-by-a-release-gate.md)    | `main` is reset onto `dev` and protected by a release gate                   | Accepted       | 2026-10-23 | `D-01` (main-release-branch)        |
+| [ADR-0042](./adr-0042-open-work-moves-to-github-issues.md)                          | Open work moves to GitHub Issues, with the tracker kept as code              | Accepted       | 2026-10-24 | `D-01` (tracker-as-code)            |
+| [ADR-0043](./adr-0043-the-frontend-moves-to-zod-4.md)                               | The frontend moves to zod 4                                                  | Accepted       | 2026-10-24 | `D-01` (zod-4-upgrade)              |
+| [ADR-0044](./adr-0044-every-task-starts-from-an-issue.md)                           | Every task starts from an issue; a kit only for two days or more             | Accepted       | 2026-10-25 | `D-01` (open-work-to-issues)        |
+| [ADR-0045](./adr-0045-releases-are-versioned-on-dev-and-tagged-on-main.md)          | Releases are versioned on `dev` and tagged on `main`                         | Accepted       | 2026-10-27 | #174 (no kit)                       |
 
 ## Where the other decisions went
 

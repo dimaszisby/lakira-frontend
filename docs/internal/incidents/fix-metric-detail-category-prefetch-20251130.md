@@ -1,5 +1,14 @@
 # Metric Detail & Category Prefetch Failures – Async Params & Auth Propagation
 
+> **Note, 2026-10-25.** Found and fixed while running `npm run dev`. No production deployment
+> exists, so "Users", "Severity" and "Frequency" below describe the developer's own flow after the
+> Next 16 migration, not live traffic. The file name dates it 2025-11-30; git first recorded it on
+> 2026-07-27 (`6e3dcce`), and the two dates were not reconciled. Follow-ups: the cookie-forwarding
+> rule is in `.claude/rules/data-access.md` and `getServerAuthHeaders` is in
+> `src/services/api/serverHeaders.ts`. A lint rule or helper for async `params` and
+> `searchParams`: not found. The audit of shared components for client-only hooks: not found. The
+> text below is the original.
+
 - **Date detected:** 2025-11-30
 - **Owner:** Codex assist
 - **Related routes:** `/metrics/[metricId]`, `/metrics/[metricId]/logs/*`, `/metrics/[metricId]/edit`, `/metric-categories/[categoryId]`, `/metric-categories/[categoryId]/edit`, `/metric-categories/[categoryId]/metrics/[metricId]`

@@ -226,7 +226,7 @@ Ensure that the app stays within agreed **performance budgets** and provides goo
 
 **What we test**
 
-- Lighthouse scores for key pages (e.g. `/`, `/app/dashboard`):
+- Lighthouse scores for key pages (e.g. `/`, `/dashboard`):
   - Performance
   - Best Practices
   - Accessibility (supplements other tests)
@@ -319,7 +319,7 @@ Security-related checks are included in:
 - E2E tests for auth and protected routes.
 - Release-time checklists:
   - `docs/how-to/releases/release-checklist.md`
-  - `docs/internal/todos/*` for time-boxed security tasks.
+  - GitHub issues for time-boxed security tasks (ADR-0044).
 
 ---
 

@@ -48,6 +48,8 @@ from a clean clone.
 | [`accessibility-baseline.md`](./reference/accessibility-baseline.md) | WCAG 2.1 AA criteria this app holds itself to                   |
 | [`performance-budget.md`](./reference/performance-budget.md)         | Web Vitals, bundle, and Lighthouse budgets                      |
 | [`ci-pipeline/`](./reference/ci-pipeline/)                           | What each CI workflow runs; the backend→frontend CI/CD contract |
+| [`issue-tracker.md`](./reference/issue-tracker.md)                   | GitHub labels and issue forms, and syncing them to a fork       |
+| [`known-gaps.md`](./reference/known-gaps.md)                         | Gaps a fork inherits knowingly, with the reason each stays      |
 
 ## Explanation — understanding-oriented
 
@@ -64,6 +66,8 @@ from a clean clone.
 
 [`internal/`](./internal/) holds this project's working material: initiative kits, audit runs,
 incidents, todos, and archive. It sits _beside_ the four quadrants rather than inside them.
+[`internal/initiatives/README.md`](./internal/initiatives/README.md) lists every kit, active or
+done, with the PR that merged it.
 
 The reason is that Diátaxis classifies documentation **of a system**. It says nothing about the
 plans, checklists, trackers, and audit runs a real project accumulates — which here is 58 of 120
@@ -89,7 +93,8 @@ Pick by the reader's purpose, not by the artifact's shape:
 | explains a decision or a concept                  | `explanation/`                              |
 | records an architectural decision                 | `explanation/decisions/` (one ADR per file) |
 | tracks a piece of work — plan, checklist, tracker | `internal/initiatives/<topic>/`             |
-| is a dated one-off note                           | `internal/todos/` or `internal/dev-log/`    |
+| is work to do, however small                      | a GitHub issue, not a file (ADR-0044)       |
+| is a dated one-off note                           | `internal/dev-log/`                         |
 | is an audit run                                   | `internal/audits/<program>/`                |
 | is a postmortem                                   | `internal/incidents/`                       |
 

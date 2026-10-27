@@ -41,7 +41,7 @@ Three things to know about the enforcement:
 - `app → types` is **not** in the allow list. Route files that need a DTO type should reach it through the feature module.
 - **No file is exempt.** Six `components` files were once quarantined at the bottom of `eslint.config.mjs` with the rule turned off. `CategorySelect` and `Visualization` moved into their feature modules on 2026-09-11; `withAuth.tsx` and `HydrateUser.tsx` were deleted on 2026-09-22; `Header.tsx` and `Sidebar.tsx` were inverted on 2026-10-13 (kit `unquarantine-layout-files`). Do not start a new list. When a shared component needs application state, the `app` or `features` caller passes it in as props: `src/app/(app)/_components/AppShell.tsx` owns the sign-out mutation and hands `Layout` and `Sidebar` an `onLogout` handler.
 
-If you add a directory that should be its own layer, add it to **both** `settings["boundaries/elements"]` and the `boundaries/element-types` rules. A `from: <type>` rule with no matching `elements` entry silently matches nothing — that exact mistake left the `components` layer unenforced until 2026-08-17, and 18 inversions accumulated behind it (see `.claude/lessons.md`).
+If you add a directory that should be its own layer, add it to **both** `settings["boundaries/elements"]` and the `boundaries/element-types` rules. A `from: <type>` rule with no matching `elements` entry silently matches nothing — that exact mistake left the `components` layer unenforced until 2026-08-17, and 18 inversions accumulated behind it (lesson of 2026-08-17: `git show 9c081c3:.claude/lessons.md`).
 
 ## Feature modules
 
@@ -102,6 +102,11 @@ Use `/new-route` to scaffold these — it holds the invariant so you do not have
 - Server-side fetches for protected routes go through `/api/proxy/[...path]` and must forward the `lakira_token` cookie via `getServerAuthHeaders()`. An SSR prefetch without it silently 401s.
 - Closing an edit modal with `router.back()` restores the cached RSC tree. Pair it with `router.refresh()` or the parent route shows stale data.
 - Client-only hooks (`useRouter`, `useState`, …) cannot live in a file that is still a server component. Split out a client child.
+- **A file loaded by convention runs only if its name and directory match the version's
+  convention**: the proxy, instrumentation, route handlers, config. `middleware.ts` at the repo root
+  never ran once Next 16 renamed it to `proxy` under `src/`, and the layout's own redirect hid it.
+  Check `node_modules/next/dist/docs/`, and prove a gate runs before trusting it; the matcher test
+  now reads `src/proxy.ts` by path (2026-09-12).
 
 ## Path aliases
 

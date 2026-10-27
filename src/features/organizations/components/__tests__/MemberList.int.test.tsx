@@ -18,6 +18,18 @@ const member = {
   joinedAt: "2026-08-01T10:00:00Z",
 };
 
+const grace = {
+  ...member,
+  membershipId: "mem-2",
+  userId: "u-2",
+  username: "grace",
+  email: "grace@example.com",
+  role: "member" as const,
+};
+
+const membersPage = (members: unknown[], nextCursor: string | null) =>
+  HttpResponse.json({ status: "success", message: "Success", data: { members, nextCursor } });
+
 describe("MemberList", () => {
   it("renders members returned for the active organization", async () => {
     server.use(
@@ -53,6 +65,48 @@ describe("MemberList", () => {
     renderWithProviders(<MemberList />);
 
     await waitFor(() => expect(requestedUrl).toContain(TEST_ORGANIZATION_ID));
+  });
+
+  it("lists members from every page when the list runs past one page", async () => {
+    // The backend answers at most 100 rows a page since lakira-backend #218;
+    // the list follows nextCursor until it is null (register row F-76).
+    const afters: (string | null)[] = [];
+    server.use(
+      http.get(MEMBERS_URL, ({ request }) => {
+        const after = new URL(request.url).searchParams.get("after");
+        afters.push(after);
+        return after === "page-2" ? membersPage([grace], null) : membersPage([member], "page-2");
+      }),
+    );
+
+    const { container } = renderWithProviders(<MemberList />);
+
+    expect(await screen.findByText("grace")).toBeInTheDocument();
+    expect(screen.getByText("ada")).toBeInTheDocument();
+    expect(afters).toEqual([null, "page-2"]);
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
+  it("stops following when the backend repeats a cursor", async () => {
+    const warn = jest.spyOn(console, "warn").mockImplementation(() => {});
+    const afters: (string | null)[] = [];
+    server.use(
+      http.get(MEMBERS_URL, ({ request }) => {
+        const after = new URL(request.url).searchParams.get("after");
+        afters.push(after);
+        return after === "page-2"
+          ? membersPage([grace], "page-2")
+          : membersPage([member], "page-2");
+      }),
+    );
+
+    renderWithProviders(<MemberList />);
+
+    expect(await screen.findByText("grace")).toBeInTheDocument();
+    expect(screen.getByText("ada")).toBeInTheDocument();
+    expect(afters).toEqual([null, "page-2"]);
+    expect(warn).toHaveBeenCalledTimes(1);
+    warn.mockRestore();
   });
 
   it("shows an empty state when the organization has no members", async () => {

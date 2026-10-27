@@ -128,3 +128,7 @@ Validation snapshot (2026-02-18):
 - `docs/reference/ci-pipeline/workflows.md` (the pipeline today; supersedes the plan below as reference)
 - `docs/internal/initiatives/cicd/pipeline-plan.md`
 - `docs/internal/todos/2026-02-16-todo-cicd-overview.md`
+
+## Status
+
+**Issue:** #178 (F-41). The open boxes below are tracked there since 2026-10-25; this file is the dated record.

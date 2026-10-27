@@ -1,3 +1,4 @@
+import { buildQueryString } from "@/features/shared/api";
 import api from "@/services/api/api";
 import { withApiErrorHandling } from "@/services/api/withApiErrorHandling";
 import type ApiResponse from "@/types/generics/ApiResponse";
@@ -8,7 +9,9 @@ import type {
   InvitableRole,
   Member,
   MemberRole,
+  MembersPage,
   MembersResponse,
+  UserOrganizationsPage,
   UserOrganizationsResponse,
 } from "./types";
 
@@ -19,14 +22,56 @@ import type {
  * rather than the legacy `src/services/api/auth.api.ts` shape.
  */
 
+type Page<T> = { rows: T[]; nextCursor?: string | null };
+
+/**
+ * Every page of a list the backend pages by cursor, 100 rows at most since
+ * lakira-backend #218, fetched in turn and merged. The list ends when
+ * `nextCursor` is null or absent. A cursor already followed also ends it, with
+ * the rows collected so far, so a backend that repeats one cannot loop the
+ * browser. Kit `org-lists-follow-cursor`, D-01.
+ */
+const collectPages = async <T>(
+  fetchPage: (after: string | undefined) => Promise<Page<T>>,
+  functionName: string,
+): Promise<T[]> => {
+  const rows: T[] = [];
+  const followed = new Set<string>();
+  let after: string | undefined;
+
+  for (;;) {
+    // Each page needs the previous page's cursor, so the requests are serial.
+    const page = await fetchPage(after);
+    rows.push(...page.rows);
+
+    const next = page.nextCursor ?? undefined;
+    if (next === undefined) return rows;
+    if (followed.has(next)) {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn(`[API] ${functionName}: the backend repeated a cursor; stopped paging`);
+      }
+      return rows;
+    }
+    followed.add(next);
+    after = next;
+  }
+};
+
 export const listMembers = (organizationId: string, opts?: RequestOpts) =>
-  withApiErrorHandling(
-    () =>
-      api
-        .get<ApiResponse<MembersResponse>>(`/organizations/${organizationId}/members`, opts)
-        .then(unwrap),
-    "listMembers",
-  );
+  withApiErrorHandling(async (): Promise<MembersResponse> => {
+    const members = await collectPages(
+      (after) =>
+        api
+          .get<ApiResponse<MembersPage>>(
+            `/organizations/${organizationId}/members${buildQueryString({ after })}`,
+            opts,
+          )
+          .then(unwrap)
+          .then((page) => ({ rows: page.members, nextCursor: page.nextCursor })),
+      "listMembers",
+    );
+    return { members };
+  }, "listMembers");
 
 export type InviteMemberInput = {
   email: string;
@@ -78,10 +123,20 @@ export const acceptInvite = (token: string, opts?: RequestOpts) =>
 
 /** The organizations the signed-in user belongs to, oldest membership first. */
 export const listMyOrganizations = (opts?: RequestOpts) =>
-  withApiErrorHandling(
-    () => api.get<ApiResponse<UserOrganizationsResponse>>("/organizations", opts).then(unwrap),
-    "listMyOrganizations",
-  );
+  withApiErrorHandling(async (): Promise<UserOrganizationsResponse> => {
+    const organizations = await collectPages(
+      (after) =>
+        api
+          .get<ApiResponse<UserOrganizationsPage>>(
+            `/organizations${buildQueryString({ after })}`,
+            opts,
+          )
+          .then(unwrap)
+          .then((page) => ({ rows: page.organizations, nextCursor: page.nextCursor })),
+      "listMyOrganizations",
+    );
+    return { organizations };
+  }, "listMyOrganizations");
 
 /**
  * Move the session to another organization.

@@ -115,7 +115,7 @@ describe("colour utilities resolve against the theme", () => {
   it("reads the theme's colour keys", () => {
     // Without this, a parse that silently returned nothing would make the
     // assertion below pass vacuously — the failure mode the boundaries rule
-    // had for months (see .claude/lessons.md, 2026-08-17).
+    // had for months (lesson of 2026-08-17, `.claude/rules/architecture.md`).
     expect(declaredKeys.size).toBeGreaterThan(5);
     expect(declaredKeys.has("ink-secondary")).toBe(true);
     expect(declaredKeys.has("status-error-bg")).toBe(true);

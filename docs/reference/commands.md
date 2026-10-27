@@ -79,6 +79,14 @@ npx jest --config jest.integration.config.ts path/to/file.int.test.tsx
 | `npm run api:types:generate` | Regenerate `src/types/api/generated/lakira-backend.d.ts` from the snapshot.   |
 | `npm run api:types:check`    | Fail if the committed types differ from a fresh generation.                   |
 
+## Repository settings
+
+| Command                   | What it does                                                                                                                                                                                                                                                                               |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `npm run labels:sync`     | Print what would make the repository's GitHub labels match `.github/labels.json`; `-- --apply` writes it, deleting labels the file does not list. Needs `gh`. See [`issue-tracker.md`](./issue-tracker.md).                                                                                |
+| `npm run release:prepare` | Bump `package.json` and the lockfile to the next version (`-- minor`, `major`, `patch` or `x.y.z`) and add its `CHANGELOG.md` section from the commits `dev` holds and `origin/main` does not. Commits nothing. See [`promote-dev-to-main.md`](../how-to/releases/promote-dev-to-main.md). |
+| `npm run release:notes`   | Print one version's `CHANGELOG.md` section (`-- 0.2.0`). The `release` workflow uses it for the GitHub release notes.                                                                                                                                                                      |
+
 ---
 
 ## Known-broken

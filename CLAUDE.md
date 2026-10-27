@@ -50,6 +50,8 @@ Those are CI's `checks` and `unit` jobs. Run them before proposing a change is c
 
 Plan mode for anything non-trivial — 3+ steps or an architectural decision.
 
+**Task ids are issue numbers.** Every task starts from a GitHub issue: the branch is `<type>/<N>-<slug>`, commits carry `refs: #N`, and the PR says `Closes #N`. A kit is written only for work of two days or more (ADR-0044).
+
 ## Agents and skills
 
 Agents: `code-reviewer`, `test-writer`, `doc-writer`, `ci-debugger`.
@@ -72,8 +74,8 @@ Worth knowing about:
 - [`docs/internal/incidents/`](docs/internal/incidents/) — four postmortems covering routing, caching, prefetch, and `searchParams`. Check these before touching those areas; the causes recur.
 - [`docs/explanation/testing-strategy.md`](docs/explanation/testing-strategy.md) — the full pyramid.
 - [`docs/reference/components/README.md`](docs/reference/components/README.md) — UI standards, read in the order that README gives.
-- [`docs/internal/todos/`](docs/internal/todos/) — active backlogs.
-- [`docs/internal/initiatives/frontend-debt-register/register.md`](docs/internal/initiatives/frontend-debt-register/register.md) — every open item, ranked. **"What's next" is answered from here** (`.claude/rules/workflow.md` § What's next).
+- [`docs/internal/todos/`](docs/internal/todos/) — dated records of findings; open work is in [GitHub Issues](https://github.com/dimaszisby/lakira-frontend/issues) since 2026-10-25 (ADR-0044).
+- [GitHub Issues](https://github.com/dimaszisby/lakira-frontend/issues) — every open item, ranked by labels. **"What's next" is answered from here** (`.claude/rules/workflow.md` § What's next). The debt register, [`register.md`](docs/internal/initiatives/frontend-debt-register/register.md), is frozen as a record since 2026-10-25 and maps each old `F-NN` to its issue.
 - [`docs/explanation/decisions/`](docs/explanation/decisions/) — the ADR registry, one decision per file. Check **Status** before trusting one.
 - [`docs/reference/commands.md`](docs/reference/commands.md) — canonical npm scripts. Do not keep a second copy elsewhere.
 
@@ -81,11 +83,11 @@ Worth knowing about:
 
 Things a reasonable reader would otherwise assume are true, and are not:
 
-- **Cache keys are organization-scoped.** Every `src/features/*/keys.ts` except `auth` takes `organizationId` as a required first argument, so a missed call site is a compile error. Do not add a key factory without it — see ADR-004 and `src/features/__tests__/key-tenant-scoping.test.ts`.
+- **Cache keys are organization-scoped.** Every `src/features/*/keys.ts` except `auth` takes `organizationId` as a required first argument, so a missed call site is a compile error. Do not add a key factory without it — see ADR-0015 and `src/features/__tests__/key-tenant-scoping.test.ts`.
 - **No file is exempt from the layer rule.** `src/components/**` was unmapped in `boundaries/elements` until 2026-08-17, so the `components` boundary never ran and 18 inversions accumulated. Six files were then quarantined at the bottom of `eslint.config.mjs`. The last two, `Header.tsx` and `Sidebar.tsx`, were brought inside the rule on 2026-10-13 (kit `unquarantine-layout-files`): the sign-out mutation now lives in `src/app/(app)/_components/AppShell.tsx` and reaches the sidebar as props. Do not start a new exemption list.
 - **Integration tests are MSW-backed, per test rather than globally.** `src/test-utils/msw/handlers.ts` is an empty array _by design_: the server runs `onUnhandledRequest: "error"` and each suite declares its own requests via `server.use()`. That is stricter than a shared handler list. (An earlier note here claimed tests mocked feature hooks at module level; verified false on 2026-08-27 — no suite does.)
 - **Coverage thresholds are real as of 2026-08-27, and measure source only as of 2026-10-19.** Global thresholds sit just below measured coverage: 54/45/48/54 % against a measured 55.61/46.14/49.74/55.13 % on 2026-10-19. Before that date test files counted as source, so every integration suite lowered the figure; the old 42/43/37/41 % was on that basis. `coverage:check --strict` runs in CI. Before 2026-08-27 they were 3/2/3/3 %, roughly a tenth of actual. Do not lower them to make a build pass, and ratchet them again when measured coverage is two points clear.
-- **The OpenAPI snapshot drifts whenever the backend publishes a spec change**, even a description-only one; last synced 2026-10-21 (backend #202). The `api-contract` check then fails on `dev` and on every open PR at once. Run `npm run api:spec:check` before trusting `src/types/dtos/**` and before handing over any PR — `api:types:check` compares only local files. It is a gate that works, not a known gap.
+- **The OpenAPI snapshot drifts whenever the backend publishes a spec change**, even a description-only one; last synced 2026-10-24 (backend #221). The `api-contract` check then fails on `dev` and on every open PR at once. Run `npm run api:spec:check` before trusting `src/types/dtos/**` and before handing over any PR — `api:types:check` compares only local files. It is a gate that works, not a known gap.
 
 <!-- BEGIN:nextjs-agent-rules -->
 
