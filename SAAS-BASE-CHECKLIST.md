@@ -94,7 +94,7 @@ The audit lists every item's grade and how it was graded.
 | **N7**  | P2       | **Fixed, pending a dated run.** The application's log lines are scrubbed (ADR-0027), and so is the error line Next prints itself (ADR-0029).                                            |
 | **C6**  | P2       | **Fixed, pending a dated run.** No file is quarantined from the layer rule (register row F-09).                                                                                         |
 |         | P2       | **Fixed, pending a dated run.** Each route group has an error boundary, and no boundary prints the error's message (register row F-08).                                                 |
-|         | P2       | Three more, listed in the audit: no `CODE_OF_CONDUCT.md`, no plan surface, and field vitals not aggregated.                                                                             |
+|         | P2       | **Partly fixed, pending a dated run.** `CODE_OF_CONDUCT.md` added (#165). Open: no plan surface, field vitals not aggregated.                                                           |
 
 Closed since 2026-10-04, each re-tested in this run: **N1** (proxy path escape), **N2** (fork fails
 `format`), **N3** (token in browser JavaScript), **N4** (inline script in the CSP), **N5**, **N6**,
