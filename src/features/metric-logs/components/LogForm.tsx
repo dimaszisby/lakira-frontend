@@ -25,7 +25,7 @@ import { ErrorMessage } from "@/ui/ErrorMessage";
 import { FormField } from "@/ui/FormField";
 import { Modal } from "@/ui/Modal";
 import { TextField } from "@/ui/TextField";
-import { parseDate, toISOWithOffset, toISOZExact } from "@/utils/date-io";
+import { parseDate, toISOZExact } from "@/utils/date-io";
 
 interface Props {
   onClose: () => void;
@@ -193,7 +193,7 @@ const MetricLogForm = ({ onClose, metricId, initialLog }: Props) => {
                   <DateTimePicker
                     mode="datetime"
                     value={parseDate(field.value)}
-                    onChange={(d) => field.onChange(toISOWithOffset(d))}
+                    onChange={(d) => field.onChange(d)}
                     minuteStep={5}
                     disabled={isBusyInputs}
                     aria-label="Log date and time"
