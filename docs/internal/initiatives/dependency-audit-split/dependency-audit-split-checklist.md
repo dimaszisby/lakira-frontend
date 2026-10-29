@@ -41,9 +41,13 @@
 - [x] **AC-2** — `security:audit` passes when the only high advisory is in a dev dependency, and
       `security:audit:full` fails on the same lockfile. _Why:_ the incident class this exists to
       stop (#62). Method: a scratch lockfile with `brace-expansion` back at 1.1.18.
-- [ ] **AC-3** — `dependency-audit.yml` runs green from `workflow_dispatch` on `dev` after merge.
+- [x] **AC-3** — `dependency-audit.yml` runs green from `workflow_dispatch` on `dev` after merge.
       _Why:_ a scheduled job nobody has seen run might not exist (lesson 2026-09-12). Method: one
-      dispatched run, checked by name.
+      dispatched run, checked by name. Met 2026-10-29: run 40858872503, dispatched on
+      `fix/185-dev-advisories` at `a9b5257`, "Full dependency audit" success. It ran on that
+      branch rather than on `dev`, so its result is recorded in the pull request that merges the
+      lockfile into `dev`, with no close-out PR. Scheduled runs had already passed on `dev` from
+      2026-10-25 to 2026-10-28.
 - [x] **AC-4** — lint fails when a runtime file in `src/` imports a devDependency, and passes on
       `dev`. _Why:_ keeps the production audit's scope true. Method: plant an `msw` import,
       watch lint fail, remove it.

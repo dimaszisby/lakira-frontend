@@ -1,9 +1,9 @@
 # Dependency audit split
 
 **Status:** Merged as #64 (77fa8e3, 2026-10-03); D-01 is ADR-0023, accepted in the same PR
-(registry rule). Open: AC-3. The first dispatched run failed on an unpatched advisory in `braces`,
-a development-only dependency, so no green run exists yet; tracked in
-`docs/internal/todos/2026-10-03-todo-braces-dev-advisory.md`.
+(registry rule). Done: AC-3, the last open box, passed on 2026-10-29 in #185's pull request (run
+40858872503). The first dispatched run, on 2026-10-03, had failed on a `braces` advisory, withdrawn
+upstream on 2026-10-23 (#163).
 **Slug:** `dependency-audit-split` · **Branch:** `chore/dependency-audit-split`
 
 - [Checklist](dependency-audit-split-checklist.md) — work items, acceptance, gates
