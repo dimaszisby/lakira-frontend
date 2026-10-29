@@ -87,7 +87,7 @@ The audit lists every item's grade and how it was graded.
 |         | P1       | **End-to-end coverage.** Every core journey has a spec now, including creating a metric and logging a value. None of the specs that sign in runs in CI.                                 |
 | **N12** | P2       | **Fixed, pending a dated run.** Four forms printed the transport error, not the server's message.                                                                                       |
 | **N13** | P2       | **Fixed, pending a dated run.** The CSP unit test sets `NEXT_PUBLIC_API_BASE_URL` itself, so the unit gate no longer depends on the shell.                                              |
-| **N14** | P2       | **Reduced, pending a dated run.** `handlebars` updated, so no critical advisory is left. `braces`, `postcss-selector-parser` and `sprintf-js` have no patch and are tracked.            |
+| **N14** | P2       | **Fixed, pending a dated run.** `handlebars` updated earlier; #186 patched `postcss-selector-parser`, and the `braces` and `sprintf-js` advisories were withdrawn.                      |
 | **N15** | P2       | **Fixed, pending a dated run.** The log form sends the exact time, so a second value in the same minute is saved.                                                                       |
 | **N16** | P2       | **Fixed, pending a dated run.** Three stale statements in the rules and the accessibility baseline corrected.                                                                           |
 |         | P2       | **Improved, pending a dated run.** The accessibility check is its own step in CI, and the WCAG baseline has no placeholder left. The signed-in pages are still checked outside CI only. |
