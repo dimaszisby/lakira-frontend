@@ -101,6 +101,7 @@ surface the backend exposes.
 Branch off `dev`, never `main`. Promotion is `feat/* → dev → main`; there is no `staging` branch.
 
 Full guide: [`CONTRIBUTING.md`](CONTRIBUTING.md). Security policy: [`SECURITY.md`](SECURITY.md).
+Code of conduct: [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
 
 Repository conventions for agents and humans live in [`CLAUDE.md`](CLAUDE.md) and
 [`.claude/rules/`](.claude/rules/).

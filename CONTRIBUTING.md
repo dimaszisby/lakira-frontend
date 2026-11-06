@@ -110,6 +110,11 @@ response time is best-effort. Open an issue first for significant changes to dis
 before writing code; the forms and labels are described in
 [`docs/reference/issue-tracker.md`](docs/reference/issue-tracker.md).
 
+## Code of Conduct
+
+This project follows the Contributor Covenant 2.1: [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md).
+Report a conduct problem privately to the maintainer, as that file says, not in a public issue.
+
 ## Security
 
 Do not open a public issue for a security problem. See [`SECURITY.md`](SECURITY.md).

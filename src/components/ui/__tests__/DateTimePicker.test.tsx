@@ -6,6 +6,7 @@ import { DateTimePicker } from "@/components/ui/DateTimePicker";
 
 const CHOOSE_DATE = /choose date$/i;
 const CHOOSE_DATE_AND_TIME = /choose date and time/i;
+const PICKED_DAY = "2026-02-18";
 
 const dayButton = (key: string) => {
   const button = document.querySelector<HTMLButtonElement>(
@@ -49,7 +50,7 @@ describe("DateTimePicker", () => {
     );
 
     await user.click(screen.getByRole("button", { name: CHOOSE_DATE_AND_TIME }));
-    await user.click(dayButton("2026-02-18"));
+    await user.click(dayButton(PICKED_DAY));
 
     const picked = lastDate(onChange);
     expect([picked.getDate(), picked.getHours(), picked.getMinutes()]).toEqual([18, 13, 45]);
@@ -217,11 +218,53 @@ describe("DateTimePicker", () => {
     );
 
     await user.click(screen.getByRole("button", { name: CHOOSE_DATE_AND_TIME }));
-    await user.click(dayButton("2026-02-18"));
+    await user.click(dayButton(PICKED_DAY));
     await user.selectOptions(screen.getByRole("combobox", { name: /select minute/i }), "30");
 
     const picked = lastDate(onChange);
     expect([picked.getDate(), picked.getMinutes()]).toEqual([18, 30]);
+  });
+
+  it("keeps the value's seconds and milliseconds when a date is picked", async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+
+    render(
+      <DateTimePicker
+        mode="datetime"
+        value={new Date(2026, 1, 16, 13, 45, 37, 250)}
+        onChange={onChange}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: CHOOSE_DATE_AND_TIME }));
+    await user.click(dayButton(PICKED_DAY));
+
+    const picked = lastDate(onChange);
+    expect([picked.getDate(), picked.getSeconds(), picked.getMilliseconds()]).toEqual([
+      18, 37, 250,
+    ]);
+  });
+
+  it("keeps the value's seconds and milliseconds when the time is changed", async () => {
+    const user = userEvent.setup();
+    const onChange = jest.fn();
+
+    render(
+      <DateTimePicker
+        mode="datetime"
+        value={new Date(2026, 1, 16, 13, 45, 37, 250)}
+        onChange={onChange}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: CHOOSE_DATE_AND_TIME }));
+    await user.selectOptions(screen.getByRole("combobox", { name: /select minute/i }), "30");
+
+    const picked = lastDate(onChange);
+    expect([picked.getMinutes(), picked.getSeconds(), picked.getMilliseconds()]).toEqual([
+      30, 37, 250,
+    ]);
   });
 
   it("does not open when disabled", async () => {

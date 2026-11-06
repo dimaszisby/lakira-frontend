@@ -174,6 +174,8 @@ export const DateTimePicker = ({
       return;
     }
 
+    // Seconds and milliseconds are not shown, so they are kept rather than zeroed: an edit keeps the
+    // value's own, and two values picked for the same minute stay distinct (#175).
     const base = latestValueRef.current ?? value ?? new Date();
     const next = clampDateTime(
       new Date(
@@ -182,6 +184,8 @@ export const DateTimePicker = ({
         date.getDate(),
         base.getHours(),
         base.getMinutes(),
+        base.getSeconds(),
+        base.getMilliseconds(),
       ),
       min,
       max,
@@ -209,7 +213,8 @@ export const DateTimePicker = ({
 
   const setTime = (hour: number, pm: boolean, minute: number) => {
     const next = new Date(latestValueRef.current ?? value ?? new Date());
-    next.setHours((hour % 12) + (pm ? 12 : 0), minute, 0, 0);
+    // Leaves seconds and milliseconds as they were; see commitDate.
+    next.setHours((hour % 12) + (pm ? 12 : 0), minute);
     const clamped = clampDateTime(next, min, max);
     latestValueRef.current = clamped;
     onChange(clamped);
