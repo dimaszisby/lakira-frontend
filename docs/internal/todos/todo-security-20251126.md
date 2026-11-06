@@ -14,6 +14,7 @@
 
 1. Fix legacy lint violations (non-arrow React components, hooks warnings, boundaries config) so the new `security:scan` CI job can pass.
 2. Explore migrating protected data fetching into server components to further tighten SSR enforcement.
+   - Decided 2026-11-06: not pursued. The edge gate in `src/proxy.ts`, the `(app)` layout's redirect and the backend's check on every proxied request already enforce every protected fetch, and a server fetch goes through the same proxy with the same cookie, so it would add no check. See #173.
 3. Plan removal of `style-src 'unsafe-inline'` by hashing or extracting Tailwind output; monitor CSP reports for regressions.
    - Decided 2026-10-14: kept. Style attributes cannot carry a nonce or a hash, and what CSS may fetch is limited instead; see ADR-0030 and `2026-10-14-todo-inline-style-stays.md`.
 4. Enable Dependabot/Snyk (or equivalent) for dependency monitoring and log evidence in the audit log.
