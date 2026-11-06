@@ -3,6 +3,7 @@
     "version": "12.8.2",
     "runsPerRoute": 3,
     "routes": ["/", "/login", "/register"],
+    "signedInRoutes": ["/dashboard", "/metrics"],
     "categories": {
       "performance": 70,
       "accessibility": 90,
