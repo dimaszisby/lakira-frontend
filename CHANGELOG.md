@@ -6,6 +6,20 @@ workflow publishes it as the notes of the GitHub release tagged `v<version>`. Ho
 [`docs/how-to/releases/promote-dev-to-main.md`](docs/how-to/releases/promote-dev-to-main.md).
 Decision: [ADR-0045](docs/explanation/decisions/adr-0045-releases-are-versioned-on-dev-and-tagged-on-main.md).
 
+## 0.2.1 - 2026-11-06
+
+### Fixes
+
+- fix(deps): move follow-redirects to 1.16.2 for GHSA-mrwp-f3q8-3g9p
+- fix(ui): keep the seconds the date and time picker does not show
+- fix(deps): clear the advisories failing the nightly dependency audit
+
+### Other
+
+- docs(checklist): record N14 as fixed by #186
+- docs: add a code of conduct, the Contributor Covenant 2.1
+- docs(dependency-audit-split): record AC-3 with the dispatched run
+
 ## 0.2.0 - 2026-10-27
 
 ### Fixes
