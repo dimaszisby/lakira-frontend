@@ -72,7 +72,8 @@ Read by scripts, never by the app:
 | `LAKIRA_OPENAPI_URL`    | `scripts/api/sync-openapi-spec.mjs` | Override the spec source URL entirely.                                              |
 | `LAKIRA_OPENAPI_BRANCH` | `scripts/api/sync-openapi-spec.mjs` | Which `lakira-backend` branch to sync from. Defaults to `dev` — see the note below. |
 | `LAKIRA_BACKEND_PATH`   | `scripts/api/sync-openapi-spec.mjs` | Sync from a local backend checkout instead of GitHub.                               |
-| `PERF_BASE_URL`         | `scripts/perf/*.mjs`                | Target for Lighthouse and Web Vitals runs.                                          |
+| `PERF_BASE_URL`         | `scripts/perf/*.mjs`                | Target for Lighthouse and Web Vitals runs. A local host for the signed-in routes.   |
+| `PERF_PUBLIC_ONLY`      | `scripts/perf/*.mjs`                | `1` skips the signed-in routes, for a run without the local stack.                  |
 | `CYPRESS_BASE_URL`      | `cypress.config.ts`                 | Target for the e2e suite.                                                           |
 
 > The OpenAPI spec lives only on the backend's `dev` branch — not `staging`, not `main`. The

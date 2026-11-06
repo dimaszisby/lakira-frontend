@@ -27,12 +27,13 @@ Two sets exist, and they disagree. The doc states the aspiration; the JSON is wh
 | Total JS | — | ≤ 3,000,000 bytes |
 | Largest chunk | — | ≤ 300,000 bytes |
 
-Aim at the doc targets. The JSON is the floor, not the goal. Routes audited: `/`, `/login`, `/register` — public pages only. Authenticated routes are not measured yet: with no session they redirect to `/login`, and scoring that would report the login page under their name (`docs/internal/todos/2026-09-24-todo-authenticated-perf-routes.md`).
+Aim at the doc targets. The JSON is the floor, not the goal. Routes audited: `/`, `/login` and `/register` (`routes`), and `/dashboard` and `/metrics` signed in (`signedInRoutes`), since 2026-11-06. The signed-in routes are measured as a user registered for the run, with one category and three metrics of fourteen days' logs seeded through `/api/proxy`, against a backend built in the job from lakira-backend `dev` ([ADR-0046](../../docs/explanation/decisions/adr-0046-signed-in-routes-are-measured-against-a-backend-built-in-the-job.md), `scripts/perf/signed-in-session.ts`). Before then they were not measured: with no session they redirected to `/login`, and were scored as the login page.
 
 How the Lighthouse gate reads a result:
 
 - **Median of three runs per route.** A single Lighthouse run is noisy — on 2026-09-24 the same commit scored 58 and then 81 on `/`. One failing run is not a regression; a failing median is. Do not reduce `runsPerRoute` to speed the job up.
-- **A redirect fails the route.** If a route's final URL differs from the one requested, the run fails with `REDIRECTED`, rather than scoring the page it landed on.
+- **A redirect fails the route.** If a route's final URL differs from the one requested, the run fails with `REDIRECTED`, rather than scoring the page it landed on. For a signed-in route this is the session check: one that lost its session lands on `/login` or `/api/auth/revive`.
+- **Every run of a signed-in route signs in afresh**, and passes the session cookie to Lighthouse with `--extra-headers`, so the 15-minute access token cannot expire mid-route. With no user, because the backend is down or the app is not on a local host, the signed-in routes fail as `NO SESSION`.
 - **Lighthouse is pinned** (`lighthouse.version` in the JSON), so a score cannot move because a new Lighthouse was published. Bump it deliberately, in its own change, and expect scores to shift with it.
 - Each route's canonical report (`reports/performance/lighthouse/<route>.json`) is its median-performance run; the individual runs sit beside it as `<route>.run-N.json`.
 
@@ -40,13 +41,15 @@ These are **lab** measurements derived from Lighthouse, not real-user monitoring
 
 ## When it runs
 
-`.github/workflows/performance.yml` runs nightly at 02:00 UTC and on manual dispatch — **not on PRs**. A regression will not block your merge; it will show up the next morning. If a change is likely to move the numbers, run it yourself:
+`.github/workflows/performance.yml` runs nightly at 02:00 UTC and on manual dispatch, and on a PR only when it changes the job itself, the backend start it shares, or `scripts/perf/`. **It gates no other PR.** A regression will not block your merge; it will show up the next morning. If a change is likely to move the numbers, run it yourself:
 
 ```bash
 npm run build && npm run perf:bundle-size
 npm run start &          # then, once it is up:
 npm run perf:lighthouse && npm run perf:web-vitals
 ```
+
+The signed-in routes need the local stack (`docs/how-to/testing/run-stack-e2e.md`), and the app built with `NEXT_PUBLIC_APP_URL=http://127.0.0.1:3000` so its server-side prefetch reaches its own proxy. Without the stack, set `PERF_PUBLIC_ONLY=1` on both perf commands; the signed-in routes are then reported as skipped.
 
 ## What actually costs money here
 
