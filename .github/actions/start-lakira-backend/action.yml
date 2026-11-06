@@ -1,0 +1,82 @@
+name: Start lakira-backend
+description: >
+  Builds and starts lakira-backend from a checkout beside the frontend's, with its backing
+  services, and names the commit under test in the step summary. Shared by frontend-stack-e2e and
+  frontend-performance, so the two start the backend the same way (ADR-0046).
+
+inputs:
+  backend-path:
+    description: The backend checkout, relative to the workspace.
+    default: lakira-backend
+  api-url:
+    description: The backend's API base URL, which /health is read from.
+    default: http://localhost:8001/api/v1
+
+runs:
+  using: composite
+  steps:
+    # The backend's own example, with two changes. The secret is made here and never printed or
+    # stored. Rate limiting is off because a run registers more users than the 10 per hour per IP
+    # that registration allows (docs/how-to/testing/run-stack-e2e.md).
+    - name: Write the backend's .env from its .env.example
+      shell: bash
+      working-directory: ${{ inputs.backend-path }}
+      run: |
+        cp .env.example .env
+        for key in JWT_SECRET DISABLE_RATE_LIMITING; do
+          grep -q "^${key}=" .env || { echo "::error::.env.example has no ${key}= line"; exit 1; }
+        done
+        sed -i "s/^JWT_SECRET=.*/JWT_SECRET=$(openssl rand -hex 32)/" .env
+        sed -i "s/^DISABLE_RATE_LIMITING=.*/DISABLE_RATE_LIMITING=true/" .env
+
+    - name: Start the backing services
+      shell: bash
+      working-directory: ${{ inputs.backend-path }}
+      run: docker compose up -d --wait db redis rabbitmq mailpit
+
+    # The image runs `npm run dev`, which does not migrate. This is how the backend's own
+    # fork-smoke.yml prepares the same database.
+    - name: Migrate the backend's database
+      shell: bash
+      working-directory: ${{ inputs.backend-path }}
+      run: |
+        npm ci
+        npm run migrate:development
+
+    - name: Build and start the backend
+      shell: bash
+      working-directory: ${{ inputs.backend-path }}
+      env:
+        API_URL: ${{ inputs.api-url }}
+      run: |
+        APP_RELEASE="$(git rev-parse HEAD)" docker compose up -d --build app
+        for i in {1..90}; do
+          if curl -fsS "$API_URL/health" >/dev/null; then
+            echo "Backend is ready"
+            exit 0
+          fi
+          sleep 2
+        done
+        echo "Backend failed to start in time"
+        docker compose logs --tail 300 app || true
+        exit 1
+
+    # A red run has to say which backend it was red against.
+    - name: Name the commits under test
+      shell: bash
+      working-directory: ${{ inputs.backend-path }}
+      env:
+        API_URL: ${{ inputs.api-url }}
+      run: |
+        backend="$(git rev-parse HEAD)"
+        release="$(curl -fsS "$API_URL/health" | node -e 'let s="";process.stdin.on("data",(d)=>(s+=d)).on("end",()=>console.log(JSON.parse(s).release))')"
+        echo "Backend dev: ${backend}; /health release: ${release}; frontend: ${GITHUB_SHA}"
+        {
+          echo "### Commits under test"
+          echo ""
+          echo "| Repository | Commit |"
+          echo "| --- | --- |"
+          echo "| lakira-backend \`dev\` | \`${backend}\` |"
+          echo "| backend \`/health\` release | \`${release}\` |"
+          echo "| lakira-frontend | \`${GITHUB_SHA}\` |"
+        } >> "$GITHUB_STEP_SUMMARY"

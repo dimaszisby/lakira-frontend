@@ -1,13 +1,30 @@
 name: frontend-performance
 
+# Lighthouse and bundle metrics, nightly and on dispatch. The signed-in routes are measured against
+# a backend built in the job from lakira-backend `dev`, with a user registered for the run
+# (ADR-0046), so a change on backend `dev` can turn this red.
+#
+# The pull_request trigger covers this file, the backend start and the scripts it runs, so a change
+# to any of them is proved on its own PR. No other pull request runs it, so backend changes cannot
+# block frontend work.
 on:
   schedule:
     - cron: "0 2 * * *"
   workflow_dispatch:
+  pull_request:
+    branches:
+      - dev
+    paths:
+      - .github/workflows/performance.yml
+      - .github/actions/start-lakira-backend/**
+      - scripts/perf/**
 
 concurrency:
   group: frontend-performance-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
 
 jobs:
   performance:
@@ -16,15 +33,43 @@ jobs:
     timeout-minutes: 45
     env:
       PERF_BASE_URL: http://127.0.0.1:3000
+      API_URL: http://localhost:8001/api/v1
+      NEXT_PUBLIC_API_BASE_URL: http://localhost:8001/api/v1
+      # The app's own origin, for the requests its server makes to /api/proxy. Unset, a production
+      # build guesses https://localhost:3000, and the dashboard's server-side prefetch fails.
+      # Inlined at build time, so it is set for the job.
+      NEXT_PUBLIC_APP_URL: http://127.0.0.1:3000
+    defaults:
+      run:
+        working-directory: lakira-frontend
     steps:
-      - name: Checkout
+      # Side by side, as in frontend-stack-e2e.
+      - name: Checkout the frontend
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: lakira-frontend
+
+      - name: Checkout the backend (dev)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: dimaszisby/lakira-backend
+          ref: dev
+          path: lakira-backend
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version-file: .nvmrc
+          node-version-file: lakira-frontend/.nvmrc
           cache: npm
+          cache-dependency-path: |
+            lakira-frontend/package-lock.json
+            lakira-backend/package-lock.json
+
+      - name: Start the backend
+        uses: ./lakira-frontend/.github/actions/start-lakira-backend
+        with:
+          api-url: ${{ env.API_URL }}
 
       - name: Install dependencies
         run: npm ci
@@ -68,10 +113,23 @@ jobs:
             rm -f /tmp/next-perf.pid
           fi
 
+      - name: Service logs
+        if: failure()
+        working-directory: lakira-backend
+        run: |
+          docker compose ps || true
+          docker compose logs --tail 300 app || true
+          tail -n 200 /tmp/next-perf.log || true
+
       - name: Upload performance reports
         if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: performance-reports
-          path: reports/performance
+          path: lakira-frontend/reports/performance
           if-no-files-found: warn
+
+      - name: Stop the backend
+        if: always()
+        working-directory: lakira-backend
+        run: docker compose down -v || true
