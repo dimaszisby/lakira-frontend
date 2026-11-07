@@ -102,9 +102,10 @@ repository and lakira-backend `dev` side by side, as `frontend-stack-e2e` does, 
 4. `npm run start` on `127.0.0.1:3000`, wait up to 120 s
 5. `perf:lighthouse`: the public routes, then the signed-in ones. It registers a user for the run
    and seeds its data through `/api/proxy`, then signs in afresh before every run of a signed-in
-   route and passes the session cookie to Lighthouse
+   route and passes the session cookie to Lighthouse. Each route gets three simulated runs for the
+   category scores and one with real throttling for the Web Vitals
    ([ADR-0046](../../explanation/decisions/adr-0046-signed-in-routes-are-measured-against-a-backend-built-in-the-job.md));
-6. `perf:web-vitals`
+6. `perf:web-vitals`, from the real-throttling runs
 7. stops the app, prints the backend's log on failure, uploads `performance-reports`
    (`lakira-frontend/reports/performance`, always), and takes the stack down.
 

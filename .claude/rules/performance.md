@@ -35,7 +35,8 @@ How the Lighthouse gate reads a result:
 - **A redirect fails the route.** If a route's final URL differs from the one requested, the run fails with `REDIRECTED`, rather than scoring the page it landed on. For a signed-in route this is the session check: one that lost its session lands on `/login` or `/api/auth/revive`.
 - **Every run of a signed-in route signs in afresh**, and passes the session cookie to Lighthouse with `--extra-headers`, so the 15-minute access token cannot expire mid-route. With no user, because the backend is down or the app is not on a local host, the signed-in routes fail as `NO SESSION`.
 - **Lighthouse is pinned** (`lighthouse.version` in the JSON), so a score cannot move because a new Lighthouse was published. Bump it deliberately, in its own change, and expect scores to shift with it.
-- Each route's canonical report (`reports/performance/lighthouse/<route>.json`) is its median-performance run; the individual runs sit beside it as `<route>.run-N.json`.
+- **The Web Vitals come from a fourth run with real throttling** (`--throttling-method=devtools`), saved as `<route>.vitals.json`; `perf:web-vitals` reads LCP, CLS and INP from it. Simulated LCP counts every script requested before first paint, so it read 3.3 to 3.7 s on pages that paint their server-rendered text at 1.7 s, and fell by nothing when 15.5 KB of script was removed (#193, ADR-0046). Do not gate a Web Vital on a simulated run.
+- Each route's canonical report (`reports/performance/lighthouse/<route>.json`) is its median-performance simulated run; the individual runs sit beside it as `<route>.run-N.json`.
 
 These are **lab** measurements derived from Lighthouse, not real-user monitoring. RUM is not implemented — do not describe these numbers as field data.
 

@@ -38,6 +38,13 @@ registers a fresh user for each run.
    `scripts/perf/performance-thresholds.json`, and meet the same category thresholds. A run with
    signed-in routes configured and no reachable backend fails. `PERF_PUBLIC_ONLY=1` skips them for
    a local run without the stack, and the summary says so.
+5. **The Web Vitals come from a run with real throttling.** After its three simulated runs, each
+   route gets one more with `--throttling-method=devtools`, the same network and CPU limits applied
+   by the browser, and `perf:web-vitals` reads LCP, CLS and INP from it. The category scores stay
+   on the simulated median. Simulated LCP counts every script requested before first paint: on the
+   first signed-in run it put `/metrics` at 3,660 ms, over the 3,600 ms budget, where real
+   throttling measured 1,695 to 1,803 ms, equal to its first paint. Taking 15.5 KB of
+   `framer-motion` out of the page's first load moved the simulated figure by nothing (#193).
 
 ## Options considered
 
@@ -51,12 +58,19 @@ registers a fresh user for each run.
   the page's.
 - **Copying the backend steps into `performance.yml`:** rejected. Two copies of a dozen steps drift;
   the action keeps them one.
+- **Simulated LCP with a higher budget for signed-in routes:** rejected. It would keep gating a
+  number no user sees, which rises with JavaScript whether or not the JavaScript delays the paint.
+- **Every run with real throttling:** rejected. Simulated scores are the more repeatable across
+  CI runners, and the category gate has relied on them since 2026-09-24.
 
 ## Consequences
 
 - The nightly performance run depends on lakira-backend `dev`. A backend that does not build or
   start turns it red, as it already does `frontend-stack-e2e`. Neither runs on pull requests, so
   backend changes still cannot block frontend work.
-- The job takes several minutes longer, for the backend build and the seeding.
+- The job takes several minutes longer, for the backend build, the seeding and one more run per
+  route.
+- LCP is now measured as users would see it under the same limits, about 1.7 s on every route
+  measured, so the 3,600 ms budget has room to tighten toward the 2,500 ms the budget page targets.
 - The scores are for a small, fixed data set. A regression that only shows with many metrics or
   long histories is not caught.

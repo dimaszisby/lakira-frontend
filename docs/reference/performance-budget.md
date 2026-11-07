@@ -48,7 +48,8 @@ The nightly Lighthouse run audits `/`, `/login` and `/register`, and `/dashboard
 signed in, as a user registered for the run with seeded data
 (`scripts/perf/performance-thresholds.json`,
 [ADR-0046](../explanation/decisions/adr-0046-signed-in-routes-are-measured-against-a-backend-built-in-the-job.md)).
-`/metrics/[metricId]` is still checked by hand, per the
+Its LCP, CLS and INP come from a run with real throttling, not the simulated runs that score the
+categories. `/metrics/[metricId]` is still checked by hand, per the
 [Performance Release Checklist](../how-to/releases/performance-release-checklist.md).
 
 **LCP (Largest Contentful Paint)**

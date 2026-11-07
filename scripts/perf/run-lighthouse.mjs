@@ -57,6 +57,38 @@ if (signedInRoutes.length > 0) {
   }
 }
 
+// One Lighthouse run of `url` into `runPath`. A signed-in route signs in afresh for every run,
+// so the 15-minute access token cannot expire mid-route. Returns the report, or null when the run
+// could not happen.
+const runLighthouse = async ({ url, access, runPath, categories, extraArgs = [] }) => {
+  const sessionArgs = [];
+  if (access === "signed-in") {
+    try {
+      sessionArgs.push(extraHeadersArg(await signIn(baseUrl, perfUser)));
+    } catch (error) {
+      sessionError = error instanceof Error ? error.message : String(error);
+      return null;
+    }
+  }
+  const result = spawnSync(
+    "npx",
+    [
+      "--yes",
+      `lighthouse@${lighthouseVersion}`,
+      url,
+      "--quiet",
+      "--output=json",
+      `--output-path=${runPath}`,
+      `--only-categories=${categories}`,
+      "--chrome-flags=--headless=new --no-sandbox --disable-dev-shm-usage",
+      ...extraArgs,
+      ...sessionArgs,
+    ],
+    { stdio: "inherit" },
+  );
+  return result.status === 0 ? JSON.parse(readFileSync(runPath, "utf8")) : null;
+};
+
 const routes = [
   ...publicRoutes.map((route) => ({ route, access: "public" })),
   ...signedInRoutes.map((route) => ({ route, access: "signed-in" })),
@@ -76,40 +108,34 @@ for (const { route, access } of routes) {
 
   for (let run = 1; run <= runsPerRoute; run++) {
     const runPath = path.join(reportDir, `${name}.run-${run}.json`);
-    // A fresh sign-in for every run, so the 15-minute access token cannot expire mid-route.
-    const sessionArgs = [];
-    if (access === "signed-in") {
-      try {
-        sessionArgs.push(extraHeadersArg(await signIn(baseUrl, perfUser)));
-      } catch (error) {
-        sessionError = error instanceof Error ? error.message : String(error);
-        failedToRun = true;
-        break;
-      }
-    }
-    const result = spawnSync(
-      "npx",
-      [
-        "--yes",
-        `lighthouse@${lighthouseVersion}`,
-        url,
-        "--quiet",
-        "--output=json",
-        `--output-path=${runPath}`,
-        "--only-categories=performance,accessibility,best-practices",
-        "--chrome-flags=--headless=new --no-sandbox --disable-dev-shm-usage",
-        ...sessionArgs,
-      ],
-      { stdio: "inherit" },
-    );
-
-    if (result.status !== 0) {
+    const report = await runLighthouse({
+      url,
+      access,
+      runPath,
+      categories: "performance,accessibility,best-practices",
+    });
+    if (!report) {
       failedToRun = true;
       break;
     }
-
-    runs.push({ path: runPath, report: JSON.parse(readFileSync(runPath, "utf8")) });
+    runs.push({ path: runPath, report });
   }
+
+  // The Web Vitals come from one more run with real throttling, the same network and CPU
+  // limits applied by the browser rather than estimated. The simulated estimate counts every
+  // script requested before first paint, so it put LCP near 3.7 s on pages that paint their
+  // server-rendered text at 1.7 s under real throttling (#193, ADR-0046).
+  const vitalsPath = path.join(reportDir, `${name}.vitals.json`);
+  const vitalsReport = failedToRun
+    ? null
+    : await runLighthouse({
+        url,
+        access,
+        runPath: vitalsPath,
+        categories: "performance",
+        extraArgs: ["--throttling-method=devtools"],
+      });
+  if (!vitalsReport) failedToRun = true;
 
   if (failedToRun) {
     hasFailure = true;
@@ -120,15 +146,16 @@ for (const { route, access } of routes) {
   // A protected route with no session redirects to /login, or to /api/auth/revive
   // with an expired one; scoring that would report another page under this
   // route's name. For a signed-in route, this is the proof the session worked.
-  const redirectedTo = runs.map(({ report }) => finalPath(report)).find((p) => p !== route);
+  const redirectedTo = [...runs.map(({ report }) => report), vitalsReport]
+    .map(finalPath)
+    .find((p) => p !== route);
   if (redirectedTo) {
     hasFailure = true;
     summary.push({ route, url, access, status: "redirected", redirectedTo });
     continue;
   }
 
-  // The run with the median performance score becomes the route's report, so
-  // the lab Web Vitals derived from it come from one real, representative run.
+  // The run with the median performance score becomes the route's report.
   const byPerformance = [...runs].sort(
     (a, b) => toPct(a.report, "performance") - toPct(b.report, "performance"),
   );

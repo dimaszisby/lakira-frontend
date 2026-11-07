@@ -39,7 +39,8 @@ const results = skippedRoutes.map((route) => ({ route, status: "skipped" }));
 let hasFailure = false;
 
 for (const route of routes) {
-  const reportPath = path.join(reportDir, `${normalizeRouteName(route)}.json`);
+  // The run with real throttling, not a simulated one: see run-lighthouse.mjs (ADR-0046).
+  const reportPath = path.join(reportDir, `${normalizeRouteName(route)}.vitals.json`);
   if (!existsSync(reportPath)) {
     hasFailure = true;
     results.push({
