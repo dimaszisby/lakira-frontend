@@ -5,8 +5,9 @@ name: frontend-stack-e2e
 # request, so a change on backend `dev` cannot turn unrelated frontend work red (kit
 # stack-suites-in-ci, D-01, which supersedes cypress-a11y-e2e D-01).
 #
-# The pull_request trigger covers this file only: a workflow can be neither dispatched nor
-# scheduled until it is on the default branch, so a change to it is proved on its own PR.
+# The pull_request trigger covers this file and the backend start it shares: a workflow can be
+# neither dispatched nor scheduled until it is on the default branch, so a change to it is proved
+# on its own PR.
 #
 # GitHub sends a failed scheduled run to the user who last modified the cron line below, and
 # disables schedules in a public repo after 60 days without activity.
@@ -19,6 +20,7 @@ on:
       - dev
     paths:
       - .github/workflows/stack-e2e.yml
+      - .github/actions/start-lakira-backend/**
 
 concurrency:
   group: frontend-stack-e2e-${{ github.ref }}
@@ -70,61 +72,11 @@ jobs:
             lakira-frontend/package-lock.json
             lakira-backend/package-lock.json
 
-      # The backend's own example, with two changes. The secret is made here and never printed
-      # or stored. Rate limiting is off because a run registers more users than the 10 per hour
-      # per IP that registration allows (docs/how-to/testing/run-stack-e2e.md).
-      - name: Write the backend's .env from its .env.example
-        working-directory: lakira-backend
-        run: |
-          cp .env.example .env
-          for key in JWT_SECRET DISABLE_RATE_LIMITING; do
-            grep -q "^${key}=" .env || { echo "::error::.env.example has no ${key}= line"; exit 1; }
-          done
-          sed -i "s/^JWT_SECRET=.*/JWT_SECRET=$(openssl rand -hex 32)/" .env
-          sed -i "s/^DISABLE_RATE_LIMITING=.*/DISABLE_RATE_LIMITING=true/" .env
-
-      - name: Start the backing services
-        working-directory: lakira-backend
-        run: docker compose up -d --wait db redis rabbitmq mailpit
-
-      # The image runs `npm run dev`, which does not migrate. This is how the backend's own
-      # fork-smoke.yml prepares the same database.
-      - name: Migrate the backend's database
-        working-directory: lakira-backend
-        run: |
-          npm ci
-          npm run migrate:development
-
-      - name: Build and start the backend
-        working-directory: lakira-backend
-        run: |
-          APP_RELEASE="$(git rev-parse HEAD)" docker compose up -d --build app
-          for i in {1..90}; do
-            if curl -fsS "$API_URL/health" >/dev/null; then
-              echo "Backend is ready"
-              exit 0
-            fi
-            sleep 2
-          done
-          echo "Backend failed to start in time"
-          docker compose logs --tail 300 app || true
-          exit 1
-
-      # A red run has to say which backend it was red against.
-      - name: Name the commits under test
-        run: |
-          backend="$(git -C ../lakira-backend rev-parse HEAD)"
-          release="$(curl -fsS "$API_URL/health" | node -e 'let s="";process.stdin.on("data",(d)=>(s+=d)).on("end",()=>console.log(JSON.parse(s).release))')"
-          echo "Backend dev: ${backend}; /health release: ${release}; frontend: ${GITHUB_SHA}"
-          {
-            echo "### Commits under test"
-            echo ""
-            echo "| Repository | Commit |"
-            echo "| --- | --- |"
-            echo "| lakira-backend \`dev\` | \`${backend}\` |"
-            echo "| backend \`/health\` release | \`${release}\` |"
-            echo "| lakira-frontend | \`${GITHUB_SHA}\` |"
-          } >> "$GITHUB_STEP_SUMMARY"
+      # The backend's start is shared with frontend-performance (ADR-0046).
+      - name: Start the backend
+        uses: ./lakira-frontend/.github/actions/start-lakira-backend
+        with:
+          api-url: ${{ env.API_URL }}
 
       - name: Install dependencies
         run: npm ci

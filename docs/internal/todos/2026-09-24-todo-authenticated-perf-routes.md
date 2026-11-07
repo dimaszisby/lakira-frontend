@@ -27,7 +27,10 @@ charts, the metric lists — has never been measured.
 ## Checklist
 
 - [ ] Decide which backend the job authenticates against.
+  - Decided 2026-11-06: a backend built in the job from lakira-backend `dev`, as
+    `frontend-stack-e2e` does (ADR-0046, #176).
 - [ ] Raise the test-account request with the backend.
+  - Not needed: the job registers its own user for each run (ADR-0046).
 - [ ] Add the session mechanism to `scripts/perf/run-lighthouse.mjs`; the redirect check then proves
       the session worked.
 - [ ] Add `/dashboard` and `/metrics` back to `performance-thresholds.json`.

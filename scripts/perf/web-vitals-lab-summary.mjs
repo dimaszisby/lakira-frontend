@@ -2,6 +2,8 @@
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
+import { routesToMeasure } from "./signed-in-session.ts";
+
 const root = process.cwd();
 const configPath = path.join(root, "scripts", "perf", "performance-thresholds.json");
 const config = JSON.parse(readFileSync(configPath, "utf8"));
@@ -10,7 +12,13 @@ const reportDir = path.join(root, "reports", "performance", "lighthouse");
 const outputPath = path.join(root, "reports", "performance", "web-vitals-lab-summary.json");
 
 const thresholds = config.webVitals;
-const routes = config.lighthouse.routes;
+// The same routes run-lighthouse.mjs measured, so a skipped signed-in route is
+// not reported as a missing report.
+const { publicRoutes, signedInRoutes, skippedRoutes } = routesToMeasure(
+  config,
+  process.env.PERF_PUBLIC_ONLY === "1",
+);
+const routes = [...publicRoutes, ...signedInRoutes];
 
 const normalizeRouteName = (route) => {
   if (route === "/") return "home";
@@ -27,11 +35,12 @@ const getAuditNumericValue = (report, keys) => {
   return null;
 };
 
-const results = [];
+const results = skippedRoutes.map((route) => ({ route, status: "skipped" }));
 let hasFailure = false;
 
 for (const route of routes) {
-  const reportPath = path.join(reportDir, `${normalizeRouteName(route)}.json`);
+  // The run with real throttling, not a simulated one: see run-lighthouse.mjs (ADR-0046).
+  const reportPath = path.join(reportDir, `${normalizeRouteName(route)}.vitals.json`);
   if (!existsSync(reportPath)) {
     hasFailure = true;
     results.push({
@@ -98,6 +107,10 @@ writeFileSync(
 
 console.log("\nWeb Vitals (Lab) summary:");
 for (const row of results) {
+  if (row.status === "skipped") {
+    console.log(`- ${row.route} (signed in): skipped, PERF_PUBLIC_ONLY=1`);
+    continue;
+  }
   if (row.status !== "ok") {
     console.log(`- ${row.route}: missing Lighthouse report`);
     continue;

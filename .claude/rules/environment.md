@@ -37,7 +37,8 @@ Server-only vars (no prefix) are readable in route handlers, `src/proxy.ts` (the
 | `APP_RELEASE` | server | the release sent with each Sentry event; the backend's name for it |
 | `TZ` | test | forced to `UTC` in `jest.setup.ts` |
 | `CYPRESS_BASE_URL` | CI | Cypress target, default `http://127.0.0.1:3000` |
-| `PERF_BASE_URL` | CI | Lighthouse target |
+| `PERF_BASE_URL` | CI | Lighthouse target; must be a local host for the signed-in routes, which register an account |
+| `PERF_PUBLIC_ONLY` | local | `1` skips the signed-in Lighthouse routes, for a run without the local stack; read in `scripts/perf/` |
 | `E2E_MAILPIT_URL` | local | Cypress stack specs, Mailpit, default `http://localhost:8025`; read in `cypress.config.ts`, exposed as `mailpitUrl` |
 | `E2E_BACKEND_URL` | local | Cypress stack preflight, default `http://localhost:8001/api/v1`; exposed as `backendUrl` |
 | `E2E_BACKEND_CONTAINER` | local | Cypress stack preflight, the backend container whose image age is checked, default `node_app`; read in `cypress.config.ts` |

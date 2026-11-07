@@ -3,7 +3,8 @@
 What each GitHub Actions workflow runs, in what order, and on what. Checked against
 `.github/workflows/test.yml` and `.github/workflows/performance.yml` on 2026-09-26, and
 `.github/workflows/dependency-audit.yml` on 2026-10-02, `.github/workflows/stack-e2e.yml` on
-2026-10-21, and `.github/workflows/release.yml` on 2026-10-27.
+2026-10-21, and `.github/workflows/release.yml` on 2026-10-27. `performance.yml` and
+`stack-e2e.yml` again on 2026-11-06, when they began sharing the backend start (#176).
 
 This page is the one description of the pipeline. What to do when a job goes red is in the
 [daily pipeline playbook](../../how-to/ci-cd/daily-pipeline-playbook.md); the npm scripts are in
@@ -84,24 +85,34 @@ Details that decide whether a job fails:
 
 ## `frontend-performance` (`performance.yml`)
 
-**Triggers:** `schedule` at `0 2 * * *` (02:00 UTC daily) and `workflow_dispatch`. Both run from the
-default branch, `dev`, unless a dispatch names another ref
-(`gh workflow run frontend-performance --ref <branch>`).
+**Triggers:** `schedule` at `0 2 * * *` (02:00 UTC daily), `workflow_dispatch`, and a
+`pull_request` to `dev` that changes `.github/workflows/performance.yml`, the backend start
+(`.github/actions/start-lakira-backend/`) or `scripts/perf/`. Scheduled runs use the default
+branch, `dev`; a dispatch can name another ref (`gh workflow run frontend-performance --ref <branch>`).
 **Concurrency:** group `frontend-performance-<ref>`, `cancel-in-progress: true`.
-**Not a PR gate.** It runs on no push and no pull request.
+**Permissions:** `contents: read`.
+**Not a PR gate.** No other pull request runs it, so a change on backend `dev` cannot block one.
 
-One job, `performance` (Lighthouse and Bundle Metrics), 45 min timeout:
+One job, `performance` (Lighthouse and Bundle Metrics), 45 min timeout. It checks out this
+repository and lakira-backend `dev` side by side, as `frontend-stack-e2e` does, then:
 
-1. `npm run build`
-2. `perf:bundle-size`
-3. `npm run start` on `127.0.0.1:3000`, wait up to 120 s
-4. `perf:lighthouse`
-5. `perf:web-vitals`
-6. stop the app; upload `performance-reports` (`reports/performance`, always)
+1. starts the backend with the shared action, the same steps 1 to 5 as `frontend-stack-e2e` below;
+2. `npm run build`, with the same `API_URL`, `NEXT_PUBLIC_API_BASE_URL` and `NEXT_PUBLIC_APP_URL`;
+3. `perf:bundle-size`
+4. `npm run start` on `127.0.0.1:3000`, wait up to 120 s
+5. `perf:lighthouse`: the public routes, then the signed-in ones. It registers a user for the run
+   and seeds its data through `/api/proxy`, then signs in afresh before every run of a signed-in
+   route and passes the session cookie to Lighthouse. Each route gets three simulated runs for the
+   category scores and one with real throttling for the Web Vitals
+   ([ADR-0046](../../explanation/decisions/adr-0046-signed-in-routes-are-measured-against-a-backend-built-in-the-job.md));
+6. `perf:web-vitals`, from the real-throttling runs
+7. stops the app, prints the backend's log on failure, uploads `performance-reports`
+   (`lakira-frontend/reports/performance`, always), and takes the stack down.
 
-Thresholds, routes, the Lighthouse version and runs per route all live in
+Thresholds, the public and signed-in routes, the Lighthouse version and runs per route all live in
 `scripts/perf/performance-thresholds.json`. How the Lighthouse gate reads a result (median of the
-runs, a redirect fails the route, pinned Lighthouse) is in `.claude/rules/performance.md`.
+runs, a redirect fails the route, pinned Lighthouse) is in `.claude/rules/performance.md`. Like
+`frontend-stack-e2e`, it reads no secret.
 
 ## `dependency-audit` (`dependency-audit.yml`)
 
@@ -123,14 +134,17 @@ schedule after 60 days without repository activity.
 
 **Triggers:** `schedule` at `0 4 * * *` (04:00 UTC daily), `workflow_dispatch`
 (`gh workflow run frontend-stack-e2e`), and a `pull_request` to `dev` that changes
-`.github/workflows/stack-e2e.yml` itself. That last trigger exists because a workflow can be
+`.github/workflows/stack-e2e.yml` itself or the backend start it shares
+(`.github/actions/start-lakira-backend/`). That last trigger exists because a workflow can be
 neither dispatched nor scheduled before it is on the default branch.
 **Concurrency:** group `frontend-stack-e2e-<ref>`, `cancel-in-progress: false`.
 **Permissions:** `contents: read`.
 **Not a PR gate.** No other pull request runs it (kit `stack-suites-in-ci`, D-01).
 
 One job, `stack-e2e` (Stack E2E, signed in, real backend), 45 min timeout. It checks out this
-repository to `lakira-frontend/` and lakira-backend `dev` to `lakira-backend/`, side by side, then:
+repository to `lakira-frontend/` and lakira-backend `dev` to `lakira-backend/`, side by side, then
+runs steps 1 to 5 through the composite action `.github/actions/start-lakira-backend`, which
+`frontend-performance` uses too:
 
 1. writes the backend's `.env` from its `.env.example`, with `JWT_SECRET` generated for the run and
    `DISABLE_RATE_LIMITING=true`;
