@@ -2,14 +2,17 @@
  * @jest-environment node
  */
 
-// The pure parts of the Lighthouse gate's signed-in session (ADR-0046, #176): which routes a run
-// measures, the local-host guard, and the cookie handed to Lighthouse. The network half is proved
-// by the performance job itself, whose redirect check fails a route that lost its session.
+// The Lighthouse gate's signed-in session (ADR-0046, #176): which routes a run measures, the
+// local-host guard, the cookie handed to Lighthouse, and how sign-in survives a dropped
+// connection. The rest of the network half is proved by the performance job itself, whose
+// redirect check fails a route that lost its session.
 import {
   assertLocalUrl,
+  describeFetchError,
   extraHeadersArg,
   routesToMeasure,
   sessionCookieFrom,
+  signIn,
 } from "../../scripts/perf/signed-in-session";
 
 const SIGNED_IN = ["/dashboard", "/metrics"];
@@ -83,5 +86,57 @@ describe("extraHeadersArg", () => {
     expect(JSON.parse(arg.slice("--extra-headers=".length))).toEqual({
       Cookie: SESSION,
     });
+  });
+});
+
+describe("describeFetchError", () => {
+  it("names the cause that fetch failed hides", () => {
+    const cause = Object.assign(new Error("other side closed"), { code: "UND_ERR_SOCKET" });
+    expect(describeFetchError(new TypeError("fetch failed", { cause }))).toBe(
+      "fetch failed (UND_ERR_SOCKET: other side closed)",
+    );
+  });
+
+  it("returns the message alone when there is no cause", () => {
+    expect(describeFetchError(new Error("boom"))).toBe("boom");
+  });
+});
+
+describe("signIn", () => {
+  const APP = "http://127.0.0.1:3000";
+  const USER = { email: "perf@example.com", password: "perf-run-password" };
+  const signedIn = () =>
+    new Response("{}", { status: 200, headers: { "Set-Cookie": `${SESSION}; Path=/` } });
+  const dropped = () => new TypeError("fetch failed", { cause: new Error("other side closed") });
+
+  const fetchMock = jest.fn<Promise<Response>, Parameters<typeof fetch>>();
+  const realFetch = global.fetch;
+
+  beforeEach(() => {
+    fetchMock.mockReset();
+    global.fetch = fetchMock as unknown as typeof fetch;
+  });
+
+  afterAll(() => {
+    global.fetch = realFetch;
+  });
+
+  it("retries once when the connection drops, as an idle kept-alive one can", async () => {
+    fetchMock.mockRejectedValueOnce(dropped()).mockResolvedValueOnce(signedIn());
+    await expect(signIn(APP, USER)).resolves.toBe(SESSION);
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("names the cause when the retry drops too", async () => {
+    fetchMock.mockRejectedValueOnce(dropped()).mockRejectedValueOnce(dropped());
+    await expect(signIn(APP, USER)).rejects.toThrow(
+      "POST /auth/login failed twice: fetch failed (other side closed)",
+    );
+  });
+
+  it("does not retry when the backend answers with an error", async () => {
+    fetchMock.mockResolvedValueOnce(new Response("{}", { status: 401 }));
+    await expect(signIn(APP, USER)).rejects.toThrow("POST /auth/login answered 401.");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });

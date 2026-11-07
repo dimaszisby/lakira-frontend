@@ -197,7 +197,8 @@ for (const row of summary) {
     continue;
   }
   if (row.status !== "ok") {
-    console.log(`- ${row.route}: FAILED to run${row.error ? `: ${row.error}` : ""}`);
+    const label = row.access === "signed-in" ? " (signed in)" : "";
+    console.log(`- ${row.route}${label}: FAILED to run${row.error ? `: ${row.error}` : ""}`);
     continue;
   }
 

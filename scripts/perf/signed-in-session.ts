@@ -65,17 +65,44 @@ export const sessionCookieFrom = (setCookies: readonly string[]): string => {
 export const extraHeadersArg = (cookie: string): string =>
   `--extra-headers=${JSON.stringify({ Cookie: cookie })}`;
 
+/** Why a request never got a response. `fetch failed` alone hides it; its cause names it. */
+export const describeFetchError = (error: unknown): string => {
+  if (!(error instanceof Error)) return String(error);
+  const { cause } = error;
+  if (!(cause instanceof Error)) return error.message;
+  const code = (cause as { code?: unknown }).code;
+  return `${error.message} (${typeof code === "string" ? `${code}: ` : ""}${cause.message})`;
+};
+
+const send = (baseUrl: string, path: string, body: unknown, cookie?: string) =>
+  fetch(new URL(`/api/proxy${path}`, baseUrl), {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...(cookie ? { Cookie: cookie } : {}) },
+    body: JSON.stringify(body),
+  });
+
 const post = async (
   baseUrl: string,
   path: string,
   body: unknown,
   cookie?: string,
+  { retryOnNetworkError = false } = {},
 ): Promise<Response> => {
-  const response = await fetch(new URL(`/api/proxy${path}`, baseUrl), {
-    method: "POST",
-    headers: { "Content-Type": "application/json", ...(cookie ? { Cookie: cookie } : {}) },
-    body: JSON.stringify(body),
-  });
+  let response: Response;
+  try {
+    response = await send(baseUrl, path, body, cookie);
+  } catch (error) {
+    // A kept-alive connection the server closed while idle fails a POST, and fetch retries no
+    // POST. Only a request that is safe to repeat gets one more attempt; an HTTP error never does.
+    if (!retryOnNetworkError) {
+      throw new Error(`POST ${path} failed: ${describeFetchError(error)}`);
+    }
+    try {
+      response = await send(baseUrl, path, body, cookie);
+    } catch (retryError) {
+      throw new Error(`POST ${path} failed twice: ${describeFetchError(retryError)}`);
+    }
+  }
   if (!response.ok) {
     throw new Error(`POST ${path} answered ${response.status}.`);
   }
@@ -87,10 +114,16 @@ const createdId = async (response: Response): Promise<string> => {
   return data.id;
 };
 
-/** Signs in through the proxy, as the app does, and returns the session cookie. */
+/**
+ * Signs in through the proxy, as the app does, and returns the session cookie. The first sign-in
+ * of a route follows minutes of idle Lighthouse runs, so it retries a dropped connection; signing
+ * in twice only issues a second session.
+ */
 export const signIn = async (baseUrl: string, user: PerfUser): Promise<string> => {
   assertLocalUrl(baseUrl);
-  const response = await post(baseUrl, "/auth/login", user);
+  const response = await post(baseUrl, "/auth/login", user, undefined, {
+    retryOnNetworkError: true,
+  });
   return sessionCookieFrom(response.headers.getSetCookie());
 };
 
