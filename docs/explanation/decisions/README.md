@@ -6,7 +6,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 ## Reading these
 
 - **Status is the first thing to check.** `Proposed` means the decision was written down but is
-  **not implemented** — do not assume the code matches it. There are no `Proposed` records today.
+  **not implemented** — do not assume the code matches it. ADR-0047 is `Proposed`.
 - **Records are immutable.** A decision that no longer holds is superseded by a new record, not
   edited. The `Related` line links the pair in both directions — see ADR-0001 and ADR-0002.
 - **`Origin` points at where the decision was made.** ADR-0001…0014 come from the kit under
@@ -72,6 +72,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0044](./adr-0044-every-task-starts-from-an-issue.md)                                  | Every task starts from an issue; a kit only for two days or more             | Accepted       | 2026-10-25 | `D-01` (open-work-to-issues)        |
 | [ADR-0045](./adr-0045-releases-are-versioned-on-dev-and-tagged-on-main.md)                 | Releases are versioned on `dev` and tagged on `main`                         | Accepted       | 2026-10-27 | #174 (no kit)                       |
 | [ADR-0046](./adr-0046-signed-in-routes-are-measured-against-a-backend-built-in-the-job.md) | Signed-in routes are measured against a backend built in the job             | Accepted       | 2026-11-06 | #176 (no kit)                       |
+| [ADR-0047](./adr-0047-the-frontend-runs-on-the-backends-vps.md)                            | The frontend runs as a container on the backend's VPS                        | Proposed       | 2026-11-08 | #155 (no kit)                       |
 
 ## Where the other decisions went
 

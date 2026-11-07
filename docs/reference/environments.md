@@ -12,19 +12,23 @@ This matrix captures FE-relevant CI/CD environment values based on current FE re
   arrives. Restoring it needs a new database provisioned and `DATABASE_URL` repointed.
 - Local development runs the backend directly — see
   [`../how-to/development/run-against-a-local-backend.md`](../how-to/development/run-against-a-local-backend.md).
+- Hosting is decided: the frontend runs as a container in lakira-backend's staging and production
+  Compose stacks on the backend's VPS
+  ([ADR-0047](../explanation/decisions/adr-0047-the-frontend-runs-on-the-backends-vps.md)). The VPS
+  is not provisioned yet.
 - Production backend URL is not available yet.
-- FE production domain is not finalized yet.
+- FE production domain is not finalized yet: no domain is registered.
 
 ## 3. Environment Matrix
 
 > Copy `.env.example` to `.env.local` to get the local column pre-filled.
 
-| Environment | FE URL                                   | Backend API URL used by FE                                                                               | Provisioning Source |
-| ----------- | ---------------------------------------- | -------------------------------------------------------------------------------------------------------- | ------------------- |
-| `local`     | `http://localhost:3000`                  | `http://localhost:8001/api/v1` (the frontend's built-in dev default; start the backend with `PORT=8001`) | `.env.local`        |
-| `ci`        | n/a (runner)                             | Not provided: CI's Cypress runs `cypress/e2e/public/` only, which needs no backend                       | GitHub Actions      |
-| `preview`   | Vercel preview URL (TBD concrete domain) | `https://lakira-backend-staging.onrender.com/api/v1` — **currently down**, see Current Status            | Vercel env config   |
-| `prod`      | FE prod URL not finalized                | Backend prod URL not available                                                                           | Pending             |
+| Environment | FE URL                                                                        | Backend API URL used by FE                                                                               | Provisioning Source               |
+| ----------- | ----------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| `local`     | `http://localhost:3000`                                                       | `http://localhost:8001/api/v1` (the frontend's built-in dev default; start the backend with `PORT=8001`) | `.env.local`                      |
+| `ci`        | n/a (runner)                                                                  | Not provided: CI's Cypress runs `cypress/e2e/public/` only, which needs no backend                       | GitHub Actions                    |
+| `staging`   | Staging stack on the VPS, not provisioned; the preview environment (ADR-0047) | Staging backend on the same VPS, not provisioned                                                         | lakira-backend Compose (ADR-0047) |
+| `prod`      | Production stack on the VPS, not provisioned; no domain yet                   | Backend prod URL not available                                                                           | lakira-backend Compose (ADR-0047) |
 
 ## 4. FE Runtime Env Vars Used In Code
 
@@ -57,9 +61,9 @@ Coverage is uploaded as a workflow artifact; there is no Codecov integration.
 Not currently required by this FE workflow:
 
 - `STAGING_API_BASE_URL`
-- `VERCEL_TOKEN`
-- `VERCEL_ORG_ID`
-- `VERCEL_PROJECT_ID`
+
+The `VERCEL_*` secrets once listed here are not used: the frontend is not hosted on Vercel
+(ADR-0047).
 
 ## 6. Local Configuration Recommendation
 
