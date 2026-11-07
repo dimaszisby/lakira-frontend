@@ -69,10 +69,11 @@ Frequently needed:
 
 ## Deployment
 
-Nothing is committed to drive a deploy today — no `Dockerfile`, no `vercel.json`, and no deploy
-job in CI. The app reads `VERCEL_URL` when present, so Vercel is the assumed target, but that is
-convention rather than configuration. Adding a gated production deploy is tracked as Phase 7 in
-[`docs/internal/audits/saas-readiness/iteration-plan.md`](docs/internal/audits/saas-readiness/iteration-plan.md).
+The frontend will run as a container on the backend's VPS, one service in each of lakira-backend's
+staging and production Compose stacks
+([ADR-0047](docs/explanation/decisions/adr-0047-the-frontend-runs-on-the-backends-vps.md)). Nothing
+is committed to drive a deploy yet: no `Dockerfile` and no deploy job in CI. The image is tracked
+in [#160](https://github.com/dimaszisby/lakira-frontend/issues/160).
 
 ## Forking
 
