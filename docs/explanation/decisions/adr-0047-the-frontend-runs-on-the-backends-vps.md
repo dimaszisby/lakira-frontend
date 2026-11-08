@@ -44,7 +44,8 @@ set out four options and recommended none, since the choice sets cost and who op
 4. **The reverse proxy is the only hop in front of the app.** It writes `X-Forwarded-For` from the
    address that connected to it, so the client's address the app sees comes from a hop this
    project configures. How `/api/proxy` passes it on, and how many hops the backend's
-   `TRUST_PROXY` counts, are settled in #162 and the backend's row B-05.
+   `TRUST_PROXY` counts, are settled in #162 and the backend's row B-05. The first is
+   [ADR-0049](./adr-0049-the-proxy-forwards-the-client-address-the-reverse-proxy-reported.md).
 5. **The staging stack is the preview environment.** There is no deployment per pull request.
    Render is not used for anything that gates a promotion (lakira-backend ADR-0042).
 6. **The image does not wait on the VPS; the deploy does.** The image can be built and

@@ -51,7 +51,7 @@ Per environment:
 | Env | `API_URL` and `NEXT_PUBLIC_API_BASE_URL` |
 |---|---|
 | local | `http://localhost:8001/api/v1` |
-| staging | not provisioned: the stack on the VPS (ADR-0047). The Render staging backend is down |
+| staging | not provisioned: the stack on the VPS (ADR-0047). The backend's own staging runs on Render again since lakira-backend #273 (2026-11-07) |
 | production | not provisioned; no domain yet |
 
 Keep `API_URL` and `NEXT_PUBLIC_API_BASE_URL` **equal** within an environment. The FE CI secret feeding both is `STAGING_API_BASE_URL`.
