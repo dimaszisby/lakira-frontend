@@ -37,9 +37,13 @@ Prefer `API_URL`: it is server-only, so it never ships to the browser. See
 1. Joins the catch-all segments onto the base URL and copies the query string across.
 2. Reads the `lakira_token` cookie. If present, sets `Authorization: Bearer <token>`; if absent,
    explicitly deletes any inbound `Authorization` header rather than forwarding it.
-3. Forwards all headers except `connection`, `content-length`, `host` and `x-request-id`. The
-   backend takes an incoming request id as its own, so a browser may not send one; the backend
-   mints it, and the id on the response still reaches the browser.
+3. Forwards all headers except `connection`, `content-length`, `host`, `x-request-id`,
+   `x-forwarded-for`, `x-real-ip` and `forwarded`. The backend takes an incoming request id as its
+   own, so a browser may not send one; the backend mints it, and the id on the response still
+   reaches the browser. The backend rate-limits by client address, so the proxy writes
+   `X-Forwarded-For` itself: the rightmost entry of the one it received, which the reverse proxy
+   in front of the app wrote, and only when that entry is a bare IP address
+   ([ADR-0049](../explanation/decisions/adr-0049-the-proxy-forwards-the-client-address-the-reverse-proxy-reported.md)).
 4. Streams the request and response bodies (`duplex: "half"`), so uploads are not buffered. An
    error response's body is the exception: see step 8.
 5. Uses `redirect: "manual"` — upstream redirects are passed through, not followed.

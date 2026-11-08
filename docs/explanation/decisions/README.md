@@ -6,7 +6,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 ## Reading these
 
 - **Status is the first thing to check.** `Proposed` means the decision was written down but is
-  **not implemented** — do not assume the code matches it. ADR-0047 and ADR-0048 are `Proposed`, until the deploy of #194.
+  **not implemented** — do not assume the code matches it. ADR-0047, ADR-0048 and ADR-0049 are `Proposed`, until the deploy of #194.
 - **Records are immutable.** A decision that no longer holds is superseded by a new record, not
   edited. The `Related` line links the pair in both directions — see ADR-0001 and ADR-0002.
 - **`Origin` points at where the decision was made.** ADR-0001…0014 come from the kit under
@@ -74,6 +74,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0046](./adr-0046-signed-in-routes-are-measured-against-a-backend-built-in-the-job.md) | Signed-in routes are measured against a backend built in the job             | Accepted       | 2026-11-06 | #176 (no kit)                       |
 | [ADR-0047](./adr-0047-the-frontend-runs-on-the-backends-vps.md)                            | The frontend runs as a container on the backend's VPS                        | Proposed       | 2026-11-08 | #155 (no kit)                       |
 | [ADR-0048](./adr-0048-the-production-image-is-built-per-environment.md)                    | The production image is built per environment and smoke-tested in CI         | Proposed       | 2026-11-08 | #160 (no kit)                       |
+| [ADR-0049](./adr-0049-the-proxy-forwards-the-client-address-the-reverse-proxy-reported.md) | The proxy forwards the client address the reverse proxy reported             | Proposed       | 2026-11-08 | #162 (no kit)                       |
 
 ## Where the other decisions went
 

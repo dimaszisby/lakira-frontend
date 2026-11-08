@@ -62,8 +62,13 @@ and the build context excludes every `.env` file (`.dockerignore`).
 
 - The reverse proxy terminates TLS and forwards to port 3000 over the stack's network. The
   session cookies are `secure`, so the app must be reached over HTTPS.
-- It is the only hop in front of the app and writes `X-Forwarded-For` (ADR-0047). How the
-  proxy route passes the client's address to the backend is #162.
+- It is the only hop in front of the app and writes `X-Forwarded-For` (ADR-0047): it either
+  replaces a client's value or appends to it, so the client is the rightmost entry. The proxy
+  route forwards that entry to the backend, and nothing else that names a client
+  ([ADR-0049](../explanation/decisions/adr-0049-the-proxy-forwards-the-client-address-the-reverse-proxy-reported.md)).
+- **Port 3000 is reached only through the reverse proxy; never publish it.** Without a proxy in
+  front, a browser's own `X-Forwarded-For` reaches the app, and its rightmost entry would be
+  the browser's choice of address.
 - Every page carries a per-request nonce in its Content Security Policy (ADR-0026). Do not cache
   HTML at the proxy: a cached page repeats a nonce.
 

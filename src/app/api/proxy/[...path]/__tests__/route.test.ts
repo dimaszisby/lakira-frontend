@@ -588,6 +588,65 @@ describe("the headers a request carries to the backend", () => {
   });
 });
 
+describe("the client address a request carries to the backend", () => {
+  const PROXY_REPORTED = "203.0.113.7";
+  const FORWARDED_FOR = "x-forwarded-for";
+
+  const sentHeaders = async (headers: Record<string, string>) => {
+    const fetchMock = jest.fn().mockResolvedValue(upstream(200));
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const req = request("metrics", { [SESSION_COOKIE_NAME]: "any-value" });
+    Object.entries(headers).forEach(([name, value]) => req.headers.set(name, value));
+    await GET(req, context("metrics"));
+
+    return (fetchMock.mock.calls[0][1] as RequestInit).headers as Headers;
+  };
+
+  it("is the address the reverse proxy reported", async () => {
+    const sent = await sentHeaders({ [FORWARDED_FOR]: PROXY_REPORTED });
+
+    expect(sent.get(FORWARDED_FOR)).toBe(PROXY_REPORTED);
+  });
+
+  it("cannot be chosen by the browser through any of the headers that name a client", async () => {
+    const sent = await sentHeaders({
+      [FORWARDED_FOR]: `198.51.100.9, ${PROXY_REPORTED}`,
+      "x-real-ip": "198.51.100.9",
+      forwarded: "for=198.51.100.9",
+    });
+
+    expect(sent.get(FORWARDED_FOR)).toBe(PROXY_REPORTED);
+    expect(sent.has("x-real-ip")).toBe(false);
+    expect(sent.has("forwarded")).toBe(false);
+  });
+
+  it("is left out when the reported entry is not an address", async () => {
+    const sent = await sentHeaders({ [FORWARDED_FOR]: `${PROXY_REPORTED}, unknown` });
+
+    expect(sent.has(FORWARDED_FOR)).toBe(false);
+  });
+
+  it("goes with the retry after a refresh too", async () => {
+    mockRefresh.mockResolvedValue({ token: "fresh", refreshToken: "rotated" });
+    const fetchMock = jest
+      .fn()
+      .mockResolvedValueOnce(upstream(401))
+      .mockResolvedValueOnce(upstream(200));
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const req = request("metrics", {
+      [SESSION_COOKIE_NAME]: "expired",
+      [REFRESH_COOKIE_NAME]: "r",
+    });
+    req.headers.set(FORWARDED_FOR, PROXY_REPORTED);
+    await GET(req, context("metrics"));
+
+    const retried = (fetchMock.mock.calls[1][1] as RequestInit).headers as Headers;
+    expect(retried.get(FORWARDED_FOR)).toBe(PROXY_REPORTED);
+  });
+});
+
 describe("a response that issues an access token", () => {
   /**
    * The browser used to receive the token in the body, read it in JavaScript

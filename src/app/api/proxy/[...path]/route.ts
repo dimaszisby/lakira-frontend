@@ -17,6 +17,7 @@ import {
   refreshAccessToken,
   takeIssuedToken,
 } from "@/lib/auth-refresh";
+import { clientAddress } from "@/lib/client-address";
 import { getApiBaseUrl } from "@/lib/env";
 import { logger } from "@/lib/logger";
 import { filterErrorBody, MAX_ERROR_BODY_BYTES } from "@/lib/proxy-error-body";
@@ -30,12 +31,19 @@ const REQUEST_ID_HEADER = "x-request-id";
  * backend takes an incoming id as the request's own, so a forwarded one would
  * let a browser choose what is written on the backend's log lines and on the
  * line this proxy logs for a 5xx. Left out, the backend mints it.
+ *
+ * So are the three that name the client. The backend rate-limits by client
+ * address, and a browser could otherwise send whichever one it liked. The proxy
+ * writes `X-Forwarded-For` itself, from what the reverse proxy reported (ADR-0049).
  */
 const FORWARDED_HEADER_BLOCKLIST = new Set([
   "connection",
   "content-length",
   "host",
   REQUEST_ID_HEADER,
+  "x-forwarded-for",
+  "x-real-ip",
+  "forwarded",
 ]);
 
 /**
@@ -118,6 +126,12 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
     if (FORWARDED_HEADER_BLOCKLIST.has(key.toLowerCase())) return;
     upstreamHeaders.set(key, value);
   });
+
+  // Without it the backend sees this server for every user, and they share one
+  // rate-limit budget. Omitted when there is no usable address, which is that
+  // shared budget again rather than a value someone chose.
+  const address = clientAddress(request.headers);
+  if (address) upstreamHeaders.set("X-Forwarded-For", address);
 
   if (token) {
     upstreamHeaders.set("Authorization", `Bearer ${token}`);
