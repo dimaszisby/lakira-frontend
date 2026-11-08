@@ -36,10 +36,11 @@ integration ─┤
 e2e ─────────┼─→ ci ("CI passed")
 api-contract ┤
 security ────┤
-secret-scan ─┘
+secret-scan ┤
+image ───────┘
 ```
 
-Every job starts at once. `ci`, named "CI passed", needs all seven, runs `if: always()`, and
+Every job starts at once. `ci`, named "CI passed", needs all eight, runs `if: always()`, and
 fails unless each one succeeded: a failed, skipped or cancelled job fails it, and its log lists
 every job's result. It is the one check the `dev` and `main` rulesets require (see Branch rules below).
 Until 2026-10-21 the jobs from `checks` to `e2e` were a `needs` chain, about 12 to 14 minutes for
@@ -54,16 +55,17 @@ Only `e2e` downloads the Cypress binary, during its `npm ci`; there is no cache 
 one hit and saved nothing (ADR-0038). Every other job sets `CYPRESS_INSTALL_BINARY=0`, so
 `npm ci` skips the download; typecheck needs only the package's bundled types.
 
-| Job            | Name               | Timeout | Runs, in order                                                                                                                                                     | Uploads                                          |
-| -------------- | ------------------ | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
-| `checks`       | Static checks      | 15 min  | `lint`, `lint:css`, `typecheck`, `format`                                                                                                                          | none                                             |
-| `unit`         | Unit tests         | 20 min  | `test:unit:ci` (global coverage thresholds), `coverage:check` (per-folder goals, `--strict`)                                                                       | `coverage-report` (always)                       |
-| `integration`  | Integration tests  | 20 min  | `test:integration`                                                                                                                                                 | none                                             |
-| `e2e`          | E2E tests          | 30 min  | `build`, `npm run start` on `127.0.0.1:3000`, waits up to 120 s for it, `test:e2e:public`, `test:e2e:a11y` (the accessibility step), `test:e2e:csp`, stops the app | `cypress-videos`, `cypress-screenshots` (always) |
-| `api-contract` | API Contract Drift | 10 min  | `api:spec:check`, `api:types:check`                                                                                                                                | none                                             |
-| `security`     | Security Scan      | 20 min  | `security:scan`: `lint`, `lint:css`, then `npm audit --omit=dev --audit-level=high` (production dependencies only)                                                 | none                                             |
-| `secret-scan`  | Secret Scan        | 10 min  | full-history checkout, gitleaks `8.30.1` binary verified against a hard-coded SHA-256, `gitleaks git . --redact`                                                   | none                                             |
-| `ci`           | CI passed          | 5 min   | `needs` all seven jobs, `if: always()`; prints each result, fails unless all are `success`                                                                         | none                                             |
+| Job            | Name               | Timeout | Runs, in order                                                                                                                                                                                                                                                    | Uploads                                          |
+| -------------- | ------------------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `checks`       | Static checks      | 15 min  | `lint`, `lint:css`, `typecheck`, `format`                                                                                                                                                                                                                         | none                                             |
+| `unit`         | Unit tests         | 20 min  | `test:unit:ci` (global coverage thresholds), `coverage:check` (per-folder goals, `--strict`)                                                                                                                                                                      | `coverage-report` (always)                       |
+| `integration`  | Integration tests  | 20 min  | `test:integration`                                                                                                                                                                                                                                                | none                                             |
+| `e2e`          | E2E tests          | 30 min  | `build`, `npm run start` on `127.0.0.1:3000`, waits up to 120 s for it, `test:e2e:public`, `test:e2e:a11y` (the accessibility step), `test:e2e:csp`, stops the app                                                                                                | `cypress-videos`, `cypress-screenshots` (always) |
+| `api-contract` | API Contract Drift | 10 min  | `api:spec:check`, `api:types:check`                                                                                                                                                                                                                               | none                                             |
+| `security`     | Security Scan      | 20 min  | `security:scan`: `lint`, `lint:css`, then `npm audit --omit=dev --audit-level=high` (production dependencies only)                                                                                                                                                | none                                             |
+| `secret-scan`  | Secret Scan        | 10 min  | full-history checkout, gitleaks `8.30.1` binary verified against a hard-coded SHA-256, `gitleaks git . --redact`                                                                                                                                                  | none                                             |
+| `image`        | Production image   | 20 min  | `docker:smoke` (`scripts/image-smoke.sh`): builds `Dockerfile` with local build arguments, then checks non-root, no devDependencies, Node against `.nvmrc`, `/` and `/login` with a nonce, a static asset, the health check and `SIGTERM` (ADR-0048). No `npm ci` | none                                             |
+| `ci`           | CI passed          | 5 min   | `needs` all eight jobs, `if: always()`; prints each result, fails unless all are `success`                                                                                                                                                                        | none                                             |
 
 Details that decide whether a job fails:
 
@@ -80,8 +82,8 @@ Details that decide whether a job fails:
   `lint` covers `cypress/`.
 - `e2e` sets `CYPRESS_BASE_URL=http://127.0.0.1:3000`. `cypress-screenshots` warns "No files were
   found" on every passing run; Cypress writes screenshots only when a test fails.
-- `secret-scan` is the only job with an explicit `permissions` block (`contents: read`), and it
-  installs no Node.
+- `secret-scan` and `image` are the jobs with an explicit `permissions` block (`contents: read`),
+  and neither installs Node on the runner; `image` builds inside Docker.
 
 ## `frontend-performance` (`performance.yml`)
 

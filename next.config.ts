@@ -69,6 +69,10 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // The production image builds a self-contained server (ADR-0048). Only its build sets
+  // NEXT_OUTPUT: every other build is served by `next start`, which warns that it "does not work"
+  // with standalone output.
+  output: process.env.NEXT_OUTPUT === "standalone" ? "standalone" : undefined,
   async headers() {
     return [
       {

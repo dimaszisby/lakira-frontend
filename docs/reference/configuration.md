@@ -60,6 +60,7 @@ deliberately unprefixed for this reason — see below.
 | `NEXT_PUBLIC_ENABLE_DUMMY_ACTIONS` | Client | dummy-data mutation hooks                          | off                                      | Gates the `create-dummy` mutations. Keep off outside local development.                                    |
 | `NODE_ENV`                         | Server | dev-only diagnostics, test setup                   | set by the toolchain                     | Never set by hand.                                                                                         |
 | `HOST` / `PORT`                    | Server | `npm run start`                                    | `localhost` / `3000`                     |                                                                                                            |
+| `HOSTNAME`                         | Server | the production image's `server.js`                 | `0.0.0.0` in the image                   | The address the standalone server binds to. See [`production-image.md`](./production-image.md).            |
 | `SENTRY_DSN`                       | Server | `src/lib/monitoring/server.ts`                     | unset: monitoring is off                 | Turns on error reporting. Never `NEXT_PUBLIC_`; the browser does not talk to Sentry (ADR-0024).            |
 | `APP_RELEASE`                      | Server | `src/lib/monitoring/server.ts`                     | —                                        | Optional. Sent as the release on each Sentry event. Same name as `lakira-backend`.                         |
 
@@ -67,14 +68,15 @@ deliberately unprefixed for this reason — see below.
 
 Read by scripts, never by the app:
 
-| Variable                | Read by                             | Purpose                                                                             |
-| ----------------------- | ----------------------------------- | ----------------------------------------------------------------------------------- |
-| `LAKIRA_OPENAPI_URL`    | `scripts/api/sync-openapi-spec.mjs` | Override the spec source URL entirely.                                              |
-| `LAKIRA_OPENAPI_BRANCH` | `scripts/api/sync-openapi-spec.mjs` | Which `lakira-backend` branch to sync from. Defaults to `dev` — see the note below. |
-| `LAKIRA_BACKEND_PATH`   | `scripts/api/sync-openapi-spec.mjs` | Sync from a local backend checkout instead of GitHub.                               |
-| `PERF_BASE_URL`         | `scripts/perf/*.mjs`                | Target for Lighthouse and Web Vitals runs. A local host for the signed-in routes.   |
-| `PERF_PUBLIC_ONLY`      | `scripts/perf/*.mjs`                | `1` skips the signed-in routes, for a run without the local stack.                  |
-| `CYPRESS_BASE_URL`      | `cypress.config.ts`                 | Target for the e2e suite.                                                           |
+| Variable                | Read by                             | Purpose                                                                                  |
+| ----------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------- |
+| `LAKIRA_OPENAPI_URL`    | `scripts/api/sync-openapi-spec.mjs` | Override the spec source URL entirely.                                                   |
+| `LAKIRA_OPENAPI_BRANCH` | `scripts/api/sync-openapi-spec.mjs` | Which `lakira-backend` branch to sync from. Defaults to `dev` — see the note below.      |
+| `LAKIRA_BACKEND_PATH`   | `scripts/api/sync-openapi-spec.mjs` | Sync from a local backend checkout instead of GitHub.                                    |
+| `PERF_BASE_URL`         | `scripts/perf/*.mjs`                | Target for Lighthouse and Web Vitals runs. A local host for the signed-in routes.        |
+| `PERF_PUBLIC_ONLY`      | `scripts/perf/*.mjs`                | `1` skips the signed-in routes, for a run without the local stack.                       |
+| `CYPRESS_BASE_URL`      | `cypress.config.ts`                 | Target for the e2e suite.                                                                |
+| `NEXT_OUTPUT`           | `next.config.ts`                    | `standalone` builds the self-contained server; only the `Dockerfile` sets it (ADR-0048). |
 
 > The OpenAPI spec lives only on the backend's `dev` branch — not `staging`, not `main`. The
 > contract this repo generates against is therefore **ahead of** the staging deployment that preview
@@ -84,8 +86,8 @@ Read by scripts, never by the app:
 
 - There is no `.env` committed to this repo, and none should be.
 - CI uses no secrets. No workflow references one, and none are configured on the repository (checked 2026-09-24). Coverage is uploaded as a workflow artifact, not to Codecov.
-- `VERCEL_TOKEN`, `VERCEL_ORG_ID`, and `VERCEL_PROJECT_ID` appear in the environments matrix as
-  _not currently required_ — deploys are not driven from CI today.
+- No Vercel secret is used: the frontend is not hosted on Vercel (ADR-0047). Deploys are not
+  driven from CI today; the image is built and smoke-tested there, and holds no secret.
 
 ## Related
 

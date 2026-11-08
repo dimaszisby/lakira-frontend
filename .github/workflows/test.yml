@@ -252,6 +252,25 @@ jobs:
       - name: Run lint + npm audit (production dependencies)
         run: npm run security:scan
 
+  # Builds the production image and runs scripts/image-smoke.sh against it: non-root, no
+  # devDependencies, Node matching .nvmrc, pages served with a nonce, static assets served, its
+  # health check healthy, and a clean stop on SIGTERM (ADR-0048). No npm ci: the build runs
+  # inside Docker, with the local URLs the script passes as build arguments.
+  image:
+    name: Production image
+    runs-on: ubuntu-26.04
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Build and smoke the image
+        run: bash scripts/image-smoke.sh
+
   # Full-history gitleaks scan on every push and PR. Runs a pinned,
   # checksum-verified gitleaks binary rather than a third-party action, so no
   # action code runs with this job's token. See .claude/rules/security.md.
@@ -294,7 +313,7 @@ jobs:
   ci:
     name: CI passed
     runs-on: ubuntu-26.04
-    needs: [checks, unit, integration, e2e, api-contract, security, secret-scan]
+    needs: [checks, unit, integration, e2e, api-contract, security, secret-scan, image]
     if: always()
     timeout-minutes: 5
     steps:
