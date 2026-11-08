@@ -31,6 +31,8 @@ Server-only vars (no prefix) are readable in route handlers, `src/proxy.ts` (the
 | `NEXT_PUBLIC_VERCEL_URL` | **public** | SSR origin, third candidate |
 | `VERCEL_URL` | server | SSR origin, fourth candidate (Vercel-injected) |
 | `HOST`, `PORT` | server | SSR origin fallback, defaults `localhost:3000` |
+| `HOSTNAME` | server | the address the production image's standalone server binds to, `0.0.0.0` (ADR-0048) |
+| `NEXT_OUTPUT` | build | `standalone` makes `next build` emit the self-contained server; only the `Dockerfile` sets it (ADR-0048) |
 | `NODE_ENV` | build | dev-only logging; CSP `unsafe-eval` in dev |
 | `NEXT_PUBLIC_ENABLE_DUMMY_ACTIONS` | **public** | feature flag, compared `=== "true"`, gates the "generate dummy data" buttons |
 | `SENTRY_DSN` | server | `src/lib/monitoring/server.ts` — turns error reporting on; unset means no vendor code loads (ADR-0024) |
@@ -49,8 +51,8 @@ Per environment:
 | Env | `API_URL` and `NEXT_PUBLIC_API_BASE_URL` |
 |---|---|
 | local | `http://localhost:8001/api/v1` |
-| preview | `https://lakira-backend-staging.onrender.com/api/v1` |
-| production | not finalised |
+| staging | not provisioned: the stack on the VPS (ADR-0047). The Render staging backend is down |
+| production | not provisioned; no domain yet |
 
 Keep `API_URL` and `NEXT_PUBLIC_API_BASE_URL` **equal** within an environment. The FE CI secret feeding both is `STAGING_API_BASE_URL`.
 

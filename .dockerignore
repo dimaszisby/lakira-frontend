@@ -1,0 +1,21 @@
+# The build context for the production image (ADR-0048). Above all, no .env file: a value in
+# one would be read by `next build` and inlined into the image. `cypress/` stays in: the build's
+# typecheck covers src/__tests__, which imports from cypress/support.
+**/.env
+**/.env.*
+!.env.example
+**/*.pem
+**/*.key
+
+node_modules/
+.next/
+.git/
+.github/
+.claude/
+.vscode/
+.local/
+coverage/
+reports/
+docs/
+*.log
+tsconfig.tsbuildinfo

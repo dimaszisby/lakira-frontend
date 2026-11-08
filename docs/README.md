@@ -35,21 +35,22 @@ from a clean clone.
 
 ## Reference — information-oriented
 
-| Path                                                                 | What                                                            |
-| -------------------------------------------------------------------- | --------------------------------------------------------------- |
-| [`api/`](./reference/api/)                                           | Synced OpenAPI contract. **Do not hand-edit.**                  |
-| [`commands.md`](./reference/commands.md)                             | Every npm script worth running                                  |
-| [`configuration.md`](./reference/configuration.md)                   | Every environment variable and the `NEXT_PUBLIC_*` rule         |
-| [`environments.md`](./reference/environments.md)                     | Environment/secret matrix                                       |
-| [`design-tokens.md`](./reference/design-tokens.md)                   | The six token layers, in load order                             |
-| [`routes-and-proxy.md`](./reference/routes-and-proxy.md)             | Route map, `@modal` interception, the proxy contract            |
-| [`components/`](./reference/components/)                             | UI component standards, read in the order that README gives     |
-| [`style/`](./reference/style/)                                       | Colour palette and typography scale                             |
-| [`accessibility-baseline.md`](./reference/accessibility-baseline.md) | WCAG 2.1 AA criteria this app holds itself to                   |
-| [`performance-budget.md`](./reference/performance-budget.md)         | Web Vitals, bundle, and Lighthouse budgets                      |
-| [`ci-pipeline/`](./reference/ci-pipeline/)                           | What each CI workflow runs; the backend→frontend CI/CD contract |
-| [`issue-tracker.md`](./reference/issue-tracker.md)                   | GitHub labels and issue forms, and syncing them to a fork       |
-| [`known-gaps.md`](./reference/known-gaps.md)                         | Gaps a fork inherits knowingly, with the reason each stays      |
+| Path                                                                 | What                                                                  |
+| -------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| [`api/`](./reference/api/)                                           | Synced OpenAPI contract. **Do not hand-edit.**                        |
+| [`commands.md`](./reference/commands.md)                             | Every npm script worth running                                        |
+| [`configuration.md`](./reference/configuration.md)                   | Every environment variable and the `NEXT_PUBLIC_*` rule               |
+| [`environments.md`](./reference/environments.md)                     | Environment/secret matrix                                             |
+| [`production-image.md`](./reference/production-image.md)             | What the production image needs, for the Compose service that runs it |
+| [`design-tokens.md`](./reference/design-tokens.md)                   | The six token layers, in load order                                   |
+| [`routes-and-proxy.md`](./reference/routes-and-proxy.md)             | Route map, `@modal` interception, the proxy contract                  |
+| [`components/`](./reference/components/)                             | UI component standards, read in the order that README gives           |
+| [`style/`](./reference/style/)                                       | Colour palette and typography scale                                   |
+| [`accessibility-baseline.md`](./reference/accessibility-baseline.md) | WCAG 2.1 AA criteria this app holds itself to                         |
+| [`performance-budget.md`](./reference/performance-budget.md)         | Web Vitals, bundle, and Lighthouse budgets                            |
+| [`ci-pipeline/`](./reference/ci-pipeline/)                           | What each CI workflow runs; the backend→frontend CI/CD contract       |
+| [`issue-tracker.md`](./reference/issue-tracker.md)                   | GitHub labels and issue forms, and syncing them to a fork             |
+| [`known-gaps.md`](./reference/known-gaps.md)                         | Gaps a fork inherits knowingly, with the reason each stays            |
 
 ## Explanation — understanding-oriented
 

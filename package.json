@@ -45,7 +45,8 @@
     "security:scan": "npm run security:lint && npm run security:audit",
     "labels:sync": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/github/sync-labels.ts",
     "release:prepare": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/github/release.ts prepare",
-    "release:notes": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/github/release.ts notes"
+    "release:notes": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/github/release.ts notes",
+    "docker:smoke": "bash scripts/image-smoke.sh"
   },
   "dependencies": {
     "@ariakit/react": "^0.4.18",

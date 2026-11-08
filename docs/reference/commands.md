@@ -70,6 +70,12 @@ npx jest --config jest.integration.config.ts path/to/file.int.test.tsx
 | `npm run security:audit:full` | `npm audit --audit-level=high`: every dependency. What the nightly `dependency-audit` workflow runs. |
 | `npm run security:scan`       | `security:lint` + `security:audit`. What CI's `security` job runs.                                   |
 
+## Production image
+
+| Command                | What it does                                                                                                                                                                                                                                                                                                  |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run docker:smoke` | Build the production image from `Dockerfile` and smoke it: non-root, no devDependencies, Node matching `.nvmrc`, pages with a nonce, static assets, health check, clean stop. `SMOKE_IMAGE=<tag>` tests an existing image. What CI's `image` job runs. Needs Docker Engine 25+ with more than 2 GB of memory. |
+
 ## API contract
 
 | Command                      | What it does                                                                  |

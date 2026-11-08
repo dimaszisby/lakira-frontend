@@ -72,8 +72,12 @@ Frequently needed:
 The frontend will run as a container on the backend's VPS, one service in each of lakira-backend's
 staging and production Compose stacks
 ([ADR-0047](docs/explanation/decisions/adr-0047-the-frontend-runs-on-the-backends-vps.md)). Nothing
-is committed to drive a deploy yet: no `Dockerfile` and no deploy job in CI. The image is tracked
-in [#160](https://github.com/dimaszisby/lakira-frontend/issues/160).
+deploys it yet. What is committed is the image: [`Dockerfile`](Dockerfile), one build per
+environment, which CI builds and smoke-tests on every pull request
+([ADR-0048](docs/explanation/decisions/adr-0048-the-production-image-is-built-per-environment.md)).
+What the stacks must give it is in
+[`docs/reference/production-image.md`](docs/reference/production-image.md); the deploy is
+[#194](https://github.com/dimaszisby/lakira-frontend/issues/194).
 
 ## Forking
 
