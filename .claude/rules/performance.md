@@ -50,7 +50,7 @@ npm run start &          # then, once it is up:
 npm run perf:lighthouse && npm run perf:web-vitals
 ```
 
-The signed-in routes need the local stack (`docs/how-to/testing/run-stack-e2e.md`), and the app built with `NEXT_PUBLIC_APP_URL=http://127.0.0.1:3000` so its server-side prefetch reaches its own proxy. Without the stack, set `PERF_PUBLIC_ONLY=1` on both perf commands; the signed-in routes are then reported as skipped.
+The signed-in routes need the local stack (`docs/how-to/testing/run-stack-e2e.md`), and the app built with `NEXT_PUBLIC_APP_URL=http://127.0.0.1:3000`, as `performance.yml` does. Server-side prefetches no longer depend on it: they reach the proxy on loopback (ADR-0050). Without the stack, set `PERF_PUBLIC_ONLY=1` on both perf commands; the signed-in routes are then reported as skipped.
 
 ## What actually costs money here
 

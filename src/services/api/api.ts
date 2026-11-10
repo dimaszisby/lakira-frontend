@@ -3,7 +3,7 @@
 import axios from "axios";
 import axiosRetry, { isNetworkOrIdempotentRequestError } from "axios-retry";
 
-import { resolveAppOrigin } from "@/lib/env";
+import { resolveSelfOrigin } from "@/lib/env";
 
 /**
  * Api Client using Axios
@@ -15,9 +15,10 @@ function resolveBaseUrl() {
   // In the browser a relative path is enough; the proxy is same-origin.
   if (typeof window !== "undefined") return API_PROXY_PATH;
 
-  // On the server the request needs an absolute URL. Origin resolution is
-  // shared with the metadata routes and is covered by src/lib/__tests__/env.test.ts.
-  return new URL(API_PROXY_PATH, resolveAppOrigin()).toString();
+  // On the server the request needs an absolute URL: this server on loopback,
+  // so a server-side prefetch never leaves the container and the browser's
+  // address it forwards arrives as sent (ADR-0050).
+  return new URL(API_PROXY_PATH, resolveSelfOrigin()).toString();
 }
 
 const api = axios.create({

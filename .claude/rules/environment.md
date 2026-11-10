@@ -26,11 +26,11 @@ Server-only vars (no prefix) are readable in route handlers, `src/proxy.ts` (the
 |---|---|---|
 | `API_URL` | server | `api/proxy/[...path]`, `api/auth/{logout,revive,session}` — the backend base URL |
 | `NEXT_PUBLIC_API_BASE_URL` | **public** | proxy fallback; `next.config.ts` derives the CSP `connect-src` origin from it |
-| `NEXT_PUBLIC_APP_URL` | **public** | SSR origin resolution, first candidate |
-| `NEXT_PUBLIC_SITE_URL` | **public** | SSR origin, second candidate |
-| `NEXT_PUBLIC_VERCEL_URL` | **public** | SSR origin, third candidate |
-| `VERCEL_URL` | server | SSR origin, fourth candidate (Vercel-injected) |
-| `HOST`, `PORT` | server | SSR origin fallback, defaults `localhost:3000` |
+| `NEXT_PUBLIC_APP_URL` | **public** | the public origin `resolveAppOrigin()` returns, first candidate; printed by `robots.ts` and `sitemap.ts`. Server-side calls to `/api/proxy` do not use it since ADR-0050 |
+| `NEXT_PUBLIC_SITE_URL` | **public** | public origin, second candidate |
+| `NEXT_PUBLIC_VERCEL_URL` | **public** | public origin, third candidate |
+| `VERCEL_URL` | server | public origin, fourth candidate (Vercel-injected) |
+| `HOST`, `PORT` | server | public origin fallback, defaults `localhost:3000`. `PORT` is also the port of `resolveSelfOrigin()`, `http://127.0.0.1:$PORT`, which server-side calls to `/api/proxy` use (ADR-0050); `next start` and `next dev` set it to the port they bound |
 | `HOSTNAME` | server | the address the production image's standalone server binds to, `0.0.0.0` (ADR-0048) |
 | `NEXT_OUTPUT` | build | `standalone` makes `next build` emit the self-contained server; only the `Dockerfile` sets it (ADR-0048) |
 | `NODE_ENV` | build | dev-only logging; CSP `unsafe-eval` in dev |
@@ -61,7 +61,7 @@ Keep `API_URL` and `NEXT_PUBLIC_API_BASE_URL` **equal** within an environment. T
 Do not scatter `process.env` reads through feature code. `src/lib/env.ts` is the one module that touches the environment, and it has two segments:
 
 - **Public** — `clientEnv` and `isDummyActionsEnabled`, covering the `NEXT_PUBLIC_*` vars. Safe to import anywhere.
-- **Server** — `getApiBaseUrl()`, `resolveAppOrigin()` and `getMonitoringConfig()`. Route handlers, server components, and `src/proxy.ts` only.
+- **Server** — `getApiBaseUrl()`, `resolveAppOrigin()`, `resolveSelfOrigin()` and `getMonitoringConfig()`. Route handlers, server components, and `src/proxy.ts` only.
 
 Each variable is referenced as a **literal** `process.env.X` inside that module. Next.js substitutes those literals at build time; a dynamic lookup like `process.env[name]` is never substituted and resolves to `undefined`.
 

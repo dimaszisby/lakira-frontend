@@ -21,7 +21,7 @@ component → TanStack Query hook → feature api.ts → axios (src/services/api
           → lakira-backend /api/v1/*
 ```
 
-`src/services/api/api.ts` resolves its base URL as `/api/proxy` in the browser; on the server it builds an absolute origin from `NEXT_PUBLIC_APP_URL` → `NEXT_PUBLIC_SITE_URL` → `NEXT_PUBLIC_VERCEL_URL` → `VERCEL_URL` → `HOST`/`PORT`. Never hardcode a backend URL in feature code.
+`src/services/api/api.ts` resolves its base URL as `/api/proxy` in the browser; on the server it is this server on loopback, `http://127.0.0.1:$PORT` (`resolveSelfOrigin()`), so a server-side call never leaves the container ([ADR-0050](../../docs/explanation/decisions/adr-0050-server-side-calls-carry-the-browsers-address-and-reach-the-proxy-on-loopback.md)). It used to be the public origin, `NEXT_PUBLIC_APP_URL` and its fallbacks, which sent the call out through the reverse proxy and rendered 404 whenever that origin was not this server; `resolveAppOrigin()` now serves only `robots.ts` and `sitemap.ts`. Never hardcode a backend URL in feature code.
 
 `axios-retry` retries three times with exponential backoff, but **only** for GET/HEAD/OPTIONS or when the caller supplies an `Idempotency-Key` header. If a POST needs to be safely retriable, pass `idempotencyKey` — do not loosen the retry policy.
 
@@ -49,7 +49,7 @@ An **expired** token is redirected to `/api/auth/revive`, not to `/login`: the r
 
 ### Server-side fetches
 
-An SSR fetch for a protected route must forward the session or it silently 401s. Use `getServerAuthHeaders()` from `src/services/api/serverHeaders.ts`, which builds a `Cookie` header from `next/headers`. This is a logged incident, not a hypothetical — see `docs/internal/incidents/`.
+An SSR fetch for a protected route must forward the session or it silently 401s. Use `getServerAuthHeaders()` from `src/services/api/serverHeaders.ts`, which builds a `Cookie` header from `next/headers`, and an `X-Forwarded-For` with the browser's address, so the prefetch counts against that user's rate-limit budget (ADR-0050). This is a logged incident, not a hypothetical — see `docs/internal/incidents/`.
 
 ## Errors
 

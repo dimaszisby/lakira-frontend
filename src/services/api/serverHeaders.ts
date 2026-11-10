@@ -1,11 +1,20 @@
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 import { SESSION_COOKIE_NAME } from "@/constants/app";
+import { clientAddress } from "@/lib/client-address";
 import { decodeJwtPayload } from "@/lib/jwt";
 
 /**
- * Builds a Cookie header string from the active request cookies so server-side API
- * calls can reuse the user's session when hitting internal proxies.
+ * Headers for a server-side call to this app's own `/api/proxy`, from the page
+ * request being rendered.
+ *
+ * - `Cookie`, so the call reuses the user's session.
+ * - `X-Forwarded-For`, the browser's address as the reverse proxy reported it,
+ *   so the prefetch counts against this user's rate-limit budget rather than
+ *   this server's. The call goes over loopback (`resolveSelfOrigin`), so the
+ *   proxy receives it as sent and forwards it (ADR-0050).
+ *
+ * `undefined` when there is neither.
  */
 export async function getServerAuthHeaders(): Promise<Record<string, string> | undefined> {
   const cookieStore = await cookies();
@@ -13,8 +22,13 @@ export async function getServerAuthHeaders(): Promise<Record<string, string> | u
     .getAll()
     .map((cookie) => `${cookie.name}=${cookie.value}`)
     .join("; ");
+  const address = clientAddress(await headers());
 
-  return cookieHeader ? { Cookie: cookieHeader } : undefined;
+  const result: Record<string, string> = {};
+  if (cookieHeader) result.Cookie = cookieHeader;
+  if (address) result["X-Forwarded-For"] = address;
+
+  return Object.keys(result).length > 0 ? result : undefined;
 }
 
 /**

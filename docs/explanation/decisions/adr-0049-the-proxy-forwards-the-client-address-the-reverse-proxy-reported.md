@@ -68,7 +68,10 @@ fix what the route handler can know:
 - Locally and in CI there is no proxy, so Next's socket address (`::ffff:127.0.0.1`) is
   forwarded, which is what the backend saw before.
 - Calls this server makes on its own behalf still carry no browser address: server-side
-  prefetches through `NEXT_PUBLIC_APP_URL`, token refreshes (coalesced across users by
-  `src/lib/auth-refresh.ts`), and `/api/auth/logout`. They keep sharing one budget.
+  prefetches through `NEXT_PUBLIC_APP_URL`, token refreshes (coalesced by refresh token in
+  `src/lib/auth-refresh.ts`, so per session; this line first said across users), and
+  `/api/auth/logout`. They keep sharing one budget. Since #199,
+  [ADR-0050](./adr-0050-server-side-calls-carry-the-browsers-address-and-reach-the-proxy-on-loopback.md)
+  sends the address on all three.
 - `X-Forwarded-Host`, `X-Forwarded-Proto` and `X-Forwarded-Port` still pass through, filled by
   Next when missing. How the backend reads them is not checked here.

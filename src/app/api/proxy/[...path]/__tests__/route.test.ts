@@ -206,7 +206,8 @@ describe("a 401 refresh cannot rescue", () => {
       context("metrics"),
     );
 
-    expect(mockRefresh).toHaveBeenCalledWith("the-cookie");
+    // No reported address on this request, so the refresh carries none.
+    expect(mockRefresh).toHaveBeenCalledWith("the-cookie", null);
   });
 });
 
@@ -644,6 +645,20 @@ describe("the client address a request carries to the backend", () => {
 
     const retried = (fetchMock.mock.calls[1][1] as RequestInit).headers as Headers;
     expect(retried.get(FORWARDED_FOR)).toBe(PROXY_REPORTED);
+  });
+
+  it("goes with the refresh itself, so it counts against this user (ADR-0050)", async () => {
+    mockRefresh.mockResolvedValue(null);
+    global.fetch = jest.fn().mockResolvedValue(upstream(401)) as unknown as typeof fetch;
+
+    const req = request("metrics", {
+      [SESSION_COOKIE_NAME]: "expired",
+      [REFRESH_COOKIE_NAME]: "r",
+    });
+    req.headers.set(FORWARDED_FOR, `198.51.100.9, ${PROXY_REPORTED}`);
+    await GET(req, context("metrics"));
+
+    expect(mockRefresh).toHaveBeenCalledWith("r", PROXY_REPORTED);
   });
 });
 
