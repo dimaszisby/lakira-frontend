@@ -5,6 +5,7 @@ import {
   invalidateDashboardVisualizations,
   invalidateMetricVisualization,
 } from "@/features/data-visualizations/cache";
+import { invalidateMetricLists } from "@/features/metrics/cache";
 import { useOrganizationId } from "@/features/organizations/context";
 import type { MetricLogResponseDTO } from "@/types/dtos/metric-log.dto";
 
@@ -63,6 +64,8 @@ export function useDeleteMetricLog(
       await invalidateLogLists(qc, organizationId);
       await invalidateMetricVisualization(qc, organizationId, vars.metricId);
       await invalidateDashboardVisualizations(qc, organizationId);
+      // Each metrics list row carries its metric's log count.
+      await invalidateMetricLists(qc, organizationId);
     },
   });
 

@@ -29,7 +29,8 @@ suite ran axe on a dashboard with cards or a metrics list with rows:
       `MetricCategoryMapper.ts:51`). Register row F-57; raised on the Notion page, Part 1. The
       categories list is left out of the spec until it closes.
 - [x] Found, out of scope: the metrics list reports `logCount: 0` for a metric with two logs.
-      Register row F-58.
+      Register row F-58. Fixed by lakira-backend #275 (2026-11-07); #170 (2026-11-09) made a log
+      write refresh the metrics lists and added a check of the count to the spec above.
 - [x] `docs/how-to/releases/a11y-release-checklist.md` and `.claude/rules/accessibility.md` name
       the new spec
 - [x] Register: F-33 closed; F-56, F-57, F-58 and O-12 added

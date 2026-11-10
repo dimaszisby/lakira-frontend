@@ -4,6 +4,7 @@ import {
   invalidateDashboardVisualizations,
   invalidateMetricVisualization,
 } from "@/features/data-visualizations/cache";
+import { invalidateMetricLists } from "@/features/metrics/cache";
 import { useOrganizationId } from "@/features/organizations/context";
 import type { CreateMetricLogRequestDTO, MetricLogResponseDTO } from "@/types/dtos/metric-log.dto";
 
@@ -26,6 +27,8 @@ export function useCreateMetricLog(
       await invalidateLogLists(qc, organizationId);
       await invalidateMetricVisualization(qc, organizationId, payload.metricId);
       await invalidateDashboardVisualizations(qc, organizationId);
+      // Each metrics list row carries its metric's log count.
+      await invalidateMetricLists(qc, organizationId);
       onSuccess?.(created);
     },
     onError,

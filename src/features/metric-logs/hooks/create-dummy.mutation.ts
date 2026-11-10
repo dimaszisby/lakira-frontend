@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { invalidateDashboardVisualizations } from "@/features/data-visualizations/cache";
+import { invalidateMetricLists } from "@/features/metrics/cache";
 import { useOrganizationId } from "@/features/organizations/context";
 import type {
   GenerateDummyMetricLogsRequestDTO,
@@ -25,6 +26,8 @@ export function useCreateMetricLogDummy(
     onSuccess: async (created) => {
       await invalidateLogLists(qc, organizationId);
       await invalidateDashboardVisualizations(qc, organizationId);
+      // Each metrics list row carries its metric's log count.
+      await invalidateMetricLists(qc, organizationId);
       onSuccess?.(created.logs);
     },
     onError,
