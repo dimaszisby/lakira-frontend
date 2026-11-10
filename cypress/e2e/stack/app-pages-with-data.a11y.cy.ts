@@ -82,6 +82,21 @@ describe("Signed-in pages with data meet WCAG 2.1 A and AA", () => {
     signInSession(user);
   });
 
+  // Not an axe check, but this seed is the only one in the suite with a known number of logs. The
+  // list answered `logCount: 0` for this metric until backend #275 (#170).
+  it("shows the metric's two logs in the metrics table", () => {
+    cy.viewport(1280, HEIGHT);
+    cy.visit("/metrics");
+    cy.get('[aria-label="Metrics table"]').within(() => {
+      cy.contains("th", "Logs").then(($th) => {
+        cy.contains("tr", METRIC_NAME)
+          .find("td")
+          .eq($th.index())
+          .should(($td) => expect($td.text().trim()).to.eq("2"));
+      });
+    });
+  });
+
   for (const width of WIDTHS) {
     for (const theme of THEMES) {
       for (const { path, label, shows } of PAGES) {
