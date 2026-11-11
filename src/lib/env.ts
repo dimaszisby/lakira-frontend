@@ -155,6 +155,19 @@ export const getApiBaseUrl = (): string => {
 };
 
 /**
+ * This server's own origin on loopback, for its calls to its own `/api/proxy`.
+ * Server-only.
+ *
+ * Not {@link resolveAppOrigin}: behind the reverse proxy (ADR-0047) the public
+ * origin sends the call out of the container and back through that proxy, which
+ * writes this server's address over the browser's, and a build whose public
+ * origin is not this server sends its prefetches elsewhere. On loopback the
+ * call never leaves the container (ADR-0050). `PORT` is the port the server
+ * listens on; `next start`, `next dev` and the image all read it.
+ */
+export const resolveSelfOrigin = (): string => `http://127.0.0.1:${process.env.PORT ?? "3000"}`;
+
+/**
  * Error-monitoring configuration. Server-only, and `null` when unset.
  *
  * `SENTRY_DSN` and `APP_RELEASE` are the names `lakira-backend` uses. Neither is

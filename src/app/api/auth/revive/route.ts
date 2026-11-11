@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { REFRESH_COOKIE_NAME } from "@/constants/app";
 import { applyRefreshedSession, clearSessionCookies, refreshAccessToken } from "@/lib/auth-refresh";
+import { clientAddress } from "@/lib/client-address";
 import { isSessionTokenUsable } from "@/lib/jwt";
 import { logger } from "@/lib/logger";
 import { authRoutes } from "@/lib/routes";
@@ -41,7 +42,7 @@ export async function GET(request: NextRequest) {
   const returnUrl = request.nextUrl.searchParams.get("returnUrl");
   const refreshToken = request.cookies.get(REFRESH_COOKIE_NAME)?.value;
 
-  const refreshed = await refreshAccessToken(refreshToken);
+  const refreshed = await refreshAccessToken(refreshToken, clientAddress(request.headers));
 
   // A refreshed token that is *itself* unusable would send the middleware
   // straight back here, and the loop would rotate the family once per hop.

@@ -32,12 +32,17 @@ const makeToken = (expOffsetSeconds: number) => {
 };
 
 const DASHBOARD = "/dashboard";
+const CARRIED_COOKIE = "the-cookie";
 
-const request = (returnUrl?: string, refreshToken = "refresh-value") => {
+const request = (
+  returnUrl?: string,
+  refreshToken = "refresh-value",
+  headers: Record<string, string> = {},
+) => {
   const url = new URL("http://localhost:3000/api/auth/revive");
   if (returnUrl !== undefined) url.searchParams.set("returnUrl", returnUrl);
 
-  const req = new NextRequest(url);
+  const req = new NextRequest(url, { headers });
   if (refreshToken) req.cookies.set(REFRESH_COOKIE_NAME, refreshToken);
   return req;
 };
@@ -71,8 +76,8 @@ describe("GET /api/auth/revive", () => {
 
   it("redeems the refresh cookie the request carried", async () => {
     mockRefresh.mockResolvedValue({ token: makeToken(900), refreshToken: null });
-    await GET(request(DASHBOARD, "the-cookie"));
-    expect(mockRefresh).toHaveBeenCalledWith("the-cookie");
+    await GET(request(DASHBOARD, CARRIED_COOKIE));
+    expect(mockRefresh).toHaveBeenCalledWith(CARRIED_COOKIE, null);
   });
 
   it("falls back to the dashboard when there is nowhere to return to", async () => {
@@ -101,7 +106,7 @@ describe("GET /api/auth/revive", () => {
 
     const response = await GET(request(DASHBOARD, ""));
 
-    expect(mockRefresh).toHaveBeenCalledWith(undefined);
+    expect(mockRefresh).toHaveBeenCalledWith(undefined, null);
     expect(setCookies(response)[SESSION_COOKIE_NAME]).toContain("Max-Age=0");
   });
 
@@ -136,5 +141,14 @@ describe("GET /api/auth/revive", () => {
     mockRefresh.mockResolvedValue({ token: makeToken(900), refreshToken: null });
     const response = await GET(request(DASHBOARD));
     expect(response.headers.get("cache-control")).toBe("no-store");
+  });
+
+  it("sends the refresh the address the reverse proxy reported (ADR-0050)", async () => {
+    mockRefresh.mockResolvedValue({ token: makeToken(900), refreshToken: null });
+    await GET(
+      request(DASHBOARD, CARRIED_COOKIE, { "x-forwarded-for": "198.51.100.9, 203.0.113.7" }),
+    );
+
+    expect(mockRefresh).toHaveBeenCalledWith(CARRIED_COOKIE, "203.0.113.7");
   });
 });

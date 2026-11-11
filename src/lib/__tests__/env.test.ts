@@ -132,6 +132,18 @@ describe("resolveAppOrigin candidate order", () => {
   });
 });
 
+describe("resolveSelfOrigin", () => {
+  it("is this server on loopback, whatever the public origin (ADR-0050)", () => {
+    const { resolveSelfOrigin } = loadEnv({ NEXT_PUBLIC_APP_URL: APP_ORIGIN, PORT: "4321" });
+    expect(resolveSelfOrigin()).toBe("http://127.0.0.1:4321");
+  });
+
+  it("defaults to port 3000", () => {
+    const { resolveSelfOrigin } = loadEnv({ PORT: undefined });
+    expect(resolveSelfOrigin()).toBe("http://127.0.0.1:3000");
+  });
+});
+
 describe("getApiBaseUrl", () => {
   it("prefers the server-only API_URL", () => {
     const { getApiBaseUrl } = loadEnv({

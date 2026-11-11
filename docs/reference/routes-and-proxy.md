@@ -107,7 +107,11 @@ token, which the backend reads as replay and answers by revoking the whole famil
 ## SSR must forward the cookie
 
 A server component fetching from the proxy does **not** automatically carry the browser's cookies.
-It must forward them explicitly via `getServerAuthHeaders()` in `src/services/api/serverHeaders.ts`.
+It must forward them explicitly via `getServerAuthHeaders()` in `src/services/api/serverHeaders.ts`,
+which also sends the browser's address as `X-Forwarded-For`. The call goes to this server on
+loopback, `http://127.0.0.1:$PORT`, not to the public origin, so the reverse proxy never sees it and
+the address arrives as sent
+([ADR-0050](../explanation/decisions/adr-0050-server-side-calls-carry-the-browsers-address-and-reach-the-proxy-on-loopback.md)).
 
 Forgetting this produces a silent `401` rather than an error — the page renders empty instead of
 failing loudly. Two of the four logged incidents trace back to this class of bug; see

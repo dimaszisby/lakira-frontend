@@ -43,6 +43,9 @@ const okResponse = (token: string, setCookie: string[] = []) =>
     headers: headersWithSetCookie(setCookie),
   }) as unknown as Response;
 
+const REPORTED_ADDRESS = "203.0.113.7";
+const FORWARDED_FOR = "x-forwarded-for";
+
 describe("captureRefreshCookie", () => {
   it("extracts the refresh token from a Set-Cookie list", () => {
     const headers = headersWithSetCookie([
@@ -101,10 +104,25 @@ describe("refreshAccessToken", () => {
     const spy = jest.fn().mockResolvedValue(okResponse(makeToken()));
     global.fetch = spy as unknown as typeof fetch;
     await refreshAccessToken("tok");
-    expect(spy.mock.calls[0][1]).toMatchObject({
-      method: "POST",
-      headers: { cookie: `${REFRESH_COOKIE_NAME}=tok` },
-    });
+    const init = spy.mock.calls[0][1] as RequestInit;
+    expect(init.method).toBe("POST");
+    expect(new Headers(init.headers).get("cookie")).toBe(`${REFRESH_COOKIE_NAME}=tok`);
+  });
+
+  it("sends the browser's address, so the refresh counts against its user (ADR-0050)", async () => {
+    const spy = jest.fn().mockResolvedValue(okResponse(makeToken()));
+    global.fetch = spy as unknown as typeof fetch;
+    await refreshAccessToken("tok", REPORTED_ADDRESS);
+    const init = spy.mock.calls[0][1] as RequestInit;
+    expect(new Headers(init.headers).get(FORWARDED_FOR)).toBe(REPORTED_ADDRESS);
+  });
+
+  it("sends no address when the caller has none", async () => {
+    const spy = jest.fn().mockResolvedValue(okResponse(makeToken()));
+    global.fetch = spy as unknown as typeof fetch;
+    await refreshAccessToken("tok");
+    const init = spy.mock.calls[0][1] as RequestInit;
+    expect(new Headers(init.headers).has(FORWARDED_FOR)).toBe(false);
   });
 
   it("returns null when the backend rejects the refresh token", async () => {
@@ -228,6 +246,27 @@ describe("refreshAccessToken coalescing", () => {
       { token, refreshToken: "rotated" },
       { token, refreshToken: "rotated" },
     ]);
+  });
+
+  it("sends the address of the caller that started a shared redemption", async () => {
+    // Callers sharing a refresh token share a session, so the first caller's
+    // address is theirs too. The joiner's own is not sent.
+    const spy = jest.fn().mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          setTimeout(() => resolve(okResponse(makeToken())), 0);
+        }),
+    );
+    global.fetch = spy as unknown as typeof fetch;
+
+    await Promise.all([
+      refreshAccessToken("shared", REPORTED_ADDRESS),
+      refreshAccessToken("shared", "198.51.100.9"),
+    ]);
+
+    expect(spy).toHaveBeenCalledTimes(1);
+    const init = spy.mock.calls[0][1] as RequestInit;
+    expect(new Headers(init.headers).get(FORWARDED_FOR)).toBe(REPORTED_ADDRESS);
   });
 
   it("replays the result for a caller still holding the superseded token", async () => {

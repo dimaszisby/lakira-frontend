@@ -58,12 +58,19 @@ const readSetCookie = (headers: Headers, name: string): string | null => {
 };
 
 /** The single un-coalesced round trip. Only {@link refreshAccessToken} calls it. */
-const performRefresh = async (refreshToken: string): Promise<RefreshResult | null> => {
+const performRefresh = async (
+  refreshToken: string,
+  address: string | null,
+): Promise<RefreshResult | null> => {
+  const headers = new Headers({ cookie: `${REFRESH_COOKIE_NAME}=${refreshToken}` });
+  // The browser's address, so the refresh counts against its user's rate-limit budget (ADR-0050).
+  if (address) headers.set("X-Forwarded-For", address);
+
   let response: Response;
   try {
     response = await fetch(`${getApiBaseUrl()}/auth/refresh`, {
       method: "POST",
-      headers: { cookie: `${REFRESH_COOKIE_NAME}=${refreshToken}` },
+      headers,
       cache: "no-store",
     });
   } catch (error) {
@@ -151,9 +158,17 @@ const forgetStale = (now: number): void => {
  * Concurrent and near-simultaneous callers presenting the same token share one
  * round trip; see the note above for why that is a correctness requirement and
  * not an optimisation.
+ *
+ * `address` is the browser's, from `clientAddress()`. A caller that joins a
+ * shared round trip does not send its own: the round trip carries the address of
+ * the caller that started it. Sharing a refresh token means sharing a session,
+ * so that is normally the same browser, or a server-side prefetch that forwarded
+ * its address. A stolen cookie replayed elsewhere is the exception, and the
+ * backend revokes the family on replay anyway.
  */
 export const refreshAccessToken = async (
   refreshToken: string | undefined | null,
+  address: string | null = null,
 ): Promise<RefreshResult | null> => {
   if (!refreshToken) return null;
 
@@ -166,7 +181,7 @@ export const refreshAccessToken = async (
   const pending = inFlight.get(refreshToken);
   if (pending) return pending;
 
-  const attempt = performRefresh(refreshToken).finally(() => {
+  const attempt = performRefresh(refreshToken, address).finally(() => {
     inFlight.delete(refreshToken);
   });
 

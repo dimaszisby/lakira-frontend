@@ -31,11 +31,11 @@ No registry holds it yet; publishing and deploying it is
 same time. A rebuilt container picks up none of them, so **an image serves the one environment it
 was built for**. Build staging's and production's separately.
 
-| Build argument             | Required | Value                                                                                                                                                                             |
-| -------------------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_APP_URL`      | Yes      | The frontend's public origin, such as `https://app.<domain>`. Without it, every page that loads its data on the server renders 404, so the build refuses to run when it is empty. |
-| `NEXT_PUBLIC_API_BASE_URL` | Yes      | The backend's public API base, such as `https://api.<domain>/api/v1`. Also becomes the CSP `connect-src` origin.                                                                  |
-| `NEXT_PUBLIC_SITE_URL`     | No       | The canonical site URL, when it differs from the app's.                                                                                                                           |
+| Build argument             | Required | Value                                                                                                                                                                                                                                 |
+| -------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_APP_URL`      | Yes      | The frontend's public origin, such as `https://app.<domain>`, which `robots.txt` and the sitemap print. The build refuses to run when it is empty. Server-side prefetches do not use it: they reach the proxy on loopback (ADR-0050). |
+| `NEXT_PUBLIC_API_BASE_URL` | Yes      | The backend's public API base, such as `https://api.<domain>/api/v1`. Also becomes the CSP `connect-src` origin.                                                                                                                      |
+| `NEXT_PUBLIC_SITE_URL`     | No       | The canonical site URL, when it differs from the app's.                                                                                                                                                                               |
 
 ## Where it is built
 
@@ -52,8 +52,8 @@ are [#194](https://github.com/dimaszisby/lakira-frontend/issues/194).
 | `API_URL`     | No       | The backend the proxy forwards to. Unset, the proxy uses the build's `NEXT_PUBLIC_API_BASE_URL`. Today the two are kept equal (`.claude/rules/environment.md`); whether the stack points it at the internal address is decided in #194. |
 | `SENTRY_DSN`  | No       | Turns on server-side error reporting (ADR-0024). Unset, no vendor code loads.                                                                                                                                                           |
 | `APP_RELEASE` | No       | The release sent with each Sentry event, such as the commit SHA. Same name as the backend's.                                                                                                                                            |
-| `PORT`        | No       | Defaults to `3000`.                                                                                                                                                                                                                     |
-| `HOSTNAME`    | No       | Defaults to `0.0.0.0`. Do not set it to `localhost`: the reverse proxy could not reach the server.                                                                                                                                      |
+| `PORT`        | No       | Defaults to `3000`. Server-side prefetches call `http://127.0.0.1:$PORT`, so it must be the port the server listens on.                                                                                                                 |
+| `HOSTNAME`    | No       | Defaults to `0.0.0.0`. Do not set it to `localhost`, where the reverse proxy could not reach the server, or to an external address alone, where the server could not reach itself on `127.0.0.1`.                                       |
 
 `NODE_ENV` is `production` in the image; do not override it. No secret is baked into the image,
 and the build context excludes every `.env` file (`.dockerignore`).
@@ -66,6 +66,9 @@ and the build context excludes every `.env` file (`.dockerignore`).
   replaces a client's value or appends to it, so the client is the rightmost entry. The proxy
   route forwards that entry to the backend, and nothing else that names a client
   ([ADR-0049](../explanation/decisions/adr-0049-the-proxy-forwards-the-client-address-the-reverse-proxy-reported.md)).
+  Server-side prefetches, token refreshes and sign-out send it too, and the prefetches reach the
+  proxy on `127.0.0.1` rather than back through the reverse proxy
+  ([ADR-0050](../explanation/decisions/adr-0050-server-side-calls-carry-the-browsers-address-and-reach-the-proxy-on-loopback.md)).
 - **Port 3000 is reached only through the reverse proxy; never publish it.** Without a proxy in
   front, a browser's own `X-Forwarded-For` reaches the app, and its rightmost entry would be
   the browser's choice of address.

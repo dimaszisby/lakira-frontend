@@ -172,7 +172,10 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
     // otherwise-valid session hits this constantly; without the retry the app
     // stops working a quarter of an hour after login.
     if (response.status === 401) {
-      refreshed = await refreshAccessToken(request.cookies.get(REFRESH_COOKIE_NAME)?.value);
+      refreshed = await refreshAccessToken(
+        request.cookies.get(REFRESH_COOKIE_NAME)?.value,
+        address,
+      );
       if (refreshed) {
         logger.info("proxy.refreshed", { path: loggedPath });
         response = await send(refreshed.token);

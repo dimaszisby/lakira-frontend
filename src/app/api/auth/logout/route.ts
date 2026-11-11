@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 
 import { REFRESH_COOKIE_NAME, SESSION_COOKIE_NAME } from "@/constants/app";
 import { clearSessionCookies } from "@/lib/auth-refresh";
+import { clientAddress } from "@/lib/client-address";
 import { getApiBaseUrl } from "@/lib/env";
 import { logger } from "@/lib/logger";
 
@@ -30,8 +31,13 @@ import { logger } from "@/lib/logger";
  * unreachable backend leaves a refresh token live until it expires, which is
  * worth a log line; refusing to clear the cookies would leave the session fully
  * usable, which is worse in every way.
+ *
+ * ## The browser's address
+ *
+ * Sent as `/api/proxy` sends it, so the backend counts the call against this
+ * user's rate-limit budget rather than this server's (ADR-0050).
  */
-export async function POST() {
+export async function POST(request: Request) {
   const cookieStore = await cookies();
   const refreshToken = cookieStore.get(REFRESH_COOKIE_NAME)?.value;
   const accessToken = cookieStore.get(SESSION_COOKIE_NAME)?.value;
@@ -40,6 +46,8 @@ export async function POST() {
     const headers = new Headers();
     if (refreshToken) headers.set("cookie", `${REFRESH_COOKIE_NAME}=${refreshToken}`);
     if (accessToken) headers.set("Authorization", `Bearer ${accessToken}`);
+    const address = clientAddress(request.headers);
+    if (address) headers.set("X-Forwarded-For", address);
 
     const upstream = await fetch(`${getApiBaseUrl()}/auth/logout`, {
       method: "POST",

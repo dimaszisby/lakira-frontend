@@ -24,6 +24,13 @@ const setCookies = (response: Response) =>
     response.headers.getSetCookie().map((cookie) => [cookie.split("=")[0], cookie]),
   );
 
+const LOGOUT_URL = "http://app.test/api/auth/logout";
+const FORWARDED_FOR = "x-forwarded-for";
+const REPORTED = "203.0.113.7";
+
+const logoutRequest = (headers: Record<string, string> = {}) =>
+  new Request(LOGOUT_URL, { method: "POST", headers });
+
 const originalFetch = global.fetch;
 
 afterEach(() => {
@@ -41,7 +48,7 @@ describe("POST /api/auth/logout", () => {
       .mockResolvedValue({ ok: true, status: 200 }) as unknown as typeof fetch;
     withCookies({ [SESSION_COOKIE_NAME]: "access", [REFRESH_COOKIE_NAME]: "refresh" });
 
-    const response = await POST();
+    const response = await POST(logoutRequest());
 
     const cleared = setCookies(response);
     expect(cleared[SESSION_COOKIE_NAME]).toContain("Max-Age=0");
@@ -53,7 +60,7 @@ describe("POST /api/auth/logout", () => {
     global.fetch = spy as unknown as typeof fetch;
     withCookies({ [SESSION_COOKIE_NAME]: "access", [REFRESH_COOKIE_NAME]: "refresh" });
 
-    await POST();
+    await POST(logoutRequest());
 
     expect(spy).toHaveBeenCalledTimes(1);
     const [url, init] = spy.mock.calls[0] as [string, RequestInit];
@@ -74,7 +81,7 @@ describe("POST /api/auth/logout", () => {
       .mockRejectedValue(new Error("ECONNREFUSED")) as unknown as typeof fetch;
     withCookies({ [SESSION_COOKIE_NAME]: "access", [REFRESH_COOKIE_NAME]: "refresh" });
 
-    const response = await POST();
+    const response = await POST(logoutRequest());
 
     expect(response.status).toBe(200);
     expect(setCookies(response)[SESSION_COOKIE_NAME]).toContain("Max-Age=0");
@@ -86,7 +93,7 @@ describe("POST /api/auth/logout", () => {
       .mockResolvedValue({ ok: false, status: 401 }) as unknown as typeof fetch;
     withCookies({ [SESSION_COOKIE_NAME]: "stale" });
 
-    const response = await POST();
+    const response = await POST(logoutRequest());
 
     expect(response.status).toBe(200);
     expect(setCookies(response)[REFRESH_COOKIE_NAME]).toContain("Max-Age=0");
@@ -97,11 +104,39 @@ describe("POST /api/auth/logout", () => {
     global.fetch = spy as unknown as typeof fetch;
     withCookies({});
 
-    const response = await POST();
+    const response = await POST(logoutRequest());
 
     expect(response.status).toBe(200);
     const headers = new Headers((spy.mock.calls[0] as [string, RequestInit])[1].headers);
     expect(headers.get("cookie")).toBeNull();
     expect(headers.get("authorization")).toBeNull();
+  });
+
+  describe("the client address it carries to the backend", () => {
+    const sentForwardedFor = async (headers: Record<string, string>) => {
+      const spy = jest.fn().mockResolvedValue({ ok: true, status: 200 });
+      global.fetch = spy as unknown as typeof fetch;
+      withCookies({ [REFRESH_COOKIE_NAME]: "refresh" });
+
+      await POST(logoutRequest(headers));
+
+      return new Headers((spy.mock.calls[0] as [string, RequestInit])[1].headers).get(
+        FORWARDED_FOR,
+      );
+    };
+
+    it("sends the address the reverse proxy reported, so sign-out counts against this user (ADR-0050)", async () => {
+      expect(await sentForwardedFor({ [FORWARDED_FOR]: REPORTED })).toBe(REPORTED);
+    });
+
+    it("sends only the rightmost entry when a browser prepended its own", async () => {
+      expect(await sentForwardedFor({ [FORWARDED_FOR]: `198.51.100.9, ${REPORTED}` })).toBe(
+        REPORTED,
+      );
+    });
+
+    it("sends no address when the rightmost entry is not an IP address", async () => {
+      expect(await sentForwardedFor({ [FORWARDED_FOR]: "unknown" })).toBeNull();
+    });
   });
 });
