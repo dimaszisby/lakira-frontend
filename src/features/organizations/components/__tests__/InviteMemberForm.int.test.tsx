@@ -14,7 +14,7 @@ import { renderWithProviders, TEST_ORGANIZATION_ID } from "@/src/test-utils/rend
 const INVITES_URL = `*/organizations/${TEST_ORGANIZATION_ID}/invites`;
 const EMAIL = "grace@example.com";
 const SEND = { name: "Send invitation" };
-const SENT_NOTE = "Invitation sent.";
+const SENT_NOTE = "Invitation sent. If it doesn't arrive, send it again.";
 
 const acknowledged = () =>
   HttpResponse.json(
@@ -80,7 +80,11 @@ describe("InviteMemberForm integration", () => {
     server.use(
       http.post(INVITES_URL, () =>
         HttpResponse.json(
-          { status: "error", message: "An invitation for this email is already pending." },
+          // Since lakira-backend #284 a 409 means only that two invites for one address raced.
+          {
+            status: "error",
+            message: "Another invitation for this address was sent at the same time.",
+          },
           { status: 409 },
         ),
       ),
@@ -91,10 +95,36 @@ describe("InviteMemberForm integration", () => {
     await user.click(screen.getByRole("button", SEND));
 
     expect(
-      await screen.findByText("An invitation for this email is already pending."),
+      await screen.findByText("Another invitation for this address was sent at the same time."),
     ).toBeInTheDocument();
     expect(screen.queryByText(/request failed with status code/i)).not.toBeInTheDocument();
     expect(screen.getByLabelText("Email")).toHaveValue(EMAIL);
+  });
+
+  it("shows the note again when the same address is invited twice", async () => {
+    // Re-inviting replaces the pending invite and sends the email again (lakira-backend #284),
+    // which is what the note tells the inviter to do (#169).
+    const user = userEvent.setup();
+    const sent = jest.fn();
+    server.use(
+      http.post(INVITES_URL, () => {
+        sent();
+        return acknowledged();
+      }),
+    );
+
+    renderWithProviders(<InviteMemberForm />);
+    for (const _attempt of [1, 2]) {
+      // The field is empty in the DOM after the reset, but user-event still holds the typed value
+      // it tracked, and would append to it.
+      await user.clear(screen.getByLabelText("Email"));
+      await user.type(screen.getByLabelText("Email"), EMAIL);
+      await user.click(screen.getByRole("button", SEND));
+      await waitFor(() => expect(screen.getByLabelText("Email")).toHaveValue(""));
+      expect(screen.getByText(SENT_NOTE)).toBeInTheDocument();
+    }
+
+    expect(sent).toHaveBeenCalledTimes(2);
   });
 
   it("disables the form while the request is in flight", async () => {

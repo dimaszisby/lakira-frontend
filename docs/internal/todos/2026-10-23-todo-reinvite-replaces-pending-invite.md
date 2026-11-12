@@ -33,14 +33,16 @@ builds B-71. The copy change is not an interface change. No frontend ADR.
 
 ## Checklist
 
-- [ ] The backend ships option 1 (B-71) on `dev`, and its Part 2 record moves to Action needed
-- [ ] `npm run api:spec:check`; sync the snapshot if the 409's description for
-      `POST /organizations/{id}/invites` changed
-- [ ] `InviteMemberForm.tsx` shows "Invitation sent. If it doesn't arrive, send it again." on a
+- [x] The backend ships option 1 (B-71) on `dev`, and its Part 2 record moves to Action needed
+      (lakira-backend #284, `ca0b57c`, 2026-11-11, closing #249; the record had not moved)
+- [x] `npm run api:spec:check`; sync the snapshot if the 409's description for
+      `POST /organizations/{id}/invites` changed; it did, synced in #169's pull request
+- [x] `InviteMemberForm.tsx` shows "Invitation sent. If it doesn't arrive, send it again." on a
       success; `SENT_NOTE` in `InviteMemberForm.int.test.tsx` follows
-- [ ] An integration case: inviting an address twice shows the success note both times, with MSW
+- [x] An integration case: inviting an address twice shows the success note both times, with MSW
       answering 201 to each
-- [ ] Register: F-65 to Closed; the Part 2 record acknowledged with the frontend PR
+- [ ] Register: F-65 to Closed; the Part 2 record acknowledged with the frontend PR. The register
+      is frozen since 2026-10-25; the record is acknowledged once #169's pull request merges
 
 ## Status
 
