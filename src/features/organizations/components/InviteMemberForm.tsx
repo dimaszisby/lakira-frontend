@@ -56,7 +56,11 @@ const InviteMemberForm = () => {
         <form noValidate onSubmit={handleFormSubmit} className="flex flex-col gap-6">
           {serverErrorMsg ? <ErrorMessage message={serverErrorMsg} className="mb-2" /> : null}
 
-          {isSuccess ? <p className="text-body2">Invitation sent.</p> : null}
+          {/* Re-inviting replaces a pending invite (lakira-backend #284), so sending again is
+              always the remedy for an email that never arrived (#169). */}
+          {isSuccess ? (
+            <p className="text-body2">Invitation sent. If it doesn&apos;t arrive, send it again.</p>
+          ) : null}
 
           <FormField invalid={!!errors.email} error={errors.email?.message}>
             <FormField.Label>Email</FormField.Label>
