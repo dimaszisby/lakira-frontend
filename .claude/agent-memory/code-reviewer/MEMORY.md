@@ -10,3 +10,4 @@
 - [Route error boundaries review](project_route-error-boundaries_review.md) — approve w/ warnings; mocked deduping fns hide Strict Mode, verify heading claims by grep
 - [Unquarantine layout files review](project_unquarantine-layout-files_review.md) — approve w/ warnings; grep whole tree for removed exemption names, trace state-writers before deleting a branch
 - [Metrics list log count review](project_metrics-list-log-count_review.md) — approve w/ suggestions; enumerate caches carrying a derived field, check sibling-import precedent
+- [Self-host font files review](project_self-host-font-files_review.md) — approve w/ warnings; grep reference docs for swapped build input, probe lint bans

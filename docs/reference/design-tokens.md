@@ -90,8 +90,10 @@ not treated as conflicts.
 
 ## Fonts
 
-Quicksand (`font-display`) and Plus Jakarta Sans (`font-ui`), loaded via `next/font/google` in
-`src/app/layout.tsx`. The named size scale (`text-h1`…`text-h6`, `body1`, `body2`, `caption`, `btn`,
+Quicksand (`font-display`) and Plus Jakarta Sans (`font-ui`), loaded via `next/font/local` in
+`src/app/fonts.ts` from files committed under `src/app/_fonts/`
+([ADR-0051](../explanation/decisions/adr-0051-fonts-are-built-from-committed-files.md)). Plus Jakarta Sans
+is the Latin subset only. The named size scale (`text-h1`…`text-h6`, `body1`, `body2`, `caption`, `btn`,
 `nav`, `badge`) is defined in `tailwind.config.mjs`.
 
 ## Known defects

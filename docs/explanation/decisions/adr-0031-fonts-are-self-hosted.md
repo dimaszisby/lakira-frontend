@@ -4,7 +4,9 @@
 - **Date:** 2026-10-16
 - **Origin:** debt register row F-54 — [`2026-10-16-todo-csp-drop-font-hosts.md`](../../internal/todos/2026-10-16-todo-csp-drop-font-hosts.md)
 - **Related:** [ADR-0030](./adr-0030-inline-style-stays-allowed.md), whose list of places CSS may
-  fetch from this record shortens by two hosts. ADR-0030's decision is unchanged.
+  fetch from this record shortens by two hosts. ADR-0030's decision is unchanged. Superseded in
+  part by [ADR-0051](./adr-0051-fonts-are-built-from-committed-files.md): the fonts are committed
+  files loaded with `next/font/local`, not `next/font/google`. The rest of this record stands
 
 ---
 
