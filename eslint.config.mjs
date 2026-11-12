@@ -401,7 +401,13 @@ const config = [
    * Sentry runs on the server only (ADR-0024): `src/instrumentation.ts` loads it
    * by dynamic import when a DSN is set, and everything else reports through the
    * logger. An import anywhere else would put the SDK in a client bundle, or tie
-   * feature code to one provider. */
+   * feature code to one provider.
+   *
+   * The same block bans `next/font/google` (ADR-0051, #201): that loader downloads
+   * the font during `next build`. It shares this block, and so its `ignores`,
+   * because flat config replaces a rule's options rather than merging them: a
+   * second `no-restricted-imports` block would silently drop the Sentry ban for
+   * every file both cover. Neither ignored file loads a font. */
   {
     files: ["**/*.{ts,tsx,mjs}"],
     ignores: ["src/instrumentation.ts", "src/lib/monitoring/**"],
@@ -414,6 +420,11 @@ const config = [
               group: ["@sentry/*"],
               message:
                 "Report through `logger` from src/lib/logger.ts. Only src/instrumentation.ts and src/lib/monitoring/** may import the vendor SDK (ADR-0024).",
+            },
+            {
+              group: ["next/font/google"],
+              message:
+                "next/font/google downloads the font during `next build`, so every build depends on Google being reachable (#201). Commit the file and load it with next/font/local in src/app/fonts.ts (ADR-0051).",
             },
           ],
         },

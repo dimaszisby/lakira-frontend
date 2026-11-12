@@ -56,7 +56,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0028](./adr-0028-raw-html-is-banned-by-lint.md)                                                   | The app renders no raw HTML; lint bans it and no sanitiser is installed       | Accepted       | 2026-10-07 | `D-01`                              |
 | [ADR-0029](./adr-0029-the-servers-console-error-output-is-scrubbed.md)                                 | The server's `console.error` output is scrubbed                               | Accepted       | 2026-10-11 | —                                   |
 | [ADR-0030](./adr-0030-inline-style-stays-allowed.md)                                                   | Inline style stays allowed; what CSS may fetch is what is guarded             | Accepted       | 2026-10-14 | —                                   |
-| [ADR-0031](./adr-0031-fonts-are-self-hosted.md)                                                        | Fonts are self-hosted; the CSP names no font host                             | Accepted       | 2026-10-16 | —                                   |
+| [ADR-0031](./adr-0031-fonts-are-self-hosted.md)                                                        | Fonts are self-hosted; CSP names no font host; superseded in part by ADR-0051 | Accepted       | 2026-10-16 | —                                   |
 | [ADR-0032](./adr-0032-a-dialog-that-is-the-page-titles-it-with-an-h1.md)                               | A dialog that is the whole page titles it with an `h1`                        | Accepted       | 2026-10-20 | `D-01` (page-headings)              |
 | [ADR-0033](./adr-0033-sign-out-lives-on-the-account-page-below-lg.md)                                  | Below `lg`, signing out lives on the account page; the mobile drawer is gone  | Accepted       | 2026-10-21 | `D-01` (mobile-sign-out)            |
 | [ADR-0034](./adr-0034-the-proxy-forwards-only-the-error-keys-the-frontend-reads.md)                    | The proxy forwards only the error keys the frontend reads                     | Accepted       | 2026-10-21 | `D-01` (proxy-error-body-allowlist) |
@@ -76,6 +76,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0048](./adr-0048-the-production-image-is-built-per-environment.md)                                | The production image is built per environment and smoke-tested in CI          | Proposed       | 2026-11-08 | #160 (no kit)                       |
 | [ADR-0049](./adr-0049-the-proxy-forwards-the-client-address-the-reverse-proxy-reported.md)             | The proxy forwards the client address the reverse proxy reported              | Proposed       | 2026-11-08 | #162 (no kit)                       |
 | [ADR-0050](./adr-0050-server-side-calls-carry-the-browsers-address-and-reach-the-proxy-on-loopback.md) | Server-side calls carry the browser's address and reach the proxy on loopback | Proposed       | 2026-11-10 | #199 (no kit)                       |
+| [ADR-0051](./adr-0051-fonts-are-built-from-committed-files.md)                                         | Fonts are built from committed files; supersedes ADR-0031 in part             | Accepted       | 2026-11-12 | #201 (no kit)                       |
 
 ## Where the other decisions went
 

@@ -58,7 +58,7 @@ The signed-in routes need the local stack (`docs/how-to/testing/run-stack-e2e.md
 - **Chart.js.** `chart.js` + `react-chartjs-2` + the date adapter are heavy and only needed on visualisation routes. Load them with `next/dynamic` and `ssr: false`; never import them into shared layout code.
 - **`framer-motion`** is likewise heavy. Prefer CSS transitions — `--btn-transition` and friends exist in `scales.css` — and reserve Framer for animation that CSS genuinely cannot express.
 - **Icons.** `@phosphor-icons/react` should be imported per-icon, never as a namespace. (It replaced the unmaintained `phosphor-react` on 2026-09-15; the icon names are unchanged, so imports differ only in the package specifier.)
-- **Fonts.** Two Google fonts are already loaded via `next/font` with `display: "swap"`. A third needs a justification.
+- **Fonts.** Two fonts are already loaded via `next/font/local` with `display: "swap"`: Quicksand whole (52.7 KB) and Plus Jakarta Sans as a Latin subset (27.3 KB), both preloaded. A third needs a justification. See `src/app/_fonts/README.md`.
 - **`date-fns`** — import the specific function, not the package root.
 
 ## Rendering

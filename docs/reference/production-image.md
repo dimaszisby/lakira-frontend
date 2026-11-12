@@ -90,5 +90,6 @@ docker run --rm -p 3000:3000 -e API_URL=http://host.docker.internal:8001/api/v1 
 `SIGKILL`, and it built at 6 GB. Raise the VM's memory (`colima start --memory 6`). The `Dockerfile`
 needs Docker Engine 25 or later, for the health check's `--start-interval`.
 
-The build downloads the two fonts from Google Fonts (ADR-0031), so it needs network access to
-`fonts.googleapis.com` and `fonts.gstatic.com`.
+The build needs no network access for fonts: both are committed under `src/app/_fonts/` and
+loaded with `next/font/local`
+([ADR-0051](../explanation/decisions/adr-0051-fonts-are-built-from-committed-files.md)).

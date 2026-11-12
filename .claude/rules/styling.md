@@ -129,7 +129,7 @@ src/styles/tokens/components/badge.recipe.css   → @layer components, .badge + 
 
 ## Fonts
 
-`display` = Quicksand, `ui` = Plus Jakarta Sans, both loaded via `next/font/google` in `src/app/layout.tsx` with `display: "swap"`. Do not add a font without a performance justification; see `.claude/rules/performance.md`.
+`display` = Quicksand, `ui` = Plus Jakarta Sans, both loaded via `next/font/local` in `src/app/fonts.ts` with `display: "swap"`, from files committed under `src/app/_fonts/` ([ADR-0051](../../docs/explanation/decisions/adr-0051-fonts-are-built-from-committed-files.md)). `next/font/google` is banned by lint: it downloads the font during `next build`. Do not add a font without a performance justification; see `.claude/rules/performance.md`.
 
 ## CSS lint
 
