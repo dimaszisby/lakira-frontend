@@ -153,3 +153,58 @@ multi-tenancy phase lands. Accepted deliberately.
 
 **Links:** `audit-2026-08-24.md` §4.11, `iteration-plan.md` Phase 6,
 `lakira-backend/docs/internal/audits/saas-readiness/audit-2026-06-05.md` §N1/N2.
+
+---
+
+## ADR-005 — The subscription or plan surface is not applicable to the template (Proposed 2026-11-14)
+
+**Context:** Category 11 (Multi-Tenancy & SaaS Surface) is gating under ADR-001 and stands at
+80% in `audit-2026-10-10.md`: 4 Pass and 1 Missing out of 5. The Missing item is "Subscription
+or plan surface", graded on "no file found in either repository". With that item Missing, the
+category has no slack: any further finding in it fails ADR-001 criterion 3.
+
+The item cannot be built from the frontend. The committed contract
+`docs/reference/api/lakira-backend-openapi.json` has no billing, subscription or plan path.
+lakira-backend has no billing code; its `subscription-billing` kit is "Deferred, unblocked, not
+started", effort L; its ADR-0025 (billing behind a `BillingProvider` port) and ADR-0026 (a
+subscription belongs to an organization) are both Proposed; and its own audit lists billing as
+deferred by design. Lakira itself has no production environment yet (#194) and no feature a
+paid plan would unlock.
+
+The owner's question, O-10 in the frozen debt register, became issue #159.
+
+**Decision:** A subscription or plan surface is out of scope for the template. The audit grades
+the item **N/A**: it is left out of Category 11's count, as neither Pass nor Missing, and the
+category's percentage is taken over the remaining items. N/A applies to this item only; it adds
+no grade any other item may use without an entry of its own.
+
+The item returns to the count, graded as any other, from the first dated run after the
+contract carries a billing or plan endpoint. The owner has set when that work starts: when
+Lakira will charge real users, production is live (#194 here, lakira-backend #237), and a paid
+feature exists for a plan to gate. lakira-backend opens its kit first; the frontend follows the
+contract sync.
+
+**Options considered:**
+
+- _Leave the item Missing._ Rejected: it would stay Missing for as long as the backend has no
+  billing, which nothing here can change, and it holds Category 11 at the 80% edge, so a gap
+  unrelated to billing could fail the verdict.
+- _Build the surface now (#168)._ Rejected: there is no contract to build against, the backend
+  kit has not started, and the surface would show a plan with nothing behind it. Every fork
+  would inherit its module, tests and e2e path whether it charges or not.
+- _ADR-004's precedent against N/A._ Not followed, because its ground does not hold here:
+  ADR-004 refused N/A for tenancy because the contract already exposed a tenant surface. The
+  contract exposes no billing surface.
+
+**Consequences:**
+
+- The next dated run grades Category 11 over 4 items. The verdict does not change on that
+  account: criterion 3 still fails on Category 8 (CI/CD & Deployment) at 67%, which waits on
+  the deploy (#194).
+- Prior runs and `SAAS-BASE-CHECKLIST.md` keep their figures until that run (ADR-002).
+- Forkers learn of the gap from `docs/reference/known-gaps.md`, which points them at the
+  backend's ADR-0025 and ADR-0026 as the intended design.
+- #168 closes as not planned.
+
+**Links:** `audit-2026-10-10.md` Category 11, `docs/reference/known-gaps.md`, issues #159 and
+#168, lakira-backend `docs/internal/initiatives/subscription-billing/`, ADR-0025 and ADR-0026.
