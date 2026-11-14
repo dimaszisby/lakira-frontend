@@ -319,14 +319,17 @@ export interface paths {
         put?: never;
         /**
          * Log out the current user
-         * @description Revokes the refresh token family associated with the presented cookie or bearer token.
+         * @description Revokes the refresh-token family of the `lakira_refresh` cookie, when the request carries it, and clears the cookie either way. The cookie is the only thing it revokes by: its path covers `/auth/logout`, so a browser sends it here, and a server-side client sends it itself.
          */
         post: {
             parameters: {
                 query?: never;
                 header?: never;
                 path?: never;
-                cookie?: never;
+                cookie?: {
+                    /** @description Opaque refresh token; without it, logout revokes nothing */
+                    lakira_refresh?: string;
+                };
             };
             requestBody?: never;
             responses: {
@@ -3497,8 +3500,8 @@ export interface components {
     requestBodies: never;
     headers: {
         /**
-         * @description Clears the `lakira_refresh` cookie: an empty value with an expiry in the past, on the same `Path=/api/v1/auth/refresh`, `HttpOnly` and `SameSite=Strict`.
-         * @example lakira_refresh=; Path=/api/v1/auth/refresh; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Strict
+         * @description Clears the `lakira_refresh` cookie: an empty value with an expiry in the past, on the same `Path=/api/v1/auth`, `HttpOnly` and `SameSite=Strict`.
+         * @example lakira_refresh=; Path=/api/v1/auth; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Strict
          */
         ClearedRefreshCookie: string;
         /**
@@ -3507,8 +3510,8 @@ export interface components {
          */
         ETag: string;
         /**
-         * @description Sets the `lakira_refresh` cookie to a new opaque refresh token. The cookie is `HttpOnly` and `SameSite=Strict`, scoped to `Path=/api/v1/auth/refresh`, with `Max-Age` set to the refresh token's lifetime. `Secure` is added in staging and production. A browser sends it to `POST /auth/refresh` only; script cannot read it.
-         * @example lakira_refresh=dGVzdC1yZWZyZXNoLXRva2Vu; Max-Age=604800; Path=/api/v1/auth/refresh; HttpOnly; SameSite=Strict
+         * @description Sets the `lakira_refresh` cookie to a new opaque refresh token. The cookie is `HttpOnly` and `SameSite=Strict`, scoped to `Path=/api/v1/auth`, with `Max-Age` set to the refresh token's lifetime. `Secure` is added in staging and production. A browser sends it to the auth routes, where `POST /auth/refresh` and `POST /auth/logout` read it; script cannot read it.
+         * @example lakira_refresh=dGVzdC1yZWZyZXNoLXRva2Vu; Max-Age=604800; Path=/api/v1/auth; HttpOnly; SameSite=Strict
          */
         RefreshCookie: string;
         /**
