@@ -1,5 +1,5 @@
 import type { VizResponse } from "@/features/data-visualizations/types";
-import { buildChartSummary } from "@/features/data-visualizations/viz-helpers";
+import { buildChartSummary, describeRange } from "@/features/data-visualizations/viz-helpers";
 
 const FIRST = "2026-02-01T00:00:00.000Z";
 const LAST = "2026-02-03T00:00:00.000Z";
@@ -86,5 +86,43 @@ describe("buildChartSummary", () => {
     unknownZone.meta.tz = "Not/A_Zone";
 
     expect(buildChartSummary(unknownZone)).toMatch(/^From 1 Feb 2026 to 3 Feb 2026: /);
+  });
+});
+
+describe("describeRange", () => {
+  const TZ = "Asia/Jakarta";
+
+  it("gives the first and last day in the time zone, the end being exclusive", () => {
+    // 1 Dec 00:00 to 31 Dec 00:00 in Jakarta (UTC+7): the last day shown is 30 Dec.
+    expect(
+      describeRange(
+        { startISO: "2025-11-30T17:00:00.000Z", endISO: "2025-12-30T17:00:00.000Z" },
+        TZ,
+      ),
+    ).toBe("1 Dec 2025 – 30 Dec 2025");
+  });
+
+  it("gives one date for a range within a single day", () => {
+    expect(
+      describeRange(
+        { startISO: "2025-11-30T17:00:00.000Z", endISO: "2025-12-01T17:00:00.000Z" },
+        TZ,
+      ),
+    ).toBe("1 Dec 2025");
+  });
+
+  it("returns null when either end does not parse", () => {
+    expect(
+      describeRange({ startISO: "not a date", endISO: "2025-12-01T17:00:00.000Z" }, TZ),
+    ).toBeNull();
+  });
+
+  it("falls back to UTC for a time zone Intl does not know", () => {
+    expect(
+      describeRange(
+        { startISO: "2025-12-01T00:00:00.000Z", endISO: "2025-12-03T00:00:00.000Z" },
+        "Not/AZone",
+      ),
+    ).toBe("1 Dec 2025 – 2 Dec 2025");
   });
 });

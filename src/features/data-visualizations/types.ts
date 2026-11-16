@@ -1,3 +1,5 @@
+import type { components } from "@/types/api/generated/lakira-backend";
+
 export type BucketAlias = "1h" | "1d" | "1w" | "1m" | "1y";
 export type FillMode = "none" | "zero" | "nan";
 
@@ -51,29 +53,8 @@ export type TimeRangeValue =
   | { mode: "absolute"; start: string; end: string };
 
 // * Dashboard Visualization
-export type DashboardVizItem = {
-  metricId: string;
-  name: string;
-  unit: string;
-  category_name: string;
-  category_color: string;
-  category_icon: string;
-  priority: number | null;
-  series: { bucketStartISO: string; value: number | null }[];
-  stats: {
-    average: number | null;
-    min: number | null;
-    max: number | null;
-    count: number;
-  };
-};
+// Taken from the contract, not copied by hand: the hand-written copy had none of the fallback
+// fields, so the dashboard could not tell a card was showing another range (#205).
+export type DashboardVizResponse = components["schemas"]["DashboardVisualizationResponse"];
 
-export type DashboardVizResponse = {
-  items: DashboardVizItem[];
-  meta: {
-    bucket: BucketAlias;
-    tz: string;
-    range: { startISO: string; endISO: string };
-    count: number; // items.length
-  };
-};
+export type DashboardVizItem = DashboardVizResponse["items"][number];
