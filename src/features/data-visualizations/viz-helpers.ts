@@ -103,6 +103,21 @@ function describeSpan(series: VizSeries[], tz: string): string {
   return first === last ? `On ${first}` : `From ${first} to ${last}`;
 }
 
+// A range the backend reports, as dates in its time zone. Both ends are real instants and the end
+// is exclusive: a range ends where its last bucket ends (lakira-backend
+// src/features/public/analytics/domain/fallback-range.ts, ADR-0062 there). So the last day shown
+// is the one just before the end. Null when either end does not parse.
+export function describeRange(range: { startISO: string; endISO: string }, tz: string) {
+  const start = Date.parse(range.startISO);
+  const end = Date.parse(range.endISO);
+  if (!Number.isFinite(start) || !Number.isFinite(end)) return null;
+
+  const format = summaryDateFormat(tz);
+  const first = format.format(start);
+  const last = format.format(Math.max(start, end - 1));
+  return first === last ? first : `${first} – ${last}`;
+}
+
 // Some backends may send count as string (e.g., pg bitstring mishap). Normalize.
 export function toNumberOr<T extends number | string | null | undefined>(v: T, fallback = 0) {
   const n = typeof v === "string" ? Number(v) : v;
