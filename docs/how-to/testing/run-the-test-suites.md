@@ -15,11 +15,11 @@ npm run test:e2e:csp       # the public pages again, with the Content Security P
 npm run test:e2e:csp:stack # the signed-in pages with it enforced; needs the local stack
 ```
 
-| Suite       | Config                       | Setup                                                                                     |
-| ----------- | ---------------------------- | ----------------------------------------------------------------------------------------- |
-| Unit        | `jest.unit.config.ts`        | `jest.setup.ts` — jest-dom, jest-canvas-mock, jest-axe, ResizeObserver polyfill, `TZ=UTC` |
-| Integration | `jest.integration.config.ts` | `jest.integration.setup.ts` — fetch/stream primitives, BroadcastChannel mock, MSW server  |
-| E2E         | `cypress.config.ts`          | `cypress/support/e2e.ts`                                                                  |
+| Suite       | Config                       | Setup                                                                                    |
+| ----------- | ---------------------------- | ---------------------------------------------------------------------------------------- |
+| Unit        | `jest.unit.config.ts`        | `jest.setup.ts` — jest-dom, jest-canvas-mock, jest-axe, ResizeObserver polyfill          |
+| Integration | `jest.integration.config.ts` | `jest.integration.setup.ts` — fetch/stream primitives, BroadcastChannel mock, MSW server |
+| E2E         | `cypress.config.ts`          | `cypress/support/e2e.ts`                                                                 |
 
 `jest.config.ts` is the shared base both Jest configs extend. `npm run test:coverage:all` runs
 everything through it — local convenience only, CI does not use it.
