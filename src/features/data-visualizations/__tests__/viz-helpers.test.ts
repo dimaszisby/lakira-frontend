@@ -1,6 +1,14 @@
-import type { VizResponse } from "@/features/data-visualizations/types";
-import { buildChartSummary, describeRange } from "@/features/data-visualizations/viz-helpers";
+import { execFileSync } from "node:child_process";
+import path from "node:path";
 
+import type { VizResponse } from "@/features/data-visualizations/types";
+import {
+  buildChartSummary,
+  describeRange,
+  seriesToXY,
+} from "@/features/data-visualizations/viz-helpers";
+
+const JAKARTA = "Asia/Jakarta";
 const FIRST = "2026-02-01T00:00:00.000Z";
 const LAST = "2026-02-03T00:00:00.000Z";
 
@@ -15,7 +23,7 @@ const data = (overrides: Partial<VizResponse> = {}): VizResponse => ({
     metricId: "metric-1",
     unit: "kg",
     bucket: "1d",
-    tz: "Asia/Jakarta",
+    tz: JAKARTA,
     range: { startISO: FIRST, endISO: "2026-02-04T00:00:00.000Z" },
   },
   ...overrides,
@@ -69,16 +77,13 @@ describe("buildChartSummary", () => {
     );
   });
 
-  it("dates each bucket in the zone the backend cut it in", () => {
-    // Midnight in Jakarta is 17:00 the day before in UTC.
-    const jakartaMidnight = data({
-      series: [{ bucketStartISO: "2026-01-31T17:00:00.000Z", value: 12 }],
-    });
+  // A label is the bucket's wall time written with a "Z" (lakira-backend ADR-0062): local midnight
+  // on 1 Feb is "2026-02-01T00:00:00.000Z" whatever zone the backend cut it in.
+  it("names the labelled day when the zone is west of UTC", () => {
+    const newYork = data();
+    newYork.meta.tz = "America/New_York";
 
-    expect(buildChartSummary(jakartaMidnight)).toMatch(/^On 1 Feb 2026: /);
-
-    jakartaMidnight.meta.tz = "UTC";
-    expect(buildChartSummary(jakartaMidnight)).toMatch(/^On 31 Jan 2026: /);
+    expect(buildChartSummary(newYork)).toMatch(/^From 1 Feb 2026 to 3 Feb 2026: /);
   });
 
   it("falls back to UTC for a zone it does not know", () => {
@@ -89,8 +94,45 @@ describe("buildChartSummary", () => {
   });
 });
 
+describe("seriesToXY", () => {
+  // Jest runs in UTC (jest.global-setup.ts), where a label and its wall time agree, so the bug
+  // cannot show in this process. Each zone runs the helper in a child Node with TZ set. Node strips
+  // the types itself, so viz-helpers.ts must keep only type imports: a runtime `@/` import breaks this.
+  const helpers = path.resolve(__dirname, "../viz-helpers.ts");
+  const wallTimesIn = (zone: string, labels: string[]) => {
+    const script = `import(${JSON.stringify(helpers)}).then((m) => {
+      const points = m.seriesToXY(${JSON.stringify(labels)}.map((l) => ({ bucketStartISO: l, value: 1 })));
+      console.log(JSON.stringify(points.map(({ x }) =>
+        [x.getFullYear(), x.getMonth() + 1, x.getDate(), x.getHours()])));
+    });`;
+    const out = execFileSync(
+      process.execPath,
+      ["--experimental-strip-types", "--no-warnings", "-e", script],
+      { env: { ...process.env, TZ: zone }, encoding: "utf8", timeout: 10_000 },
+    );
+    return JSON.parse(out) as number[][];
+  };
+
+  it.each([JAKARTA, "America/New_York"])(
+    "places a bucket at its labelled wall time when the browser is in %s",
+    (zone) => {
+      expect(wallTimesIn(zone, ["2026-02-01T09:00:00.000Z", "2026-02-01T00:00:00.000Z"])).toEqual([
+        [2026, 2, 1, 9],
+        [2026, 2, 1, 0],
+      ]);
+    },
+  );
+
+  it("keeps a gap as NaN and an unparseable label as an invalid date", () => {
+    const [point] = seriesToXY([{ bucketStartISO: "not a date", value: null }]);
+
+    expect(Number.isNaN((point.x as Date).getTime())).toBe(true);
+    expect(point.y).toBeNaN();
+  });
+});
+
 describe("describeRange", () => {
-  const TZ = "Asia/Jakarta";
+  const TZ = JAKARTA;
 
   it("gives the first and last day in the time zone, the end being exclusive", () => {
     // 1 Dec 00:00 to 31 Dec 00:00 in Jakarta (UTC+7): the last day shown is 30 Dec.

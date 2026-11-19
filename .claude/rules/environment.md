@@ -37,7 +37,7 @@ Server-only vars (no prefix) are readable in route handlers, `src/proxy.ts` (the
 | `NEXT_PUBLIC_ENABLE_DUMMY_ACTIONS` | **public** | feature flag, compared `=== "true"`, gates the "generate dummy data" buttons |
 | `SENTRY_DSN` | server | `src/lib/monitoring/server.ts` — turns error reporting on; unset means no vendor code loads (ADR-0024) |
 | `APP_RELEASE` | server | the release sent with each Sentry event; the backend's name for it |
-| `TZ` | test | forced to `UTC` in `jest.setup.ts` |
+| `TZ` | test | forced to `UTC` in `jest.global-setup.ts` |
 | `CYPRESS_BASE_URL` | CI | Cypress target, default `http://127.0.0.1:3000` |
 | `PERF_BASE_URL` | CI | Lighthouse target; must be a local host for the signed-in routes, which register an account |
 | `PERF_PUBLIC_ONLY` | local | `1` skips the signed-in Lighthouse routes, for a run without the local stack; read in `scripts/perf/` |

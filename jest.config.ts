@@ -3,6 +3,7 @@ import type { Config } from "jest";
 const config: Config = {
   preset: "ts-jest",
   testEnvironment: "jest-environment-jsdom",
+  globalSetup: "<rootDir>/jest.global-setup.ts",
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts", "<rootDir>/jest.integration.setup.ts"],
   moduleNameMapper: {
     // First: the first matching pattern wins, and `@/styles/*` below would otherwise hand Jest the

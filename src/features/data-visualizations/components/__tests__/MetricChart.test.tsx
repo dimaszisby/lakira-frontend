@@ -217,6 +217,27 @@ describe("MetricChart", () => {
     ]);
   });
 
+  it("leaves out a point whose label does not parse when the rest are valid", () => {
+    render(
+      <MetricChart
+        metricName={METRIC_NAME}
+        data={{
+          ...baseData,
+          series: [
+            { bucketStartISO: BUCKET_1, value: 12 },
+            { bucketStartISO: "not a date", value: 14 },
+          ],
+        }}
+      />,
+    );
+
+    const props = lineSpy.mock.calls[0]?.[0] as {
+      data: { datasets: Array<{ data: Array<{ x: string; y: number }> }> };
+    };
+
+    expect(props.data.datasets[0]?.data).toEqual([{ x: BUCKET_1, y: 12 }]);
+  });
+
   it("falls back safely when unit is not a string at runtime", () => {
     render(
       <MetricChart

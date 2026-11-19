@@ -12,3 +12,4 @@
 - [Metrics list log count review](project_metrics-list-log-count_review.md) — approve w/ suggestions; enumerate caches carrying a derived field, check sibling-import precedent
 - [Self-host font files review](project_self-host-font-files_review.md) — approve w/ warnings; grep reference docs for swapped build input, probe lint bans
 - [Dashboard fallback notice review](project_dashboard-fallback-notice_review.md) — request changes; status-bg surfaces inherit light text in dark, jsdom cannot see contrast
+- [Bucket labels wall-times review](project_bucket-labels-wall-times_review.md) — approve w/ warnings; type-change hides throwing consumer, grep docs for moved setting

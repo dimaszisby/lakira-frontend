@@ -143,10 +143,19 @@ export default memo(MetricChart);
 type TimeSeriesPoint = { x: string; y: number };
 
 function toScatterDataPoints(points: ReturnType<typeof seriesToXY>): TimeSeriesPoint[] {
-  return points.map((point) => ({
+  // A label that does not parse is left out: toISOString() throws on an Invalid Date, and one bad
+  // label would otherwise take the whole chart down.
+  return points.flatMap((point) => {
+    if (point.x instanceof Date && Number.isNaN(point.x.getTime())) return [];
+    return [toScatterDataPoint(point)];
+  });
+}
+
+function toScatterDataPoint(point: ReturnType<typeof seriesToXY>[number]): TimeSeriesPoint {
+  return {
     x: point.x instanceof Date ? point.x.toISOString() : String(point.x),
     y: typeof point.y === "number" && Number.isFinite(point.y) ? point.y : Number.NaN,
-  }));
+  };
 }
 
 function getTooltipValue(raw: unknown): number | null {

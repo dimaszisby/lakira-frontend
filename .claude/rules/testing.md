@@ -10,6 +10,7 @@ paths:
   - jest.unit.config.ts
   - jest.integration.config.ts
   - jest.setup.ts
+  - jest.global-setup.ts
   - jest.integration.setup.ts
   - cypress/**
   - src/test-utils/**
@@ -53,7 +54,9 @@ nested wrapper is incomplete, not inert. Use the option regardless.
 renderWithProviders(<VerifyEmailPanel token={token} />, { reactStrictMode: true });
 ```
 
-`jest.setup.ts` gives you `@testing-library/jest-dom`, `jest-canvas-mock` (Chart.js needs it), a `ResizeObserver` polyfill, `TZ=UTC`, and `toHaveNoViolations`.
+`jest.setup.ts` gives you `@testing-library/jest-dom`, `jest-canvas-mock` (Chart.js needs it), a `ResizeObserver` polyfill, and `toHaveNoViolations`.
+
+**Every suite runs in UTC, set by `jest.global-setup.ts`.** Never set an environment variable in a setup file: Jest gives each test file its own copy of `process.env`, so the assignment changes nothing. `jest.setup.ts` set `TZ=UTC` that way for months, and every suite ran in the machine's zone (#208). A test that needs another zone runs a child process with `TZ` set; see `src/features/data-visualizations/__tests__/viz-helpers.test.ts`.
 
 ## Integration tests
 

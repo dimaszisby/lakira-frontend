@@ -39,10 +39,29 @@ export function toTimeUnit(bucket: BucketAlias): "hour" | "day" | "week" | "mont
 
 export type XY = { x: Date | string | number; y: number | null };
 
+// A bucket label is a wall time in the requested zone written with a "Z", not an instant
+// (lakira-backend ADR-0062, decision 2): Jakarta's local midnight on 1 Dec is
+// "2025-12-01T00:00:00Z". The chart's date adapter shows dates in the browser's zone, so the label
+// becomes a browser-local Date with the same wall time. Known limit: on an hourly chart, a wall
+// time the browser's own zone skips (its spring-forward hour) moves by an hour. Fixing that needs
+// a zone-aware adapter, a new dependency.
+function bucketLabelToLocal(iso: string): Date {
+  const utc = new Date(iso);
+  if (Number.isNaN(utc.getTime())) return utc;
+  return new Date(
+    utc.getUTCFullYear(),
+    utc.getUTCMonth(),
+    utc.getUTCDate(),
+    utc.getUTCHours(),
+    utc.getUTCMinutes(),
+    utc.getUTCSeconds(),
+  );
+}
+
 export function seriesToXY(series: VizSeries[]): XY[] {
   // keep gaps with NaN (Chart.js draws holes for NaN)
   return series.map((s) => ({
-    x: s.bucketStartISO,
+    x: bucketLabelToLocal(s.bucketStartISO),
     y: s.value == null ? Number.NaN : Number(s.value),
   }));
 }
@@ -52,7 +71,8 @@ export function isAllMissing(xs: XY[]) {
   return xs.length === 0 || xs.every((p) => !Number.isFinite(p.y as number));
 }
 
-// A fixed locale, and dates in the series' own zone: the dashboard renders this on the server as
+// A fixed locale, and dates that do not depend on the process's zone (bucket labels are read in
+// UTC, ranges in the response's zone): the dashboard renders this on the server as
 // well as in the browser, and the two must write the same text (kit chart-text-summary, D-02).
 const SUMMARY_LOCALE = "en-GB";
 const SUMMARY_NUMBER = new Intl.NumberFormat(SUMMARY_LOCALE, { maximumFractionDigits: 2 });
@@ -79,7 +99,7 @@ export function buildChartSummary(data: VizResponse, goalValue?: number | null):
   const body = figures.length > 0 ? `${figures.join(", ")}, from ${logs}` : logs;
   const goal = isFiniteNumber(goalValue) ? ` Goal ${withUnit(goalValue)}.` : "";
 
-  return `${describeSpan(data.series, data.meta.tz)}: ${body}.${goal}`;
+  return `${describeSpan(data.series)}: ${body}.${goal}`;
 }
 
 function summaryDateFormat(tz: string): Intl.DateTimeFormat {
@@ -91,8 +111,10 @@ function summaryDateFormat(tz: string): Intl.DateTimeFormat {
   }
 }
 
-function describeSpan(series: VizSeries[], tz: string): string {
-  const format = summaryDateFormat(tz);
+// Bucket labels are wall times written with a "Z" (see bucketLabelToLocal), so reading them in UTC
+// gives back the labelled day. Reading them in meta.tz named the day before west of UTC.
+function describeSpan(series: VizSeries[]): string {
+  const format = summaryDateFormat("UTC");
   const formatBucket = (iso: string | undefined) => {
     const ms = iso ? Date.parse(iso) : Number.NaN;
     return Number.isFinite(ms) ? format.format(ms) : "";
