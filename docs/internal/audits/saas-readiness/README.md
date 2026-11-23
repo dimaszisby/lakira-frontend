@@ -35,6 +35,10 @@ It mirrors the equivalent kit in `lakira-backend`
 - `audit-2026-10-10.md` — targeted re-audit after PRs #70 to #80. 86%; the verdict is not
   reconfirmed, on CI/CD alone. N1 to N11 re-tested; first run with an independent grader for the
   items its own session had changed, and a column saying how each item was graded.
+- `audit-2026-11-14.md` — full regrade after PRs #81 to #206. 91% of 78 items, the plan surface
+  N/A under ADR-005; the verdict is not reconfirmed, on Auth & Session and Forkability. CI/CD
+  clears 80% with the production image committed. First run to probe the production image, and
+  the first without a kit (issue #214).
 - `FINAL-AUDIT-SUMMARY.md` — closeout across both runs, including the findings the programme
   itself got wrong and corrected.
 - `iteration-plan.md` — phase roadmap mapping each remediation phase to its gap IDs and kit.
