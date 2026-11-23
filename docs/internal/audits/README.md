@@ -5,7 +5,7 @@ immutable once written.
 
 | Program        | Folder                                 | What it grades                                                                        | Latest run                                                                   |
 | -------------- | -------------------------------------- | ------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| SaaS readiness | [`saas-readiness/`](./saas-readiness/) | How close the repo is to being forkable as a generic SaaS frontend base               | [2026-08-29](./saas-readiness/audit-2026-08-29.md) — FORK-READY WITH CAVEATS |
+| SaaS readiness | [`saas-readiness/`](./saas-readiness/) | How close the repo is to being forkable as a generic SaaS frontend base               | [2026-11-14](./saas-readiness/audit-2026-11-14.md) — not reconfirmed; criterion 3 fails on Auth and Forkability |
 | Security       | [`security/`](./security/)             | Threat model, control matrix, and findings against OWASP ASVS / Top 10, CIS, NIST CSF | [2025-11-21](./security/audit-2025-11-21/) — complete                        |
 
 ## Conventions

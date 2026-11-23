@@ -141,12 +141,41 @@ What this run did that the earlier ones had not:
   fail. The gate is green as CI runs it, and the test's dependence on the caller's shell is now a
   finding (N13).
 
-## 9. Related
+## 9. The 2026-11-14 run
+
+Added when that run landed. Earlier sections are left as written.
+
+| Open after 2026-10-10                     | On 2026-11-14                                                         |
+| ----------------------------------------- | --------------------------------------------------------------------- |
+| C4 — deploy config                        | Reduced. The image is committed and smoke-tested; the deploy job waits on #194 |
+| C6 — quarantined files                    | Closed. None left                                                     |
+| N7 — Next prints a raw error              | Closed. Its own line is scrubbed (ADR-0029)                           |
+| N12 to N16                                | Closed                                                                |
+| Accessibility gate, WCAG baseline         | Closed. A named step in CI; no placeholder left                       |
+| End-to-end coverage outside CI            | Closed. The signed-in specs run nightly in CI                         |
+| ADR-001 criterion 3                       | Still fails, now on Auth & Session and Forkability, not on CI/CD      |
+
+What this run did that the earlier ones had not:
+
+- **It probed the production image** with the headers a reverse proxy sends, and found that
+  session revival redirects to the server's bind address there (N17). No test or earlier probe
+  ran the app behind a proxy.
+- **It ran the fork flow again after a gate was added,** the lesson of N2, and found the same class
+  of defect: a test added on 2026-10-25 reads a folder the bootstrap deletes (N18).
+- **It found that a guard was missing, not broken.** Undoing ADR-0050's loopback rule fails no test
+  (N24).
+- **It held two security findings back** from the public record (N19, N20), and found that the
+  private channel `SECURITY.md` names is switched off (N22).
+- **It lost its own logs mid-run,** to cleanup of the session's scratch directory, and recorded the
+  figures it had kept.
+
+## 10. Related
 
 - [`audit-2026-08-24.md`](./audit-2026-08-24.md) — baseline, immutable
 - [`audit-2026-08-29.md`](./audit-2026-08-29.md) — re-audit after phases 0-7, immutable
 - [`audit-2026-10-04.md`](./audit-2026-10-04.md) — re-audit on Node 24, immutable
-- [`audit-2026-10-10.md`](./audit-2026-10-10.md) — current run, immutable
-- [`decisions.md`](./decisions.md) — ADR-001 through ADR-004
+- [`audit-2026-10-10.md`](./audit-2026-10-10.md) — targeted re-audit after #70 to #80, immutable
+- [`audit-2026-11-14.md`](./audit-2026-11-14.md) — current run, immutable
+- [`decisions.md`](./decisions.md) — ADR-001 through ADR-005
 - [`iteration-plan.md`](./iteration-plan.md) — phase roadmap and status
 - [`../../../../SAAS-BASE-CHECKLIST.md`](../../../../SAAS-BASE-CHECKLIST.md) — the public one-pager

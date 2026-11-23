@@ -161,3 +161,10 @@ Not visible from the OpenAPI contract alone; found by decoding a real token.
   Forkability back to 86%. Accessibility 50% on an independent grader's stricter reading, and
   Error Handling 80% on a defect found in four forms; neither is a regression. Kit
   [`saas-reaudit-2026-10-10`](../../initiatives/saas-reaudit-2026-10-10/README.md).
+- `audit-2026-11-14.md` — full regrade after PRs #81 to #206: 71 pass / 6 partial / 1 missing of
+  78, the plan surface N/A under ADR-005 (91%). 0 P0, 4 P1, 7 P2. **Verdict not reconfirmed** —
+  criterion 3 fails on Auth & Session (75%) and Forkability (71%), on four defects this run found:
+  session revival behind a proxy (N17), a security finding in the sign-in return path (N19), a
+  bootstrapped fork failing the unit gate (N18), and private vulnerability reporting switched off
+  (N22). CI/CD 83%: the image is committed; the deploy job waits on #194. N7 and N12 to N16 closed.
+  No kit; issue #214.
