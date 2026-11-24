@@ -386,7 +386,10 @@ export interface paths {
                 500: components["responses"]["InternalServerError"];
             };
         };
-        /** Update current user's profile */
+        /**
+         * Update current user's profile
+         * @description A new `password` ends every session the user has: each refresh token issued before it answers 401 at `POST /auth/refresh`. The session making the change continues on a new refresh cookie, sent with the 200. An access token already issued stays valid until it expires.
+         */
         put: {
             parameters: {
                 query?: never;
@@ -403,6 +406,7 @@ export interface paths {
                 /** @description User profile updated successfully */
                 200: {
                     headers: {
+                        "Set-Cookie": components["headers"]["ReissuedRefreshCookie"];
                         [name: string]: unknown;
                     };
                     content: {
@@ -591,7 +595,7 @@ export interface paths {
         put?: never;
         /**
          * Confirm password reset with a token
-         * @description Consumes a reset token sent via email and sets a new password. Returns a generic 400 for unknown, used, expired, or otherwise invalid tokens to avoid information leak. Caller must log in via /auth/login afterwards.
+         * @description Consumes a reset token sent via email and sets a new password. Returns a generic 400 for unknown, used, expired, or otherwise invalid tokens to avoid information leak. A reset ends every session the user had: each refresh token issued before it answers 401 at `POST /auth/refresh`. Caller must log in via /auth/login afterwards.
          */
         post: {
             parameters: {
@@ -3514,6 +3518,11 @@ export interface components {
          * @example lakira_refresh=dGVzdC1yZWZyZXNoLXRva2Vu; Max-Age=604800; Path=/api/v1/auth; HttpOnly; SameSite=Strict
          */
         RefreshCookie: string;
+        /**
+         * @description Sent only when the request changes the password. Every session the user had is ended, this one included, and this one continues on a new refresh token: the `lakira_refresh` cookie is set as `RefreshCookie` describes. A refresh cookie issued before the change answers 401 at `POST /auth/refresh`.
+         * @example lakira_refresh=dGVzdC1yZWZyZXNoLXRva2Vu; Max-Age=604800; Path=/api/v1/auth; HttpOnly; SameSite=Strict
+         */
+        ReissuedRefreshCookie: string;
         /**
          * @description How many seconds to wait before retrying. Every 429 carries it: each rate limiter sets it to the seconds left in its window, and a locked-out login to the lockout's length.
          * @example 900
