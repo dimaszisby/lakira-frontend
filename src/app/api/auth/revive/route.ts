@@ -8,6 +8,27 @@ import { isSessionTokenUsable } from "@/lib/jwt";
 import { logger } from "@/lib/logger";
 import { authRoutes } from "@/lib/routes";
 
+// A relative `Location`, which the browser resolves against the origin it asked for (RFC 9110
+// § 10.2.2). Not `new URL(path, request.url)`: in the production image `request.url` is the bind
+// address, so behind a reverse proxy that sent users to `https://0.0.0.0:3000` (#218).
+// `NextResponse.redirect` accepts only an absolute URL, hence the plain response.
+//
+// The path still goes through the URL parser, against a placeholder origin that is then dropped.
+// `afterAuth` returns `returnUrl` as decoded, and a header value cannot hold a character above
+// U+00FF or a line break: the response would throw after the refresh token rotated, and the lost
+// cookie would revoke the family on its next use. Parsing percent-encodes the one and strips the
+// other, as the old `new URL` did. Which paths are let through is still `authRoutes`' decision;
+// one that parses to another host keeps only its path here, so it stays on this origin.
+const PLACEHOLDER_ORIGIN = "http://revive.invalid";
+
+const redirectTo = (path: string) => {
+  const { pathname, search, hash } = new URL(path, PLACEHOLDER_ORIGIN);
+  return new NextResponse(null, {
+    status: 307,
+    headers: { Location: `${pathname}${search}${hash}` },
+  });
+};
+
 /**
  * Revive an expired session during a page navigation, then continue to where
  * the user was going.
@@ -52,7 +73,7 @@ export async function GET(request: NextRequest) {
   if (!refreshed || !isSessionTokenUsable(refreshed.token)) {
     logger.info("auth.revive.failed", { hadRefreshToken: Boolean(refreshToken) });
 
-    const response = NextResponse.redirect(new URL(authRoutes.login(returnUrl), request.url));
+    const response = redirectTo(authRoutes.login(returnUrl));
     // `authRoutes` rejects anything that is not a safe relative path, so a
     // `returnUrl` of `//evil.test` becomes a plain `/login`.
     clearSessionCookies(response.cookies);
@@ -62,7 +83,7 @@ export async function GET(request: NextRequest) {
 
   logger.info("auth.revive.succeeded");
 
-  const response = NextResponse.redirect(new URL(authRoutes.afterAuth(returnUrl), request.url));
+  const response = redirectTo(authRoutes.afterAuth(returnUrl));
   applyRefreshedSession(response.cookies, refreshed);
   response.headers.set("Cache-Control", "no-store");
   return response;

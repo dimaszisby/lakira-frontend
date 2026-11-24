@@ -65,7 +65,7 @@ describe("GET /api/auth/revive", () => {
     const response = await GET(request("/metrics/abc?tab=logs"));
 
     expect(response.status).toBe(307);
-    expect(response.headers.get("location")).toBe("http://localhost:3000/metrics/abc?tab=logs");
+    expect(response.headers.get("location")).toBe("/metrics/abc?tab=logs");
 
     const cookies = setCookies(response);
     expect(cookies[SESSION_COOKIE_NAME]).toContain(`${SESSION_COOKIE_NAME}=${token}`);
@@ -83,7 +83,7 @@ describe("GET /api/auth/revive", () => {
   it("falls back to the dashboard when there is nowhere to return to", async () => {
     mockRefresh.mockResolvedValue({ token: makeToken(900), refreshToken: null });
     const response = await GET(request());
-    expect(response.headers.get("location")).toBe("http://localhost:3000/dashboard");
+    expect(response.headers.get("location")).toBe(DASHBOARD);
   });
 
   it("sends a rejected session to the login form and clears both cookies", async () => {
@@ -91,9 +91,7 @@ describe("GET /api/auth/revive", () => {
 
     const response = await GET(request("/metrics"));
 
-    expect(response.headers.get("location")).toBe(
-      "http://localhost:3000/login?returnUrl=%2Fmetrics",
-    );
+    expect(response.headers.get("location")).toBe("/login?returnUrl=%2Fmetrics");
 
     // Both, because a surviving refresh cookie can mint a new access token.
     const cookies = setCookies(response);
@@ -128,13 +126,41 @@ describe("GET /api/auth/revive", () => {
   it("refuses to redirect off-origin", async () => {
     mockRefresh.mockResolvedValue({ token: makeToken(900), refreshToken: null });
     const response = await GET(request("//evil.test/phish"));
-    expect(response.headers.get("location")).toBe("http://localhost:3000/dashboard");
+    expect(response.headers.get("location")).toBe(DASHBOARD);
+  });
+
+  // A header value cannot hold a character above U+00FF or a line break. Failing on one would come
+  // after the refresh token rotated, losing the new cookie and revoking the family on next use.
+  it.each([
+    ["a non-ASCII character", "/caf\u00e9", "/caf%C3%A9"],
+    ["a line break", `/a${String.fromCharCode(10)}b`, "/ab"],
+  ])(
+    "still delivers the rotated session when the return path holds %s",
+    async (_, path, location) => {
+      mockRefresh.mockResolvedValue({ token: makeToken(900), refreshToken: "rotated" });
+
+      const response = await GET(request(path));
+
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toBe(location);
+      expect(setCookies(response)[REFRESH_COOKIE_NAME]).toContain(`${REFRESH_COOKIE_NAME}=rotated`);
+    },
+  );
+
+  it("stays on this origin when the return path parses to another host", async () => {
+    mockRefresh.mockResolvedValue({ token: makeToken(900), refreshToken: null });
+
+    const response = await GET(request("/\\evil.test/phish"));
+    const location = response.headers.get("location") ?? "";
+
+    expect(location).toMatch(/^\/(?![/\\])/);
+    expect(location).not.toContain("evil.test");
   });
 
   it("refuses an off-origin return even when the revival fails", async () => {
     mockRefresh.mockResolvedValue(null);
     const response = await GET(request("https://evil.test/phish"));
-    expect(response.headers.get("location")).toBe("http://localhost:3000/login");
+    expect(response.headers.get("location")).toBe("/login");
   });
 
   it("is never cached", async () => {
@@ -150,5 +176,32 @@ describe("GET /api/auth/revive", () => {
     );
 
     expect(mockRefresh).toHaveBeenCalledWith(CARRIED_COOKIE, "203.0.113.7");
+  });
+
+  // In the production image `request.url` is the bind address, whatever the proxy sent (#218).
+  describe("behind a reverse proxy", () => {
+    const proxied = () => {
+      const req = new NextRequest("http://0.0.0.0:3000/api/auth/revive?returnUrl=%2Fdashboard", {
+        headers: {
+          host: "app.example.com",
+          "x-forwarded-host": "app.example.com",
+          "x-forwarded-proto": "https",
+        },
+      });
+      req.cookies.set(REFRESH_COOKIE_NAME, CARRIED_COOKIE);
+      return req;
+    };
+
+    it.each([
+      ["a failed revival", null, "/login?returnUrl=%2Fdashboard"],
+      ["a successful revival", { token: makeToken(900), refreshToken: null }, DASHBOARD],
+    ])("answers %s with a relative location, not the bind address", async (_, result, path) => {
+      mockRefresh.mockResolvedValue(result);
+
+      const response = await GET(proxied());
+
+      expect(response.status).toBe(307);
+      expect(response.headers.get("location")).toBe(path);
+    });
   });
 });
