@@ -80,19 +80,19 @@ regression since 2026-10-10. The audit lists every item's grade and how it was g
 
 ## Open items
 
-|         | Severity |                                                                                                                                                |
-| ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| **N17** | P1       | **Session revival redirects to the server's bind address behind a reverse proxy.** Reproduced in the production image. Keeps the verdict open. |
-| **N18** | P1       | **A bootstrapped fork fails the unit gate**: a test reads `docs/internal/`, which the script removes. Keeps the verdict open.                  |
-| **C4**  | P1       | **No deploy job.** The configuration is committed; the job waits on #194.                                                                      |
-| **N20** | P1       | **Security finding in the API proxy.** Details withheld from this public record.                                                               |
-| **N19** | P2       | **Security finding in the sign-in return path.** Details withheld from this public record. Keeps the verdict open.                             |
-| **N21** | P2       | A backend outage during session revival signs the user out.                                                                                    |
-| **N22** | P2       | Private vulnerability reporting is off, while `SECURITY.md` and the form chooser send reporters there.                                         |
-| **N23** | P2       | Three statements that no longer hold: the README's local API port, and two on the accessibility checks.                                        |
-| **N24** | P2       | Nothing pins ADR-0050's loopback rule; with it undone, every test passes.                                                                      |
-| **N25** | P2       | The dashboard's time zone is fixed to Asia/Jakarta.                                                                                            |
-|         | P2       | Field vitals are not aggregated (#167).                                                                                                        |
+|         | Severity |                                                                                                                                                       |
+| ------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **N17** | P1       | **Session revival redirects to the server's bind address behind a reverse proxy** (#218). Reproduced in the production image. Keeps the verdict open. |
+| **N18** | P1       | **A bootstrapped fork fails the unit gate** (#219): a test reads `docs/internal/`, which the script removes. Keeps the verdict open.                  |
+| **C4**  | P1       | **No deploy job.** The configuration is committed; the job waits on #194.                                                                             |
+| **N20** | P1       | **Security finding in the API proxy.** Details withheld from this public record.                                                                      |
+| **N19** | P2       | **Security finding in the sign-in return path.** Details withheld from this public record. Keeps the verdict open.                                    |
+| **N21** | P2       | A backend outage during session revival signs the user out (#220).                                                                                    |
+| **N22** | P2       | Private vulnerability reporting is off, while `SECURITY.md` and the form chooser send reporters there (#216).                                         |
+| **N23** | P2       | Three statements that no longer hold: the README's local API port, and two on the accessibility checks (#221).                                        |
+| **N24** | P2       | Nothing pins ADR-0050's loopback rule; with it undone, every test passes (#222).                                                                      |
+| **N25** | P2       | The dashboard's time zone is fixed to Asia/Jakarta (#223).                                                                                            |
+|         | P2       | Field vitals are not aggregated (#167).                                                                                                               |
 
 Closed since 2026-10-10, each re-tested in this run: **N7**, **N12** to **N16**, **C6**, the
 route-group error boundaries, the named accessibility step, the WCAG baseline's placeholders,
