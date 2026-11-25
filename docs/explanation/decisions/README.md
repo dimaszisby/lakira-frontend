@@ -77,6 +77,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0049](./adr-0049-the-proxy-forwards-the-client-address-the-reverse-proxy-reported.md)             | The proxy forwards the client address the reverse proxy reported              | Proposed       | 2026-11-08 | #162 (no kit)                       |
 | [ADR-0050](./adr-0050-server-side-calls-carry-the-browsers-address-and-reach-the-proxy-on-loopback.md) | Server-side calls carry the browser's address and reach the proxy on loopback | Proposed       | 2026-11-10 | #199 (no kit)                       |
 | [ADR-0051](./adr-0051-fonts-are-built-from-committed-files.md)                                         | Fonts are built from committed files; supersedes ADR-0031 in part             | Accepted       | 2026-11-12 | #201 (no kit)                       |
+| [ADR-0052](./adr-0052-a-bootstrapped-fork-is-checked-on-every-pull-request.md)                         | A bootstrapped fork is checked on every pull request                          | Accepted       | 2026-11-24 | #219 (no kit)                       |
 
 ## Where the other decisions went
 

@@ -32,6 +32,7 @@ the run still going on it.
 ```
 checks ──────┐
 unit ────────┤
+fork ────────┤
 integration ─┤
 e2e ─────────┼─→ ci ("CI passed")
 api-contract ┤
@@ -40,7 +41,7 @@ secret-scan ┤
 image ───────┘
 ```
 
-Every job starts at once. `ci`, named "CI passed", needs all eight, runs `if: always()`, and
+Every job starts at once. `ci`, named "CI passed", needs all nine, runs `if: always()`, and
 fails unless each one succeeded: a failed, skipped or cancelled job fails it, and its log lists
 every job's result. It is the one check the `dev` and `main` rulesets require (see Branch rules below).
 Until 2026-10-21 the jobs from `checks` to `e2e` were a `needs` chain, about 12 to 14 minutes for
@@ -59,19 +60,23 @@ one hit and saved nothing (ADR-0038). Every other job sets `CYPRESS_INSTALL_BINA
 | -------------- | ------------------ | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | `checks`       | Static checks      | 15 min  | `lint`, `lint:css`, `typecheck`, `format`                                                                                                                                                                                                                         | none                                             |
 | `unit`         | Unit tests         | 20 min  | `test:unit:ci` (global coverage thresholds), `coverage:check` (per-folder goals, `--strict`)                                                                                                                                                                      | `coverage-report` (always)                       |
+| `fork`         | Fork bootstrap     | 20 min  | `scripts/bootstrap-fork.sh --name acme-app` before `npm ci`, then `npm ci`, `format:fix`, and the script's printed step 3: `lint`, `typecheck`, `format`, `test:unit`, `build` (ADR-0052)                                                                         | none                                             |
 | `integration`  | Integration tests  | 20 min  | `test:integration`                                                                                                                                                                                                                                                | none                                             |
 | `e2e`          | E2E tests          | 30 min  | `build`, `npm run start` on `127.0.0.1:3000`, waits up to 120 s for it, `test:e2e:public`, `test:e2e:a11y` (the accessibility step), `test:e2e:csp`, stops the app                                                                                                | `cypress-videos`, `cypress-screenshots` (always) |
 | `api-contract` | API Contract Drift | 10 min  | `api:spec:check`, `api:types:check`                                                                                                                                                                                                                               | none                                             |
 | `security`     | Security Scan      | 20 min  | `security:scan`: `lint`, `lint:css`, then `npm audit --omit=dev --audit-level=high` (production dependencies only)                                                                                                                                                | none                                             |
 | `secret-scan`  | Secret Scan        | 10 min  | full-history checkout, gitleaks `8.30.1` binary verified against a hard-coded SHA-256, `gitleaks git . --redact`                                                                                                                                                  | none                                             |
 | `image`        | Production image   | 20 min  | `docker:smoke` (`scripts/image-smoke.sh`): builds `Dockerfile` with local build arguments, then checks non-root, no devDependencies, Node against `.nvmrc`, `/` and `/login` with a nonce, a static asset, the health check and `SIGTERM` (ADR-0048). No `npm ci` | none                                             |
-| `ci`           | CI passed          | 5 min   | `needs` all eight jobs, `if: always()`; prints each result, fails unless all are `success`                                                                                                                                                                        | none                                             |
+| `ci`           | CI passed          | 5 min   | `needs` all nine jobs, `if: always()`; prints each result, fails unless all are `success`                                                                                                                                                                         | none                                             |
 
 Details that decide whether a job fails:
 
 - `format` is deliberately last in `checks`: a formatting failure is auto-fixable, so it must not
   hide a lint or type error in the same run.
 - `lint` runs with `--max-warnings=0`, so a warning fails `checks` and `security` alike.
+- `fork` fails when a gate depends on something the fork script removes or renames, such as a
+  test reading `docs/internal/` (#219). Its steps follow the steps the script prints; change both
+  together ([ADR-0052](../../explanation/decisions/adr-0052-a-bootstrapped-fork-is-checked-on-every-pull-request.md)).
 - `e2e` runs `cypress/e2e/public/` in two steps. "Run E2E tests" takes the home spec and the
   `/login` keyboard check. "Run accessibility checks on the public pages" takes axe over every
   public page in both themes, contrast included, so an accessibility failure is named as one; it
