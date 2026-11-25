@@ -25,14 +25,6 @@
           "type": "string"
         }
       },
-      "ReissuedRefreshCookie": {
-        "description": "Sent only when the request changes the password. Every session the user had is ended, this one included, and this one continues on a new refresh token: the `lakira_refresh` cookie is set as `RefreshCookie` describes. A refresh cookie issued before the change answers 401 at `POST /auth/refresh`.",
-        "example": "lakira_refresh=dGVzdC1yZWZyZXNoLXRva2Vu; Max-Age=604800; Path=/api/v1/auth; HttpOnly; SameSite=Strict",
-        "required": false,
-        "schema": {
-          "type": "string"
-        }
-      },
       "RetryAfter": {
         "description": "How many seconds to wait before retrying. Every 429 carries it: each rate limiter sets it to the seconds left in its window, and a locked-out login to the lockout's length.",
         "example": 900,
@@ -349,6 +341,31 @@
         },
         "required": [
           "role"
+        ],
+        "type": "object"
+      },
+      "ChangePasswordRequest": {
+        "properties": {
+          "currentPassword": {
+            "example": "OldPass123!",
+            "minLength": 1,
+            "type": "string"
+          },
+          "password": {
+            "example": "BrandNewPass123!",
+            "minLength": 6,
+            "type": "string"
+          },
+          "passwordConfirmation": {
+            "example": "BrandNewPass123!",
+            "minLength": 6,
+            "type": "string"
+          }
+        },
+        "required": [
+          "currentPassword",
+          "password",
+          "passwordConfirmation"
         ],
         "type": "object"
       },
@@ -2371,20 +2388,9 @@
       },
       "UpdateUserRequest": {
         "properties": {
-          "email": {
-            "example": "updated@example.com",
-            "format": "email",
-            "pattern": "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$",
-            "type": "string"
-          },
           "isPublicProfile": {
             "example": false,
             "type": "boolean"
-          },
-          "password": {
-            "example": "updatedpassword",
-            "minLength": 6,
-            "type": "string"
           },
           "username": {
             "example": "updateduser",
@@ -3111,6 +3117,77 @@
         ]
       }
     },
+    "/auth/change-password": {
+      "post": {
+        "description": "Asks for the current password. A wrong one answers 400 with an error on `currentPassword`, never 401, and counts toward a per-user limit: after 5 wrong ones within 15 minutes the route answers 429 until the window passes. A new password equal to the current one answers 400 on `password`. On success every session the user has ends: each refresh token issued before the change answers 401 at `POST /auth/refresh`, and the session making the change continues on the new refresh cookie sent with the 200. An access token already issued stays valid until it expires. Reset links sent before the change stop working.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuccessResponse"
+                }
+              }
+            },
+            "description": "Password changed; other devices signed out",
+            "headers": {
+              "Set-Cookie": {
+                "$ref": "#/components/headers/RefreshCookie"
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequestError"
+          },
+          "401": {
+            "$ref": "#/components/responses/UnauthorizedError"
+          },
+          "413": {
+            "$ref": "#/components/responses/PayloadTooLargeError"
+          },
+          "415": {
+            "$ref": "#/components/responses/UnsupportedMediaTypeError"
+          },
+          "429": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RateLimitError"
+                }
+              }
+            },
+            "description": "Too many wrong current passwords for this user (5 within 15 minutes), or too many requests (RATE_LIMIT_USER_MAX per 15 minutes)",
+            "headers": {
+              "Retry-After": {
+                "$ref": "#/components/headers/RetryAfter"
+              }
+            }
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Change the password",
+        "tags": [
+          "Auth"
+        ]
+      }
+    },
     "/auth/forgot-password": {
       "post": {
         "description": "Always responds 200 with a generic message to prevent email enumeration. When the email matches a registered account, a single-use reset link is sent. Tokens are valid for 15 minutes; subsequent requests invalidate any prior unused tokens.",
@@ -3310,7 +3387,7 @@
         ]
       },
       "put": {
-        "description": "A new `password` ends every session the user has: each refresh token issued before it answers 401 at `POST /auth/refresh`. The session making the change continues on a new refresh cookie, sent with the 200. An access token already issued stays valid until it expires.",
+        "description": "Changes the username and whether the profile is public. A body carrying `password` or `email` is refused with 400: the password is changed with `POST /auth/change-password`, which asks for the current one.",
         "requestBody": {
           "content": {
             "application/json": {
@@ -3330,12 +3407,7 @@
                 }
               }
             },
-            "description": "User profile updated successfully",
-            "headers": {
-              "Set-Cookie": {
-                "$ref": "#/components/headers/ReissuedRefreshCookie"
-              }
-            }
+            "description": "User profile updated successfully"
           },
           "400": {
             "$ref": "#/components/responses/BadRequestError"

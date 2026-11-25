@@ -203,6 +203,65 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/change-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Change the password
+         * @description Asks for the current password. A wrong one answers 400 with an error on `currentPassword`, never 401, and counts toward a per-user limit: after 5 wrong ones within 15 minutes the route answers 429 until the window passes. A new password equal to the current one answers 400 on `password`. On success every session the user has ends: each refresh token issued before the change answers 401 at `POST /auth/refresh`, and the session making the change continues on the new refresh cookie sent with the 200. An access token already issued stays valid until it expires. Reset links sent before the change stop working.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ChangePasswordRequest"];
+                };
+            };
+            responses: {
+                /** @description Password changed; other devices signed out */
+                200: {
+                    headers: {
+                        "Set-Cookie": components["headers"]["RefreshCookie"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SuccessResponse"];
+                    };
+                };
+                400: components["responses"]["BadRequestError"];
+                401: components["responses"]["UnauthorizedError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
+                /** @description Too many wrong current passwords for this user (5 within 15 minutes), or too many requests (RATE_LIMIT_USER_MAX per 15 minutes) */
+                429: {
+                    headers: {
+                        "Retry-After": components["headers"]["RetryAfter"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RateLimitError"];
+                    };
+                };
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/forgot-password": {
         parameters: {
             query?: never;
@@ -388,7 +447,7 @@ export interface paths {
         };
         /**
          * Update current user's profile
-         * @description A new `password` ends every session the user has: each refresh token issued before it answers 401 at `POST /auth/refresh`. The session making the change continues on a new refresh cookie, sent with the 200. An access token already issued stays valid until it expires.
+         * @description Changes the username and whether the profile is public. A body carrying `password` or `email` is refused with 400: the password is changed with `POST /auth/change-password`, which asks for the current one.
          */
         put: {
             parameters: {
@@ -406,7 +465,6 @@ export interface paths {
                 /** @description User profile updated successfully */
                 200: {
                     headers: {
-                        "Set-Cookie": components["headers"]["ReissuedRefreshCookie"];
                         [name: string]: unknown;
                     };
                     content: {
@@ -2361,6 +2419,14 @@ export interface components {
              */
             role: "admin" | "member";
         };
+        ChangePasswordRequest: {
+            /** @example OldPass123! */
+            currentPassword: string;
+            /** @example BrandNewPass123! */
+            password: string;
+            /** @example BrandNewPass123! */
+            passwordConfirmation: string;
+        };
         CreateInviteRequest: {
             /**
              * Format: email
@@ -3204,15 +3270,8 @@ export interface components {
             timeFrameEnabled?: boolean;
         };
         UpdateUserRequest: {
-            /**
-             * Format: email
-             * @example updated@example.com
-             */
-            email?: string;
             /** @example false */
             isPublicProfile?: boolean;
-            /** @example updatedpassword */
-            password?: string;
             /** @example updateduser */
             username?: string;
         };
@@ -3518,11 +3577,6 @@ export interface components {
          * @example lakira_refresh=dGVzdC1yZWZyZXNoLXRva2Vu; Max-Age=604800; Path=/api/v1/auth; HttpOnly; SameSite=Strict
          */
         RefreshCookie: string;
-        /**
-         * @description Sent only when the request changes the password. Every session the user had is ended, this one included, and this one continues on a new refresh token: the `lakira_refresh` cookie is set as `RefreshCookie` describes. A refresh cookie issued before the change answers 401 at `POST /auth/refresh`.
-         * @example lakira_refresh=dGVzdC1yZWZyZXNoLXRva2Vu; Max-Age=604800; Path=/api/v1/auth; HttpOnly; SameSite=Strict
-         */
-        ReissuedRefreshCookie: string;
         /**
          * @description How many seconds to wait before retrying. Every 429 carries it: each rate limiter sets it to the seconds left in its window, and a locked-out login to the lockout's length.
          * @example 900
