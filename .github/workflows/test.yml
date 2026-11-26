@@ -94,6 +94,54 @@ jobs:
           path: coverage
           if-no-files-found: warn
 
+  # A fork made with scripts/bootstrap-fork.sh, taken through the steps the script prints. A gate
+  # that reads something the script removes fails here, on the pull request that adds it, rather
+  # than on someone's first fork: N2 of the 2026-10-04 audit and N18 of 2026-11-14 were both that
+  # (#219, ADR-0052). The steps after the script are its printed step 3, in its order. Keep them
+  # matched: a green job proves nothing if a forker's run is red. Printed step 1, the API contract,
+  # needs a backend of the fork's own, so `api:spec:check` is not run.
+  fork:
+    name: Fork bootstrap
+    runs-on: ubuntu-26.04
+    timeout-minutes: 20
+    env:
+      CYPRESS_INSTALL_BINARY: "0"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      # Before `npm ci`, as on a fresh clone: Prettier is then absent and the script leaves
+      # formatting to the `format:fix` below.
+      - name: Bootstrap the fork
+        run: ./scripts/bootstrap-fork.sh --name acme-app
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Format the rewritten files
+        run: npm run format:fix
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Run typecheck
+        run: npm run typecheck
+
+      - name: Run format check
+        run: npm run format
+
+      - name: Run unit tests
+        run: npm run test:unit
+
+      - name: Build app
+        run: npm run build
+
   integration:
     name: Integration tests
     runs-on: ubuntu-26.04
@@ -313,7 +361,7 @@ jobs:
   ci:
     name: CI passed
     runs-on: ubuntu-26.04
-    needs: [checks, unit, integration, e2e, api-contract, security, secret-scan, image]
+    needs: [checks, unit, fork, integration, e2e, api-contract, security, secret-scan, image]
     if: always()
     timeout-minutes: 5
     steps:
