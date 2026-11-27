@@ -67,6 +67,7 @@ backend, unless its full path is one of the public auth entry points in `PUBLIC_
 ```
 auth/login · auth/register · auth/logout · auth/refresh
 auth/forgot-password · auth/reset-password · auth/verify-email
+auth/confirm-email-change
 ```
 
 That list comes from the OpenAPI contract, where every other operation declares `security`. Paths
