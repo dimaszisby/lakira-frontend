@@ -17,8 +17,9 @@ import { authRoutes } from "@/lib/routes";
 // `afterAuth` returns `returnUrl` as decoded, and a header value cannot hold a character above
 // U+00FF or a line break: the response would throw after the refresh token rotated, and the lost
 // cookie would revoke the family on its next use. Parsing percent-encodes the one and strips the
-// other, as the old `new URL` did. Which paths are let through is still `authRoutes`' decision;
-// one that parses to another host keeps only its path here, so it stays on this origin.
+// other, as the old `new URL` did. Which paths are let through is `authRoutes`' decision, and it
+// drops one that parses to another origin and returns the parsed form (#226), which this parse
+// leaves as it is.
 const PLACEHOLDER_ORIGIN = "http://revive.invalid";
 
 const redirectTo = (path: string) => {

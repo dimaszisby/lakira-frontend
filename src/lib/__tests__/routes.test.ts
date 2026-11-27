@@ -10,6 +10,11 @@ const METRIC_ID = "m-1";
 const CATEGORY_ID = "c-1";
 const RETURN_URL = "/metrics?page=2";
 const ENCODED_RETURN_URL = "%2Fmetrics%3Fpage%3D2";
+// Built in code: a control-character escape written through an editing tool
+// can land as the raw byte (.claude/rules/code-style.md, Editing hazards).
+const TAB = String.fromCharCode(9);
+const NEWLINE = String.fromCharCode(10);
+const BACKSLASH = String.fromCharCode(92);
 
 describe("buildPath", () => {
   it("returns the base path when there is no query", () => {
@@ -47,14 +52,42 @@ describe("authRoutes", () => {
     expect(authRoutes.afterAuth(RETURN_URL)).toBe(RETURN_URL);
   });
 
-  it.each(["//evil.example", "https://evil.example", "metrics", null, undefined, ""])(
-    "drops the unsafe return URL %p",
-    (returnUrl) => {
-      expect(authRoutes.login(returnUrl)).toBe("/login");
-      expect(authRoutes.register(returnUrl)).toBe("/register");
-      expect(authRoutes.afterAuth(returnUrl)).toBe("/dashboard");
-    },
-  );
+  // The URL parser browsers use reads a backslash as a slash and strips tabs
+  // and newlines, so the backslash, tab and newline forms leave the origin as
+  // `//evil.example` does (#226).
+  it.each([
+    "//evil.example",
+    "https://evil.example",
+    `/${BACKSLASH}evil.example`,
+    `${BACKSLASH}${BACKSLASH}evil.example`,
+    `/${TAB}/evil.example`,
+    `/${NEWLINE}/evil.example`,
+    `/${BACKSLASH}${TAB}evil.example`,
+    // Dot segments resolve to `//evil.example`.
+    "/.//evil.example",
+    "/a/..//evil.example",
+    "/%2e//evil.example",
+    "metrics",
+    null,
+    undefined,
+    "",
+  ])("drops the unsafe return URL %j", (returnUrl) => {
+    expect(authRoutes.login(returnUrl)).toBe("/login");
+    expect(authRoutes.register(returnUrl)).toBe("/register");
+    expect(authRoutes.revive(returnUrl)).toBe("/api/auth/revive");
+    expect(authRoutes.afterAuth(returnUrl)).toBe("/dashboard");
+  });
+
+  it.each([
+    ["/metrics/abc?tab=logs#chart", "/metrics/abc?tab=logs#chart"],
+    [`/a${BACKSLASH}b`, "/a/b"],
+    ["/metrics/./abc", "/metrics/abc"],
+    // Percent-encoded, so `redirect()` can put it in a `Location` header.
+    ["/caf\u00e9", "/caf%C3%A9"],
+    [`/a${NEWLINE}b`, "/ab"],
+  ])("keeps the same-origin return URL %j, in its parsed form %j", (returnUrl, parsed) => {
+    expect(authRoutes.afterAuth(returnUrl)).toBe(parsed);
+  });
 
   it("builds token links only when a token is present", () => {
     expect(authRoutes.resetPassword("abc")).toBe("/reset-password?token=abc");

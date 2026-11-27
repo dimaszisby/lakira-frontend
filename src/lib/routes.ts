@@ -51,12 +51,27 @@ export const buildPath = (basePath: string, query?: QueryParams): string => {
   return `${basePath}${basePath.includes("?") ? "&" : "?"}${queryString}`;
 };
 
-const isSafeRelativePath = (path: string): boolean =>
-  path.startsWith("/") && !path.startsWith("//");
+// Parsed as a browser would, against a placeholder origin (#226). A backslash reads as a slash
+// and a tab or newline is stripped, so `/\evil.test` and `/<tab>/evil.test` leave the origin
+// just as `//evil.test` does; a prefix test cannot see that.
+//
+// What is returned is the parsed form, not the input. Dot segments are resolved, so
+// `/.//evil.test` becomes `//evil.test`, which is refused here instead of by whichever caller
+// parses it next; the revive route keeps only the path and would have sent it off-site. And
+// characters a `Location` header cannot hold are percent-encoded, so `redirect()` on the sign-in
+// pages cannot throw on them.
+const RETURN_URL_BASE = "http://return-url.invalid";
 
 const resolveReturnUrl = (returnUrl?: string | null): string | undefined => {
-  if (!returnUrl) return undefined;
-  return isSafeRelativePath(returnUrl) ? returnUrl : undefined;
+  if (!returnUrl?.startsWith("/")) return undefined;
+  let parsed: URL;
+  try {
+    parsed = new URL(returnUrl, RETURN_URL_BASE);
+  } catch {
+    return undefined;
+  }
+  if (parsed.origin !== RETURN_URL_BASE || parsed.pathname.startsWith("//")) return undefined;
+  return `${parsed.pathname}${parsed.search}${parsed.hash}`;
 };
 
 export const authRoutes = {

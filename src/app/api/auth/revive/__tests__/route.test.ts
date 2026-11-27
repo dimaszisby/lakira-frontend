@@ -147,15 +147,20 @@ describe("GET /api/auth/revive", () => {
     },
   );
 
-  it("stays on this origin when the return path parses to another host", async () => {
-    mockRefresh.mockResolvedValue({ token: makeToken(900), refreshToken: null });
+  // A dot segment resolves to `//evil.test` only once parsed, and this route keeps the parsed
+  // path, so a check of the raw string let it off-site (#226).
+  it.each(["/\\evil.test/phish", "/.//evil.test/phish", "/a/..//evil.test/phish"])(
+    "stays on this origin when the return path %j parses to another host",
+    async (returnUrl) => {
+      mockRefresh.mockResolvedValue({ token: makeToken(900), refreshToken: null });
 
-    const response = await GET(request("/\\evil.test/phish"));
-    const location = response.headers.get("location") ?? "";
+      const response = await GET(request(returnUrl));
+      const location = response.headers.get("location") ?? "";
 
-    expect(location).toMatch(/^\/(?![/\\])/);
-    expect(location).not.toContain("evil.test");
-  });
+      expect(location).toMatch(/^\/(?![/\\])/);
+      expect(location).not.toContain("evil.test");
+    },
+  );
 
   it("refuses an off-origin return even when the revival fails", async () => {
     mockRefresh.mockResolvedValue(null);
