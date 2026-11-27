@@ -120,6 +120,7 @@ describe("isPublicApiPath", () => {
     ["auth", "forgot-password"],
     ["auth", "reset-password"],
     ["auth", "verify-email"],
+    ["auth", "confirm-email-change"],
   ])("allows %s/%s without a token", (...segments) => {
     expect(isPublicApiPath(segments)).toBe(true);
   });
@@ -138,6 +139,7 @@ describe("isPublicApiPath", () => {
     [["auth", "profile"], AUTH_PREFIX_NOTE],
     [["auth", "switch-org"], AUTH_PREFIX_NOTE],
     [["auth", "resend-verification"], AUTH_PREFIX_NOTE],
+    [["auth", "change-email"], AUTH_PREFIX_NOTE],
   ])("requires a token for %s — %s", (segments) => {
     expect(isPublicApiPath(segments)).toBe(false);
   });
