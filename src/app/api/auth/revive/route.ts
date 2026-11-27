@@ -2,7 +2,12 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
 import { REFRESH_COOKIE_NAME } from "@/constants/app";
-import { applyRefreshedSession, clearSessionCookies, refreshAccessToken } from "@/lib/auth-refresh";
+import {
+  applyRefreshedSession,
+  clearSessionCookies,
+  refreshAccessToken,
+  UNAVAILABLE_GRACE_MS,
+} from "@/lib/auth-refresh";
 import { clientAddress } from "@/lib/client-address";
 import { isSessionTokenUsable } from "@/lib/jwt";
 import { logger } from "@/lib/logger";
@@ -27,6 +32,52 @@ const redirectTo = (path: string) => {
   return new NextResponse(null, {
     status: 307,
     headers: { Location: `${pathname}${search}${hash}` },
+  });
+};
+
+/** `&`, `<`, `>` and `"`, the characters that could end the attribute or open markup. */
+const escapeHtml = (value: string) =>
+  value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+/**
+ * The answer when the backend could not answer the refresh (#220). The session is
+ * kept: nothing says it is over, and clearing it signed out everyone whose access
+ * token expired during a backend restart.
+ *
+ * A page with a link, not a redirect. Sent on to `returnUrl`, the user would be
+ * sent straight back here by the middleware, and each hop would ask the backend
+ * again; an automatic reload would do the same. "Sign in again" is the way out if
+ * the backend keeps failing: nothing here ends the session on its own. No script
+ * and no styles beyond
+ * the browser's, so the static policy `/api` routes get is enough.
+ */
+const unavailablePage = (returnUrl: string | null) => {
+  const retry = escapeHtml(authRoutes.revive(returnUrl));
+  const signIn = escapeHtml(authRoutes.login(returnUrl));
+  const html = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lakira cannot reach the server</title>
+</head>
+<body>
+<main>
+<h1>We can't reach the server right now</h1>
+<p>You're still signed in. Try again in a moment.</p>
+<p><a href="${retry}">Try again</a></p>
+<p>Or <a href="${signIn}">sign in again</a>.</p>
+</main>
+</body>
+</html>
+`;
+  return new NextResponse(html, {
+    status: 503,
+    headers: {
+      "Content-Type": "text/html; charset=utf-8",
+      "Cache-Control": "no-store",
+      "Retry-After": String(UNAVAILABLE_GRACE_MS / 1000),
+    },
   });
 };
 
@@ -66,12 +117,17 @@ export async function GET(request: NextRequest) {
 
   const refreshed = await refreshAccessToken(refreshToken, clientAddress(request.headers));
 
+  if (refreshed.status === "unavailable") {
+    logger.warn("auth.revive.unavailable");
+    return unavailablePage(returnUrl);
+  }
+
   // A refreshed token that is *itself* unusable would send the middleware
   // straight back here, and the loop would rotate the family once per hop.
   // Treating it as a failed revival is what makes the redirect terminate: every
-  // exit is either a usable session or `/login`, which the middleware does not
-  // gate.
-  if (!refreshed || !isSessionTokenUsable(refreshed.token)) {
+  // exit is a usable session, `/login`, which the middleware does not gate, or
+  // the page above, which redirects nowhere.
+  if (refreshed.status === "rejected" || !isSessionTokenUsable(refreshed.token)) {
     logger.info("auth.revive.failed", { hadRefreshToken: Boolean(refreshToken) });
 
     const response = redirectTo(authRoutes.login(returnUrl));
