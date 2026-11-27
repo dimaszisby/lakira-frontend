@@ -203,6 +203,65 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/change-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ask to change the email
+         * @description Asks for the current password, as `POST /auth/change-password` does, and shares its per-user count of wrong ones: after 5 within 15 minutes either route answers 429. The new address must differ from the current one (400 on `email`) and not belong to another account (409). The account's email does not change here: a 202 stores a pending change, sends a confirmation link to the new address, valid for 24 hours, and tells the old address, naming the new one masked. A new request replaces a pending one, and a password change or reset cancels it.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ChangeEmailRequest"];
+                };
+            };
+            responses: {
+                /** @description Pending; the new address must confirm the change */
+                202: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SuccessResponse"];
+                    };
+                };
+                400: components["responses"]["BadRequestError"];
+                401: components["responses"]["UnauthorizedError"];
+                409: components["responses"]["ConflictError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
+                /** @description Too many wrong current passwords for this user (5 within 15 minutes, shared with `POST /auth/change-password`), or too many requests (RATE_LIMIT_EMAIL_CHANGE_USER_MAX per hour) */
+                429: {
+                    headers: {
+                        "Retry-After": components["headers"]["RetryAfter"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RateLimitError"];
+                    };
+                };
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/change-password": {
         parameters: {
             query?: never;
@@ -244,6 +303,64 @@ export interface paths {
                 413: components["responses"]["PayloadTooLargeError"];
                 415: components["responses"]["UnsupportedMediaTypeError"];
                 /** @description Too many wrong current passwords for this user (5 within 15 minutes), or too many requests (RATE_LIMIT_USER_MAX per 15 minutes) */
+                429: {
+                    headers: {
+                        "Retry-After": components["headers"]["RetryAfter"];
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["RateLimitError"];
+                    };
+                };
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/confirm-email-change": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirm an email change
+         * @description Takes the single-use token from the link sent to the new address. The account's email becomes that address, marked verified, and verification and reset links sent before it stop working. Returns a generic 400 for an unknown, used, replaced or expired token, and 409 when the address has been taken since the request. No JWT required: the link may be opened on another device.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": components["schemas"]["ConfirmEmailChangeRequest"];
+                };
+            };
+            responses: {
+                /** @description Email changed and verified */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["SuccessResponse"];
+                    };
+                };
+                400: components["responses"]["BadRequestError"];
+                409: components["responses"]["ConflictError"];
+                413: components["responses"]["PayloadTooLargeError"];
+                415: components["responses"]["UnsupportedMediaTypeError"];
+                /** @description Too many token submissions from this address (RATE_LIMIT_EMAIL_VERIFICATION_IP_MAX per hour, shared with `POST /auth/verify-email`) */
                 429: {
                     headers: {
                         "Retry-After": components["headers"]["RetryAfter"];
@@ -447,7 +564,7 @@ export interface paths {
         };
         /**
          * Update current user's profile
-         * @description Changes the username and whether the profile is public. A body carrying `password` or `email` is refused with 400: the password is changed with `POST /auth/change-password`, which asks for the current one.
+         * @description Changes the username and whether the profile is public. A body carrying `password` or `email` is refused with 400: the password is changed with `POST /auth/change-password` and the email with `POST /auth/change-email`, each of which asks for the current password. A new username follows the registration rule; the current one, sent back unchanged, is accepted as it is, even one registered before the rule.
          */
         put: {
             parameters: {
@@ -2242,7 +2359,7 @@ export interface paths {
         put?: never;
         /**
          * Invite a user to the organization
-         * @description Sends an invitation email with a single-use token. Only owners and admins can invite. Inviting an address that already has a pending invite replaces it: a new token and expiry, the email sent again, the earlier link no longer accepted, and the newer role applies. A 409 means only that two invites for the same address raced.
+         * @description Sends an invitation email with a single-use token. Only owners and admins can invite, and only once their own email address is verified: an unverified inviter is answered 403. Inviting an address that already has a pending invite replaces it: a new token and expiry, the email sent again, the earlier link no longer accepted, and the newer role applies. A 409 means only that two invites for the same address raced.
          */
         post: {
             parameters: {
@@ -2412,6 +2529,15 @@ export interface components {
             /** @example dGVzdC1pbnZpdGUtdG9rZW4 */
             token: string;
         };
+        ChangeEmailRequest: {
+            /** @example OldPass123! */
+            currentPassword: string;
+            /**
+             * Format: email
+             * @example new-address@example.com
+             */
+            email: string;
+        };
         ChangeMemberRoleRequest: {
             /**
              * @example admin
@@ -2426,6 +2552,10 @@ export interface components {
             password: string;
             /** @example BrandNewPass123! */
             passwordConfirmation: string;
+        };
+        ConfirmEmailChangeRequest: {
+            /** @example AbCdEf0123456789AbCdEf0123456789AbCdEf01 */
+            token: string;
         };
         CreateInviteRequest: {
             /**

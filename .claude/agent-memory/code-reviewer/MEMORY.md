@@ -15,3 +15,4 @@
 - [Bucket labels wall-times review](project_bucket-labels-wall-times_review.md) — approve w/ warnings; type-change hides throwing consumer, grep docs for moved setting
 - [Revive relative redirect review](project_revive-relative-redirect_review.md) — approve w/ warning; raw string into Headers loses URL-constructor encoding, check post-side-effect throws
 - [Fork bootstrap CI job review](project_fork-bootstrap-ci-job_review.md) — approve; replay scripts on the CI OS flavour, skip keyed on folder, tar `._*` artifacts
+- [Confirm-email-change public path review](project_confirm-email-change-public-path_review.md) — approve w/ warnings; grep word-number in sibling rule files, check ADR rejected options are distinct

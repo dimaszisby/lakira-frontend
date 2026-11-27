@@ -29,7 +29,7 @@ component → TanStack Query hook → feature api.ts → axios (src/services/api
 
 `src/app/api/proxy/[...path]/route.ts` reads the httpOnly session cookie and sets `Authorization: Bearer <token>`.
 
-**It denies by default.** A request without a token is rejected with 401 unless its path is in `PUBLIC_API_PATHS` (`src/lib/auth-paths.ts`), which lists the seven unauthenticated auth entry points and nothing else. That list is derived from the OpenAPI contract, where every other operation declares `security`. Adding a new authed backend resource requires **no change** — it is protected the moment it exists.
+**It denies by default.** A request without a token is rejected with 401 unless its path is in `PUBLIC_API_PATHS` (`src/lib/auth-paths.ts`), which lists the eight unauthenticated auth entry points and nothing else. That list is derived from the OpenAPI contract, where every other operation declares `security`. Adding a new authed backend resource requires **no change** — it is protected the moment it exists.
 
 This used to be an allowlist of *protected* segments, which was a denylist by omission: `analytics/*` and `admin/_ping` both proxied unauthenticated even though the contract marks them secured.
 

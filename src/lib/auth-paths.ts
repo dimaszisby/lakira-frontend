@@ -71,6 +71,8 @@ export const PUBLIC_API_PATHS = new Set([
   "auth/forgot-password",
   "auth/reset-password",
   "auth/verify-email",
+  // Redeemed from a link sent to the new address, maybe on another device (ADR-0053).
+  "auth/confirm-email-change",
 ]);
 
 /**
