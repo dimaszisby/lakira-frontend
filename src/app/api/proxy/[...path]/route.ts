@@ -10,6 +10,7 @@ import {
   SESSION_MAX_AGE_SECONDS,
 } from "@/constants/app";
 import { buildUpstreamUrl, isPublicApiPath, isTokenIssuingApiPath } from "@/lib/auth-paths";
+import type { RefreshResult } from "@/lib/auth-refresh";
 import {
   applyRefreshedSession,
   captureRefreshCookie,
@@ -163,7 +164,10 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
   };
 
   let response: Response;
-  let refreshed: Awaited<ReturnType<typeof refreshAccessToken>> = null;
+  let refreshed: RefreshResult | null = null;
+  // The refresh could not reach the backend, or it answered 5xx or 429: nothing
+  // says the session is over, so a 401 it could not rescue must not end it (#220).
+  let isRefreshUnavailable = false;
 
   try {
     response = await send(token);
@@ -172,11 +176,13 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
     // otherwise-valid session hits this constantly; without the retry the app
     // stops working a quarter of an hour after login.
     if (response.status === 401) {
-      refreshed = await refreshAccessToken(
+      const outcome = await refreshAccessToken(
         request.cookies.get(REFRESH_COOKIE_NAME)?.value,
         address,
       );
-      if (refreshed) {
+      if (outcome.status === "unavailable") isRefreshUnavailable = true;
+      if (outcome.status === "refreshed") {
+        refreshed = outcome;
         logger.info("proxy.refreshed", { path: loggedPath });
         response = await send(refreshed.token);
       }
@@ -259,8 +265,18 @@ async function proxyHandler(request: NextRequest, context: RouteContext) {
 
   // A 401 that refresh could not rescue means the session is finished, and is
   // answered below in the proxy's own words. Decided here so its body is not read.
-  const isSessionEnded =
+  const isUnrescued =
     response.status === 401 && !refreshed && token !== null && !isPublicApiPath(rawSegments);
+
+  // Answered as a backend that cannot be reached, which is what it is, and with
+  // both cookies kept: the next request can refresh once the backend is back.
+  if (isUnrescued && isRefreshUnavailable) {
+    logger.warn("proxy.refresh_unavailable", { path: loggedPath, method: request.method });
+    await response.body?.cancel().catch(() => undefined);
+    return NextResponse.json(UPSTREAM_UNREACHABLE_BODY, { status: 502 });
+  }
+
+  const isSessionEnded = isUnrescued;
 
   // An error body reaches the browser only as the keys the frontend reads, so a
   // field the backend adds, or a `stack` it fails to gate, stops here (ADR-0034).

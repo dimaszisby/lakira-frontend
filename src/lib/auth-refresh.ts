@@ -38,11 +38,28 @@ import { logger } from "@/lib/logger";
  */
 
 export type RefreshResult = {
+  status: "refreshed";
   /** The freshly issued access token. */
   token: string;
   /** New refresh-token value to persist, when the backend rotated one. */
   refreshToken: string | null;
 };
+
+/**
+ * What a refresh came to. The two failures ask for opposite things (#220):
+ *
+ * - `rejected`: the session is over. Clear both cookies.
+ * - `unavailable`: the backend could not answer, so nothing is known about the
+ *   session. Keep both cookies and let the user try again. Clearing them here
+ *   signed out everyone whose access token expired during a backend restart.
+ */
+export type RefreshOutcome = RefreshResult | { status: "rejected" } | { status: "unavailable" };
+
+const REJECTED: RefreshOutcome = { status: "rejected" };
+const UNAVAILABLE: RefreshOutcome = { status: "unavailable" };
+
+/** Statuses that say the backend could not answer now, not that the token is bad. */
+const isTransientStatus = (status: number): boolean => status === 429 || status >= 500;
 
 /** Pull a cookie value out of a `Set-Cookie` header list. */
 const readSetCookie = (headers: Headers, name: string): string | null => {
@@ -61,7 +78,7 @@ const readSetCookie = (headers: Headers, name: string): string | null => {
 const performRefresh = async (
   refreshToken: string,
   address: string | null,
-): Promise<RefreshResult | null> => {
+): Promise<RefreshOutcome> => {
   const headers = new Headers({ cookie: `${REFRESH_COOKIE_NAME}=${refreshToken}` });
   // The browser's address, so the refresh counts against its user's rate-limit budget (ADR-0050).
   if (address) headers.set("X-Forwarded-For", address);
@@ -72,28 +89,43 @@ const performRefresh = async (
       method: "POST",
       headers,
       cache: "no-store",
+      // A backend that accepts the connection and then hangs, as one restarting
+      // behind a reverse proxy can, would otherwise hold the request for minutes.
+      signal: AbortSignal.timeout(REFRESH_TIMEOUT_MS),
     });
   } catch (error) {
     logger.warn("auth.refresh.unreachable", { error });
-    return null;
+    return UNAVAILABLE;
+  }
+
+  if (isTransientStatus(response.status)) {
+    logger.warn("auth.refresh.unavailable", { status: response.status });
+    return UNAVAILABLE;
   }
 
   if (!response.ok) {
     // A 401 here is normal and expected: the refresh token expired, or was
     // already redeemed and the family revoked. Not an error worth alarming on.
     logger.info("auth.refresh.rejected", { status: response.status });
-    return null;
+    return REJECTED;
   }
 
   const body = (await response.json().catch(() => null)) as { data?: { token?: unknown } } | null;
   const token = body?.data?.token;
 
   if (typeof token !== "string" || decodeJwtPayload(token) === null) {
+    // A 2xx from the backend means it has rotated the token, so the one presented
+    // is spent and the session cannot go on. An intermediary answering 200 with
+    // its own page would end the session too: rare, and the safe direction.
     logger.error("auth.refresh.malformed", { hasToken: typeof token });
-    return null;
+    return REJECTED;
   }
 
-  return { token, refreshToken: readSetCookie(response.headers, REFRESH_COOKIE_NAME) };
+  return {
+    status: "refreshed",
+    token,
+    refreshToken: readSetCookie(response.headers, REFRESH_COOKIE_NAME),
+  };
 };
 
 /**
@@ -130,15 +162,25 @@ const performRefresh = async (
 /** How long a settled refresh answers for the token that produced it. */
 const RESULT_GRACE_MS = 30_000;
 
+/**
+ * How long an `unavailable` answer is remembered: long enough to absorb a burst,
+ * and no longer than the `Retry-After` the revive page sends, so "Try again"
+ * reaches the backend once it is back (#220).
+ */
+export const UNAVAILABLE_GRACE_MS = 5_000;
+
+/** How long a refresh may take before it counts as unavailable. */
+const REFRESH_TIMEOUT_MS = 5_000;
+
 /** Upper bound on remembered results, so a hostile caller cannot grow the map. */
 const MAX_REMEMBERED = 100;
 
-const inFlight = new Map<string, Promise<RefreshResult | null>>();
-const settled = new Map<string, { result: RefreshResult | null; at: number }>();
+const inFlight = new Map<string, Promise<RefreshOutcome>>();
+const settled = new Map<string, { result: RefreshOutcome; until: number }>();
 
 const forgetStale = (now: number): void => {
   for (const [key, entry] of settled) {
-    if (now - entry.at >= RESULT_GRACE_MS) settled.delete(key);
+    if (now >= entry.until) settled.delete(key);
   }
   // Insertion order, so the oldest go first.
   while (settled.size > MAX_REMEMBERED) {
@@ -151,9 +193,17 @@ const forgetStale = (now: number): void => {
 /**
  * Exchange a refresh token for a new access token, at most once per token.
  *
- * Returns `null` when the refresh token is missing, rejected, or the backend is
- * unreachable — every one of which means "cannot refresh", and the caller
- * should fall through to its unauthenticated path rather than retrying.
+ * Returns `rejected` when the refresh token is missing or the backend refused
+ * it: the caller ends the session. Returns `unavailable` when the backend could
+ * not be reached, or answered 5xx or 429: the caller keeps the session and
+ * reports the outage instead (#220).
+ *
+ * An `unavailable` answer is remembered too, but only for
+ * {@link UNAVAILABLE_GRACE_MS}: enough to keep a burst from hammering a
+ * restarting backend, short enough that a retry reaches it once it is back. A
+ * timeout or a lost response may have hidden a rotation that did happen; the
+ * next attempt then presents a spent token, and the backend ends the session as
+ * it would have before this distinction existed.
  *
  * Concurrent and near-simultaneous callers presenting the same token share one
  * round trip; see the note above for why that is a correctness requirement and
@@ -169,8 +219,8 @@ const forgetStale = (now: number): void => {
 export const refreshAccessToken = async (
   refreshToken: string | undefined | null,
   address: string | null = null,
-): Promise<RefreshResult | null> => {
-  if (!refreshToken) return null;
+): Promise<RefreshOutcome> => {
+  if (!refreshToken) return REJECTED;
 
   const now = Date.now();
   forgetStale(now);
@@ -189,7 +239,8 @@ export const refreshAccessToken = async (
   inFlight.set(refreshToken, attempt);
 
   const result = await attempt;
-  settled.set(refreshToken, { result, at: Date.now() });
+  const grace = result.status === "unavailable" ? UNAVAILABLE_GRACE_MS : RESULT_GRACE_MS;
+  settled.set(refreshToken, { result, until: Date.now() + grace });
   return result;
 };
 

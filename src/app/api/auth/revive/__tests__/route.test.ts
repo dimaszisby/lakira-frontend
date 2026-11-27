@@ -31,6 +31,11 @@ const makeToken = (expOffsetSeconds: number) => {
   return `${b64({ alg: "HS256", typ: "JWT" })}.${b64({ id: "u1", exp: now + expOffsetSeconds })}.sig`;
 };
 
+const REJECTED = { status: "rejected" } as const;
+const UNAVAILABLE = { status: "unavailable" } as const;
+const refreshed = (token: string, refreshToken: string | null) =>
+  ({ status: "refreshed", token, refreshToken }) as const;
+
 const DASHBOARD = "/dashboard";
 const CARRIED_COOKIE = "the-cookie";
 
@@ -60,7 +65,7 @@ beforeEach(() => {
 describe("GET /api/auth/revive", () => {
   it("revives the session and continues to where the user was going", async () => {
     const token = makeToken(900);
-    mockRefresh.mockResolvedValue({ token, refreshToken: "rotated" });
+    mockRefresh.mockResolvedValue(refreshed(token, "rotated"));
 
     const response = await GET(request("/metrics/abc?tab=logs"));
 
@@ -75,19 +80,19 @@ describe("GET /api/auth/revive", () => {
   });
 
   it("redeems the refresh cookie the request carried", async () => {
-    mockRefresh.mockResolvedValue({ token: makeToken(900), refreshToken: null });
+    mockRefresh.mockResolvedValue(refreshed(makeToken(900), null));
     await GET(request(DASHBOARD, CARRIED_COOKIE));
     expect(mockRefresh).toHaveBeenCalledWith(CARRIED_COOKIE, null);
   });
 
   it("falls back to the dashboard when there is nowhere to return to", async () => {
-    mockRefresh.mockResolvedValue({ token: makeToken(900), refreshToken: null });
+    mockRefresh.mockResolvedValue(refreshed(makeToken(900), null));
     const response = await GET(request());
     expect(response.headers.get("location")).toBe(DASHBOARD);
   });
 
   it("sends a rejected session to the login form and clears both cookies", async () => {
-    mockRefresh.mockResolvedValue(null);
+    mockRefresh.mockResolvedValue(REJECTED);
 
     const response = await GET(request("/metrics"));
 
@@ -99,8 +104,62 @@ describe("GET /api/auth/revive", () => {
     expect(cookies[REFRESH_COOKIE_NAME]).toContain("Max-Age=0");
   });
 
+  // A backend that could not answer has not said the session is over (#220). A
+  // redirect to the page would come straight back here through the middleware,
+  // so the answer is a page with a link to try again.
+  describe("when the backend cannot answer the refresh", () => {
+    it("keeps both cookies", async () => {
+      mockRefresh.mockResolvedValue(UNAVAILABLE);
+
+      const response = await GET(request("/metrics"));
+
+      expect(response.status).toBe(503);
+      expect(response.headers.getSetCookie()).toEqual([]);
+      expect(response.headers.get("location")).toBeNull();
+    });
+
+    it("is never cached, and says when to try again", async () => {
+      mockRefresh.mockResolvedValue(UNAVAILABLE);
+
+      const response = await GET(request("/metrics"));
+
+      expect(response.headers.get("cache-control")).toBe("no-store");
+      expect(response.headers.get("retry-after")).toBe("5");
+      expect(response.headers.get("content-type")).toBe("text/html; charset=utf-8");
+    });
+
+    it("links back to revival, keeping where the user was going", async () => {
+      mockRefresh.mockResolvedValue(UNAVAILABLE);
+
+      const html = await (await GET(request("/metrics?page=2&sort=name"))).text();
+
+      expect(html).toContain(
+        'href="/api/auth/revive?returnUrl=%2Fmetrics%3Fpage%3D2%26sort%3Dname"',
+      );
+      expect(html).not.toContain("<script");
+    });
+
+    it("offers a way out to the login form, in case the backend keeps failing", async () => {
+      mockRefresh.mockResolvedValue(UNAVAILABLE);
+
+      const html = await (await GET(request("/metrics"))).text();
+
+      expect(html).toContain('href="/login?returnUrl=%2Fmetrics"');
+    });
+
+    it("drops an off-origin return from the link too", async () => {
+      mockRefresh.mockResolvedValue(UNAVAILABLE);
+
+      const html = await (await GET(request("//evil.test"))).text();
+
+      expect(html).toContain('href="/api/auth/revive"');
+      expect(html).toContain('href="/login"');
+      expect(html).not.toContain("evil.test");
+    });
+  });
+
   it("clears the session when no refresh cookie was sent at all", async () => {
-    mockRefresh.mockResolvedValue(null);
+    mockRefresh.mockResolvedValue(REJECTED);
 
     const response = await GET(request(DASHBOARD, ""));
 
@@ -115,7 +174,7 @@ describe("GET /api/auth/revive", () => {
    * redirect: every exit is a usable session or `/login`, which is not gated.
    */
   it("does not hand back a token that is already expired", async () => {
-    mockRefresh.mockResolvedValue({ token: makeToken(-60), refreshToken: "rotated" });
+    mockRefresh.mockResolvedValue(refreshed(makeToken(-60), "rotated"));
 
     const response = await GET(request(DASHBOARD));
 
@@ -124,7 +183,7 @@ describe("GET /api/auth/revive", () => {
   });
 
   it("refuses to redirect off-origin", async () => {
-    mockRefresh.mockResolvedValue({ token: makeToken(900), refreshToken: null });
+    mockRefresh.mockResolvedValue(refreshed(makeToken(900), null));
     const response = await GET(request("//evil.test/phish"));
     expect(response.headers.get("location")).toBe(DASHBOARD);
   });
@@ -137,7 +196,7 @@ describe("GET /api/auth/revive", () => {
   ])(
     "still delivers the rotated session when the return path holds %s",
     async (_, path, location) => {
-      mockRefresh.mockResolvedValue({ token: makeToken(900), refreshToken: "rotated" });
+      mockRefresh.mockResolvedValue(refreshed(makeToken(900), "rotated"));
 
       const response = await GET(request(path));
 
@@ -152,7 +211,7 @@ describe("GET /api/auth/revive", () => {
   it.each(["/\\evil.test/phish", "/.//evil.test/phish", "/a/..//evil.test/phish"])(
     "stays on this origin when the return path %j parses to another host",
     async (returnUrl) => {
-      mockRefresh.mockResolvedValue({ token: makeToken(900), refreshToken: null });
+      mockRefresh.mockResolvedValue(refreshed(makeToken(900), null));
 
       const response = await GET(request(returnUrl));
       const location = response.headers.get("location") ?? "";
@@ -163,19 +222,19 @@ describe("GET /api/auth/revive", () => {
   );
 
   it("refuses an off-origin return even when the revival fails", async () => {
-    mockRefresh.mockResolvedValue(null);
+    mockRefresh.mockResolvedValue(REJECTED);
     const response = await GET(request("https://evil.test/phish"));
     expect(response.headers.get("location")).toBe("/login");
   });
 
   it("is never cached", async () => {
-    mockRefresh.mockResolvedValue({ token: makeToken(900), refreshToken: null });
+    mockRefresh.mockResolvedValue(refreshed(makeToken(900), null));
     const response = await GET(request(DASHBOARD));
     expect(response.headers.get("cache-control")).toBe("no-store");
   });
 
   it("sends the refresh the address the reverse proxy reported (ADR-0050)", async () => {
-    mockRefresh.mockResolvedValue({ token: makeToken(900), refreshToken: null });
+    mockRefresh.mockResolvedValue(refreshed(makeToken(900), null));
     await GET(
       request(DASHBOARD, CARRIED_COOKIE, { "x-forwarded-for": "198.51.100.9, 203.0.113.7" }),
     );
@@ -198,8 +257,8 @@ describe("GET /api/auth/revive", () => {
     };
 
     it.each([
-      ["a failed revival", null, "/login?returnUrl=%2Fdashboard"],
-      ["a successful revival", { token: makeToken(900), refreshToken: null }, DASHBOARD],
+      ["a failed revival", REJECTED, "/login?returnUrl=%2Fdashboard"],
+      ["a successful revival", refreshed(makeToken(900), null), DASHBOARD],
     ])("answers %s with a relative location, not the bind address", async (_, result, path) => {
       mockRefresh.mockResolvedValue(result);
 

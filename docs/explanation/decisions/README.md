@@ -79,6 +79,7 @@ Format: [Nygard ADR](https://cognitect.com/blog/2011/11/15/documenting-architect
 | [ADR-0051](./adr-0051-fonts-are-built-from-committed-files.md)                                         | Fonts are built from committed files; supersedes ADR-0031 in part             | Accepted       | 2026-11-12 | #201 (no kit)                       |
 | [ADR-0052](./adr-0052-a-bootstrapped-fork-is-checked-on-every-pull-request.md)                         | A bootstrapped fork is checked on every pull request                          | Accepted       | 2026-11-24 | #219 (no kit)                       |
 | [ADR-0053](./adr-0053-confirm-email-change-is-a-public-proxy-path.md)                                  | `auth/confirm-email-change` is proxied without a session                      | Accepted       | 2026-11-27 | #234 (no kit)                       |
+| [ADR-0054](./adr-0054-a-refresh-the-backend-cannot-answer-keeps-the-session.md)                        | A refresh the backend cannot answer keeps the session                         | Accepted       | 2026-11-27 | #220 (no kit)                       |
 
 ## Where the other decisions went
 

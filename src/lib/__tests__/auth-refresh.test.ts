@@ -43,6 +43,17 @@ const okResponse = (token: string, setCookie: string[] = []) =>
     headers: headersWithSetCookie(setCookie),
   }) as unknown as Response;
 
+const errorResponse = (status: number) =>
+  ({
+    ok: false,
+    status,
+    json: async () => ({ status: "fail" }),
+    headers: headersWithSetCookie([]),
+  }) as unknown as Response;
+
+const REJECTED = { status: "rejected" };
+const UNAVAILABLE = { status: "unavailable" };
+
 const REPORTED_ADDRESS = "203.0.113.7";
 const FORWARDED_FOR = "x-forwarded-for";
 
@@ -80,12 +91,12 @@ describe("refreshAccessToken", () => {
     jest.restoreAllMocks();
   });
 
-  it("returns null without a refresh token, and makes no request", async () => {
+  it("is rejected without a refresh token, and makes no request", async () => {
     const spy = jest.fn();
     global.fetch = spy as unknown as typeof fetch;
-    expect(await refreshAccessToken(undefined)).toBeNull();
-    expect(await refreshAccessToken(null)).toBeNull();
-    expect(await refreshAccessToken("")).toBeNull();
+    expect(await refreshAccessToken(undefined)).toEqual(REJECTED);
+    expect(await refreshAccessToken(null)).toEqual(REJECTED);
+    expect(await refreshAccessToken("")).toEqual(REJECTED);
     expect(spy).not.toHaveBeenCalled();
   });
 
@@ -97,7 +108,11 @@ describe("refreshAccessToken", () => {
         okResponse(token, [`${REFRESH_COOKIE_NAME}=rotated; Path=/api/v1/auth/refresh`]),
       ) as unknown as typeof fetch;
 
-    expect(await refreshAccessToken("old")).toEqual({ token, refreshToken: "rotated" });
+    expect(await refreshAccessToken("old")).toEqual({
+      status: "refreshed",
+      token,
+      refreshToken: "rotated",
+    });
   });
 
   it("sends the refresh token as a cookie header", async () => {
@@ -125,24 +140,25 @@ describe("refreshAccessToken", () => {
     expect(new Headers(init.headers).has(FORWARDED_FOR)).toBe(false);
   });
 
-  it("returns null when the backend rejects the refresh token", async () => {
-    global.fetch = jest.fn().mockResolvedValue({
-      ok: false,
-      status: 401,
-      json: async () => ({ status: "fail" }),
-      headers: headersWithSetCookie([]),
-    }) as unknown as typeof fetch;
-    expect(await refreshAccessToken("revoked")).toBeNull();
+  // A refusal ends the session; a backend that could not answer does not (#220).
+  it.each([400, 401, 403])("is rejected when the backend answers %i", async (status) => {
+    global.fetch = jest.fn().mockResolvedValue(errorResponse(status)) as unknown as typeof fetch;
+    expect(await refreshAccessToken("revoked")).toEqual(REJECTED);
   });
 
-  it("returns null when the backend is unreachable", async () => {
+  it.each([429, 500, 502, 503])("is unavailable when the backend answers %i", async (status) => {
+    global.fetch = jest.fn().mockResolvedValue(errorResponse(status)) as unknown as typeof fetch;
+    expect(await refreshAccessToken("tok")).toEqual(UNAVAILABLE);
+  });
+
+  it("is unavailable when the backend is unreachable", async () => {
     global.fetch = jest
       .fn()
       .mockRejectedValue(new Error("ECONNREFUSED")) as unknown as typeof fetch;
-    expect(await refreshAccessToken("tok")).toBeNull();
+    expect(await refreshAccessToken("tok")).toEqual(UNAVAILABLE);
   });
 
-  it("returns null when the response carries no usable token", async () => {
+  it("is rejected when the response carries no usable token", async () => {
     for (const data of [{}, { token: 42 }, { token: "not-a-jwt" }]) {
       global.fetch = jest.fn().mockResolvedValue({
         ok: true,
@@ -150,7 +166,8 @@ describe("refreshAccessToken", () => {
         json: async () => ({ status: "success", data }),
         headers: headersWithSetCookie([]),
       }) as unknown as typeof fetch;
-      expect(await refreshAccessToken("tok")).toBeNull();
+      // The backend answered 2xx, so it has rotated the token: the old one is spent.
+      expect(await refreshAccessToken("tok")).toEqual(REJECTED);
     }
   });
 
@@ -163,7 +180,7 @@ describe("refreshAccessToken", () => {
       json: async () => ({ status: "success", token: makeToken() }),
       headers: headersWithSetCookie([]),
     }) as unknown as typeof fetch;
-    expect(await refreshAccessToken("tok")).toBeNull();
+    expect(await refreshAccessToken("tok")).toEqual(REJECTED);
   });
 });
 
@@ -180,7 +197,7 @@ describe("applyRefreshedSession", () => {
 
   it("writes the new access token", () => {
     const writer = makeWriter();
-    applyRefreshedSession(writer, { token: "new-token", refreshToken: null });
+    applyRefreshedSession(writer, { status: "refreshed", token: "new-token", refreshToken: null });
     const session = writer.calls.find((c) => c.name === SESSION_COOKIE_NAME);
     expect(session?.value).toBe("new-token");
     expect(session?.options).toMatchObject({ httpOnly: true, secure: true, path: "/" });
@@ -188,7 +205,7 @@ describe("applyRefreshedSession", () => {
 
   it("writes the rotated refresh cookie scoped to this origin, not the backend's path", () => {
     const writer = makeWriter();
-    applyRefreshedSession(writer, { token: "t", refreshToken: "r" });
+    applyRefreshedSession(writer, { status: "refreshed", token: "t", refreshToken: "r" });
     const refresh = writer.calls.find((c) => c.name === REFRESH_COOKIE_NAME);
     // Scoped to /api because the proxy at /api/proxy is what redeems it; a
     // cookie scoped to /api/auth is never sent there.
@@ -203,7 +220,7 @@ describe("applyRefreshedSession", () => {
 
   it("leaves the existing refresh cookie alone when none was rotated", () => {
     const writer = makeWriter();
-    applyRefreshedSession(writer, { token: "t", refreshToken: null });
+    applyRefreshedSession(writer, { status: "refreshed", token: "t", refreshToken: null });
     expect(writer.calls.some((c) => c.name === REFRESH_COOKIE_NAME)).toBe(false);
   });
 });
@@ -242,9 +259,9 @@ describe("refreshAccessToken coalescing", () => {
 
     expect(spy).toHaveBeenCalledTimes(1);
     expect(results).toEqual([
-      { token, refreshToken: "rotated" },
-      { token, refreshToken: "rotated" },
-      { token, refreshToken: "rotated" },
+      { status: "refreshed", token, refreshToken: "rotated" },
+      { status: "refreshed", token, refreshToken: "rotated" },
+      { status: "refreshed", token, refreshToken: "rotated" },
     ]);
   });
 
@@ -289,16 +306,47 @@ describe("refreshAccessToken coalescing", () => {
   });
 
   it("remembers a rejection too, so a burst cannot hammer the backend", async () => {
-    const spy = jest.fn().mockResolvedValue({
-      ok: false,
-      status: 401,
-      json: async () => ({ status: "fail" }),
-      headers: headersWithSetCookie([]),
-    }) as unknown as typeof fetch;
+    const spy = jest.fn().mockResolvedValue(errorResponse(401)) as unknown as typeof fetch;
     global.fetch = spy;
 
-    expect(await refreshAccessToken("revoked")).toBeNull();
-    expect(await refreshAccessToken("revoked")).toBeNull();
+    expect(await refreshAccessToken("revoked")).toEqual(REJECTED);
+    expect(await refreshAccessToken("revoked")).toEqual(REJECTED);
+    expect(spy).toHaveBeenCalledTimes(1);
+  });
+
+  it("forgets an unavailable backend within seconds, so a retry reaches it once it is back", async () => {
+    jest.useFakeTimers();
+    try {
+      const spy = jest
+        .fn()
+        .mockRejectedValueOnce(new Error("ECONNREFUSED"))
+        .mockResolvedValueOnce(okResponse(makeToken())) as unknown as typeof fetch;
+      global.fetch = spy;
+
+      expect(await refreshAccessToken("back")).toEqual(UNAVAILABLE);
+      jest.setSystemTime(Date.now() + 6_000);
+      expect((await refreshAccessToken("back")).status).toBe("refreshed");
+      expect(spy).toHaveBeenCalledTimes(2);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it("gives up on a backend that does not answer", async () => {
+    const spy = jest.fn().mockResolvedValue(okResponse(makeToken()));
+    global.fetch = spy as unknown as typeof fetch;
+    await refreshAccessToken("tok");
+    expect((spy.mock.calls[0][1] as RequestInit).signal).toBeInstanceOf(AbortSignal);
+  });
+
+  it("remembers an unavailable backend, so a restart is not hammered either", async () => {
+    // Also what keeps a token from being presented twice when a lost response
+    // hid a rotation that did happen: the second caller gets the recorded answer.
+    const spy = jest.fn().mockRejectedValue(new Error("ECONNREFUSED")) as unknown as typeof fetch;
+    global.fetch = spy;
+
+    expect(await refreshAccessToken("down")).toEqual(UNAVAILABLE);
+    expect(await refreshAccessToken("down")).toEqual(UNAVAILABLE);
     expect(spy).toHaveBeenCalledTimes(1);
   });
 

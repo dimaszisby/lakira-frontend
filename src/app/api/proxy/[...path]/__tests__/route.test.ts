@@ -61,6 +61,11 @@ const upstreamJson = (status: number, body: unknown, setCookie: string[] = []) =
 
 const USER = { id: "user-1", email: "a@example.test" };
 
+const REJECTED = { status: "rejected" } as const;
+const UNAVAILABLE = { status: "unavailable" } as const;
+const refreshed = (token: string, refreshToken: string | null) =>
+  ({ status: "refreshed", token, refreshToken }) as const;
+
 const setCookies = (response: Response) =>
   Object.fromEntries(
     response.headers.getSetCookie().map((cookie) => [cookie.split("=")[0], cookie]),
@@ -70,7 +75,7 @@ const originalFetch = global.fetch;
 
 beforeEach(() => {
   mockRefresh.mockReset();
-  mockRefresh.mockResolvedValue(null);
+  mockRefresh.mockResolvedValue(REJECTED);
 });
 
 afterEach(() => {
@@ -170,7 +175,7 @@ describe("a 401 refresh cannot rescue", () => {
   });
 
   it("leaves the session alone when refresh rescued it", async () => {
-    mockRefresh.mockResolvedValue({ token: "fresh", refreshToken: "rotated" });
+    mockRefresh.mockResolvedValue(refreshed("fresh", "rotated"));
     global.fetch = jest
       .fn()
       .mockResolvedValueOnce(upstream(401))
@@ -186,6 +191,42 @@ describe("a 401 refresh cannot rescue", () => {
     expect(cookies[SESSION_COOKIE_NAME]).toContain(`${SESSION_COOKIE_NAME}=fresh`);
     expect(cookies[SESSION_COOKIE_NAME]).not.toContain("Max-Age=0");
     expect(cookies[REFRESH_COOKIE_NAME]).toContain(`${REFRESH_COOKIE_NAME}=rotated`);
+  });
+
+  // A refresh the backend could not answer has not ended the session (#220).
+  it("keeps the session, and answers 502, when the refresh could not reach the backend", async () => {
+    mockRefresh.mockResolvedValue(UNAVAILABLE);
+    global.fetch = jest.fn().mockResolvedValue(upstream(401)) as unknown as typeof fetch;
+
+    const response = await GET(
+      request("metrics", { [SESSION_COOKIE_NAME]: "expired", [REFRESH_COOKIE_NAME]: "r" }),
+      context("metrics"),
+    );
+
+    expect(response.status).toBe(502);
+    await expect(response.json()).resolves.toEqual({ error: "The server could not be reached." });
+    expect(response.headers.getSetCookie()).toEqual([]);
+    expect(global.fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("passes a public path's own 401 through when the refresh could not reach the backend", async () => {
+    // A wrong password on login is about the credentials, not the session.
+    mockRefresh.mockResolvedValue(UNAVAILABLE);
+    global.fetch = jest.fn().mockResolvedValue(
+      new Response(JSON.stringify({ message: "Invalid credentials" }), {
+        status: 401,
+        headers: { "content-type": "application/json" },
+      }),
+    ) as typeof fetch;
+
+    const response = await POST(
+      request(LOGIN_PATH, { [SESSION_COOKIE_NAME]: "expired", [REFRESH_COOKIE_NAME]: "r" }, "POST"),
+      context("auth", "login"),
+    );
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({ message: "Invalid credentials" });
+    expect(response.headers.getSetCookie()).toEqual([]);
   });
 
   it("does not clear anything on a public path", async () => {
@@ -287,7 +328,7 @@ describe("a backend that goes away between the refresh and the retry", () => {
    */
   it("still hands the rotated session to the browser on the 502", async () => {
     const stdout = jest.spyOn(process.stdout, "write").mockImplementation(() => true);
-    mockRefresh.mockResolvedValue({ token: "fresh", refreshToken: "rotated" });
+    mockRefresh.mockResolvedValue(refreshed("fresh", "rotated"));
     global.fetch = jest
       .fn()
       .mockResolvedValueOnce(upstream(401))
@@ -629,7 +670,7 @@ describe("the client address a request carries to the backend", () => {
   });
 
   it("goes with the retry after a refresh too", async () => {
-    mockRefresh.mockResolvedValue({ token: "fresh", refreshToken: "rotated" });
+    mockRefresh.mockResolvedValue(refreshed("fresh", "rotated"));
     const fetchMock = jest
       .fn()
       .mockResolvedValueOnce(upstream(401))
@@ -648,7 +689,7 @@ describe("the client address a request carries to the backend", () => {
   });
 
   it("goes with the refresh itself, so it counts against this user (ADR-0050)", async () => {
-    mockRefresh.mockResolvedValue(null);
+    mockRefresh.mockResolvedValue(REJECTED);
     global.fetch = jest.fn().mockResolvedValue(upstream(401)) as unknown as typeof fetch;
 
     const req = request("metrics", {
@@ -711,7 +752,7 @@ describe("a response that issues an access token", () => {
   it("lets a newly issued session win over one a refresh obtained on the way", async () => {
     const refreshedOldOrg = usableToken({ organizationId: "org-old" });
     const issuedNewOrg = usableToken({ organizationId: "org-new" });
-    mockRefresh.mockResolvedValue({ token: refreshedOldOrg, refreshToken: "rotated-old-org" });
+    mockRefresh.mockResolvedValue(refreshed(refreshedOldOrg, "rotated-old-org"));
     global.fetch = jest
       .fn()
       .mockResolvedValueOnce(upstream(401))
@@ -739,7 +780,7 @@ describe("a response that issues an access token", () => {
   });
 
   it("ends the session, refreshed cookies included, when the retried call issues no usable token", async () => {
-    mockRefresh.mockResolvedValue({ token: usableToken(), refreshToken: "rotated" });
+    mockRefresh.mockResolvedValue(refreshed(usableToken(), "rotated"));
     global.fetch = jest
       .fn()
       .mockResolvedValueOnce(upstream(401))

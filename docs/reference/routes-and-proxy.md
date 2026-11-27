@@ -47,8 +47,10 @@ Prefer `API_URL`: it is server-only, so it never ships to the browser. See
 4. Streams the request and response bodies (`duplex: "half"`), so uploads are not buffered. An
    error response's body is the exception: see step 8.
 5. Uses `redirect: "manual"` — upstream redirects are passed through, not followed.
-6. On a `401`, redeems the refresh cookie once and retries. If that fails, clears both session
-   cookies so the next navigation reaches the login form rather than looping on a dead token.
+6. On a `401`, redeems the refresh cookie once and retries. If the backend refuses the refresh,
+   clears both session cookies so the next navigation reaches the login form rather than looping
+   on a dead token. If it cannot answer (unreachable, 5xx or 429), answers `502` and keeps both
+   cookies, so a backend restart does not end the session (#220).
 7. Strips the backend's `Set-Cookie`, but first captures `lakira_refresh` out of it and re-issues
    it scoped to this origin's `/api`. Login runs as `POST /api/proxy/auth/login`, so this is the
    only point that cookie passes through — dropping it wholesale, as the proxy used to, is what
@@ -96,8 +98,11 @@ An expired token is **not** sent to `/login`. The backend pairs a 15-minute acce
 scoped to `/api` and a page navigation therefore does not carry it, which leaves the gate
 unable to read it, let alone redeem it — so the request is redirected to `/api/auth/revive`
 instead, which sits under that path and can. That route rotates the token, writes both cookies and
-continues to `returnUrl`; when the refresh token is gone it clears both cookies and falls through
-to `/login`. Every exit is a usable session or the login form, so the redirect terminates.
+continues to `returnUrl`; when the backend refuses the refresh token it clears both cookies and
+falls through to `/login`. When the backend cannot answer (unreachable, 5xx or 429) it keeps both
+cookies and answers 503 with a page linking back to itself (#220): a redirect would come straight
+back through the gate. Every exit is a usable session, the login form or that page, so the redirect
+terminates.
 
 Widening the refresh cookie to `/` instead would break rotation. `getServerAuthHeaders()` forwards
 every cookie it can see, so a server component rendering through the proxy would start redeeming
