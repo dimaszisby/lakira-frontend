@@ -357,8 +357,9 @@ Accessibility is enforced through:
    - E2E a11y checks via `cypress-axe` on full pages, in both themes. CI checks the eight public
      pages (home, login, register, forgot password, reset password, verify email, accept invite,
      not found) in a step of its own, `npm run test:e2e:a11y`. The five signed-in pages (dashboard, metrics, metric categories, organization,
-     account) are checked by `npm run test:e2e:stack`, which needs the backend and runs locally
-     only. See `.claude/rules/testing.md` § E2E.
+     account) are checked by `npm run test:e2e:stack`, which needs the backend. It runs nightly and
+     on dispatch in CI, in `frontend-stack-e2e`, and not on pull requests, so run it locally when a
+     signed-in page changes. See `.claude/rules/testing.md` § E2E.
 
 3. **Manual checks**
    - Keyboard-only navigation on primary flows.
