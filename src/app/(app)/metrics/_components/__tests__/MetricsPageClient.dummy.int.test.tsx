@@ -1,5 +1,6 @@
 import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { axe } from "jest-axe";
 import { http, HttpResponse } from "msw";
 
 import MetricsPageClient from "@/app/(app)/metrics/_components/MetricsPageClient";
@@ -29,7 +30,26 @@ const TIMESTAMP = "2026-02-18T08:00:00.000Z";
 
 const initialParams: MetricListSearchParams = { ...DEFAULT_METRIC_LIST_PARAMS, mode: "pages" };
 
+const EMPTY_PAGE = {
+  status: "success",
+  message: "Metrics fetched",
+  data: { items: [], nextCursor: null, sort: "-createdAt", limit: 20, q: "", totalCount: 0 },
+};
+
 describe("MetricsPageClient with dummy actions on", () => {
+  // The only suite that renders the page with "Add Dummy" showing, so the one that can see
+  // a violation that button brings.
+  it("has no axe violations with the dummy button showing", async () => {
+    server.use(http.get("/api/proxy/metrics", () => HttpResponse.json(EMPTY_PAGE)));
+
+    const { container } = renderWithProviders(<MetricsPageClient initialParams={initialParams} />);
+    // Waits for the list to settle, as the sibling suite does, so nothing renders after axe.
+    await screen.findByRole("heading", { name: /no data available/i });
+    expect(screen.getByRole("button", { name: /add dummy/i })).toBeInTheDocument();
+
+    expect(await axe(container)).toHaveNoViolations();
+  });
+
   it("shows the delete error when a refused delete follows a refused dummy create", async () => {
     const user = userEvent.setup();
     const consoleErrorSpy = jest.spyOn(console, "error").mockImplementation(() => undefined);
