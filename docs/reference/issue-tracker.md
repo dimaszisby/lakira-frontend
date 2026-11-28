@@ -69,3 +69,9 @@ first. `src/__tests__/github-tracker.test.ts` checks the file and the forms in t
 Forking copies `.github/` but not the labels. Run `npm run labels:sync -- --apply` once in the
 fork, after `scripts/bootstrap-fork.sh`, which rewrites the repository owner in the form
 chooser's security link.
+
+Nor does it copy private vulnerability reporting, which that link and `SECURITY.md` send
+reporters to. Switch it on in the fork too, from Settings, Code security, or with
+`gh api -X PUT repos/<owner>/<repo>/private-vulnerability-reporting`. Until it is on, the link
+offers no form. `gh api repos/<owner>/<repo>/private-vulnerability-reporting` answers
+`{"enabled":true}` once it is (#216).
